@@ -25,7 +25,6 @@ body {
   line-height: var(--leading-normal);
   color: var(--color-text-inverse);
   background: linear-gradient(160deg, var(--color-navy) 0%, var(--color-dark) 50%, var(--color-green) 100%);
-  opacity: 0.9;
   min-height: 100dvh;
   overflow-x: hidden;
 }

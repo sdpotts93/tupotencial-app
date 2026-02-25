@@ -1,16 +1,17 @@
 <template>
   <div class="screen">
-    <!-- Branded header card (sticks from top, rounded bottom) -->
+    <!-- Branded header (logo scrolls away, progress sticks) -->
     <div class="hoy__hero">
       <img src="/logo-icon/logo-icon-white.png" alt="Tu Potencial" class="hoy__hero-logo" />
-      <div class="hoy__hero-progress">
-        <div class="hoy__hero-progress-row">
-          <span class="hoy__hero-label">RETOS ACTIVOS</span>
-          <span class="hoy__hero-count"><Icon name="lucide:star" size="14" /> {{ retosCompleted }} / {{ retosTotal }}</span>
-        </div>
-        <div class="hoy__hero-bar">
-          <div class="hoy__hero-bar-fill" :style="{ width: retosProgressWidth }" />
-        </div>
+    </div>
+
+    <div class="hoy__hero-progress">
+      <div class="hoy__hero-progress-row">
+        <span class="hoy__hero-label">RETOS ACTIVOS</span>
+        <span class="hoy__hero-count"><Icon name="lucide:star" size="14" /> {{ retosCompleted }} / {{ retosTotal }}</span>
+      </div>
+      <div class="hoy__hero-bar">
+        <div class="hoy__hero-bar-fill" :style="{ width: retosProgressWidth }" />
       </div>
       <NuxtLink to="/retos" class="hoy__hero-link">Ver todos los retos →</NuxtLink>
     </div>
@@ -121,17 +122,26 @@ const activities = ref([
 <style scoped>
 /* ─── Hero header (dark branded card from top) ─── */
 .hoy__hero {
-  background: #28292b;
-  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
-  padding: var(--space-5) var(--space-5) var(--space-5);
-  margin-bottom: var(--space-5);
-  box-shadow: 1px 1px 23px #ffffff21;
+  background: radial-gradient(ellipse at -11% 18%, rgb(174 174 174 / 14%) 0%, transparent 55%), #28282800;
+  padding: var(--space-5) var(--space-5) 0;
 }
 
 .hoy__hero-logo {
   height: 36px;
   width: auto;
   margin-bottom: var(--space-5);
+}
+
+.hoy__hero-progress {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #28313c6b;
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+  padding: var(--space-3) var(--space-5) var(--space-5);
+  margin-bottom: var(--space-5);
+  box-shadow: 2px 19px 24px rgb(0 0 0 / 14%);
+  backdrop-filter: blur(5px);
 }
 
 .hoy__hero-progress-row {
@@ -156,21 +166,22 @@ const activities = ref([
 }
 
 .hoy__hero-bar {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.15);
+  height: 4px;
+  background: #ffffff30;
   border-radius: var(--radius-full);
   overflow: hidden;
-  margin-bottom: var(--space-3);
 }
 
 .hoy__hero-bar-fill {
   height: 100%;
-  background: var(--color-accent);
+  background: white;
   border-radius: var(--radius-full);
   transition: width 0.3s ease;
 }
 
 .hoy__hero-link {
+  display: block;
+  margin-top: var(--space-3);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: #fff;
@@ -194,7 +205,7 @@ const activities = ref([
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-5);
-  background: #ffffff21;
+  background: #ffffff14;
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: white;
