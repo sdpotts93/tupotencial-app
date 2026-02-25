@@ -137,7 +137,7 @@ onBeforeUnmount(() => ro?.disconnect())
   align-items: center;
   padding: 4px 12px;
   text-decoration: none;
-  color: var(--color-dark);
+  color: #b1b1b1;
   transition: color 0.25s ease, flex 0.4s ease;
   -webkit-tap-highlight-color: transparent;
   border-radius: 32px;
