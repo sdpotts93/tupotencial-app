@@ -1246,7 +1246,6 @@ function closeAccionSheet() {
 }
 
 .hoy__checkin-success-badge {
-  font-size: 3rem;
   margin-bottom: var(--space-3);
   color: var(--color-primary);
   animation: success-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
