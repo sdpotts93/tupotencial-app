@@ -55,17 +55,17 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped>
 .card {
-  background: var(--color-surface);
+  background: #ffffff21;
   border-radius: var(--radius-xl);
   overflow: hidden;
   text-decoration: none;
-  color: var(--color-text);
+  color: white;
 }
 
-.card--default { box-shadow: var(--shadow-1); }
+.card--default { }
 .card--elevated { box-shadow: var(--shadow-2); }
-.card--outlined { box-shadow: none; border: 1px solid var(--color-border); }
-.card--filled { background: var(--color-surface-alt); box-shadow: none; }
+.card--outlined { box-shadow: none; border: 1px solid rgba(255, 255, 255, 0.15); }
+.card--filled { background: rgba(255, 255, 255, 0.08); }
 .card--dark { background: var(--color-dark); color: var(--color-light); }
 
 .card--clickable {
@@ -82,7 +82,7 @@ withDefaults(defineProps<Props>(), {
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: var(--color-surface-alt);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .card__media :deep(img) {
@@ -98,7 +98,7 @@ withDefaults(defineProps<Props>(), {
   gap: var(--space-1);
 }
 
-.card__eyebrow { margin-bottom: var(--space-1); }
+.card__eyebrow { margin-bottom: var(--space-1); color: #ffffff8a; }
 
 .card__title {
   font-family: var(--font-body);
@@ -109,7 +109,7 @@ withDefaults(defineProps<Props>(), {
 
 .card__subtitle {
   font-size: var(--text-sm);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.6);
   line-height: var(--leading-normal);
 }
 

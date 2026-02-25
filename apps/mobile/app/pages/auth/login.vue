@@ -4,6 +4,7 @@
     <div class="login__hero">
       <div class="login__hero-bg" />
       <div class="login__hero-content">
+        <img src="/logo-word/logo-word-white.png" alt="Tu Potencial" class="login__wordmark" />
         <div class="login__logo">
           <img src="/logo-icon/logo-icon-black.png" alt="Tu Potencial" class="login__logo-img" />
         </div>
@@ -284,6 +285,13 @@ async function handleRegister() {
   width: auto;
   border-radius: var(--radius-xl);
   opacity: 0.75;
+}
+
+.login__wordmark {
+  height: 18px;
+  width: auto;
+  display: block;
+  margin-bottom: var(--space-8);
 }
 
 .login__tagline {

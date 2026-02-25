@@ -144,21 +144,20 @@ const weekDays = computed(() => {
   flex-direction: column;
   align-items: center;
   padding: var(--space-4);
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: #ffffff21;
+  color: white;
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-1);
 }
 
 .progress__stat-value {
   font-size: var(--title-sm);
   font-weight: var(--weight-bold);
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .progress__stat-label {
   font-size: var(--text-xs);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
   margin-top: 2px;
 }

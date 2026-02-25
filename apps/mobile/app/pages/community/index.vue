@@ -87,11 +87,10 @@ function toggleReaction(id: string) {
 }
 
 .post {
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: #ffffff21;
+  color: white;
   border-radius: var(--radius-xl);
   padding: var(--space-5);
-  box-shadow: var(--shadow-1);
 }
 
 .post__header {
@@ -124,7 +123,7 @@ function toggleReaction(id: string) {
 
 .post__time {
   font-size: var(--text-xs);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .post__body-link { text-decoration: none; color: inherit; }
@@ -139,7 +138,7 @@ function toggleReaction(id: string) {
 
 .post__body {
   font-size: var(--text-base);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   line-height: var(--leading-relaxed);
 }
 
@@ -148,7 +147,7 @@ function toggleReaction(id: string) {
   gap: var(--space-5);
   margin-top: var(--space-4);
   padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border-light);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .post__action {
@@ -159,8 +158,8 @@ function toggleReaction(id: string) {
   border: none;
   cursor: pointer;
   font-size: var(--text-sm);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
 }
-.post__action:hover { color: var(--color-text-secondary); }
+.post__action:hover { color: rgba(255, 255, 255, 0.8); }
 </style>

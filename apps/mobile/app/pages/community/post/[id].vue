@@ -57,8 +57,8 @@ const newComment = ref('')
 
 <style scoped>
 .post-detail {
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: #ffffff21;
+  color: white;
   border-radius: var(--radius-xl);
   padding: var(--space-5);
   margin-bottom: var(--space-6);
@@ -78,7 +78,7 @@ const newComment = ref('')
 }
 
 .post-detail__author { font-weight: var(--weight-semibold); font-size: var(--text-sm); display: block; }
-.post-detail__time { font-size: var(--text-xs); color: var(--color-muted); }
+.post-detail__time { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.5); }
 
 .post-detail__title {
   font-family: var(--font-title);
@@ -88,7 +88,7 @@ const newComment = ref('')
 
 .post-detail__body {
   font-size: var(--text-base);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   line-height: var(--leading-relaxed);
 }
 
@@ -107,16 +107,16 @@ const newComment = ref('')
 }
 
 .comment__avatar {
-  width: 32px; height: 32px; border-radius: 50%; background: var(--color-surface-alt);
+  width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.15);
   display: flex; align-items: center; justify-content: center;
-  font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--color-text-secondary);
+  font-size: var(--text-xs); font-weight: var(--weight-semibold); color: rgba(255, 255, 255, 0.7);
   flex-shrink: 0;
 }
 
 .comment__content { flex: 1; }
 .comment__author { font-size: var(--text-sm); font-weight: var(--weight-semibold); }
-.comment__body { font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 2px; line-height: var(--leading-normal); }
-.comment__time { font-size: var(--text-xs); color: var(--color-muted); margin-top: 4px; display: block; }
+.comment__body { font-size: var(--text-sm); color: rgba(255, 255, 255, 0.7); margin-top: 2px; line-height: var(--leading-normal); }
+.comment__time { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.5); margin-top: 4px; display: block; }
 
 .post-detail__add {
   display: flex;

@@ -38,7 +38,7 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: var(--leading-tight);
-  color: var(--color-muted);
+  color: #ffffff8a;
 }
 .eyebrow--sm { font-size: var(--eyebrow-sm); }
 .eyebrow--lg { font-size: var(--eyebrow-lg); }

@@ -21,7 +21,7 @@
         <h2 class="title title--md hoy__featured-title">Recomendado para ti</h2>
         <NuxtLink to="/hoy/checkin" class="hoy__featured-card">
           <div class="hoy__featured-text">
-            <p class="eyebrow eyebrow--sm eyebrow--accent">{{ dailyPlan.eyebrow }}</p>
+            <p class="eyebrow eyebrow--sm">{{ dailyPlan.eyebrow }}</p>
             <h3 class="hoy__featured-name">{{ dailyPlan.title }}</h3>
             <p class="hoy__featured-desc">{{ dailyPlan.message }}</p>
           </div>
@@ -121,10 +121,11 @@ const activities = ref([
 <style scoped>
 /* ─── Hero header (dark branded card from top) ─── */
 .hoy__hero {
-  background: linear-gradient(160deg, var(--color-navy) 0%, var(--color-dark) 60%, var(--color-green) 100%);
+  background: #28292b;
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   padding: var(--space-5) var(--space-5) var(--space-5);
   margin-bottom: var(--space-5);
+  box-shadow: 1px 1px 23px #ffffff21;
 }
 
 .hoy__hero-logo {
@@ -193,16 +194,15 @@ const activities = ref([
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-5);
-  background: var(--color-surface);
+  background: #ffffff21;
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-1);
   text-decoration: none;
-  color: var(--color-text);
-  transition: box-shadow var(--transition-fast);
+  color: white;
+  transition: background var(--transition-fast);
 }
 
 .hoy__featured-card:hover {
-  box-shadow: var(--shadow-2);
+  background: #ffffff30;
   text-decoration: none;
 }
 
@@ -214,14 +214,14 @@ const activities = ref([
 .hoy__featured-name {
   font-family: var(--font-title);
   font-size: var(--title-sm);
-  color: var(--color-text);
+  color: white;
   margin: var(--space-1) 0 var(--space-2);
   line-height: var(--leading-snug);
 }
 
 .hoy__featured-desc {
   font-size: var(--text-sm);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
   line-height: var(--leading-relaxed);
 }
 
@@ -262,16 +262,15 @@ const activities = ref([
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
-  background: var(--color-surface);
+  background: #ffffff21;
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-1);
   text-decoration: none;
-  color: var(--color-text);
-  transition: box-shadow var(--transition-fast);
+  color: white;
+  transition: background var(--transition-fast);
 }
 
 .hoy__activity:hover {
-  box-shadow: var(--shadow-2);
+  background: #ffffff30;
   text-decoration: none;
 }
 
@@ -294,18 +293,18 @@ const activities = ref([
 .hoy__activity-name {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
-  color: var(--color-text);
+  color: white;
   line-height: var(--leading-snug);
 }
 
 .hoy__activity-meta {
   font-size: var(--text-xs);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
   margin-top: 2px;
 }
 
 .hoy__activity-arrow {
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
 }
 </style>

@@ -92,20 +92,20 @@ async function handleSubmit() {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-3);
-  border: 2px solid var(--color-border);
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: #ffffff21;
+  color: white;
   cursor: pointer;
   flex: 1;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.checkin__mood:hover { border-color: var(--color-text-secondary); }
+.checkin__mood:hover { border-color: rgba(255, 255, 255, 0.4); }
 
 .checkin__mood--selected {
   border-color: var(--color-accent);
-  background: var(--color-success-light);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .checkin__mood-emoji { font-size: 1.5rem; }
@@ -113,7 +113,7 @@ async function handleSubmit() {
 .checkin__mood-label {
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .checkin__submit { margin-top: var(--space-6); }

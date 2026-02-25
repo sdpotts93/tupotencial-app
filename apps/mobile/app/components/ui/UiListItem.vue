@@ -66,8 +66,8 @@ withDefaults(defineProps<Props>(), {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.list-item--clickable:hover { background: var(--color-surface-alt); }
-.list-item--clickable:active { background: var(--color-border-light); }
+.list-item--clickable:hover { background: rgba(255, 255, 255, 0.08); }
+.list-item--clickable:active { background: rgba(255, 255, 255, 0.12); }
 
 .list-item__icon {
   display: flex;
@@ -76,7 +76,7 @@ withDefaults(defineProps<Props>(), {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .list-item__content {
@@ -90,18 +90,18 @@ withDefaults(defineProps<Props>(), {
 .list-item__label {
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  color: var(--color-text);
+  color: white;
 }
 
 .list-item__description {
   font-size: var(--text-sm);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .list-item__suffix { flex-shrink: 0; }
 
 .list-item__chevron {
   flex-shrink: 0;
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.5);
 }
 </style>

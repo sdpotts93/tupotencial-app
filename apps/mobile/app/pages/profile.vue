@@ -99,10 +99,10 @@ async function handleSave() {
 
 .profile__membership {
   display: flex; align-items: center; justify-content: space-between;
-  padding: var(--space-4); background: var(--color-surface); color: var(--color-text);
-  border-radius: var(--radius-xl); box-shadow: var(--shadow-1);
+  padding: var(--space-4); background: #ffffff21; color: white;
+  border-radius: var(--radius-xl);
 }
 
 .profile__membership-status { font-weight: var(--weight-semibold); display: block; }
-.profile__membership-detail { font-size: var(--text-xs); color: var(--color-muted); display: block; margin-top: 2px; }
+.profile__membership-detail { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.6); display: block; margin-top: 2px; }
 </style>

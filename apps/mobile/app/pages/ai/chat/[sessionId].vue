@@ -192,11 +192,10 @@ function closeSession() {
 }
 
 .chat__bubble--assistant {
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: #ffffff21;
+  color: white;
   align-self: flex-start;
   border-bottom-left-radius: var(--radius-sm);
-  box-shadow: var(--shadow-1);
 }
 
 .chat__bubble-time {
@@ -250,12 +249,12 @@ function closeSession() {
 .chat__quick-btn {
   flex-shrink: 0;
   padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-full);
-  background: var(--color-surface);
+  background: #ffffff21;
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  color: var(--color-primary);
+  color: white;
   cursor: pointer;
   white-space: nowrap;
 }

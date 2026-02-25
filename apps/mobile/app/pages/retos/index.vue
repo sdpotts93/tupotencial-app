@@ -120,7 +120,7 @@ const filteredPrograms = computed(() => {
 
 .retos__card-desc {
   font-size: var(--text-sm);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
   line-height: var(--leading-normal);
 }
 
@@ -133,7 +133,7 @@ const filteredPrograms = computed(() => {
 .retos__progress-text {
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* ─── Desktop ─── */

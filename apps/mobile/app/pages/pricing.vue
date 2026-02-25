@@ -78,13 +78,12 @@ definePageMeta({ layout: 'auth' })
 }
 
 .pricing__plan {
-  background: var(--color-surface); color: var(--color-text); border-radius: var(--radius-xl);
-  padding: var(--space-6); border: 1px solid var(--color-border);
+  background: #ffffff21; color: white; border-radius: var(--radius-xl);
+  padding: var(--space-6); border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .pricing__plan--featured {
-  border: 2px solid var(--color-primary);
-  box-shadow: var(--shadow-2);
+  border: 2px solid var(--color-accent);
 }
 
 .pricing__plan-name {
@@ -92,11 +91,11 @@ definePageMeta({ layout: 'auth' })
 }
 
 .pricing__plan-price {
-  font-size: var(--title-lg); font-weight: var(--weight-bold); color: var(--color-primary);
+  font-size: var(--title-lg); font-weight: var(--weight-bold); color: var(--color-accent);
 }
 
 .pricing__plan-price span {
-  font-size: var(--text-sm); font-weight: var(--weight-regular); color: var(--color-muted);
+  font-size: var(--text-sm); font-weight: var(--weight-regular); color: rgba(255, 255, 255, 0.6);
 }
 
 .pricing__plan-annual {
@@ -109,7 +108,7 @@ definePageMeta({ layout: 'auth' })
 }
 
 .pricing__features li {
-  font-size: var(--text-sm); color: var(--color-text-secondary);
+  font-size: var(--text-sm); color: rgba(255, 255, 255, 0.7);
   padding-left: var(--space-5); position: relative;
 }
 

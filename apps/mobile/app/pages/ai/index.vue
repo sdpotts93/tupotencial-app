@@ -124,18 +124,18 @@ function startChat(prompt?: string) {
 
 .ai-home__tone-btn {
   display: flex; flex-direction: column; align-items: center; gap: var(--space-1);
-  padding: var(--space-5); border: 2px solid var(--color-border); border-radius: var(--radius-xl);
-  background: var(--color-surface); color: var(--color-text); cursor: pointer;
+  padding: var(--space-5); border: 2px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-xl);
+  background: #ffffff21; color: white; cursor: pointer;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.ai-home__tone-btn:hover { border-color: var(--color-text-secondary); }
+.ai-home__tone-btn:hover { border-color: rgba(255, 255, 255, 0.4); }
 
-.ai-home__tone-btn--active { border-color: var(--color-accent); background: var(--color-success-light); }
+.ai-home__tone-btn--active { border-color: var(--color-accent); background: rgba(255, 255, 255, 0.2); }
 
 .ai-home__tone-emoji { font-size: 1.5rem; }
 .ai-home__tone-name { font-weight: var(--weight-semibold); font-size: var(--text-md); }
-.ai-home__tone-desc { font-size: var(--text-xs); color: var(--color-muted); }
+.ai-home__tone-desc { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.6); }
 
 .ai-home__prompts { margin-bottom: var(--space-6); }
 .ai-home__prompts > .eyebrow { margin-bottom: var(--space-3); }
@@ -143,12 +143,12 @@ function startChat(prompt?: string) {
 .ai-home__prompts-list { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
 .ai-home__prompt-chip {
-  padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border);
-  border-radius: var(--radius-full); background: var(--color-surface);
-  font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-4); border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full); background: #ffffff21;
+  font-family: var(--font-body); font-size: var(--text-sm); color: white;
   cursor: pointer; transition: background var(--transition-fast);
 }
-.ai-home__prompt-chip:hover { background: var(--color-surface-alt); }
+.ai-home__prompt-chip:hover { background: #ffffff30; }
 
 .ai-home__history { margin-bottom: var(--space-6); }
 .ai-home__history > .eyebrow { margin-bottom: var(--space-3); }
