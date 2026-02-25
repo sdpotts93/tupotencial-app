@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav :title="`Check-in — Día ${dayIndex}`" show-back @back="navigateTo(`/retos/${programId}/day/${dayIndex}`)" />
+    <UiTopNav :title="`Check-in — Día ${dayIndex}`" show-back  />
     <div class="screen__content">
       <h1 class="title title--lg">Check-in del día</h1>
       <p class="pcheckin__desc">Comparte tu reflexión de hoy sobre este tema.</p>

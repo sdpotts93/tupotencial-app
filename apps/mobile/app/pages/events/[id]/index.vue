@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav :title="event.title" show-back @back="navigateTo('/events')" />
+    <UiTopNav :title="event.title" show-back />
     <div class="screen__content">
       <div class="event-detail__hero">
         <div class="event-detail__hero-bg" />

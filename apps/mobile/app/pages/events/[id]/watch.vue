@@ -1,6 +1,6 @@
 <template>
   <div class="watch">
-    <UiTopNav show-back @back="navigateTo(`/events/${id}`)">
+    <UiTopNav show-back>
       <template #right>
         <span style="font-size: var(--text-xs); color: var(--color-sand); font-family: var(--font-eyebrow);">EN VIVO</span>
       </template>

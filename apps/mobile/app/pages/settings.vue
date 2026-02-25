@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Configuración" show-back @back="navigateTo('/more')" />
+    <UiTopNav title="Configuración" show-back />
     <div class="screen__content">
       <UiList>
         <UiListItem label="Notificaciones" description="Gestionar permisos y preferencias" clickable>

@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav :title="category.title" show-back @back="navigateTo('/library')" />
+    <UiTopNav :title="category.title" show-back />
     <div class="screen__content">
       <p v-if="category.description" class="category__desc">{{ category.description }}</p>
 

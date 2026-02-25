@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav show-back @back="navigateTo('/addons')" />
+    <UiTopNav show-back />
     <div class="screen__content">
       <div class="addon-detail__hero">
         <div class="addon-detail__hero-bg" />

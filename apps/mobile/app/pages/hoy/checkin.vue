@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Check-in diario" show-back @back="navigateTo('/hoy')" />
+    <UiTopNav title="Check-in diario" show-back />
     <div class="screen__content">
       <h1 class="title title--lg">¿Cómo te sientes hoy?</h1>
       <p class="checkin__subtitle">Tómate un momento para reflexionar sobre tu estado actual.</p>

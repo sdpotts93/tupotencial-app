@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Contenido VIP" show-back @back="navigateTo('/addons')" />
+    <UiTopNav title="Contenido VIP" show-back />
     <div class="screen__content">
       <UiEmptyState
         title="Contenido VIP"

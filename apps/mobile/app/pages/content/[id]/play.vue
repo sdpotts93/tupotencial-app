@@ -1,6 +1,6 @@
 <template>
   <div class="player">
-    <UiTopNav show-back @back="navigateTo(`/content/${id}`)">
+    <UiTopNav show-back>
       <template #right>
         <span class="player__time">{{ currentTime }} / {{ totalTime }}</span>
       </template>

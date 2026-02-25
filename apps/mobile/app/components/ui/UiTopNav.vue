@@ -2,7 +2,7 @@
   <header class="top-nav safe-top">
     <div class="top-nav__content">
       <div class="top-nav__left">
-        <button v-if="showBack" class="top-nav__back" aria-label="Volver" @click="$emit('back')">
+        <button v-if="showBack" class="top-nav__back" aria-label="Volver" @click="goBack">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -27,7 +27,11 @@ withDefaults(defineProps<Props>(), {
   showBack: false,
 })
 
-defineEmits<{ back: [] }>()
+const router = useRouter()
+
+function goBack() {
+  router.back()
+}
 </script>
 
 <style scoped>

@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav show-back @back="navigateTo('/retos')" />
+    <UiTopNav show-back />
     <div class="screen__content">
       <!-- Hero (inspired by inspiration-retos-[id]) -->
       <div class="program-detail__hero">

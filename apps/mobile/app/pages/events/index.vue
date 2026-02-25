@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Eventos y Lives" show-back @back="navigateTo('/more')" />
+    <UiTopNav title="Eventos y Lives" show-back />
     <div class="screen__content">
       <!-- Upcoming -->
       <section class="events__section">

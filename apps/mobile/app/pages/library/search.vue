@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Buscar" show-back @back="navigateTo('/library')" />
+    <UiTopNav title="Buscar" show-back />
     <div class="screen__content">
       <UiInput
         v-model="query"

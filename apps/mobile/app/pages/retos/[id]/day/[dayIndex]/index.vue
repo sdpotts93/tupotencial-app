@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav :title="`Día ${dayIndex}`" show-back @back="navigateTo(`/retos/${programId}`)">
+    <UiTopNav :title="`Día ${dayIndex}`" show-back >
       <template #right>
         <UiTag variant="accent">Día {{ dayIndex }}/{{ totalDays }}</UiTag>
       </template>

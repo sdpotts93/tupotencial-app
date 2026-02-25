@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Coach IA" show-back @back="navigateTo('/more')" />
+    <UiTopNav title="Coach IA" show-back />
     <div class="screen__content">
       <!-- Intro (inspired by inspiration-ai) -->
       <div class="ai-home__hero">

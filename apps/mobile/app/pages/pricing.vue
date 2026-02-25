@@ -1,6 +1,6 @@
 <template>
   <div class="pricing">
-    <UiTopNav title="Membresía" show-back @back="navigateTo('/auth/login')" />
+    <UiTopNav title="Membresía" show-back />
     <div class="screen__content">
       <div class="pricing__hero">
         <img src="/logo-icon/logo-icon-green.png" alt="" class="pricing__logo" />

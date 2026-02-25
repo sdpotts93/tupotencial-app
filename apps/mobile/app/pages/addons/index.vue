@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Add-ons / VIP" show-back @back="navigateTo('/more')" />
+    <UiTopNav title="Add-ons / VIP" show-back />
     <div class="screen__content">
       <p class="addons__intro">Lleva tu experiencia al siguiente nivel con contenido y experiencias exclusivas.</p>
 

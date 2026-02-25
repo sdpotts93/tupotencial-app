@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Tu progreso" show-back @back="navigateTo('/hoy')" />
+    <UiTopNav title="Tu progreso" show-back />
     <div class="screen__content">
       <!-- Streak highlight (inspired by inspiration-hoy-progress) -->
       <div class="progress__hero">

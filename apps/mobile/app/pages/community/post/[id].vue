@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Publicación" show-back @back="navigateTo('/community')" />
+    <UiTopNav title="Publicación" show-back />
     <div class="screen__content">
       <!-- Post -->
       <article class="post-detail">

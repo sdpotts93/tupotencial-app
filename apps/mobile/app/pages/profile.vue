@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Mi perfil" show-back @back="navigateTo('/more')" />
+    <UiTopNav title="Mi perfil" show-back />
     <div class="screen__content">
       <!-- Avatar + name (inspired by inspiration-profile) -->
       <div class="profile__hero">

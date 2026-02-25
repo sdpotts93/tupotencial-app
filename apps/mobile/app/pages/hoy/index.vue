@@ -48,15 +48,15 @@
 
       <!-- Start your day -->
       <section class="hoy__start">
-        <h2 class="title title--md hoy__start-title">Recomendado para ti</h2>
+        <h2 class="title title--md hoy__start-title">Explora</h2>
         <div class="hoy__start-list">
           <template v-for="activity in activities" :key="activity.id">
             <NuxtLink
               :to="activity.to"
               class="hoy__activity"
             >
-              <div class="hoy__activity-thumb" :style="{ background: activity.bg }">
-                <Icon :name="activity.icon" size="20" />
+              <div class="hoy__activity-thumb">
+                <Icon :name="activity.icon" size="28" />
               </div>
               <div class="hoy__activity-info">
                 <h3 class="hoy__activity-name">{{ activity.title }}</h3>
@@ -206,31 +206,71 @@ const dailyPlan = ref({
   message: 'Enfoca tu energía en una acción clave. Hazla con intención.',
 })
 
-// Activities list
+// App sections
 const activities = ref([
   {
-    id: 'reto-gratitud',
-    title: 'Reto de gratitud — Día 5',
-    meta: 'Reto activo • 5 min',
-    icon: 'lucide:heart-handshake',
-    bg: 'linear-gradient(135deg, var(--color-green), #A7A68E)',
-    to: '/retos/mock-prog-001/day/5',
-  },
-  {
-    id: 'library-rec',
-    title: 'Respiración consciente',
-    meta: 'Audio • 8 min',
-    icon: 'lucide:wind',
-    bg: 'linear-gradient(135deg, #28374A, var(--color-navy))',
+    id: 'biblioteca',
+    title: 'Biblioteca',
+    meta: 'Audios, videos y más',
+    icon: 'lucide:book-open',
+    accent: '#7EB8C9',
     to: '/library',
   },
   {
+    id: 'retos',
+    title: 'Retos',
+    meta: 'Desafíos diarios',
+    icon: 'lucide:trophy',
+    accent: '#C9BFA0',
+    to: '/retos',
+  },
+  {
     id: 'ai-coach',
-    title: 'Habla con tu coach',
-    meta: 'AI Coach • Sin límite',
+    title: 'AI Coach',
+    meta: 'Tu coach personal',
     icon: 'lucide:bot',
-    bg: 'linear-gradient(135deg, var(--color-dark), #28374A)',
-    to: '/ai/chat/new',
+    accent: '#9AB3C7',
+    to: '/ai',
+  },
+  {
+    id: 'comunidad',
+    title: 'Comunidad',
+    meta: 'Conecta con otros',
+    icon: 'lucide:users',
+    accent: '#A893BA',
+    to: '/community',
+  },
+  {
+    id: 'eventos',
+    title: 'Eventos',
+    meta: 'En vivo y grabados',
+    icon: 'lucide:calendar',
+    accent: '#C08A8A',
+    to: '/events',
+  },
+  {
+    id: 'beneficios',
+    title: 'Beneficios',
+    meta: 'Ofertas exclusivas',
+    icon: 'lucide:gift',
+    accent: '#8BBF9A',
+    to: '/benefits',
+  },
+  {
+    id: 'addons',
+    title: 'Addons',
+    meta: 'Contenido extra',
+    icon: 'lucide:puzzle',
+    accent: '#B5B590',
+    to: '/addons',
+  },
+  {
+    id: 'vip',
+    title: 'VIP',
+    meta: 'Acceso premium',
+    icon: 'lucide:crown',
+    accent: '#C9A88E',
+    to: '/vip',
   },
 ])
 
@@ -379,7 +419,7 @@ async function handleAccion() {
   display: flex;
   flex-direction: column;
   padding: var(--space-5);
-  background: var(--color-sand);
+  background: var(--color-surface);
   border-radius: var(--radius-xl);
   padding-right: var(--space-10);
 }
@@ -432,7 +472,7 @@ async function handleAccion() {
   margin-bottom: var(--space-6);
   border: none;
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, rgba(78, 205, 196, 0.25), rgba(168, 216, 110, 0.2));
+  background: linear-gradient(135deg, #8d6639, rgb(183 144 73));
   color: white;
   font-family: inherit;
   font-size: var(--text-base);
@@ -531,16 +571,17 @@ async function handleAccion() {
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
-  background: #ffffff21;
+  background: #ffffff17;
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: white;
   transition: background var(--transition-fast);
   border: none;
   width: 100%;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   font-family: inherit;
+  align-items: center;
 }
 
 .hoy__activity:hover {
@@ -555,7 +596,7 @@ async function handleAccion() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--color-sand);
   flex-shrink: 0;
 }
 

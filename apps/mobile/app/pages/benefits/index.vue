@@ -1,6 +1,6 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Beneficios" show-back @back="navigateTo('/more')" />
+    <UiTopNav title="Beneficios" show-back />
     <div class="screen__content">
       <p class="benefits__intro">Disfruta descuentos y ofertas exclusivas para miembros de Tu Potencial.</p>
 
