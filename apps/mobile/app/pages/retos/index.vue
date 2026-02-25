@@ -97,7 +97,7 @@ const filteredPrograms = computed(() => {
 }
 
 .retos__subtitle {
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   color: rgba(255, 255, 255, 0.5);
   margin: 0 0 var(--space-5);
   text-align: left;

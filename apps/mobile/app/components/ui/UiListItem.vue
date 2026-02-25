@@ -9,7 +9,7 @@
     </span>
     <div class="list-item__content">
       <span class="list-item__label">{{ label }}</span>
-      <span v-if="description" class="list-item__description">{{ description }}</span>
+      <span :class="['list-item__description', { 'list-item__description--success': descriptionVariant === 'success' }]">{{ description || '\u00A0' }}</span>
     </div>
     <span v-if="$slots.suffix" class="list-item__suffix">
       <slot name="suffix" />
@@ -27,7 +27,7 @@
     </span>
     <div class="list-item__content">
       <span class="list-item__label">{{ label }}</span>
-      <span v-if="description" class="list-item__description">{{ description }}</span>
+      <span :class="['list-item__description', { 'list-item__description--success': descriptionVariant === 'success' }]">{{ description || '\u00A0' }}</span>
     </div>
     <span v-if="$slots.suffix" class="list-item__suffix">
       <slot name="suffix" />
@@ -43,11 +43,13 @@
 interface Props {
   label: string
   description?: string
+  descriptionVariant?: 'default' | 'success'
   to?: string
   clickable?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
+  descriptionVariant: 'default',
   clickable: false,
 })
 </script>
@@ -58,6 +60,7 @@ withDefaults(defineProps<Props>(), {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
+  min-height: 60px;
   text-decoration: none;
   color: inherit;
 }
@@ -96,6 +99,10 @@ withDefaults(defineProps<Props>(), {
 .list-item__description {
   font-size: var(--text-sm);
   color: rgba(255, 255, 255, 0.6);
+}
+
+.list-item__description--success {
+  color: #68D391;
 }
 
 .list-item__suffix { flex-shrink: 0; }
