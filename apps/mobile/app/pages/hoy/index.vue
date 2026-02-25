@@ -118,7 +118,7 @@
       <!-- Latest from Biblioteca -->
       <section class="hoy__latest">
         <div class="hoy__latest-header">
-          <h2 class="title title--md">Biblioteca</h2>
+          <h2 class="title title--md">Recientes</h2>
           <NuxtLink to="/library" class="hoy__latest-see-all">Ver todo</NuxtLink>
         </div>
         <div class="hoy__latest-scroll">
@@ -131,11 +131,13 @@
             <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="hoy__latest-img" />
             <div class="hoy__latest-overlay">
               <span class="hoy__latest-type">
-                <Icon :name="contentTypeIcon(item.type)" size="14" />
-                {{ item.typeLabel }}
+                <!-- <Icon :name="contentTypeIcon(item.type)" size="12" /> -->
+                <span class="hot__latest-type-label">
+                  {{ item.typeLabel }}
+                </span>
               </span>
               <span class="hoy__latest-title">{{ item.title }}</span>
-              <span v-if="item.duration" class="hoy__latest-duration">{{ item.duration }}</span>
+              <span v-if="item.duration" class="hoy__latest-duration"><Icon name="lucide:clock" size="12" /> {{ item.duration }}</span>
             </div>
           </NuxtLink>
         </div>
@@ -371,52 +373,34 @@ const activePrograms = ref([
   { id: 'mock-uuid-prog-002', title: 'Despertar consciente', currentDay: 12, totalDays: 30, progressPct: 12 / 30 },
 ])
 
-// ─── Latest from biblioteca (mock — 5 most recent published) ───
+// ─── Latest from biblioteca (mock — most recent published) ───
 const latestContent = ref([
   {
-    id: 'mock-uuid-ci-010',
-    type: 'link' as const,
-    typeLabel: 'Articulo',
-    title: 'La ciencia detras de los habitos',
-    thumbnail: 'https://picsum.photos/seed/habits-article/640/360',
-    duration: null,
-    to: '/library/mock-uuid-ci-010',
+    id: 'mock-uuid-ci-001',
+    type: 'video' as const,
+    typeLabel: 'Video',
+    title: 'Meditacion matutina: Gratitud y presencia',
+    thumbnail: '/images/lib-1.jpg',
+    duration: '10 min',
+    to: '/library/mock-uuid-ci-001',
   },
   {
-    id: 'mock-uuid-ci-007',
-    type: 'text' as const,
-    typeLabel: 'Lectura',
-    title: 'Como crear un espacio sagrado en casa',
-    thumbnail: 'https://picsum.photos/seed/sacred-space/640/360',
-    duration: null,
-    to: '/library/mock-uuid-ci-007',
+    id: 'mock-uuid-ci-002',
+    type: 'video' as const,
+    typeLabel: 'Video',
+    title: 'Rutina energizante de 5 minutos',
+    thumbnail: '/images/lib-2.jpg',
+    duration: '5 min',
+    to: '/library/mock-uuid-ci-002',
   },
   {
-    id: 'mock-uuid-ci-006',
-    type: 'text' as const,
-    typeLabel: 'Lectura',
-    title: 'Las 5 preguntas que transforman tu manana',
-    thumbnail: 'https://picsum.photos/seed/journaling1/640/360',
-    duration: null,
-    to: '/library/mock-uuid-ci-006',
-  },
-  {
-    id: 'mock-uuid-ci-005',
-    type: 'audio' as const,
-    typeLabel: 'Meditacion',
-    title: 'Visualizacion guiada: Tu mejor version',
-    thumbnail: 'https://picsum.photos/seed/visualize/640/360',
-    duration: '15 min',
-    to: '/library/mock-uuid-ci-005',
-  },
-  {
-    id: 'mock-uuid-ci-004',
-    type: 'audio' as const,
-    typeLabel: 'Meditacion',
-    title: 'Meditacion nocturna: Soltar el dia',
-    thumbnail: 'https://picsum.photos/seed/night-med/640/360',
-    duration: '15 min',
-    to: '/library/mock-uuid-ci-004',
+    id: 'mock-uuid-ci-003',
+    type: 'video' as const,
+    typeLabel: 'Video',
+    title: 'Respiracion 4-7-8 para calmar la ansiedad',
+    thumbnail: '/images/lib-3.jpg',
+    duration: '8 min',
+    to: '/library/mock-uuid-ci-003',
   },
 ])
 
@@ -964,7 +948,7 @@ function closeAccionSheet() {
 .hoy__latest-see-all {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  color: var(--color-accent);
+  color: white;
   text-decoration: none;
 }
 
@@ -1012,7 +996,7 @@ function closeAccionSheet() {
   flex-direction: column;
   justify-content: flex-end;
   padding: var(--space-5);
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
+  background: linear-gradient(to top, rgb(0 0 0) 0%, rgb(0 0 0 / 60%) 36%, transparent 100%);
 }
 
 .hoy__latest-type {
@@ -1024,7 +1008,11 @@ function closeAccionSheet() {
   color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.hoy__latest-type-label {
+  line-height: 1.1;
 }
 
 .hoy__latest-title {
@@ -1033,9 +1021,17 @@ function closeAccionSheet() {
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
   color: white;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: var(--space-1);
 }
 
 .hoy__latest-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--text-xs);
   color: rgba(255, 255, 255, 0.6);
   margin-top: var(--space-1);
