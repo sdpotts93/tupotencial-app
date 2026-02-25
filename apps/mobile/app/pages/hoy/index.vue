@@ -21,10 +21,10 @@
       <section class="hoy__mensaje">
         <div class="hoy__mensaje-card">
           <Icon name="lucide:quote" size="18" class="hoy__mensaje-icon" />
-          <p class="hoy__mensaje-text">{{ mensajeDelDia }}</p>
+          <p class="hoy__mensaje-text">{{ mensajeDelDia.text }}</p>
           <div class="hoy__mensaje-author">
-            <img src="https://i.pravatar.cc/80?img=12" alt="Avatar" class="hoy__mensaje-avatar" />
-            <span class="hoy__mensaje-name">Gabriel</span>
+            <img :src="`/images/${mensajeDelDia.author}.png`" :alt="mensajeDelDia.author" class="hoy__mensaje-avatar" />
+            <span class="hoy__mensaje-name">{{ mensajeDelDia.author === 'gabriel' ? 'Gabriel' : 'Carlotta' }}</span>
           </div>
         </div>
       </section>
@@ -197,7 +197,10 @@ function completeReto(type: 'checkin' | 'video' | 'accion') {
 }
 
 // Mensaje del día (admin-configurable)
-const mensajeDelDia = ref('El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.')
+const mensajeDelDia = ref({
+  text: 'El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.',
+  author: 'gabriel' as 'gabriel' | 'carlotta',
+})
 
 // Mock daily plan
 const dailyPlan = ref({
