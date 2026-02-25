@@ -115,6 +115,32 @@
         </div>
       </section>
 
+      <!-- Latest from Biblioteca -->
+      <section class="hoy__latest">
+        <div class="hoy__latest-header">
+          <h2 class="title title--md">Biblioteca</h2>
+          <NuxtLink to="/library" class="hoy__latest-see-all">Ver todo</NuxtLink>
+        </div>
+        <div class="hoy__latest-scroll">
+          <NuxtLink
+            v-for="item in latestContent"
+            :key="item.id"
+            :to="item.to"
+            class="hoy__latest-card"
+          >
+            <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="hoy__latest-img" />
+            <div class="hoy__latest-overlay">
+              <span class="hoy__latest-type">
+                <Icon :name="contentTypeIcon(item.type)" size="14" />
+                {{ item.typeLabel }}
+              </span>
+              <span class="hoy__latest-title">{{ item.title }}</span>
+              <span v-if="item.duration" class="hoy__latest-duration">{{ item.duration }}</span>
+            </div>
+          </NuxtLink>
+        </div>
+      </section>
+
       <!-- Explore -->
       <section class="hoy__start">
         <h2 class="title title--md hoy__start-title">Explora</h2>
@@ -344,6 +370,65 @@ const activePrograms = ref([
   { id: 'mock-uuid-prog-001', title: 'Reto 7 dias de gratitud', currentDay: 4, totalDays: 7, progressPct: 4 / 7 },
   { id: 'mock-uuid-prog-002', title: 'Despertar consciente', currentDay: 12, totalDays: 30, progressPct: 12 / 30 },
 ])
+
+// ─── Latest from biblioteca (mock — 5 most recent published) ───
+const latestContent = ref([
+  {
+    id: 'mock-uuid-ci-010',
+    type: 'link' as const,
+    typeLabel: 'Articulo',
+    title: 'La ciencia detras de los habitos',
+    thumbnail: 'https://picsum.photos/seed/habits-article/640/360',
+    duration: null,
+    to: '/library/mock-uuid-ci-010',
+  },
+  {
+    id: 'mock-uuid-ci-007',
+    type: 'text' as const,
+    typeLabel: 'Lectura',
+    title: 'Como crear un espacio sagrado en casa',
+    thumbnail: 'https://picsum.photos/seed/sacred-space/640/360',
+    duration: null,
+    to: '/library/mock-uuid-ci-007',
+  },
+  {
+    id: 'mock-uuid-ci-006',
+    type: 'text' as const,
+    typeLabel: 'Lectura',
+    title: 'Las 5 preguntas que transforman tu manana',
+    thumbnail: 'https://picsum.photos/seed/journaling1/640/360',
+    duration: null,
+    to: '/library/mock-uuid-ci-006',
+  },
+  {
+    id: 'mock-uuid-ci-005',
+    type: 'audio' as const,
+    typeLabel: 'Meditacion',
+    title: 'Visualizacion guiada: Tu mejor version',
+    thumbnail: 'https://picsum.photos/seed/visualize/640/360',
+    duration: '15 min',
+    to: '/library/mock-uuid-ci-005',
+  },
+  {
+    id: 'mock-uuid-ci-004',
+    type: 'audio' as const,
+    typeLabel: 'Meditacion',
+    title: 'Meditacion nocturna: Soltar el dia',
+    thumbnail: 'https://picsum.photos/seed/night-med/640/360',
+    duration: '15 min',
+    to: '/library/mock-uuid-ci-004',
+  },
+])
+
+function contentTypeIcon(type: string) {
+  switch (type) {
+    case 'video': return 'lucide:play'
+    case 'audio': return 'lucide:headphones'
+    case 'text': return 'lucide:file-text'
+    case 'link': return 'lucide:external-link'
+    default: return 'lucide:file'
+  }
+}
 
 // ─── App sections ───
 const activities = ref([
@@ -862,6 +947,98 @@ function closeAccionSheet() {
 .hoy__continue-arrow {
   flex-shrink: 0;
   color: rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Latest from Biblioteca ─── */
+.hoy__latest {
+  margin-bottom: var(--space-8);
+}
+
+.hoy__latest-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.hoy__latest-see-all {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.hoy__latest-scroll {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline-start: var(--space-5);
+  -webkit-overflow-scrolling: touch;
+  margin: 0 calc(-1 * var(--space-5));
+}
+
+.hoy__latest-scroll::before,
+.hoy__latest-scroll::after {
+  content: '';
+  flex: 0 0 var(--space-5);
+}
+
+.hoy__latest-scroll::-webkit-scrollbar { display: none; }
+
+.hoy__latest-card {
+  flex: 0 0 85%;
+  scroll-snap-align: start;
+  text-decoration: none;
+  color: white;
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+}
+
+.hoy__latest-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hoy__latest-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-5);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
+}
+
+.hoy__latest-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
+}
+
+.hoy__latest-title {
+  font-family: var(--font-title);
+  font-size: var(--title-sm);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+  color: white;
+}
+
+.hoy__latest-duration {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: var(--space-1);
 }
 
 /* ─── Explore grid ─── */
