@@ -34,7 +34,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 .tabs__list {
   display: flex;
   gap: var(--space-1);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -48,17 +48,17 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.45);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color var(--transition-fast), border-color var(--transition-fast);
   white-space: nowrap;
 }
 
-.tabs__tab:hover { color: var(--color-text); }
+.tabs__tab:hover { color: rgba(255, 255, 255, 0.8); }
 
 .tabs__tab--active {
-  color: var(--color-text);
-  border-bottom-color: var(--color-primary);
+  color: white;
+  border-bottom-color: white;
 }
 </style>

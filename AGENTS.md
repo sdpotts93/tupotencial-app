@@ -84,6 +84,14 @@ References:
 
 ---
 
+## 0.3 Screen orientation (mandatory)
+
+- The app must be **locked to portrait** on all screens **except** media playback routes (e.g. `/content/[id]/play`).
+- Media playback routes should allow **both portrait and landscape** so users can rotate for fullscreen video.
+- Implementation plan:
+  1. **Phase 1 (now — web only):** Use a CSS overlay ("please rotate your device") on landscape for non-media routes as a universal fallback. On media routes, hide the overlay and let the user rotate freely.
+  2. **Phase 2 (Capacitor):** When Capacitor is added, use `@capacitor/screen-orientation` plugin to natively lock portrait on app launch and unlock on media routes. Remove the CSS overlay fallback once native orientation control is in place.
+
 ## 1) Monorepo layout (canonical)
 
 Note (repo evolution):

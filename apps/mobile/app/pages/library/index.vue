@@ -75,15 +75,15 @@ const categories = ref([
     title: 'Rutinas de mañana',
     slug: 'rutinas-manana',
     items: [
-      { id: 'mock-content-004', title: 'Despertar con energía', typeLabel: 'Video', duration: '12 min', thumbnail: '/images/lib-2.jpg' },
-      { id: 'mock-content-005', title: 'Diario de gratitud', typeLabel: 'Texto', duration: '5 min', thumbnail: '/images/lib-3.jpg' },
+      { id: 'mock-content-004', title: 'Despertar con energía', typeLabel: 'Video', duration: '12 min', thumbnail: '/images/lib-5.jpg' },
+      { id: 'mock-content-005', title: 'Diario de gratitud', typeLabel: 'Texto', duration: '5 min', thumbnail: '/images/lib-6.jpg' },
     ],
   },
   {
     title: 'Crecimiento personal',
     slug: 'crecimiento-personal',
     items: [
-      { id: 'mock-content-006', title: 'Mentalidad de crecimiento', typeLabel: 'Video', duration: '20 min', thumbnail: '/images/lib-1.jpg' },
+      { id: 'mock-content-006', title: 'Mentalidad de crecimiento', typeLabel: 'Video', duration: '20 min', thumbnail: '/images/lib-7.jpg' },
       { id: 'mock-content-007', title: 'Hábitos atómicos', typeLabel: 'Texto', duration: '8 min', thumbnail: '/images/lib-2.jpg' },
     ],
   },
@@ -139,6 +139,7 @@ const categories = ref([
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: bottom;
 }
 
 .library__featured-overlay {
