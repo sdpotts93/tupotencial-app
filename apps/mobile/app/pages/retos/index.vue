@@ -2,7 +2,7 @@
   <div class="screen">
     <div class="screen__content">
       <header class="retos__header">
-        <h1 class="retos__title">Retos / Programas / Bootcamps</h1>
+        <h1 class="retos__title">Programas / Retos / Bootcamps</h1>
       </header>
 
       <p class="retos__subtitle">Programas guiados para construir hábitos con estructura y constancia.</p>
@@ -184,6 +184,7 @@ const filteredPrograms = computed(() => {
   font-weight: var(--weight-medium);
   color: rgba(255, 255, 255, 0.6);
   letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 /* ─── Tags (per plan type) ─── */

@@ -1034,6 +1034,7 @@ function closeAccionSheet() {
   color: rgba(255, 255, 255, 0.6);
   margin-top: var(--space-2);
   font-family: var(--font-eyebrow);
+  text-transform: uppercase;
 }
 
 /* ─── Explore grid ─── */
