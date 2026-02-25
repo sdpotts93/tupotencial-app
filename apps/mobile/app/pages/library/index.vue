@@ -91,8 +91,9 @@ const categories = ref([
 .library__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: var(--space-6);
+  position: relative;
 }
 
 .library__search-btn {
@@ -103,6 +104,8 @@ const categories = ref([
   justify-content: center;
   color: var(--color-text-inverse);
   border-radius: var(--radius-md);
+  position: absolute;
+  right: 0;
 }
 .library__search-btn:hover { background: rgba(255, 255, 255, 0.1); }
 
