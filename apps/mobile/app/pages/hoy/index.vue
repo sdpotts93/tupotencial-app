@@ -13,7 +13,7 @@
       <div class="hoy__hero-bar">
         <div class="hoy__hero-bar-fill" :style="{ width: retosProgressWidth }" />
       </div>
-      <NuxtLink to="/retos" class="hoy__hero-link">Ver todos los retos →</NuxtLink>
+      <!-- <NuxtLink to="/retos" class="hoy__hero-link">Ver todos los retos →</NuxtLink> -->
     </div>
 
     <div class="screen__content">
