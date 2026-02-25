@@ -60,14 +60,18 @@ function updatePill() {
 
   const navRect = nav.getBoundingClientRect()
   const itemRect = itemEls[idx]!.getBoundingClientRect()
+  const itemCenterX = itemRect.left + itemRect.width / 2 - navRect.left
+  const pillWidth = navRect.width * 0.25
+  let x = itemCenterX - pillWidth / 2
+  const isLast = idx === props.items.length - 1
+  if (isLast) x -= 1
 
   pillStyle.value = {
     opacity: '1',
-    transform: `translate(${itemRect.left - navRect.left}px, ${itemRect.top - navRect.top}px)`,
-    width: `${itemRect.width}px`,
-    height: `${itemRect.height}px`,
+    transform: `translateX(${x}px)`,
+    width: `${pillWidth}px`,
     transition: animated.value
-      ? 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s ease, height 0.4s ease, opacity 0.3s ease'
+      ? 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease'
       : 'none',
   }
 }
@@ -91,23 +95,21 @@ onBeforeUnmount(() => ro?.disconnect())
 </script>
 
 <style scoped>
-/* ─── Mobile: Floating bottom bar (Dark style) ─── */
+/* ─── Mobile: Floating bottom bar (Match style) ─── */
 .bottom-nav {
   position: fixed;
-  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   left: 16px;
   right: 16px;
   z-index: var(--z-fixed);
-  background: rgba(20, 20, 22, 0.78);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.24);
-  border-radius: 28px;
+  background: rgb(255 255 255 / 9%);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 40px;
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
-  padding: 6px 4px;
+  padding: 4px;
 }
 
 .bottom-nav__logo {
@@ -117,10 +119,11 @@ onBeforeUnmount(() => ro?.disconnect())
 /* ─── Sliding pill (capsule) ─── */
 .bottom-nav__pill {
   position: absolute;
-  top: 0;
+  top: 3px;
   left: 0;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.12);
+  bottom: 3px;
+  border-radius: 32px;
+  background: rgb(255 255 255 / 32%);
   pointer-events: none;
   z-index: 0;
 }
@@ -132,22 +135,23 @@ onBeforeUnmount(() => ro?.disconnect())
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 8px 18px;
+  padding: 4px 12px;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.4);
-  transition: color 0.25s ease;
+  color: var(--color-dark);
+  transition: color 0.25s ease, flex 0.4s ease;
   -webkit-tap-highlight-color: transparent;
-  border-radius: 22px;
-}
-
-.bottom-nav__item:hover {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
+  border-radius: 32px;
+  flex: 0 0 25%;
+  min-width: 0;
 }
 
 .bottom-nav__item--active {
-  color: #ffffff;
+  flex: 1 0 25%;
+  color: #fff;
+}
+
+.bottom-nav__item:hover {
+  text-decoration: none;
 }
 
 /* Active icon: outline only, no fill */
@@ -156,18 +160,19 @@ onBeforeUnmount(() => ro?.disconnect())
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 
 .bottom-nav__icon :deep(svg) {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 
 .bottom-nav__label {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 2px;
   letter-spacing: 0.02em;
 }
 
