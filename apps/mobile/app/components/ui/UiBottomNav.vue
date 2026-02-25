@@ -102,7 +102,7 @@ onBeforeUnmount(() => ro?.disconnect())
   left: 16px;
   right: 16px;
   z-index: var(--z-fixed);
-  background: rgb(255 255 255 / 9%);
+  background: rgb(255 255 255 / 26%);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -137,7 +137,7 @@ onBeforeUnmount(() => ro?.disconnect())
   align-items: center;
   padding: 4px 12px;
   text-decoration: none;
-  color: #b1b1b1;
+  color: var(--color-dark);
   transition: color 0.25s ease, flex 0.4s ease;
   -webkit-tap-highlight-color: transparent;
   border-radius: 32px;
