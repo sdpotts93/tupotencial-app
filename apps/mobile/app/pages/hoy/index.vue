@@ -6,7 +6,7 @@
       <div class="hoy__hero-progress">
         <div class="hoy__hero-progress-row">
           <span class="hoy__hero-label">RETOS ACTIVOS</span>
-          <span class="hoy__hero-count">⭐ {{ retosCompleted }} / {{ retosTotal }}</span>
+          <span class="hoy__hero-count"><Icon name="lucide:star" size="14" /> {{ retosCompleted }} / {{ retosTotal }}</span>
         </div>
         <div class="hoy__hero-bar">
           <div class="hoy__hero-bar-fill" :style="{ width: retosProgressWidth }" />
@@ -42,15 +42,13 @@
             class="hoy__activity"
           >
             <div class="hoy__activity-thumb" :style="{ background: activity.bg }">
-              <span>{{ activity.icon }}</span>
+              <Icon :name="activity.icon" size="20" />
             </div>
             <div class="hoy__activity-info">
               <h3 class="hoy__activity-name">{{ activity.title }}</h3>
               <p class="hoy__activity-meta">{{ activity.meta }}</p>
             </div>
-            <svg class="hoy__activity-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
+            <Icon name="lucide:chevron-right" size="16" class="hoy__activity-arrow" />
           </NuxtLink>
         </div>
       </section>
@@ -88,32 +86,32 @@ const activities = ref([
   {
     id: 'checkin',
     title: 'Completa tu check-in',
-    meta: '🧘 Reflexión diaria • 3 min',
-    icon: '✍️',
+    meta: 'Reflexión diaria • 3 min',
+    icon: 'lucide:pen-line',
     bg: 'linear-gradient(135deg, var(--color-navy), var(--color-green))',
     to: '/hoy/checkin',
   },
   {
     id: 'reto-gratitud',
     title: 'Reto de gratitud — Día 5',
-    meta: '🌱 Reto activo • 5 min',
-    icon: '🙏',
+    meta: 'Reto activo • 5 min',
+    icon: 'lucide:heart-handshake',
     bg: 'linear-gradient(135deg, var(--color-green), #A7A68E)',
     to: '/retos/mock-prog-001/day/5',
   },
   {
     id: 'library-rec',
     title: 'Respiración consciente',
-    meta: '🎧 Audio • 8 min',
-    icon: '🌬️',
+    meta: 'Audio • 8 min',
+    icon: 'lucide:wind',
     bg: 'linear-gradient(135deg, #28374A, var(--color-navy))',
     to: '/library',
   },
   {
     id: 'ai-coach',
     title: 'Habla con tu coach',
-    meta: '💬 AI Coach • Sin límite',
-    icon: '🤖',
+    meta: 'AI Coach • Sin límite',
+    icon: 'lucide:bot',
     bg: 'linear-gradient(135deg, var(--color-dark), #28374A)',
     to: '/ai/chat/new',
   },
@@ -284,7 +282,7 @@ const activities = ref([
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  color: #fff;
   flex-shrink: 0;
 }
 

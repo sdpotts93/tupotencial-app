@@ -2,7 +2,7 @@
   <div class="screen">
     <UiTopNav title="Beneficio" show-back @back="navigateTo('/benefits')" />
     <div class="screen__content">
-      <div class="benefit-detail__icon">🏔️</div>
+      <div class="benefit-detail__icon"><Icon name="lucide:mountain" size="48" /></div>
       <h1 class="title title--lg">{{ benefit.title }}</h1>
       <p class="benefit-detail__desc">{{ benefit.description }}</p>
 

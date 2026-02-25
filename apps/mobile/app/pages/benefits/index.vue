@@ -13,7 +13,7 @@
           :to="`/benefits/${benefit.id}`"
         >
           <div style="display: flex; align-items: center; gap: var(--space-3);">
-            <span class="benefits__emoji">{{ benefit.emoji }}</span>
+            <span class="benefits__emoji"><Icon :name="benefit.emoji" size="32" /></span>
             <div>
               <h3 style="font-weight: var(--weight-semibold); font-size: var(--text-md);">{{ benefit.title }}</h3>
               <p style="font-size: var(--text-sm); color: var(--color-muted); margin-top: 2px;">{{ benefit.description }}</p>
@@ -29,10 +29,10 @@
 definePageMeta({ layout: 'blank' })
 
 const benefits = ref([
-  { id: 'mock-ben-001', title: 'Descuento en retiros', description: '15% de descuento en retiros presenciales', emoji: '🏔️' },
-  { id: 'mock-ben-002', title: 'Acceso a comunidad VIP', description: 'Grupo exclusivo de WhatsApp con mentores', emoji: '💬' },
-  { id: 'mock-ben-003', title: 'Sesión 1:1 gratuita', description: 'Una sesión de coaching al mes sin costo', emoji: '🎯' },
-  { id: 'mock-ben-004', title: 'Descuento en libros', description: '20% en la tienda de libros recomendados', emoji: '📚' },
+  { id: 'mock-ben-001', title: 'Descuento en retiros', description: '15% de descuento en retiros presenciales', emoji: 'lucide:mountain' },
+  { id: 'mock-ben-002', title: 'Acceso a comunidad VIP', description: 'Grupo exclusivo de WhatsApp con mentores', emoji: 'lucide:message-circle' },
+  { id: 'mock-ben-003', title: 'Sesión 1:1 gratuita', description: 'Una sesión de coaching al mes sin costo', emoji: 'lucide:target' },
+  { id: 'mock-ben-004', title: 'Descuento en libros', description: '20% en la tienda de libros recomendados', emoji: 'lucide:book-open' },
 ])
 </script>
 

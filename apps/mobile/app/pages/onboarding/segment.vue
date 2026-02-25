@@ -3,9 +3,7 @@
     <!-- Header: back + progress -->
     <div class="onboarding__header">
       <button class="onboarding__back" aria-label="Volver" @click="handleBack">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <Icon name="lucide:chevron-left" size="20" />
       </button>
       <div class="onboarding__progress">
         <div class="onboarding__progress-fill" :style="{ width: progressWidth }" />
@@ -23,7 +21,7 @@
           :class="['onboarding-opt', { 'onboarding-opt--selected': isSelected(opt.value) }]"
           @click="toggleOption(opt.value)"
         >
-          <span class="onboarding-opt__icon">{{ opt.icon }}</span>
+          <span class="onboarding-opt__icon"><Icon :name="opt.icon" size="20" /></span>
           <span class="onboarding-opt__label">{{ opt.label }}</span>
         </button>
       </div>
@@ -61,11 +59,11 @@ const steps = [
     key: 'motivation',
     multi: true,
     options: [
-      { value: 'calm', icon: '🧘', label: 'Encontrar calma y reducir estrés' },
-      { value: 'discipline', icon: '🎯', label: 'Ser más disciplinado/a' },
-      { value: 'growth', icon: '🌱', label: 'Crecimiento personal' },
-      { value: 'motivation', icon: '⚡', label: 'Motivación diaria' },
-      { value: 'community', icon: '🤝', label: 'Conectar con una comunidad' },
+      { value: 'calm', icon: 'lucide:flower-2', label: 'Encontrar calma y reducir estrés' },
+      { value: 'discipline', icon: 'lucide:target', label: 'Ser más disciplinado/a' },
+      { value: 'growth', icon: 'lucide:sprout', label: 'Crecimiento personal' },
+      { value: 'motivation', icon: 'lucide:zap', label: 'Motivación diaria' },
+      { value: 'community', icon: 'lucide:handshake', label: 'Conectar con una comunidad' },
     ],
   },
   {
@@ -73,30 +71,30 @@ const steps = [
     key: 'focus',
     multi: true,
     options: [
-      { value: 'emotional', icon: '💚', label: 'Bienestar emocional' },
-      { value: 'productivity', icon: '📋', label: 'Productividad y hábitos' },
-      { value: 'relationships', icon: '💬', label: 'Relaciones y comunicación' },
-      { value: 'confidence', icon: '💪', label: 'Autoconfianza' },
-      { value: 'mindfulness', icon: '🧠', label: 'Mindfulness y meditación' },
+      { value: 'emotional', icon: 'lucide:heart', label: 'Bienestar emocional' },
+      { value: 'productivity', icon: 'lucide:clipboard-list', label: 'Productividad y hábitos' },
+      { value: 'relationships', icon: 'lucide:message-circle', label: 'Relaciones y comunicación' },
+      { value: 'confidence', icon: 'lucide:shield-check', label: 'Autoconfianza' },
+      { value: 'mindfulness', icon: 'lucide:brain', label: 'Mindfulness y meditación' },
     ],
   },
   {
     question: 'Elige tu voz guía',
     key: 'segment',
     options: [
-      { value: 'gabriel', icon: '🌊', label: 'Gabriel — Disciplina consciente' },
-      { value: 'carlotta', icon: '🌸', label: 'Carlotta — Bienestar emocional' },
-      { value: 'conjunta', icon: '✨', label: 'Combinada — Equilibrio integral' },
+      { value: 'gabriel', icon: 'lucide:waves', label: 'Gabriel — Disciplina consciente' },
+      { value: 'carlotta', icon: 'lucide:flower', label: 'Carlotta — Bienestar emocional' },
+      { value: 'conjunta', icon: 'lucide:sparkles', label: 'Combinada — Equilibrio integral' },
     ],
   },
   {
     question: '¿Cuánto tiempo al día puedes dedicar?',
     key: 'time',
     options: [
-      { value: '5', icon: '⚡', label: '5 minutos' },
-      { value: '10', icon: '☕', label: '10 minutos' },
-      { value: '15', icon: '🌿', label: '15 minutos' },
-      { value: '20', icon: '🌟', label: '20+ minutos' },
+      { value: '5', icon: 'lucide:zap', label: '5 minutos' },
+      { value: '10', icon: 'lucide:coffee', label: '10 minutos' },
+      { value: '15', icon: 'lucide:leaf', label: '15 minutos' },
+      { value: '20', icon: 'lucide:star', label: '20+ minutos' },
     ],
   },
 ]
@@ -254,6 +252,7 @@ function handleContinue() {
   flex-shrink: 0;
   width: 24px;
   text-align: center;
+  color: var(--color-sand);
 }
 
 .onboarding-opt__label {

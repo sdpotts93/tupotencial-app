@@ -10,7 +10,8 @@
     <UiDataTable :columns="columns" :rows="categories" @row-click="editCategory">
       <template #cell-icon_url="{ value }">
         <div class="category-icon">
-          {{ value ? '🎯' : '—' }}
+          <Icon v-if="value" name="lucide:target" size="20" />
+          <span v-else>—</span>
         </div>
       </template>
 

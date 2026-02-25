@@ -13,7 +13,7 @@
           :class="['checkin__mood', { 'checkin__mood--selected': selectedMood === mood.value }]"
           @click="selectedMood = mood.value"
         >
-          <span class="checkin__mood-emoji">{{ mood.emoji }}</span>
+          <span class="checkin__mood-emoji"><Icon :name="mood.emoji" size="24" /></span>
           <span class="checkin__mood-label">{{ mood.label }}</span>
         </button>
       </div>
@@ -33,7 +33,7 @@
       <!-- Success modal -->
       <UiModal v-model="showSuccess" title="¡Check-in completado!" variant="center" :show-handle="false">
         <div class="checkin__success">
-          <div class="checkin__success-badge">🏆</div>
+          <div class="checkin__success-badge"><Icon name="lucide:trophy" size="48" /></div>
           <p>Tu racha es de <strong>{{ streak + 1 }} días</strong>. ¡Sigue así!</p>
         </div>
         <template #footer>
@@ -54,11 +54,11 @@ const showSuccess = ref(false)
 const streak = ref(7)
 
 const moods = [
-  { value: 'great', emoji: '🤩', label: 'Increíble' },
-  { value: 'good', emoji: '😊', label: 'Bien' },
-  { value: 'ok', emoji: '😐', label: 'Regular' },
-  { value: 'low', emoji: '😔', label: 'Bajo' },
-  { value: 'tough', emoji: '😣', label: 'Difícil' },
+  { value: 'great', emoji: 'lucide:laugh', label: 'Increíble' },
+  { value: 'good', emoji: 'lucide:smile', label: 'Bien' },
+  { value: 'ok', emoji: 'lucide:meh', label: 'Regular' },
+  { value: 'low', emoji: 'lucide:frown', label: 'Bajo' },
+  { value: 'tough', emoji: 'lucide:annoyed', label: 'Difícil' },
 ]
 
 async function handleSubmit() {

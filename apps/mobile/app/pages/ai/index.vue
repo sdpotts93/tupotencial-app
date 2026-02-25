@@ -4,7 +4,7 @@
     <div class="screen__content">
       <!-- Intro (inspired by inspiration-ai) -->
       <div class="ai-home__hero">
-        <div class="ai-home__icon">🧠</div>
+        <div class="ai-home__icon"><Icon name="lucide:brain" size="48" /></div>
         <h1 class="title title--lg">Tu acompañamiento diario</h1>
         <p class="ai-home__desc">
           Recibe orientación personalizada según tu estado de energía, ánimo y tiempo disponible. Elige la voz que más resuene contigo.
@@ -20,7 +20,7 @@
             :class="['ai-home__tone-btn', { 'ai-home__tone-btn--active': selectedTone === 'carlotta' }]"
             @click="selectedTone = 'carlotta'"
           >
-            <span class="ai-home__tone-emoji">🌸</span>
+            <span class="ai-home__tone-emoji"><Icon name="lucide:flower" size="24" /></span>
             <span class="ai-home__tone-name">Carlotta</span>
             <span class="ai-home__tone-desc">Contención, calma y presencia</span>
           </button>
@@ -28,7 +28,7 @@
             :class="['ai-home__tone-btn', { 'ai-home__tone-btn--active': selectedTone === 'gabriel' }]"
             @click="selectedTone = 'gabriel'"
           >
-            <span class="ai-home__tone-emoji">🌊</span>
+            <span class="ai-home__tone-emoji"><Icon name="lucide:waves" size="24" /></span>
             <span class="ai-home__tone-name">Gabriel</span>
             <span class="ai-home__tone-desc">Estructura, disciplina y acción</span>
           </button>
@@ -53,7 +53,7 @@
             v-for="session in sessions"
             :key="session.id"
             :label="session.preview"
-            :description="`${session.tone === 'carlotta' ? '🌸' : '🌊'} ${session.date}`"
+            :description="session.date"
             :to="`/ai/chat/${session.id}`"
           />
         </UiList>

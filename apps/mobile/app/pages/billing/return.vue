@@ -8,7 +8,7 @@
       </div>
 
       <div v-else-if="status === 'success'" class="billing-return__state">
-        <span class="billing-return__icon">🎉</span>
+        <span class="billing-return__icon"><Icon name="lucide:party-popper" size="48" /></span>
         <h1 class="title title--lg">¡Bienvenida a Core!</h1>
         <p>Tu membresía está activa. Aquí tienes los siguientes pasos:</p>
 
@@ -44,7 +44,7 @@
       </div>
 
       <div v-else class="billing-return__state">
-        <span class="billing-return__icon">⚠️</span>
+        <span class="billing-return__icon"><Icon name="lucide:triangle-alert" size="48" /></span>
         <h1 class="title title--lg">Hubo un problema</h1>
         <p>No pudimos confirmar tu pago. Si crees que es un error, contacta a soporte.</p>
         <p><strong>soporte@tupotencial.app</strong></p>

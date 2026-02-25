@@ -16,5 +16,11 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.93"
+  },
+  "dependencies": {
+    "nuxt": "^4.3.1"
   }
 }

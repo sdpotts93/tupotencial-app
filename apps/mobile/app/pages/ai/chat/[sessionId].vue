@@ -3,7 +3,7 @@
     <!-- Top bar -->
     <header class="chat__header safe-top">
       <button class="chat__back" aria-label="Volver" @click="navigateTo('/ai')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <Icon name="lucide:chevron-left" size="24" />
       </button>
       <div class="chat__header-info">
         <span class="chat__tone-label">{{ toneName }}</span>
@@ -53,7 +53,7 @@
         :disabled="!inputText.trim() || generating || limitReached"
         @click="sendMessage()"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        <Icon name="lucide:send" size="20" />
       </button>
     </div>
   </div>
@@ -64,7 +64,7 @@ definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
 
-const toneName = ref('Carlotta 🌸')
+const toneName = ref('Carlotta')
 const generating = ref(false)
 const limitReached = ref(false)
 const inputText = ref('')
