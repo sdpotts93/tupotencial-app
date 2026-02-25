@@ -61,7 +61,7 @@ function updatePill() {
   const navRect = nav.getBoundingClientRect()
   const itemRect = itemEls[idx]!.getBoundingClientRect()
   const itemCenterX = itemRect.left + itemRect.width / 2 - navRect.left
-  const pillWidth = navRect.width * 0.25
+  const pillWidth = navRect.width * (1 / props.items.length)
   let x = itemCenterX - pillWidth / 2
   const isLast = idx === props.items.length - 1
   if (isLast) x -= 1
@@ -141,12 +141,12 @@ onBeforeUnmount(() => ro?.disconnect())
   transition: color 0.25s ease, flex 0.4s ease;
   -webkit-tap-highlight-color: transparent;
   border-radius: 32px;
-  flex: 0 0 25%;
+  flex: 0 0 20%;
   min-width: 0;
 }
 
 .bottom-nav__item--active {
-  flex: 1 0 25%;
+  flex: 1 0 20%;
   color: #fff;
 }
 
@@ -170,7 +170,7 @@ onBeforeUnmount(() => ro?.disconnect())
 }
 
 .bottom-nav__label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   margin-top: 2px;
   letter-spacing: 0.02em;

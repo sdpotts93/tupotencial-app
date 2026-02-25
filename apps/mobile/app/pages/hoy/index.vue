@@ -145,9 +145,10 @@
           <template v-for="activity in activities" :key="activity.id">
             <NuxtLink
               :to="activity.to"
-              class="hoy__activity"
+              :class="['hoy__activity', { 'hoy__activity--wide': activity.id === 'ai-coach' }]"
               :style="{ '--activity-accent': activity.accent }"
             >
+              <span v-if="activity.featured" class="hoy__activity-badge">Nuevo</span>
               <div class="hoy__activity-thumb">
                 <Icon :name="activity.icon" size="28" />
               </div>
@@ -418,14 +419,7 @@ const activities = ref([
     icon: 'lucide:bot',
     accent: '#9AB3C7',
     to: '/ai',
-  },
-  {
-    id: 'comunidad',
-    title: 'Comunidad',
-    meta: 'Conecta con otros',
-    icon: 'lucide:users',
-    accent: '#A893BA',
-    to: '/community',
+    featured: true,
   },
   {
     id: 'eventos',
@@ -434,6 +428,7 @@ const activities = ref([
     icon: 'lucide:calendar',
     accent: '#C08A8A',
     to: '/events',
+    featured: false,
   },
   {
     id: 'vip',
@@ -442,6 +437,7 @@ const activities = ref([
     icon: 'lucide:crown',
     accent: '#C9A88E',
     to: '/vip',
+    featured: false,
   },
 ])
 
@@ -1056,6 +1052,7 @@ function closeAccionSheet() {
 }
 
 .hoy__activity {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: var(--space-4);
@@ -1070,6 +1067,29 @@ function closeAccionSheet() {
   cursor: pointer;
   font-family: inherit;
   align-items: center;
+}
+
+.hoy__activity-badge {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: rgba(154, 179, 199, 0.25);
+  color: #9AB3C7;
+}
+
+.hoy__activity--wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  text-align: left;
+  gap: var(--space-4);
+  background: linear-gradient(330deg, rgb(154 179 199 / 35%) 0%, rgb(32 32 32 / 69%) 100%);
 }
 
 .hoy__activity:hover {
