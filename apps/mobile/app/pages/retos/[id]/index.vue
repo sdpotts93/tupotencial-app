@@ -115,7 +115,6 @@ function enroll() {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: bottom;
 }
 
 .detail__hero-overlay {
