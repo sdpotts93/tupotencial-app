@@ -137,7 +137,7 @@
                 </span>
               </span>
               <span class="hoy__latest-title">{{ item.title }}</span>
-              <span v-if="item.duration" class="hoy__latest-duration"><Icon name="lucide:clock" size="12" /> {{ item.duration }}</span>
+              <span v-if="item.duration" class="hoy__latest-duration"><Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}</span>
             </div>
           </NuxtLink>
         </div>
@@ -441,12 +441,12 @@ const activities = ref([
     to: '/events',
   },
   {
-    id: 'addons',
-    title: 'Addons',
-    meta: 'Contenido extra',
-    icon: 'lucide:puzzle',
-    accent: '#B5B590',
-    to: '/addons',
+    id: 'vip',
+    title: 'VIP',
+    meta: 'Acceso premium',
+    icon: 'lucide:crown',
+    accent: '#C9A88E',
+    to: '/vip',
   },
 ])
 
@@ -510,6 +510,10 @@ function closeAccionSheet() {
 </script>
 
 <style scoped>
+
+.clock-icon {
+  transform: translateY(-2px);
+}
 /* ─── Hero header ─── */
 .hoy__hero {
   background: radial-gradient(ellipse at -11% 18%, rgb(174 174 174 / 14%) 0%, transparent 55%), #28282800;
@@ -1034,7 +1038,7 @@ function closeAccionSheet() {
   gap: 4px;
   font-size: var(--text-xs);
   color: rgba(255, 255, 255, 0.6);
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
 }
 
 /* ─── Explore grid ─── */

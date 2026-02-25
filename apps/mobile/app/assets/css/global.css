@@ -93,7 +93,7 @@ img, video {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+  padding-bottom: calc(var(--safe-area-bottom));
 }
 
 .screen__content {
