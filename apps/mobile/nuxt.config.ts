@@ -33,7 +33,7 @@ export default defineNuxtConfig({
     '~/assets/css/transitions.css',
   ],
 
-  modules: [],
+  modules: ['@nuxt/icon'],
 
   runtimeConfig: {
     public: {

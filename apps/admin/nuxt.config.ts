@@ -31,7 +31,7 @@ export default defineNuxtConfig({
     '~/assets/css/admin.css',
   ],
 
-  modules: [],
+  modules: ['@nuxt/icon'],
 
   runtimeConfig: {
     public: {
