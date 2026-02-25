@@ -2,7 +2,14 @@
   <div class="screen">
     <!-- Branded header (logo scrolls away, progress sticks) -->
     <div class="hoy__hero">
-      <img src="/logo-word/logo-word-white.png" alt="Tu Potencial" class="hoy__hero-logo" />
+      <div class="hoy__hero-top">
+        <img src="/logo-word/logo-word-white.png" alt="Tu Potencial" class="hoy__hero-logo" />
+        <NuxtLink to="/hoy/progress" class="hoy__streak-badge">
+          <Icon name="lucide:flame" size="16" class="hoy__streak-icon" />
+          <span class="hoy__streak-count">{{ streak }}</span>
+        </NuxtLink>
+      </div>
+      <h1 class="hoy__greeting">{{ greeting }}</h1>
     </div>
 
     <div class="hoy__hero-progress">
@@ -11,30 +18,47 @@
         <span class="hoy__hero-count"><Icon name="lucide:star" size="14" /> {{ retosCompleted }} / {{ retosTotal }}</span>
       </div>
       <div class="hoy__hero-bar">
-        <div class="hoy__hero-bar-fill" :style="{ width: retosProgressWidth }" />
+        <div class="hoy__hero-bar-fill" :style="{ width: animatedProgressWidth }" />
       </div>
-      <!-- <NuxtLink to="/retos" class="hoy__hero-link">Ver todos los retos →</NuxtLink> -->
     </div>
 
     <div class="screen__content">
-      <!-- Mensaje del día -->
-      <section class="hoy__mensaje">
-        <div class="hoy__mensaje-card">
-          <Icon name="lucide:quote" size="18" class="hoy__mensaje-icon" />
-          <p class="hoy__mensaje-text">{{ mensajeDelDia.text }}</p>
-          <div class="hoy__mensaje-author">
-            <img :src="`/images/${mensajeDelDia.author}.png`" :alt="mensajeDelDia.author" class="hoy__mensaje-avatar" />
-            <span class="hoy__mensaje-name">{{ mensajeDelDia.author === 'gabriel' ? 'Gabriel' : 'Carlotta' }}</span>
+
+      <!-- Daily retos task list / Celebration state -->
+      <section class="hoy__retos">
+        <Transition name="fade" mode="out-in">
+          <!-- Celebration state when all complete -->
+          <div v-if="allRetosComplete" key="complete" class="hoy__celebration">
+            <div class="hoy__celebration-icon">
+              <Icon name="lucide:party-popper" size="32" />
+            </div>
+            <div class="hoy__celebration-text">
+              <p class="hoy__celebration-title">Dia completado</p>
+              <p class="hoy__celebration-sub">Racha de {{ streak + 1 }} dias. Explora mas contenido abajo.</p>
+            </div>
           </div>
-        </div>
+
+          <!-- Task list when not all complete -->
+          <div v-else key="tasks" class="hoy__retos-list">
+            <button
+              v-for="reto in dailyRetos"
+              :key="reto.id"
+              class="hoy__reto-item"
+              :class="{ 'hoy__reto-item--done': reto.completed }"
+              @click="handleRetoTap(reto.type)"
+            >
+              <span class="hoy__reto-check">
+                <Icon v-if="reto.completed" name="lucide:check-circle-2" size="20" />
+                <Icon v-else name="lucide:circle" size="20" />
+              </span>
+              <span class="hoy__reto-label">{{ reto.title }}</span>
+              <Icon name="lucide:chevron-right" size="16" class="hoy__reto-arrow" />
+            </button>
+          </div>
+        </Transition>
       </section>
 
-      <!-- Daily check-in button -->
-      <button class="hoy__checkin-btn" @click="activeSheet = 'checkin'">
-        Completa tu check-in
-      </button>
-
-      <!-- Featured card — opens "acción del día" sheet -->
+      <!-- Featured card — opens "accion del dia" sheet -->
       <section class="hoy__featured">
         <button class="hoy__featured-card" @click="activeSheet = 'accion'">
           <img src="/images/rojo-carlotta.jpg" alt="" class="hoy__featured-img" />
@@ -46,7 +70,52 @@
         </button>
       </section>
 
-      <!-- Start your day -->
+      <!-- Mensaje del dia -->
+      <section class="hoy__mensaje">
+        <div class="hoy__mensaje-card">
+          <Icon name="lucide:quote" size="18" class="hoy__mensaje-icon" />
+          <p class="hoy__mensaje-text">{{ mensajeDelDia.text }}</p>
+          <div class="hoy__mensaje-author">
+            <img :src="`/images/${mensajeDelDia.author}.png`" :alt="mensajeDelDia.author" class="hoy__mensaje-avatar" />
+            <span class="hoy__mensaje-name">{{ mensajeDelDia.author === 'gabriel' ? 'Gabriel' : 'Carlotta' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Continue active programs -->
+      <section v-if="activePrograms.length" class="hoy__continue">
+        <h2 class="title title--md hoy__continue-title">Continua</h2>
+        <div class="hoy__continue-scroll">
+          <NuxtLink
+            v-for="prog in activePrograms"
+            :key="prog.id"
+            :to="`/retos/${prog.id}`"
+            class="hoy__continue-card"
+          >
+            <div class="hoy__continue-progress">
+              <svg viewBox="0 0 36 36" class="hoy__continue-ring">
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="#ffffff15" stroke-width="3" />
+                <circle
+                  cx="18" cy="18" r="15.5" fill="none"
+                  stroke="var(--color-sand)"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  :stroke-dasharray="`${prog.progressPct * 97.4} 97.4`"
+                  transform="rotate(-90 18 18)"
+                />
+              </svg>
+              <span class="hoy__continue-day">{{ prog.currentDay }}</span>
+            </div>
+            <div class="hoy__continue-info">
+              <span class="hoy__continue-name">{{ prog.title }}</span>
+              <span class="hoy__continue-meta">Dia {{ prog.currentDay }} de {{ prog.totalDays }}</span>
+            </div>
+            <Icon name="lucide:chevron-right" size="16" class="hoy__continue-arrow" />
+          </NuxtLink>
+        </div>
+      </section>
+
+      <!-- Explore -->
       <section class="hoy__start">
         <h2 class="title title--md hoy__start-title">Explora</h2>
         <div class="hoy__start-list">
@@ -54,6 +123,7 @@
             <NuxtLink
               :to="activity.to"
               class="hoy__activity"
+              :style="{ '--activity-accent': activity.accent }"
             >
               <div class="hoy__activity-thumb">
                 <Icon :name="activity.icon" size="28" />
@@ -62,7 +132,6 @@
                 <h3 class="hoy__activity-name">{{ activity.title }}</h3>
                 <p class="hoy__activity-meta">{{ activity.meta }}</p>
               </div>
-              <Icon name="lucide:chevron-right" size="16" class="hoy__activity-arrow" />
             </NuxtLink>
           </template>
         </div>
@@ -70,7 +139,7 @@
 
     </div>
 
-    <!-- ═══ Check-in slideover ═══ -->
+    <!-- Check-in slideover -->
     <div
       class="hoy__overlay"
       :class="{ 'hoy__overlay--active': activeSheet === 'checkin' }"
@@ -86,47 +155,51 @@
           </button>
         </div>
 
-        <h1 class="hoy__sheet-title">¿Cómo te sientes hoy?</h1>
-        <p class="hoy__sheet-subtitle">Tómate un momento para reflexionar sobre tu estado actual.</p>
-
-        <!-- Mood selector -->
-        <div class="hoy__checkin-moods">
-          <button
-            v-for="mood in moods"
-            :key="mood.value"
-            :class="['hoy__checkin-mood', { 'hoy__checkin-mood--selected': selectedMood === mood.value }]"
-            :style="selectedMood === mood.value ? { background: mood.color, borderColor: mood.color } : {}"
-            @click="selectedMood = mood.value"
-          >
-            <span class="hoy__checkin-mood-emoji"><Icon :name="mood.emoji" size="24" /></span>
-            <span class="hoy__checkin-mood-label">{{ mood.label }}</span>
-          </button>
-        </div>
-
-        <!-- Reflection -->
-        <UiTextarea
-          v-model="checkinReflection"
-          label="Reflexión (opcional)"
-          placeholder="¿Qué quieres lograr hoy?"
-          :rows="3"
-        />
-
-        <UiButton block :loading="checkinLoading" :disabled="!selectedMood" class="hoy__checkin-submit" @click="handleCheckin">
-          Completar check-in
-        </UiButton>
-
-        <!-- Success state -->
-        <Transition name="fade">
-          <div v-if="checkinSuccess" class="hoy__checkin-success">
+        <Transition name="fade" mode="out-in">
+          <!-- Success state -->
+          <div v-if="checkinSuccess" key="success" class="hoy__checkin-success">
             <div class="hoy__checkin-success-badge"><Icon name="lucide:trophy" size="48" /></div>
-            <p>Tu racha es de <strong>{{ streak + 1 }} días</strong>. ¡Sigue así!</p>
+            <p class="hoy__checkin-success-streak">{{ streak + 1 }} dias</p>
+            <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
             <UiButton block variant="secondary" @click="closeCheckinSheet">Listo</UiButton>
+          </div>
+
+          <!-- Form state -->
+          <div v-else key="form">
+            <h1 class="hoy__sheet-title">Como te sientes hoy?</h1>
+            <p class="hoy__sheet-subtitle">Tomate un momento para reflexionar sobre tu estado actual.</p>
+
+            <!-- Mood selector -->
+            <div class="hoy__checkin-moods">
+              <button
+                v-for="mood in moods"
+                :key="mood.value"
+                :class="['hoy__checkin-mood', { 'hoy__checkin-mood--selected': selectedMood === mood.value }]"
+                :style="selectedMood === mood.value ? { background: mood.color, borderColor: mood.color } : {}"
+                @click="selectedMood = mood.value"
+              >
+                <span class="hoy__checkin-mood-emoji"><Icon :name="mood.emoji" size="24" /></span>
+                <span class="hoy__checkin-mood-label">{{ mood.label }}</span>
+              </button>
+            </div>
+
+            <!-- Reflection -->
+            <UiTextarea
+              v-model="checkinReflection"
+              label="Reflexion (opcional)"
+              placeholder="Que quieres lograr hoy?"
+              :rows="3"
+            />
+
+            <UiButton block :loading="checkinLoading" :disabled="!selectedMood" class="hoy__checkin-submit" @click="handleCheckin">
+              Completar check-in
+            </UiButton>
           </div>
         </Transition>
       </div>
     </div>
 
-    <!-- ═══ Acción del día slideover ═══ -->
+    <!-- Accion del dia slideover -->
     <div
       class="hoy__overlay"
       :class="{ 'hoy__overlay--active': activeSheet === 'accion' }"
@@ -142,48 +215,85 @@
           </button>
         </div>
 
-        <h1 class="hoy__sheet-title">{{ dailyPlan.title }}</h1>
-        <p class="hoy__sheet-subtitle">{{ dailyPlan.message }}</p>
+        <Transition name="fade" mode="out-in">
+          <!-- Success state -->
+          <div v-if="accionSuccess" key="success" class="hoy__checkin-success">
+            <div class="hoy__checkin-success-badge"><Icon name="lucide:check-circle" size="48" /></div>
+            <p class="hoy__checkin-success-streak">{{ accionChoice === 'done' ? 'Accion completada' : 'Listo para manana' }}</p>
+            <p class="hoy__checkin-success-msg">{{ accionChoice === 'done' ? 'Excelente trabajo hoy. Cada accion cuenta.' : 'No pasa nada. Manana es una nueva oportunidad.' }}</p>
+            <UiButton block variant="secondary" @click="closeAccionSheet">Listo</UiButton>
+          </div>
 
-        <div class="hoy__accion-options">
-          <button
-            :class="['hoy__accion-option', { 'hoy__accion-option--selected': accionChoice === 'done' }]"
-            @click="accionChoice = 'done'"
-          >
-            <span class="hoy__accion-option-icon"><Icon name="lucide:check-circle" size="24" /></span>
-            <span class="hoy__accion-option-text">Hoy cumplí con la acción del día</span>
-          </button>
+          <!-- Form state -->
+          <div v-else key="form">
+            <h1 class="hoy__sheet-title">{{ dailyPlan.title }}</h1>
+            <p class="hoy__sheet-subtitle">{{ dailyPlan.message }}</p>
 
-          <button
-            :class="['hoy__accion-option', { 'hoy__accion-option--selected': accionChoice === 'skip' }]"
-            @click="accionChoice = 'skip'"
-          >
-            <span class="hoy__accion-option-icon"><Icon name="lucide:arrow-right-circle" size="24" /></span>
-            <span class="hoy__accion-option-text">Hoy no cumplí, estoy listo para mañana</span>
-          </button>
-        </div>
+            <div class="hoy__accion-options">
+              <button
+                :class="['hoy__accion-option', { 'hoy__accion-option--selected': accionChoice === 'done' }]"
+                @click="accionChoice = 'done'"
+              >
+                <span class="hoy__accion-option-icon"><Icon name="lucide:check-circle" size="24" /></span>
+                <span class="hoy__accion-option-text">Hoy cumpli con la accion del dia</span>
+              </button>
 
-        <UiButton block :loading="accionLoading" :disabled="!accionChoice" @click="handleAccion">
-          Confirmar
-        </UiButton>
+              <button
+                :class="['hoy__accion-option', { 'hoy__accion-option--selected': accionChoice === 'skip' }]"
+                @click="accionChoice = 'skip'"
+              >
+                <span class="hoy__accion-option-icon"><Icon name="lucide:arrow-right-circle" size="24" /></span>
+                <span class="hoy__accion-option-text">Hoy no cumpli, estoy listo para manana</span>
+              </button>
+            </div>
+
+            <UiButton block :loading="accionLoading" :disabled="!accionChoice" @click="handleAccion">
+              Confirmar
+            </UiButton>
+          </div>
+        </Transition>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// ─── Daily retos queue ───
+const { user } = useAuth()
+
+// ─── Time-aware greeting ───
+const greeting = computed(() => {
+  const name = user.value?.display_name?.split(' ')[0] ?? ''
+  const hour = new Date().getHours()
+  let saludo = 'Buenos dias'
+  if (hour >= 12 && hour < 18) saludo = 'Buenas tardes'
+  else if (hour >= 18) saludo = 'Buenas noches'
+  return name ? `${saludo}, ${name}` : saludo
+})
+
+// ─── Streak ───
+const streak = ref(7)
+
+const streakMessage = computed(() => {
+  const next = streak.value + 1
+  if (next >= 30) return 'Increible disciplina! Un mes completo.'
+  if (next >= 14) return 'Dos semanas seguidas! Vas imparable.'
+  if (next >= 7) return 'Una semana completa! Sigue asi.'
+  if (next >= 3) return 'Buen comienzo! Ya llevas 3 dias.'
+  return 'Sigue asi!'
+})
+
+// ─── Daily retos queue (2 items: check-in + admin-configurable action) ───
 const dailyRetos = ref([
   { id: 'checkin', type: 'checkin' as const, title: 'Completa tu check-in', completed: false },
-  { id: 'video', type: 'video' as const, title: 'Mira el video del día', completed: false },
-  { id: 'accion', type: 'accion' as const, title: 'Acción del día', completed: false },
+  { id: 'accion', type: 'accion' as const, title: 'Accion del dia', completed: false },
 ])
 
 const retosCompleted = computed(() => dailyRetos.value.filter(r => r.completed).length)
 const retosTotal = computed(() => dailyRetos.value.length)
+const allRetosComplete = computed(() => retosCompleted.value === retosTotal.value)
 const currentReto = computed(() => dailyRetos.value.find(r => !r.completed) ?? dailyRetos.value[dailyRetos.value.length - 1]!)
 const currentRetoLabel = computed(() => {
-  if (retosCompleted.value === retosTotal.value) return 'RETOS COMPLETADOS'
+  if (allRetosComplete.value) return 'RETOS COMPLETADOS'
   return currentReto.value.title.toUpperCase()
 })
 const retosProgressWidth = computed(() => {
@@ -191,42 +301,52 @@ const retosProgressWidth = computed(() => {
   return `${Math.round((retosCompleted.value / retosTotal.value) * 100)}%`
 })
 
-function completeReto(type: 'checkin' | 'video' | 'accion') {
+// Animate progress bar on mount
+const animatedProgressWidth = ref('0%')
+onMounted(() => {
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      animatedProgressWidth.value = retosProgressWidth.value
+    }, 300)
+  })
+})
+watch(retosProgressWidth, (val) => {
+  animatedProgressWidth.value = val
+})
+
+function completeReto(type: 'checkin' | 'accion') {
   const reto = dailyRetos.value.find(r => r.type === type)
   if (reto) reto.completed = true
 }
 
-// Mensaje del día (admin-configurable)
+function handleRetoTap(type: 'checkin' | 'accion') {
+  const reto = dailyRetos.value.find(r => r.type === type)
+  if (reto?.completed) return
+  if (type === 'checkin') activeSheet.value = 'checkin'
+  else activeSheet.value = 'accion'
+}
+
+// ─── Mensaje del dia (admin-configurable) ───
 const mensajeDelDia = ref({
-  text: 'El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.',
+  text: 'El exito no es la clave de la felicidad. La felicidad es la clave del exito.',
   author: 'gabriel' as 'gabriel' | 'carlotta',
 })
 
-// Mock daily plan
+// ─── Mock daily plan ───
 const dailyPlan = ref({
-  eyebrow: 'Acción del día',
+  eyebrow: 'Accion del dia',
   title: 'Prioriza una sola cosa',
-  message: 'Enfoca tu energía en una acción clave. Hazla con intención.',
+  message: 'Enfoca tu energia en una accion clave. Hazla con intencion.',
 })
 
-// App sections
+// ─── Active programs (mock) ───
+const activePrograms = ref([
+  { id: 'mock-uuid-prog-001', title: 'Reto 7 dias de gratitud', currentDay: 4, totalDays: 7, progressPct: 4 / 7 },
+  { id: 'mock-uuid-prog-002', title: 'Despertar consciente', currentDay: 12, totalDays: 30, progressPct: 12 / 30 },
+])
+
+// ─── App sections ───
 const activities = ref([
-  {
-    id: 'biblioteca',
-    title: 'Biblioteca',
-    meta: 'Audios, videos y más',
-    icon: 'lucide:book-open',
-    accent: '#7EB8C9',
-    to: '/library',
-  },
-  {
-    id: 'retos',
-    title: 'Retos',
-    meta: 'Desafíos diarios',
-    icon: 'lucide:trophy',
-    accent: '#C9BFA0',
-    to: '/retos',
-  },
   {
     id: 'ai-coach',
     title: 'AI Coach',
@@ -252,28 +372,12 @@ const activities = ref([
     to: '/events',
   },
   {
-    id: 'beneficios',
-    title: 'Beneficios',
-    meta: 'Ofertas exclusivas',
-    icon: 'lucide:gift',
-    accent: '#8BBF9A',
-    to: '/benefits',
-  },
-  {
     id: 'addons',
     title: 'Addons',
     meta: 'Contenido extra',
     icon: 'lucide:puzzle',
     accent: '#B5B590',
     to: '/addons',
-  },
-  {
-    id: 'vip',
-    title: 'VIP',
-    meta: 'Acceso premium',
-    icon: 'lucide:crown',
-    accent: '#C9A88E',
-    to: '/vip',
   },
 ])
 
@@ -285,14 +389,13 @@ const selectedMood = ref<string | null>(null)
 const checkinReflection = ref('')
 const checkinLoading = ref(false)
 const checkinSuccess = ref(false)
-const streak = ref(7)
 
 const moods = [
-  { value: 'great', emoji: 'lucide:laugh', label: 'Increíble', color: '#4ECDC4' },
+  { value: 'great', emoji: 'lucide:laugh', label: 'Increible', color: '#4ECDC4' },
   { value: 'good', emoji: 'lucide:smile', label: 'Bien', color: '#A8D86E' },
   { value: 'ok', emoji: 'lucide:meh', label: 'Regular', color: '#F5D547' },
   { value: 'low', emoji: 'lucide:frown', label: 'Bajo', color: '#F09A5E' },
-  { value: 'tough', emoji: 'lucide:annoyed', label: 'Difícil', color: '#E05A5A' },
+  { value: 'tough', emoji: 'lucide:annoyed', label: 'Dificil', color: '#E05A5A' },
 ]
 
 async function handleCheckin() {
@@ -314,37 +417,89 @@ function closeCheckinSheet() {
   }, 400)
 }
 
-// ─── Acción del día state ───
+// ─── Accion del dia state ───
 const accionChoice = ref<'done' | 'skip' | null>(null)
 const accionLoading = ref(false)
+const accionSuccess = ref(false)
 
 async function handleAccion() {
   if (!accionChoice.value) return
   accionLoading.value = true
   await new Promise(r => setTimeout(r, 600))
   accionLoading.value = false
+  accionSuccess.value = true
   completeReto('accion')
+}
+
+function closeAccionSheet() {
   activeSheet.value = 'none'
-  // Reset after transition
   setTimeout(() => {
     accionChoice.value = null
+    accionSuccess.value = false
   }, 400)
 }
 </script>
 
 <style scoped>
-/* ─── Hero header (dark branded card from top) ─── */
+/* ─── Hero header ─── */
 .hoy__hero {
   background: radial-gradient(ellipse at -11% 18%, rgb(174 174 174 / 14%) 0%, transparent 55%), #28282800;
   padding: var(--space-5) var(--space-5) 0;
 }
 
+.hoy__hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
 .hoy__hero-logo {
   height: 20px;
   width: auto;
-  margin-bottom: var(--space-5);
 }
 
+/* ─── Streak badge ─── */
+.hoy__streak-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+  background: linear-gradient(135deg, rgba(255, 170, 50, 0.25), rgba(255, 120, 30, 0.2));
+  border: 1px solid rgba(255, 170, 50, 0.3);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+
+.hoy__streak-badge:hover {
+  background: linear-gradient(135deg, rgba(255, 170, 50, 0.35), rgba(255, 120, 30, 0.3));
+  text-decoration: none;
+}
+
+.hoy__streak-icon {
+  color: #ffaa32;
+}
+
+.hoy__streak-count {
+  font-family: var(--font-eyebrow);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: #ffaa32;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Greeting ─── */
+.hoy__greeting {
+  font-family: var(--font-title);
+  font-size: var(--title-lg);
+  color: white;
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-5);
+  font-weight: 100;
+}
+
+/* ─── Progress bar ─── */
 .hoy__hero-progress {
   position: sticky;
   top: 0;
@@ -397,22 +552,117 @@ async function handleAccion() {
   height: 100%;
   background: white;
   border-radius: var(--radius-full);
-  transition: width 0.3s ease;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.hoy__hero-link {
-  display: block;
-  margin-top: var(--space-3);
-  font-size: var(--text-sm);
+/* ─── Daily retos task list ─── */
+.hoy__retos {
+  margin-bottom: var(--space-6);
+}
+
+.hoy__retos-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hoy__reto-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: #ffffff12;
+  border-radius: var(--radius-xl);
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+  transition: background var(--transition-fast);
+}
+
+.hoy__reto-item:hover {
+  background: #ffffff20;
+}
+
+.hoy__reto-item--done {
+  opacity: 0.5;
+}
+
+.hoy__reto-item--done .hoy__reto-label {
+  text-decoration: line-through;
+}
+
+.hoy__reto-check {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+}
+
+.hoy__reto-item--done .hoy__reto-check {
+  color: #A8D86E;
+}
+
+.hoy__reto-label {
+  flex: 1;
+  font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  color: #fff;
-}
-.hoy__hero-link:hover {
-  color: #fff;
-  text-decoration: none;
+  line-height: var(--leading-snug);
 }
 
-/* ─── Mensaje del día ─── */
+.hoy__reto-arrow {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.hoy__reto-item--done .hoy__reto-arrow {
+  display: none;
+}
+
+/* ─── Celebration state ─── */
+.hoy__celebration {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: linear-gradient(135deg, rgba(78, 205, 196, 0.15), rgba(168, 216, 110, 0.12));
+  border: 1px solid rgba(168, 216, 110, 0.25);
+  border-radius: var(--radius-xl);
+}
+
+.hoy__celebration-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(168, 216, 110, 0.2);
+  border-radius: var(--radius-lg);
+  color: #A8D86E;
+}
+
+.hoy__celebration-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.hoy__celebration-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: white;
+  line-height: var(--leading-snug);
+}
+
+.hoy__celebration-sub {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+  line-height: var(--leading-normal);
+}
+
+/* ─── Mensaje del dia ─── */
 .hoy__mensaje {
   margin-bottom: var(--space-6);
   position: relative;
@@ -468,26 +718,6 @@ async function handleAccion() {
   color: rgba(0, 0, 0, 0.45);
 }
 
-/* ─── Daily check-in button ─── */
-.hoy__checkin-btn {
-  width: 100%;
-  padding: var(--space-4);
-  margin-bottom: var(--space-6);
-  border: none;
-  border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, #8d6639, rgb(183 144 73));
-  color: white;
-  font-family: inherit;
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.hoy__checkin-btn:hover {
-  background: linear-gradient(135deg, rgba(78, 205, 196, 0.35), rgba(168, 216, 110, 0.3));
-}
-
 /* ─── Featured card ─── */
 .hoy__featured {
   margin-bottom: var(--space-8);
@@ -523,10 +753,8 @@ async function handleAccion() {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: var(--space-6);
-  /* padding-top: var(--space-16, 6rem); */
-  background: linear-gradient(to top, rgb(0 0 0 / 0%) 0%, rgba(0, 0, 0, 0.45) 55%, transparent 100%);
-  backdrop-filter: blur(16px);
+  padding: var(--space-5);
+  backdrop-filter: blur(8px);
 }
 
 .hoy__featured-eyebrow {
@@ -554,7 +782,89 @@ async function handleAccion() {
   line-height: var(--leading-normal);
 }
 
-/* ─── Start your day ─── */
+/* ─── Continue active programs ─── */
+.hoy__continue {
+  margin-bottom: var(--space-8);
+}
+
+.hoy__continue-title {
+  margin-bottom: var(--space-4);
+}
+
+.hoy__continue-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.hoy__continue-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: #ffffff12;
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  color: white;
+  transition: background var(--transition-fast);
+}
+
+.hoy__continue-card:hover {
+  background: #ffffff20;
+  text-decoration: none;
+}
+
+.hoy__continue-progress {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.hoy__continue-ring {
+  width: 100%;
+  height: 100%;
+}
+
+.hoy__continue-day {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: white;
+}
+
+.hoy__continue-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.hoy__continue-name {
+  display: block;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hoy__continue-meta {
+  display: block;
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+}
+
+.hoy__continue-arrow {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Explore grid ─── */
 .hoy__start {
   margin-bottom: var(--space-6);
 }
@@ -572,9 +882,8 @@ async function handleAccion() {
 .hoy__activity {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
   padding: var(--space-4);
-  background: #ffffff17;
+  background:color-mix(in srgb, var(--activity-accent, var(--color-sand)) 12%, transparent);
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: white;
@@ -588,7 +897,7 @@ async function handleAccion() {
 }
 
 .hoy__activity:hover {
-  background: #ffffff30;
+  background: #ffffff25;
   text-decoration: none;
 }
 
@@ -621,11 +930,7 @@ async function handleAccion() {
   margin-top: 2px;
 }
 
-.hoy__activity-arrow {
-  display: none;
-}
-
-/* ─── Sheet overlay (shared pattern from login) ─── */
+/* ─── Sheet overlay ─── */
 .hoy__overlay {
   position: fixed;
   inset: 0;
@@ -758,6 +1063,7 @@ async function handleAccion() {
 
 .hoy__checkin-submit { margin-top: var(--space-6); }
 
+/* ─── Check-in success ─── */
 .hoy__checkin-success {
   text-align: center;
   padding: var(--space-6) 0 var(--space-2);
@@ -767,15 +1073,30 @@ async function handleAccion() {
   font-size: 3rem;
   margin-bottom: var(--space-3);
   color: var(--color-primary);
+  animation: success-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.hoy__checkin-success p {
-  font-size: var(--text-md);
+@keyframes success-bounce {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.hoy__checkin-success-streak {
+  font-family: var(--font-title);
+  font-size: var(--title-lg);
+  color: var(--color-text);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-1);
+}
+
+.hoy__checkin-success-msg {
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
   margin-bottom: var(--space-6);
 }
 
-/* ─── Acción del día sheet content ─── */
+/* ─── Accion del dia sheet content ─── */
 .hoy__accion-options {
   display: flex;
   flex-direction: column;
@@ -822,15 +1143,21 @@ async function handleAccion() {
   line-height: var(--leading-snug);
 }
 
-/* ─── Fade transition ─── */
+/* ─── Transitions ─── */
 .fade-enter-active { transition: opacity 0.25s ease, transform 0.25s ease; }
+.fade-leave-active { transition: opacity 0.15s ease; }
 .fade-enter-from { opacity: 0; transform: translateY(8px); }
+.fade-leave-to { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .hoy__overlay,
   .hoy__sheet,
-  .fade-enter-active {
+  .hoy__hero-bar-fill,
+  .fade-enter-active,
+  .fade-leave-active,
+  .hoy__checkin-success-badge {
     transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
 </style>
