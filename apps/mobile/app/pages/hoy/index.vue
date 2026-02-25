@@ -130,12 +130,7 @@
           >
             <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="hoy__latest-img" />
             <div class="hoy__latest-overlay">
-              <span class="hoy__latest-type">
-                <!-- <Icon :name="contentTypeIcon(item.type)" size="12" /> -->
-                <span class="hot__latest-type-label">
-                  {{ item.typeLabel }}
-                </span>
-              </span>
+              <Icon :name="contentTypeIcon(item.type)" size="14" class="hoy__latest-type-label" />
               <span class="hoy__latest-title">{{ item.title }}</span>
               <span v-if="item.duration" class="hoy__latest-duration"><Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}</span>
             </div>
@@ -406,7 +401,7 @@ const latestContent = ref([
 
 function contentTypeIcon(type: string) {
   switch (type) {
-    case 'video': return 'lucide:play'
+    case 'video': return 'lucide:video'
     case 'audio': return 'lucide:headphones'
     case 'text': return 'lucide:file-text'
     case 'link': return 'lucide:external-link'
@@ -511,9 +506,6 @@ function closeAccionSheet() {
 
 <style scoped>
 
-.clock-icon {
-  transform: translateY(-2px);
-}
 /* ─── Hero header ─── */
 .hoy__hero {
   background: radial-gradient(ellipse at -11% 18%, rgb(174 174 174 / 14%) 0%, transparent 55%), #28282800;
@@ -1008,15 +1000,21 @@ function closeAccionSheet() {
   align-items: center;
   gap: 4px;
   font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  color: rgba(255, 255, 255, 0.7);
+  /* font-weight: 800; */
+  color: white;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: var(--space-1);
+  font-family: var(--font-eyebrow);
 }
 
 .hoy__latest-type-label {
-  line-height: 1.1;
+  position: absolute;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  padding: var(--space-1);
+  border-radius: 4px;
+  font-size: 10px;
 }
 
 .hoy__latest-title {
@@ -1036,9 +1034,10 @@ function closeAccionSheet() {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--text-xs);
+  font-size: 10px;
   color: rgba(255, 255, 255, 0.6);
   margin-top: var(--space-2);
+  font-family: var(--font-eyebrow);
 }
 
 /* ─── Explore grid ─── */

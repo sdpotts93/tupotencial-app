@@ -1,70 +1,132 @@
 <template>
   <div class="screen">
-    <UiTopNav :title="category.title" show-back />
     <div class="screen__content">
-      <p v-if="category.description" class="category__desc">{{ category.description }}</p>
+      <header class="cat__header">
+        <NuxtLink to="/library" class="cat__back" aria-label="Volver">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </NuxtLink>
+        <h1 class="cat__title">{{ category.title }}</h1>
+      </header>
 
-      <div class="category__grid">
-        <UiCard
+      <div class="cat__list">
+        <NuxtLink
           v-for="item in items"
           :key="item.id"
-          variant="default"
-          clickable
           :to="`/content/${item.id}`"
-          :eyebrow="item.typeLabel"
-          :title="item.title"
-          :subtitle="item.subtitle"
+          class="cat__item"
         >
-          <template #media>
-            <div class="category__thumb" :style="{ background: item.color }" />
-          </template>
-        </UiCard>
+          <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="cat__item-thumb" />
+          <div class="cat__item-body">
+            <h3 class="cat__item-name">{{ item.title }}</h3>
+            <p class="cat__item-meta">{{ item.meta }}</p>
+            <span class="cat__item-category">{{ category.title }}</span>
+          </div>
+        </NuxtLink>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
-
 const route = useRoute()
 const slug = route.params.slug as string
 
 const category = computed(() => ({
   title: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-  description: 'Explora el contenido de esta categoría y encuentra lo que necesitas hoy.',
 }))
 
 const items = ref([
-  { id: 'mock-content-001', title: 'Respiración consciente', subtitle: '10 minutos de calma', typeLabel: 'AUDIO', color: 'linear-gradient(135deg, #384637, #28374A)' },
-  { id: 'mock-content-002', title: 'Escaneo corporal', subtitle: 'Reconecta con tu cuerpo', typeLabel: 'AUDIO', color: 'linear-gradient(135deg, #28374A, #A7A68E)' },
-  { id: 'mock-content-003', title: 'Atención plena', subtitle: 'Practica el presente', typeLabel: 'VIDEO', color: 'linear-gradient(135deg, #282828, #384637)' },
-  { id: 'mock-content-004', title: 'Gratitud matutina', subtitle: 'Empieza con intención', typeLabel: 'TEXTO', color: 'linear-gradient(135deg, #A7A68E, #E8E6E2)' },
+  { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio • Meditación', tag: 'Meditación', thumbnail: '/images/lib-1.jpg' },
+  { id: 'mock-content-002', title: 'Escaneo corporal', meta: '15 min • Audio • Relajación', tag: 'Body Scan', thumbnail: '/images/lib-2.jpg' },
+  { id: 'mock-content-003', title: 'Atención plena', meta: '8 min • Video • Mindfulness', tag: 'Mindfulness', thumbnail: '/images/lib-3.jpg' },
+  { id: 'mock-content-004', title: 'Gratitud matutina', meta: '5 min • Texto • Reflexión', tag: 'Journaling', thumbnail: '/images/lib-4.jpg' },
+  { id: 'mock-content-005', title: 'Despertar con energía', meta: '12 min • Video • Rutina', tag: 'Rutina AM', thumbnail: '/images/lib-5.jpg' },
+  { id: 'mock-content-006', title: 'Mentalidad de crecimiento', meta: '20 min • Video • Desarrollo', tag: 'Growth Mindset', thumbnail: '/images/lib-6.jpg' },
 ])
 </script>
 
 <style scoped>
-.category__desc {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
+/* ─── Header (matches /library) ─── */
+.cat__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: var(--space-6);
-  line-height: var(--leading-relaxed);
+  position: relative;
 }
 
-.category__grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
+.cat__title {
+  font-family: var(--font-eyebrow);
+  font-size: 14px;
+  text-transform: uppercase;
 }
 
-@media (min-width: 768px) {
-  .category__grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.cat__back {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-md);
+  position: absolute;
+  left: 0;
+}
+.cat__back:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* ─── Item list ─── */
+.cat__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
 }
 
-.category__thumb {
-  width: 100%;
-  height: 100%;
+.cat__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  text-decoration: none;
+  color: white;
+}
+.cat__item:hover { text-decoration: none; }
+
+.cat__item-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.cat__item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cat__item-name {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: white;
+  margin-bottom: 2px;
+}
+
+.cat__item-meta {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.5);
+  line-height: var(--leading-normal);
+  margin-bottom: 4px;
+}
+
+.cat__item-category {
+  display: inline-block;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  color: var(--color-sand);
 }
 </style>

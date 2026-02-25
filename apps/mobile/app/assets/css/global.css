@@ -94,6 +94,7 @@ img, video {
   flex-direction: column;
   min-height: 100dvh;
   padding-bottom: calc(var(--safe-area-bottom));
+  overflow-x: clip;
 }
 
 .screen__content {
