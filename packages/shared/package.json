@@ -1,0 +1,13 @@
+{
+  "name": "@tupotencial/shared",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types/index.ts",
+    "./utils": "./utils/index.ts",
+    "./constants": "./constants/index.ts",
+    "./mock": "./mock/index.ts"
+  }
+}

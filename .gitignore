@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Nuxt build outputs
+.output/
+.nuxt/
+.nitro/
+.cache/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+
+# Playwright
+.playwright-mcp/
+
+# Cloudflare Workers
+.wrangler/
+.dev.vars
+
+# Misc
+*.tsbuildinfo
+dist/
+coverage/

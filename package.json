@@ -1,0 +1,20 @@
+{
+  "name": "tupotencial",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "workers/*"
+  ],
+  "scripts": {
+    "dev:mobile": "npm -w apps/mobile run dev",
+    "dev:admin": "npm -w apps/admin run dev",
+    "build:mobile": "npm -w apps/mobile run build",
+    "build:admin": "npm -w apps/admin run build",
+    "dev": "npm run dev:mobile",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

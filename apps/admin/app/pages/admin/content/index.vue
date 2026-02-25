@@ -1,0 +1,141 @@
+<template>
+  <div>
+    <div class="page-header">
+      <h1 class="page-header__title">Contenido</h1>
+      <div class="page-header__actions">
+        <UiButton size="sm" to="/admin/content/new">+ Crear contenido</UiButton>
+      </div>
+    </div>
+
+    <UiDataTable :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+      <template #toolbar>
+        <UiSelect
+          v-model="filterStatus"
+          :options="statusOptions"
+          placeholder="Estado"
+        />
+        <UiSelect
+          v-model="filterType"
+          :options="typeOptions"
+          placeholder="Tipo"
+        />
+        <UiSelect
+          v-model="filterSegment"
+          :options="segmentOptions"
+          placeholder="Segmento"
+        />
+      </template>
+
+      <template #cell-status="{ value }">
+        <UiTag :variant="statusVariant(value)">{{ statusLabel(value) }}</UiTag>
+      </template>
+
+      <template #cell-content_type="{ value }">
+        <UiTag variant="info">{{ typeLabel(value) }}</UiTag>
+      </template>
+
+      <template #cell-segment="{ value }">
+        {{ segmentLabel(value) }}
+      </template>
+
+      <template #cell-published_at="{ value }">
+        {{ value ? formatDate(value) : 'Sin publicar' }}
+      </template>
+
+      <template #actions="{ row }">
+        <UiButton variant="ghost" size="sm" :to="`/admin/content/${row.id}`">
+          Editar
+        </UiButton>
+      </template>
+    </UiDataTable>
+  </div>
+</template>
+
+<script setup lang="ts">
+definePageMeta({ layout: 'default' })
+
+const router = useRouter()
+
+const filterStatus = ref('')
+const filterType = ref('')
+const filterSegment = ref('')
+
+const statusOptions = [
+  { value: '', label: 'Todos los estados' },
+  { value: 'draft', label: 'Borrador' },
+  { value: 'published', label: 'Publicado' },
+  { value: 'archived', label: 'Archivado' },
+]
+
+const typeOptions = [
+  { value: '', label: 'Todos los tipos' },
+  { value: 'article', label: 'Articulo' },
+  { value: 'video', label: 'Video' },
+  { value: 'audio', label: 'Audio' },
+  { value: 'infographic', label: 'Infografia' },
+]
+
+const segmentOptions = [
+  { value: '', label: 'Todos los segmentos' },
+  { value: 'all', label: 'General' },
+  { value: 'free', label: 'Gratuito' },
+  { value: 'premium', label: 'Premium' },
+  { value: 'enterprise', label: 'Empresarial' },
+]
+
+const columns = [
+  { key: 'title', label: 'Titulo', width: '30%' },
+  { key: 'content_type', label: 'Tipo' },
+  { key: 'segment', label: 'Segmento' },
+  { key: 'status', label: 'Estado' },
+  { key: 'published_at', label: 'Publicacion' },
+]
+
+const rows = ref([
+  { id: 'cnt-001', title: '5 pasos para el bienestar emocional', content_type: 'article', segment: 'all', status: 'published', published_at: '2026-02-20T08:00:00' },
+  { id: 'cnt-002', title: 'Meditacion guiada para la manana', content_type: 'audio', segment: 'premium', status: 'published', published_at: '2026-02-18T06:00:00' },
+  { id: 'cnt-003', title: 'Nutricion consciente: guia basica', content_type: 'article', segment: 'free', status: 'published', published_at: '2026-02-15T10:00:00' },
+  { id: 'cnt-004', title: 'Rutina de yoga para principiantes', content_type: 'video', segment: 'premium', status: 'published', published_at: '2026-02-12T07:00:00' },
+  { id: 'cnt-005', title: 'Infografia: ciclo del sueno', content_type: 'infographic', segment: 'all', status: 'draft', published_at: null },
+  { id: 'cnt-006', title: 'Como manejar el estres laboral', content_type: 'article', segment: 'enterprise', status: 'draft', published_at: null },
+  { id: 'cnt-007', title: 'Ejercicios de respiracion 4-7-8', content_type: 'video', segment: 'free', status: 'published', published_at: '2026-02-10T09:00:00' },
+  { id: 'cnt-008', title: 'Alimentacion para la energia diaria', content_type: 'article', segment: 'premium', status: 'archived', published_at: '2026-01-28T08:00:00' },
+])
+
+const filteredRows = computed(() => {
+  return rows.value.filter(row => {
+    if (filterStatus.value && row.status !== filterStatus.value) return false
+    if (filterType.value && row.content_type !== filterType.value) return false
+    if (filterSegment.value && row.segment !== filterSegment.value) return false
+    return true
+  })
+})
+
+function statusVariant(status: string) {
+  const map: Record<string, string> = { published: 'success', draft: 'warning', archived: 'default' }
+  return (map[status] ?? 'default') as any
+}
+
+function statusLabel(status: string) {
+  const map: Record<string, string> = { published: 'Publicado', draft: 'Borrador', archived: 'Archivado' }
+  return map[status] ?? status
+}
+
+function typeLabel(type: string) {
+  const map: Record<string, string> = { article: 'Articulo', video: 'Video', audio: 'Audio', infographic: 'Infografia' }
+  return map[type] ?? type
+}
+
+function segmentLabel(segment: string) {
+  const map: Record<string, string> = { all: 'General', free: 'Gratuito', premium: 'Premium', enterprise: 'Empresarial' }
+  return map[segment] ?? segment
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function goToEdit(row: Record<string, any>) {
+  router.push(`/admin/content/${row.id}`)
+}
+</script>
