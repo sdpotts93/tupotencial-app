@@ -3,7 +3,7 @@
     <!-- Branded header (logo scrolls away, progress sticks) -->
     <div class="hoy__hero">
       <div class="hoy__hero-top">
-        <img src="/logo-word/logo-word-white.png" alt="Tu Potencial" class="hoy__hero-logo" />
+        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="hoy__hero-logo" />
         <NuxtLink to="/hoy/progress" class="hoy__streak-badge">
           <Icon name="lucide:flame" size="16" class="hoy__streak-icon" />
           <span class="hoy__streak-count">{{ streak }}</span>
@@ -505,7 +505,7 @@ function closeAccionSheet() {
 
 /* ─── Hero header ─── */
 .hoy__hero {
-  background: radial-gradient(ellipse at -11% 18%, rgb(174 174 174 / 14%) 0%, transparent 55%), #282828c2;
+  background: var(--color-surface);
   padding: var(--space-5) var(--space-5) 0;
 }
 
@@ -527,15 +527,15 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
-  background: linear-gradient(135deg, rgba(255, 170, 50, 0.25), rgba(255, 120, 30, 0.2));
-  border: 1px solid rgba(255, 170, 50, 0.3);
+  background: var(--color-dark);
+  border: none;
   border-radius: var(--radius-full);
   text-decoration: none;
   transition: background var(--transition-fast);
 }
 
 .hoy__streak-badge:hover {
-  background: linear-gradient(135deg, rgba(255, 170, 50, 0.35), rgba(255, 120, 30, 0.3));
+  background: var(--color-text);
   text-decoration: none;
 }
 
@@ -555,7 +555,7 @@ function closeAccionSheet() {
 .hoy__greeting {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: white;
+  color: var(--color-text);
   line-height: var(--leading-tight);
   margin-bottom: var(--space-1);
   margin-top: var(--space-5);
@@ -568,14 +568,14 @@ function closeAccionSheet() {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #282828b5;
+  background: var(--color-surface);
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   padding: var(--space-3) var(--space-5) var(--space-3);
   margin-bottom: var(--space-5);
-  box-shadow: 0px 1px 0px rgb(255 255 255 / 16%);
+  box-shadow: 0 1px 0 var(--color-border);
   backdrop-filter: blur(5px);
   text-decoration: none;
-  color: inherit;
+  color: var(--color-text);
 }
 
 .hoy__hero-progress-row {
@@ -590,13 +590,13 @@ function closeAccionSheet() {
   font-weight: var(--weight-bold);
   font-size: var(--eyebrow-sm);
   letter-spacing: 0.08em;
-  color: #fff;
+  color: var(--color-text);
 }
 
 .hoy__hero-count {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  color: #fff;
+  color: var(--color-text);
 }
 
 .hoy__hero-count > span {
@@ -604,7 +604,7 @@ function closeAccionSheet() {
   top: 2px;
   position: relative;
   margin-right: 4px;
-  color: #ffe726;
+  color: var(--color-sand);
 }
 
 .hoy__hero-link {
@@ -616,18 +616,19 @@ function closeAccionSheet() {
   align-items: center;
   justify-content: center;
   gap: 2px;
+  color: var(--color-muted);
 }
 
 .hoy__hero-bar {
   height: 4px;
-  background: #ffffff30;
+  background: var(--color-border);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .hoy__hero-bar-fill {
   height: 100%;
-  background: white;
+  background: var(--color-text);
   border-radius: var(--radius-full);
   transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
