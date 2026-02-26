@@ -11,6 +11,8 @@
   --color-green: #384637;
   --color-sand: #A7A68E;
 
+  --color-dark-lighter: #282828a3;
+
   /* ---- Semantic colors ---- */
   --color-bg: #1C2633;
   --color-surface: #f0efe5;
@@ -22,11 +24,11 @@
   --color-muted: #8A8A8A;
   --color-placeholder: #B0AFA8;
 
-  --color-primary: #28374A;
-  --color-primary-contrast: #FFFFFF;
-  --color-primary-hover: #1E2C3D;
+  --color-primary: var(--color-dark);
+  --color-primary-contrast: var(--color-light);
+  --color-primary-hover: #343434;
 
-  --color-accent: #384637;
+  --color-accent: #FFFFFF;
   --color-accent-contrast: #FFFFFF;
   --color-accent-hover: #2D3A2D;
 

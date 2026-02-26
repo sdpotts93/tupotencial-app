@@ -62,10 +62,10 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   gap: var(--space-2);
   background: var(--color-input-bg);
   border: none;
-  border-bottom: 1.5px solid #e3e1d6;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0px 0px 2px #9f9f9f;
 }
 
 /* .input-field__wrapper:focus-within {

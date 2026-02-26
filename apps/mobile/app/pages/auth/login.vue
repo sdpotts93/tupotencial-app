@@ -4,9 +4,9 @@
     <div class="login__hero">
       <div class="login__hero-bg" />
       <div class="login__hero-content">
-        <img src="/logo-word/logo-word-white.png" alt="Tu Potencial" class="login__wordmark" />
+        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="login__wordmark" />
         <div class="login__logo">
-          <img src="/logo-icon/logo-icon-black.png" alt="Tu Potencial" class="login__logo-img" />
+          <img src="/logo-icon/logo-running.png" alt="Tu Potencial" class="login__logo-img" />
         </div>
         <p class="login__tagline">
           Un espacio seguro para <br> tu crecimiento integral.
@@ -73,7 +73,7 @@
             block
             :loading="loginLoading"
             :disabled="!loginEmail"
-            :variant="loginEmail ? 'primary' : 'secondary'"
+            variant="secondary"
           >
             Continuar
           </UiButton>
@@ -145,7 +145,7 @@
             block
             :loading="regLoading"
             :disabled="!regEmail || !regPassword || !regConfirm"
-            :variant="regEmail && regPassword && regConfirm ? 'primary' : 'secondary'"
+            variant="secondary"
           >
             Crear cuenta
           </UiButton>
@@ -258,7 +258,7 @@ async function handleRegister() {
 .login__hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, var(--color-navy) 0%, var(--color-dark) 50%, var(--color-green) 100%);
+  background: var(--color-light);
   opacity: 0.9;
 }
 
@@ -275,13 +275,11 @@ async function handleRegister() {
 
 .login__logo {
   margin-bottom: var(--space-8);
-  background: var(--color-sand);
-  padding: 1rem;
   border-radius: 1rem;
 }
 
 .login__logo-img {
-  height: 80px;
+  height: 160px;
   width: auto;
   border-radius: var(--radius-xl);
   opacity: 0.75;
@@ -297,7 +295,7 @@ async function handleRegister() {
 .login__tagline {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: var(--color-light);
+  color: var(--color-text);
   text-align: center;
   line-height: var(--leading-snug);
 }
@@ -312,37 +310,16 @@ async function handleRegister() {
   gap: var(--space-3);
 }
 
-.login__cta-area :deep(.btn--primary) {
-  background: #FFFFFF;
-  color: var(--color-text);
-  border-color: #FFFFFF;
-}
-.login__cta-area :deep(.btn--primary:hover) {
-  background: var(--color-light);
-  border-color: var(--color-light);
-}
-
-.login__cta-area :deep(.btn--outline) {
-  background: rgba(255, 255, 255, 0.12);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  color: var(--color-light);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-.login__cta-area :deep(.btn--outline:hover) {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 .login__legal {
   text-align: center;
   font-size: var(--text-xs);
-  color: rgba(232, 230, 226, 0.6);
+  color: var(--color-dark-lighter);
   line-height: var(--leading-normal);
   margin-top: var(--space-2);
 }
 
 .login__legal-link {
-  color: var(--color-light);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -366,7 +343,7 @@ async function handleRegister() {
 }
 
 .login__sheet {
-  background: var(--color-surface);
+  background: var(--color-accent);
   color: var(--color-text);
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   padding: var(--space-2) var(--space-6) var(--space-10);

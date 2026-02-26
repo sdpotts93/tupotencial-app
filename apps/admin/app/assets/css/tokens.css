@@ -13,6 +13,7 @@
 
   /* ---- Semantic colors ---- */
   --color-bg: #FAFAF8;
+  --color-dark-lighter: #282828a3;
   --color-surface: #f0efe5;
   --color-surface-alt: #F3F2EE;
   --color-text: #282828;
