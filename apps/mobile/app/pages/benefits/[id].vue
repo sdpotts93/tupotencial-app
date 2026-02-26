@@ -118,8 +118,6 @@ function handleOpen() {
   padding: var(--space-4);
   margin-bottom: var(--space-5);
   text-align: center;
-  box-shadow: 0px 0px 2px #ffffff78;
-
 }
 
 .benefit__code-label {

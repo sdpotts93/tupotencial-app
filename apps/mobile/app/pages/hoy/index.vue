@@ -650,7 +650,6 @@ function closeAccionSheet() {
     padding: var(--space-4);
     background: #ffffff12;
     border-radius: var(--radius-xl);
-    box-shadow: 0px 0px 2px #ffffff78;
     border: none;
     color: white;
     cursor: pointer;
@@ -887,7 +886,6 @@ function closeAccionSheet() {
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: white;
-  box-shadow: 0px 0px 2px #ffffff78;
   transition: background var(--transition-fast);
 }
 
@@ -1090,7 +1088,6 @@ function closeAccionSheet() {
   cursor: pointer;
   font-family: inherit;
   align-items: center;
-  box-shadow: 0px 0px 2px #ffffff78;
 }
 
 .hoy__activity-badge {

@@ -173,8 +173,6 @@ function startChat(prompt?: string) {
   text-align: left;
   font-family: inherit;
   transition: border-color var(--transition-fast), background var(--transition-fast);
-  box-shadow: 0px 0px 2px #ffffff78;
-
 }
 
 .ai-home__tone-btn:hover { border-color: rgba(255, 255, 255, 0.4); }
@@ -241,8 +239,6 @@ function startChat(prompt?: string) {
   cursor: pointer;
   background: rgba(255, 255, 255, 0.08);
   transition: background var(--transition-fast);
-  box-shadow: 0px 0px 2px #ffffff78;
-
 }
 .ai-home__session:hover { background: rgba(255, 255, 255, 0.12); }
 

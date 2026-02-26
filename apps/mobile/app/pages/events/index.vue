@@ -230,7 +230,6 @@ const pastEvents = ref([
   cursor: pointer;
   background: rgba(255, 255, 255, 0.08);
   transition: background var(--transition-fast);
-  box-shadow: 0px 0px 2px #ffffff78;
 }
 .events__past-card:hover { background: rgba(255, 255, 255, 0.12); }
 .events__past-card:active { background: rgba(255, 255, 255, 0.15); }

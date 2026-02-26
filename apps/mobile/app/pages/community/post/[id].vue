@@ -133,7 +133,6 @@ const newComment = ref('')
   border-radius: var(--radius-xl);
   padding: var(--space-5);
   margin-bottom: var(--space-6);
-  box-shadow: 0px 0px 2px #ffffff78;
 }
 
 .post-detail__header {
