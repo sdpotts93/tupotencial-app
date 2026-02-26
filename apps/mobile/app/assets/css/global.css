@@ -106,6 +106,10 @@ img, video {
   margin-bottom: 2rem;
 }
 
+.icon-t {
+  transform: translateY(-4px);
+}
+
 @media (min-width: 768px) {
   .screen__content {
     max-width: var(--max-page-width);
