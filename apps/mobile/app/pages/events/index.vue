@@ -99,7 +99,7 @@ const pastEvents = ref([
   justify-content: center;
   background: none;
   border: none;
-  color: var(--color-text-inverse);
+  color: var(--color-dark-lighter);
   cursor: pointer;
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
@@ -126,7 +126,6 @@ const pastEvents = ref([
   overflow: hidden;
   text-decoration: none;
   color: var(--color-text);
-  background: #000;
 }
 
 .events__card-img {
@@ -136,6 +135,7 @@ const pastEvents = ref([
   height: 100%;
   object-fit: cover;
   object-position: bottom;
+  border-radius: var(--radius-2xl);
 }
 
 .events__card-overlay {
@@ -144,10 +144,7 @@ const pastEvents = ref([
   left: 0;
   right: 0;
   padding: var(--space-5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(13px);
-  background: var(--color-surface-alt);
+  background: var(--color-gray);
 }
 
 .events__card-date {

@@ -87,7 +87,7 @@ function handleOpen() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-dark-lighter);
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);

@@ -84,7 +84,7 @@ const addons = ref([
   justify-content: center;
   background: none;
   border: none;
-  color: var(--color-text-inverse);
+  color: var(--color-dark-lighter);
   cursor: pointer;
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
@@ -116,7 +116,6 @@ const addons = ref([
   overflow: hidden;
   text-decoration: none;
   color: var(--color-text);
-  background: #000;
 }
 
 .addons__card-img {
@@ -126,6 +125,7 @@ const addons = ref([
   height: 100%;
   object-fit: cover;
   object-position: bottom;
+  border-radius: var(--radius-2xl);
 }
 
 .addons__card-gradient {
@@ -159,8 +159,7 @@ const addons = ref([
   left: 0;
   right: 0;
   padding: var(--space-5);
-  backdrop-filter: blur(13px);
-  background: var(--color-surface-alt);
+  background: var(--color-gray);
 }
 
 .addons__card-eyebrow {

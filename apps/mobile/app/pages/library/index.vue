@@ -171,7 +171,6 @@ const categories = ref([
   overflow: hidden;
   text-decoration: none;
   color: var(--color-text);
-  background: #000;
 }
 
 .library__featured-img {
@@ -181,6 +180,7 @@ const categories = ref([
   height: 100%;
   object-fit: cover;
   object-position: bottom;
+  border-radius: var(--radius-2xl);
 }
 
 .library__featured-type {
@@ -199,8 +199,7 @@ const categories = ref([
   left: 0;
   right: 0;
   padding: var(--space-5);
-  backdrop-filter: blur(13px);
-  background: var(--color-surface-alt);
+  background: var(--color-gray);
 }
 
 .library__featured-eyebrow {

@@ -95,6 +95,7 @@ img, video {
   min-height: 100dvh;
   padding-bottom: calc(var(--safe-area-bottom));
   overflow-x: clip;
+  background: white;
 }
 
 .screen__content {

@@ -139,7 +139,7 @@ function enroll() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-dark);
+  color: var(--color-dark-lighter);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
   border: none;

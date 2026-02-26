@@ -76,7 +76,7 @@ const event = ref({
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
-  color: var(--color-text);
+  color: var(--color-dark-lighter);
   -webkit-tap-highlight-color: transparent;
 }
 .watch__back:hover { background: rgba(0, 0, 0, 0.6); }

@@ -122,7 +122,6 @@ const filteredPrograms = computed(() => {
   overflow: hidden;
   text-decoration: none;
   color: var(--color-text);
-  background: #000;
 }
 
 .retos__card-img {
@@ -132,6 +131,8 @@ const filteredPrograms = computed(() => {
   height: 100%;
   object-fit: cover;
   object-position: bottom;
+  border-radius: var(--radius-2xl);
+
 }
 
 .retos__card-overlay {
@@ -140,10 +141,7 @@ const filteredPrograms = computed(() => {
   left: 0;
   right: 0;
   padding: var(--space-5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(13px);
-  background: var(--color-surface-alt);
+  background: var(--color-gray);
 }
 
 .retos__card-eyebrow {

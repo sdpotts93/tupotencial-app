@@ -130,8 +130,7 @@
             class="hoy__latest-card"
           >
             <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="hoy__latest-img" />
-            <div class="hoy__latest-overlay">
-              <Icon :name="contentTypeIcon(item.type)" size="14" class="hoy__latest-type-label" />
+            <div class="hoy__latest-info">
               <span class="hoy__latest-title">{{ item.title }}</span>
               <span v-if="item.duration" class="hoy__latest-duration"><Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}</span>
             </div>
@@ -988,67 +987,37 @@ function closeAccionSheet() {
 .hoy__latest-scroll::-webkit-scrollbar { display: none; }
 
 .hoy__latest-card {
-  flex: 0 0 85%;
+  flex: 0 0 60%;
   scroll-snap-align: start;
   text-decoration: none;
   color: var(--color-text);
-  position: relative;
+  display: flex;
+  flex-direction: column;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  aspect-ratio: 3 / 2;
 }
 
 .hoy__latest-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
+  display: block;
+  border-radius: var(--radius-xl);
 }
 
-.hoy__latest-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: var(--space-5);
-  background: linear-gradient(to top, rgb(255 255 255) 0%, rgb(255 255 255 / 60%) 36%, transparent 100%);
-}
-
-.hoy__latest-type {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--text-xs);
-  /* font-weight: 800; */
-  color: var(--color-text);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: var(--space-1);
-  font-family: var(--font-eyebrow);
-}
-
-.hoy__latest-type-label {
-  position: absolute;
-  bottom: var(--space-5);
-  right: var(--space-5);
-  padding: var(--space-1);
-  border-radius: 4px;
-  font-size: 10px;
+.hoy__latest-info {
+  padding: var(--space-3) var(--space-1) 0;
 }
 
 .hoy__latest-title {
-  font-family: var(--font-title);
-  font-size: var(--title-sm);
-  font-weight: var(--weight-bold);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
   color: var(--color-text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: var(--space-1);
 }
 
 .hoy__latest-duration {
@@ -1057,7 +1026,7 @@ function closeAccionSheet() {
   gap: 4px;
   font-size: 10px;
   color: var(--color-muted);
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
 }

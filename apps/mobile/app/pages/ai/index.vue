@@ -121,7 +121,7 @@ function startChat(prompt?: string) {
   justify-content: center;
   background: none;
   border: none;
-  color: var(--color-text-inverse);
+  color: var(--color-dark-lighter);
   cursor: pointer;
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;

@@ -82,7 +82,7 @@ function goBack() {
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--color-text);
+  color: var(--color-dark-lighter);
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }

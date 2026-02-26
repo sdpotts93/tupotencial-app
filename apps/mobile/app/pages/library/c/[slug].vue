@@ -69,7 +69,7 @@ const items = ref([
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-inverse);
+  color: var(--color-dark-lighter);
   border-radius: var(--radius-md);
   position: absolute;
   left: 0;
