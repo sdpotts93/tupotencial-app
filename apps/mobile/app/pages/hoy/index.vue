@@ -436,7 +436,7 @@ const activities = ref([
     meta: 'Acceso premium',
     icon: 'lucide:crown',
     accent: '#C9A88E',
-    to: '/vip',
+    to: '/addons',
     featured: false,
   },
 ])

@@ -9,7 +9,7 @@
     </span>
     <div class="list-item__content">
       <span class="list-item__label">{{ label }}</span>
-      <span :class="['list-item__description', { 'list-item__description--success': descriptionVariant === 'success' }]">{{ description || '\u00A0' }}</span>
+      <span v-if="description" :class="['list-item__description', { 'list-item__description--success': descriptionVariant === 'success' }]">{{ description }}</span>
     </div>
     <span v-if="$slots.suffix" class="list-item__suffix">
       <slot name="suffix" />
@@ -27,7 +27,7 @@
     </span>
     <div class="list-item__content">
       <span class="list-item__label">{{ label }}</span>
-      <span :class="['list-item__description', { 'list-item__description--success': descriptionVariant === 'success' }]">{{ description || '\u00A0' }}</span>
+      <span v-if="description" :class="['list-item__description', { 'list-item__description--success': descriptionVariant === 'success' }]">{{ description }}</span>
     </div>
     <span v-if="$slots.suffix" class="list-item__suffix">
       <slot name="suffix" />
@@ -87,7 +87,9 @@ withDefaults(defineProps<Props>(), {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 2px;
+  min-height: calc((var(--text-base) + var(--text-sm)) * var(--leading-normal) + 2px);
 }
 
 .list-item__label {
