@@ -896,6 +896,7 @@ function closeAccionSheet() {
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
   color: white;
+  transform: translateY(3px);
 }
 
 .hoy__continue-info {

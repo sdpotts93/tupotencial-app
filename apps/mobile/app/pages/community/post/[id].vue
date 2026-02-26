@@ -1,14 +1,22 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Publicación" show-back />
     <div class="screen__content">
+      <header class="pdetail__header">
+        <button class="pdetail__back" aria-label="Volver" @click="$router.back()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <h1 class="pdetail__header-title">Publicación</h1>
+      </header>
+
       <!-- Post -->
       <article class="post-detail">
         <div class="post-detail__header">
-          <div class="post-detail__avatar"><span>TP</span></div>
+          <img :src="post.avatar" alt="" class="post-detail__avatar" />
           <div>
-            <span class="post-detail__author">Tu Potencial</span>
-            <span class="post-detail__time">Hace 2 horas</span>
+            <span class="post-detail__author">{{ post.author }}</span>
+            <span class="post-detail__time">{{ post.timeAgo }}</span>
           </div>
         </div>
         <h1 v-if="post.title" class="post-detail__title">{{ post.title }}</h1>
@@ -43,6 +51,9 @@
 definePageMeta({ layout: 'blank' })
 
 const post = ref({
+  author: 'Gabriel',
+  avatar: '/images/gabriel.png',
+  timeAgo: 'Hace 2 horas',
   title: 'Bienvenidos a la comunidad',
   body: 'Este es un espacio seguro para compartir tu camino de crecimiento. Cuéntanos: ¿qué te motivó a empezar?',
 })
@@ -56,8 +67,40 @@ const newComment = ref('')
 </script>
 
 <style scoped>
+/* ─── Header (matches retos/library) ─── */
+.pdetail__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: var(--space-6);
+}
+
+.pdetail__header-title {
+  font-family: var(--font-eyebrow);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.pdetail__back {
+  position: absolute;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  -webkit-tap-highlight-color: transparent;
+}
+.pdetail__back:hover { background: rgba(255, 255, 255, 0.1); }
+
 .post-detail {
-  background: #ffffff21;
+  background: rgba(255, 255, 255, 0.08);
   color: white;
   border-radius: var(--radius-xl);
   padding: var(--space-5);
@@ -72,9 +115,7 @@ const newComment = ref('')
 }
 
 .post-detail__avatar {
-  width: 40px; height: 40px; border-radius: 50%; background: var(--color-primary);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--color-primary-contrast); font-size: var(--text-xs); font-weight: var(--weight-semibold);
+  width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
 }
 
 .post-detail__author { font-weight: var(--weight-semibold); font-size: var(--text-sm); display: block; }

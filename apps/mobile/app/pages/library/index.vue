@@ -47,6 +47,31 @@
           </NuxtLink>
         </div>
       </section>
+
+      <!-- Eventos Grabados -->
+      <section class="library__section">
+        <div class="section__header">
+          <h2 class="title title--md">Eventos Grabados</h2>
+          <NuxtLink to="/events" class="library__see-all">Ver todo</NuxtLink>
+        </div>
+        <div class="library__scroll">
+          <NuxtLink
+            v-for="ev in recordedEvents"
+            :key="ev.id"
+            :to="`/events/${ev.id}`"
+            class="library__scroll-card"
+          >
+            <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
+            <div class="library__scroll-overlay">
+              <Icon name="lucide:video" size="14" class="library__scroll-type-label" />
+              <span class="library__scroll-title">{{ ev.title }}</span>
+              <span class="library__scroll-duration">
+                <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.dateLabel }}
+              </span>
+            </div>
+          </NuxtLink>
+        </div>
+      </section>
     </div>
   </div>
 </template>
@@ -60,6 +85,12 @@ function contentTypeIcon(typeLabel: string) {
     default: return 'lucide:file'
   }
 }
+
+const recordedEvents = ref([
+  { id: 'mock-event-003', title: 'Live: Respiración y estrés', dateLabel: '15 Feb 2026', img: '/images/lib-2.jpg' },
+  { id: 'mock-event-004', title: 'Taller: Diario de gratitud', dateLabel: '8 Feb 2026', img: '/images/lib-6.jpg' },
+  { id: 'mock-event-005', title: 'Q&A: Hábitos de alto rendimiento', dateLabel: '1 Feb 2026', img: '/images/lib-8.jpg' },
+])
 
 const categories = ref([
   {

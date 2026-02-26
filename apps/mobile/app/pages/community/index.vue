@@ -1,21 +1,21 @@
 <template>
   <div class="screen">
     <div class="screen__content">
-      <h1 class="title title--lg">Comunidad</h1>
+      <header class="community__header">
+        <h1 class="community__header-title">Comunidad</h1>
+      </header>
+
       <p class="community__subtitle">El espacio donde compartir avances, sostener el proceso y crecer con otros que viven con intención.</p>
 
-      <!-- Community feed (inspired by inspiration-community) -->
+      <!-- Community feed -->
       <div class="community__feed">
         <article v-for="post in posts" :key="post.id" class="post">
           <div class="post__header">
-            <div class="post__avatar">
-              <span>{{ post.authorInitials }}</span>
-            </div>
+            <img :src="post.avatar" alt="" class="post__avatar" />
             <div class="post__meta">
               <span class="post__author">{{ post.author }}</span>
               <span class="post__time">{{ post.timeAgo }}</span>
             </div>
-            <UiTag v-if="post.isOfficial" variant="primary" size="sm">Oficial</UiTag>
           </div>
 
           <NuxtLink :to="`/community/post/${post.id}`" class="post__body-link">
@@ -32,9 +32,6 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
               <span>{{ post.comments }}</span>
             </NuxtLink>
-            <button class="post__action">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            </button>
           </div>
         </article>
       </div>
@@ -45,22 +42,34 @@
 <script setup lang="ts">
 const posts = ref([
   {
-    id: 'mock-post-001', author: 'Tu Potencial', authorInitials: 'TP', isOfficial: true,
+    id: 'mock-post-001', author: 'Gabriel', avatar: '/images/gabriel.png',
     title: 'Bienvenidos a la comunidad',
     body: 'Este es un espacio seguro para compartir tu camino de crecimiento. Cuéntanos: ¿qué te motivó a empezar?',
     reactions: 24, comments: 8, liked: false, timeAgo: 'Hace 2 horas',
   },
   {
-    id: 'mock-post-002', author: 'Ana López', authorInitials: 'AL', isOfficial: false,
+    id: 'mock-post-002', author: 'Carlotta', avatar: '/images/carlotta.png',
     title: null,
-    body: 'Hoy completé mi día 7 del reto de gratitud. No puedo creer la diferencia que hace tomarse 5 minutos para agradecer cada mañana. ¡Lo recomiendo mucho!',
-    reactions: 15, comments: 3, liked: true, timeAgo: 'Hace 4 horas',
+    body: 'Hoy quiero compartir una técnica de respiración que me ha ayudado mucho en momentos de estrés. Inhala 4 segundos, retén 4, exhala 6. Repite 5 veces.',
+    reactions: 31, comments: 12, liked: true, timeAgo: 'Hace 4 horas',
   },
   {
-    id: 'mock-post-003', author: 'Carlos Ruiz', authorInitials: 'CR', isOfficial: false,
-    title: '¿Alguien más haciendo el programa de 30 días?',
-    body: 'Voy en el día 12 de "Despertar consciente" y me encantaría saber si alguien más lo está haciendo para compartir experiencias.',
-    reactions: 9, comments: 5, liked: false, timeAgo: 'Hace 6 horas',
+    id: 'mock-post-003', author: 'Ambos', avatar: '/images/gabriel.png',
+    title: '¿Qué tema quieren para el próximo live?',
+    body: 'Estamos planeando el siguiente evento en vivo. ¿Qué les gustaría explorar? Déjenos sus ideas en los comentarios.',
+    reactions: 18, comments: 15, liked: false, timeAgo: 'Hace 6 horas',
+  },
+  {
+    id: 'mock-post-004', author: 'Gabriel', avatar: '/images/gabriel.png',
+    title: 'Reflexión del día',
+    body: 'El crecimiento no es lineal. Algunos días sentirás que retrocedes, pero cada paso cuenta. Confía en el proceso.',
+    reactions: 42, comments: 7, liked: false, timeAgo: 'Hace 1 día',
+  },
+  {
+    id: 'mock-post-005', author: 'Carlotta', avatar: '/images/carlotta.png',
+    title: null,
+    body: 'Nuevo contenido en la biblioteca: "Escaneo corporal para dormir mejor". Ideal para quienes luchan con el insomnio. 🌙',
+    reactions: 27, comments: 4, liked: false, timeAgo: 'Hace 2 días',
   },
 ])
 
@@ -74,10 +83,26 @@ function toggleReaction(id: string) {
 </script>
 
 <style scoped>
+/* ─── Header (matches retos/library) ─── */
+.community__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: var(--space-6);
+}
+
+.community__header-title {
+  font-family: var(--font-eyebrow);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
 .community__subtitle {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  margin: var(--space-2) 0 var(--space-6);
+  font-size: var(--text-md);
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 var(--space-6);
+  line-height: var(--leading-normal);
 }
 
 .community__feed {
@@ -87,7 +112,7 @@ function toggleReaction(id: string) {
 }
 
 .post {
-  background: #ffffff21;
+  background: rgba(255, 255, 255, 0.08);
   color: white;
   border-radius: var(--radius-xl);
   padding: var(--space-5);
@@ -104,13 +129,7 @@ function toggleReaction(id: string) {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-primary-contrast);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
+  object-fit: cover;
   flex-shrink: 0;
 }
 
