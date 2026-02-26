@@ -31,6 +31,8 @@
         <UiButton type="submit" block :loading="saving">Guardar cambios</UiButton>
       </form>
 
+      <hr class="profile__divider" />
+
       <!-- Membership -->
       <section class="profile__section">
         <p class="eyebrow">MEMBRESÍA</p>
@@ -42,9 +44,9 @@
           <UiTag v-if="isSubscriber" variant="accent">Activa</UiTag>
           <UiTag v-else variant="default">Gratis</UiTag>
         </div>
-        <button v-if="isSubscriber" class="profile__manage-btn" @click="handleManageSub">
+        <UiButton v-if="isSubscriber" block variant="outline" @click="handleManageSub">
           Administrar suscripción
-        </button>
+        </UiButton>
       </section>
 
       <!-- Accesos VIP -->
@@ -216,17 +218,22 @@ function handleManageSub() {
   color: white;
 }
 
-.profile__form :deep(.select-field__wrapper) {
+.profile__form :deep(.select-field__input) {
   background: #ffffff21;
   border: none;
   border-bottom: 1.5px solid #a7a68e36;
   border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  transition: border-color var(--transition-fast);
+  color: white;
 }
 
-.profile__form :deep(.select-field__select) {
+
+.profile__form :deep(.select-field__input option) {
+  background: var(--color-dark);
   color: white;
+}
+
+.profile__form :deep(.select-field__chevron) {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .profile__form :deep(.btn--primary) {
@@ -240,6 +247,13 @@ function handleManageSub() {
 }
 
 /* ─── Sections ─── */
+/* ─── Divider ─── */
+.profile__divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 0 0 var(--space-6);
+}
+
 .profile__section { margin-bottom: var(--space-6); }
 .profile__section > .eyebrow { margin-bottom: var(--space-3); }
 
@@ -280,24 +294,17 @@ function handleManageSub() {
   color: #C0C0C0;
 }
 
-.profile__manage-btn {
-  display: block;
-  width: 100%;
+.profile__section :deep(.btn--outline) {
   margin-top: var(--space-3);
-  padding: var(--space-3);
-  background: none;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: var(--radius-lg);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: #D4AF37;
-  cursor: pointer;
-  text-align: center;
-  -webkit-tap-highlight-color: transparent;
-  transition: background var(--transition-fast);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
 }
-.profile__manage-btn:hover { background: rgba(212, 175, 55, 0.08); }
+.profile__section :deep(.btn--outline:hover) {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 /* ─── Accesos VIP (progress__card style) ─── */
 .profile__accesos-list {
