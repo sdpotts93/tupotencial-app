@@ -125,11 +125,11 @@ const newComment = ref('')
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.pdetail__back:hover { background: rgba(255, 255, 255, 0.1); }
+.pdetail__back:hover { background: rgba(0, 0, 0, 0.06); }
 
 .post-detail {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
   margin-bottom: var(--space-6);
@@ -147,7 +147,7 @@ const newComment = ref('')
 }
 
 .post-detail__author { font-weight: var(--weight-semibold); font-size: var(--text-sm); display: block; }
-.post-detail__time { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.5); }
+.post-detail__time { font-size: var(--text-xs); color: var(--color-muted); }
 
 .post-detail__title {
   font-family: var(--font-title);
@@ -157,7 +157,7 @@ const newComment = ref('')
 
 .post-detail__body {
   font-size: var(--text-base);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
 }
 
@@ -166,7 +166,7 @@ const newComment = ref('')
   gap: var(--space-4);
   margin-top: var(--space-4);
   padding-top: var(--space-3);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .post-detail__like {
@@ -174,14 +174,14 @@ const newComment = ref('')
   align-items: center;
   gap: var(--space-1);
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   background: none;
   border: none;
   cursor: pointer;
   font-family: var(--font-body);
   -webkit-tap-highlight-color: transparent;
 }
-.post-detail__like:hover { color: rgba(255, 255, 255, 0.7); }
+.post-detail__like:hover { color: var(--color-text-secondary); }
 
 .post-detail__comments > .eyebrow { margin-bottom: var(--space-4); }
 
@@ -200,9 +200,9 @@ const newComment = ref('')
 }
 
 .comment__avatar {
-  width: 28px; height: 28px; border-radius: 50%; background: rgba(255, 255, 255, 0.12);
+  width: 28px; height: 28px; border-radius: 50%; background: rgba(0, 0, 0, 0.06);
   display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: var(--weight-semibold); color: rgba(255, 255, 255, 0.5);
+  font-size: 10px; font-weight: var(--weight-semibold); color: var(--color-muted);
   flex-shrink: 0;
 }
 
@@ -215,13 +215,13 @@ const newComment = ref('')
   margin-bottom: 2px;
 }
 
-.comment__author { font-size: var(--text-xs); font-weight: var(--weight-semibold); color: white; }
-.comment__dot { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.3); }
-.comment__time { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.35); }
+.comment__author { font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--color-text); }
+.comment__dot { font-size: var(--text-xs); color: var(--color-muted); }
+.comment__time { font-size: var(--text-xs); color: var(--color-muted); }
 
 .comment__body {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-normal);
 }
 
@@ -232,8 +232,8 @@ const newComment = ref('')
   left: 0;
   right: 0;
   z-index: var(--z-sticky, 10);
-  background: #1d1d1d;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-surface-alt);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
   padding: var(--space-3) var(--space-5);
 }
 
@@ -245,17 +245,17 @@ const newComment = ref('')
 
 .post-detail__input {
   flex: 1;
-  background: #ffffff21;
+  background: rgba(0, 0, 0, 0.04);
   border: none;
   border-radius: var(--radius-full);
   padding: var(--space-3) var(--space-4);
   font-size: var(--text-md);
   font-family: var(--font-body);
-  color: white;
+  color: var(--color-text);
   outline: none;
 }
-.post-detail__input::placeholder { color: rgba(255, 255, 255, 0.35); }
-.post-detail__input:focus { background: rgba(255, 255, 255, 0.12); }
+.post-detail__input::placeholder { color: var(--color-muted); }
+.post-detail__input:focus { background: rgba(0, 0, 0, 0.06); }
 
 .post-detail__send {
   width: 36px;

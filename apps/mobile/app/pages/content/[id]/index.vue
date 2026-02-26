@@ -92,7 +92,7 @@ const content = ref({
 .detail__hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, transparent 40%, rgba(255, 255, 255, 0.6) 100%);
 }
 
 /* ─── Nav overlaid on hero ─── */
@@ -149,7 +149,7 @@ const content = ref({
 /* ─── Content info (dark bg) ─── */
 .detail__subtitle {
   font-size: var(--text-md);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   margin-top: var(--space-1);
 }
 
@@ -158,12 +158,12 @@ const content = ref({
 .detail__actions :deep(.btn) {
   background: #FFFFFF;
   color: var(--color-text);
-  border-color: #FFFFFF;
+  border-color: var(--color-border);
 }
 
 .detail__description {
   font-size: var(--text-base);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-5);
 }
@@ -176,7 +176,7 @@ const content = ref({
 
 .detail__meta :deep(.tag) {
   background: var(--color-sand);
-  color: white;
+  color: var(--color-text);
 }
 
 /* ─── Desktop ─── */

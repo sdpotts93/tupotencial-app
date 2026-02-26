@@ -142,7 +142,7 @@ function handleManageSub() {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.profile__back:hover { background: rgba(255, 255, 255, 0.1); }
+.profile__back:hover { background: rgba(0, 0, 0, 0.05); }
 
 /* ─── Avatar with camera overlay (profile-setup style) ─── */
 .profile__avatar-area {
@@ -176,7 +176,7 @@ function handleManageSub() {
   height: 32px;
   border-radius: var(--radius-full);
   background: var(--color-surface);
-  border: 2px solid var(--color-bg);
+  border: 2px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,14 +195,14 @@ function handleManageSub() {
 }
 
 .profile__form :deep(.input-field__label) {
-  color: white;
+  color: var(--color-text);
 }
 
 .profile__form :deep(.input-field__wrapper) {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  background: #ffffff21;
+  background: rgba(0, 0, 0, 0.04);
   border: none;
   border-bottom: 1.5px solid #a7a68e36;
   border-radius: var(--radius-lg);
@@ -211,35 +211,35 @@ function handleManageSub() {
 }
 
 .profile__form :deep(.input-field__input) {
-  color: white;
+  color: var(--color-text);
 }
 
 .profile__form :deep(.select-field__label) {
-  color: white;
+  color: var(--color-text);
 }
 
 .profile__form :deep(.select-field__input) {
-  background: #ffffff21;
+  background: rgba(0, 0, 0, 0.04);
   border: none;
   border-bottom: 1.5px solid #a7a68e36;
   border-radius: var(--radius-lg);
-  color: white;
+  color: var(--color-text);
 }
 
 
 .profile__form :deep(.select-field__input option) {
-  background: var(--color-dark);
-  color: white;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .profile__form :deep(.select-field__chevron) {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
 }
 
 .profile__form :deep(.btn--primary) {
   background: white;
   color: var(--color-dark);
-  border-color: white;
+  border-color: var(--color-border);
 }
 .profile__form :deep(.btn--primary:hover) {
   background: var(--color-light);
@@ -250,7 +250,7 @@ function handleManageSub() {
 /* ─── Divider ─── */
 .profile__divider {
   border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
   margin: 0 0 var(--space-6);
 }
 
@@ -263,7 +263,7 @@ function handleManageSub() {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: var(--radius-xl);
 }
 
@@ -276,12 +276,12 @@ function handleManageSub() {
 .profile__membership-plan {
   font-weight: var(--weight-semibold);
   font-size: var(--text-base);
-  color: white;
+  color: var(--color-text);
 }
 
 .profile__membership-detail {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
 }
 
 .profile__membership :deep(.tag--accent) {
@@ -296,14 +296,14 @@ function handleManageSub() {
 
 .profile__section :deep(.btn--outline) {
   margin-top: var(--space-3);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.03);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: white;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--color-text);
 }
 .profile__section :deep(.btn--outline:hover) {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 /* ─── Accesos VIP (progress__card style) ─── */
@@ -319,14 +319,14 @@ function handleManageSub() {
   gap: var(--space-4);
   width: 100%;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   transition: background var(--transition-fast);
 }
-.profile__acceso:hover { background: rgba(255, 255, 255, 0.12); }
+.profile__acceso:hover { background: rgba(0, 0, 0, 0.06); }
 
 .profile__acceso-img {
   width: 56px;
@@ -348,7 +348,7 @@ function handleManageSub() {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -359,7 +359,7 @@ function handleManageSub() {
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -367,6 +367,6 @@ function handleManageSub() {
 
 .profile__acceso-chevron {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
 }
 </style>

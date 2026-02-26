@@ -126,7 +126,7 @@ function startChat(prompt?: string) {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.ai__back:hover { background: rgba(255, 255, 255, 0.1); }
+.ai__back:hover { background: rgba(0, 0, 0, 0.04); }
 
 /* ─── Hero ─── */
 .ai-home__hero { text-align: center; margin-bottom: var(--space-8); }
@@ -135,7 +135,7 @@ function startChat(prompt?: string) {
 
 .ai-home__desc {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   line-height: var(--leading-relaxed);
   margin-top: var(--space-2);
   max-width: 280px;
@@ -145,7 +145,7 @@ function startChat(prompt?: string) {
 
 .ai-home__disclaimer {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-muted);
   margin-top: var(--space-3);
   font-style: italic;
 }
@@ -165,9 +165,9 @@ function startChat(prompt?: string) {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  background: #ffffff21;
-  color: white;
-  border: 1.5px solid #ffffff00;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-text);
+  border: 1.5px solid rgba(0, 0, 0, 0);
   border-radius: var(--radius-xl);
   cursor: pointer;
   text-align: left;
@@ -175,10 +175,10 @@ function startChat(prompt?: string) {
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.ai-home__tone-btn:hover { border-color: rgba(255, 255, 255, 0.4); }
+.ai-home__tone-btn:hover { border-color: rgba(0, 0, 0, 0.2); }
 
 .ai-home__tone-btn--active {
-  border-color: white;
+  border-color: var(--color-border);
   background: var(--color-surface);
 }
 
@@ -208,12 +208,12 @@ function startChat(prompt?: string) {
 .ai-home__tone-label {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
-  color: white;
+  color: var(--color-text);
 }
 
 .ai-home__tone-desc {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   margin-left: auto;
 }
 
@@ -233,14 +233,14 @@ function startChat(prompt?: string) {
   gap: var(--space-4);
   width: 100%;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   transition: background var(--transition-fast);
 }
-.ai-home__session:hover { background: rgba(255, 255, 255, 0.12); }
+.ai-home__session:hover { background: rgba(0, 0, 0, 0.06); }
 
 .ai-home__session-body {
   flex: 1;
@@ -254,7 +254,7 @@ function startChat(prompt?: string) {
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -262,7 +262,7 @@ function startChat(prompt?: string) {
 
 .ai-home__session-date {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--color-muted);
   margin-left: 2px;
   margin-top: 5px;
 }
@@ -290,7 +290,7 @@ function startChat(prompt?: string) {
 
 .ai-home__session-chevron {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
 }
 
 /* ─── Actions (login__cta-area style) ─── */
@@ -304,11 +304,11 @@ function startChat(prompt?: string) {
 .ai-home__actions :deep(.btn--primary) {
   background: #FFFFFF;
   color: var(--color-text);
-  border-color: #FFFFFF;
+  border-color: var(--color-border);
 }
 .ai-home__actions :deep(.btn--primary:hover) {
   background: var(--color-light);
-  border-color: var(--color-light);
+  border-color: var(--color-border);
 }
 
 /* ─── Limit warning ─── */

@@ -108,7 +108,7 @@ const activePrograms = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.progress__back:hover { background: rgba(255, 255, 255, 0.1); }
+.progress__back:hover { background: rgba(0, 0, 0, 0.05); }
 
 /* ─── Hero ─── */
 .progress__hero {
@@ -122,7 +122,7 @@ const activePrograms = ref([
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-navy));
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -134,13 +134,13 @@ const activePrograms = ref([
 .progress__hero-number {
   font-family: var(--font-title);
   font-size: var(--title-xl);
-  color: #fff;
+  color: var(--color-text);
   line-height: 1;
 }
 
 .progress__hero-label {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -171,7 +171,7 @@ const activePrograms = ref([
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-4);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: var(--radius-xl);
   justify-content: center;
 }
@@ -184,11 +184,11 @@ const activePrograms = ref([
 
 .progress__stat-value--checkins,
 .progress__stat-value--programs,
-.progress__stat-value--content { color: white; }
+.progress__stat-value--content { color: var(--color-text); }
 
 .progress__stat-label {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   text-align: center;
 }
 
@@ -208,14 +208,14 @@ const activePrograms = ref([
   gap: var(--space-4);
   width: 100%;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   transition: background var(--transition-fast);
 }
-.progress__card:hover { background: rgba(255, 255, 255, 0.12); }
+.progress__card:hover { background: rgba(0, 0, 0, 0.06); }
 
 .progress__card-img {
   width: 56px;
@@ -237,7 +237,7 @@ const activePrograms = ref([
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -248,7 +248,7 @@ const activePrograms = ref([
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -256,6 +256,6 @@ const activePrograms = ref([
 
 .progress__card-chevron {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
 }
 </style>

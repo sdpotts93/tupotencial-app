@@ -59,7 +59,7 @@ definePageMeta({ layout: 'auth' })
 </script>
 
 <style scoped>
-.pricing { min-height: 100dvh; background: var(--color-bg); }
+.pricing { min-height: 100dvh; background: var(--color-light); }
 
 .pricing__hero {
   text-align: center;
@@ -78,8 +78,8 @@ definePageMeta({ layout: 'auth' })
 }
 
 .pricing__plan {
-  background: #ffffff21; color: white; border-radius: var(--radius-xl);
-  padding: var(--space-6); border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.04); color: var(--color-text); border-radius: var(--radius-xl);
+  padding: var(--space-6); border: 1px solid rgba(0, 0, 0, 0.075);
 }
 
 .pricing__plan--featured {
@@ -95,7 +95,7 @@ definePageMeta({ layout: 'auth' })
 }
 
 .pricing__plan-price span {
-  font-size: var(--text-sm); font-weight: var(--weight-regular); color: rgba(255, 255, 255, 0.6);
+  font-size: var(--text-sm); font-weight: var(--weight-regular); color: var(--color-muted);
 }
 
 .pricing__plan-annual {
@@ -108,7 +108,7 @@ definePageMeta({ layout: 'auth' })
 }
 
 .pricing__features li {
-  font-size: var(--text-sm); color: rgba(255, 255, 255, 0.7);
+  font-size: var(--text-sm); color: var(--color-text-secondary);
   padding-left: var(--space-5); position: relative;
 }
 

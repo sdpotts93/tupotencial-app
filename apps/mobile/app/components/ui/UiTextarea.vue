@@ -49,7 +49,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 .textarea-field__input {
   background: var(--color-input-bg);
   border: none;
-  border-bottom: 1.5px solid #e3e1d6;
+  box-shadow: 0px 0px 2px #9f9f9f;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   font-family: var(--font-body);
@@ -57,13 +57,11 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   color: var(--color-text);
   resize: vertical;
   width: 100%;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .textarea-field__input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(40, 55, 74, 0.1);
 }
 
 .textarea-field__input::placeholder { color: var(--color-placeholder); }

@@ -69,8 +69,8 @@ withDefaults(defineProps<Props>(), {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.list-item--clickable:hover { background: rgba(255, 255, 255, 0.08); }
-.list-item--clickable:active { background: rgba(255, 255, 255, 0.12); }
+.list-item--clickable:hover { background: rgba(0, 0, 0, 0.04); }
+.list-item--clickable:active { background: rgba(0, 0, 0, 0.08); }
 
 .list-item__icon {
   display: flex;
@@ -79,7 +79,7 @@ withDefaults(defineProps<Props>(), {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
 }
 
 .list-item__content {
@@ -95,12 +95,12 @@ withDefaults(defineProps<Props>(), {
 .list-item__label {
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  color: white;
+  color: var(--color-text);
 }
 
 .list-item__description {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
 }
 
 .list-item__description--success {
@@ -111,6 +111,6 @@ withDefaults(defineProps<Props>(), {
 
 .list-item__chevron {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
 }
 </style>

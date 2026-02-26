@@ -23,8 +23,8 @@ body {
   font-weight: var(--weight-regular);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
-  color: var(--color-text-inverse);
-  background: var(--color-light);
+  color: var(--color-text);
+  background: var(--color-bg);
   min-height: 100dvh;
   overflow-x: hidden;
 }
@@ -37,7 +37,7 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: var(--leading-tight);
-  color: #ffffff8a;
+  color: var(--color-muted);
 }
 .eyebrow--sm { font-size: var(--eyebrow-sm); }
 .eyebrow--lg { font-size: var(--eyebrow-lg); }

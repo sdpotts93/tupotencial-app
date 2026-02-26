@@ -74,7 +74,7 @@ const items = ref([
   position: absolute;
   left: 0;
 }
-.cat__back:hover { background: rgba(255, 255, 255, 0.1); }
+.cat__back:hover { background: rgba(0, 0, 0, 0.06); }
 
 /* ─── Item list ─── */
 .cat__list {
@@ -88,7 +88,7 @@ const items = ref([
   align-items: center;
   gap: var(--space-4);
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
 }
 .cat__item:hover { text-decoration: none; }
 
@@ -110,13 +110,13 @@ const items = ref([
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   margin-bottom: 2px;
 }
 
 .cat__item-meta {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   line-height: var(--leading-normal);
   margin-bottom: 4px;
 }

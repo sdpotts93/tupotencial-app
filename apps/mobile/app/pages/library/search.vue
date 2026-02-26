@@ -96,7 +96,7 @@ const filteredResults = computed(() => {
   position: absolute;
   left: 0;
 }
-.search__back:hover { background: rgba(255, 255, 255, 0.1); }
+.search__back:hover { background: rgba(0, 0, 0, 0.06); }
 
 /* ─── Input (matches profile-setup) ─── */
 .search__input { margin-bottom: var(--space-6); }
@@ -105,7 +105,7 @@ const filteredResults = computed(() => {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  background: #ffffff21;
+  background: rgba(0, 0, 0, 0.04);
   border: none;
   border-bottom: 1.5px solid #a7a68e36;
   border-radius: var(--radius-lg);
@@ -114,11 +114,11 @@ const filteredResults = computed(() => {
 }
 
 .search__input :deep(.input-field__input) {
-  color: white;
+  color: var(--color-text);
 }
 
 .search__input :deep(.input-field__label) {
-  color: white;
+  color: var(--color-text);
 }
 
 /* ─── Results ─── */
@@ -135,7 +135,7 @@ const filteredResults = computed(() => {
   align-items: center;
   gap: var(--space-4);
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
 }
 .search__item:hover { text-decoration: none; }
 
@@ -157,13 +157,13 @@ const filteredResults = computed(() => {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   margin-bottom: 2px;
 }
 
 .search__item-meta {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   line-height: var(--leading-normal);
   margin-bottom: 4px;
 }

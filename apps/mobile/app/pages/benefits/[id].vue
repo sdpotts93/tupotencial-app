@@ -68,7 +68,7 @@ function handleOpen() {
 }
 
 .benefit__hero-icon {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-secondary);
 }
 
 /* ─── Nav ─── */
@@ -106,14 +106,14 @@ function handleOpen() {
 /* ─── Description ─── */
 .benefit__desc {
   font-size: var(--text-base);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-5);
 }
 
 /* ─── Code ─── */
 .benefit__code {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   margin-bottom: var(--space-5);
@@ -125,7 +125,7 @@ function handleOpen() {
   font-size: var(--eyebrow-sm);
   font-weight: var(--weight-bold);
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
   margin-bottom: var(--space-2);
 }
 
@@ -144,7 +144,7 @@ function handleOpen() {
 .benefit__actions :deep(.btn) {
   background: #FFFFFF;
   color: var(--color-dark);
-  border-color: #FFFFFF;
+  border-color: var(--color-border);
 }
 
 /* ─── Desktop ─── */

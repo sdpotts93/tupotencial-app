@@ -148,7 +148,7 @@ const categories = ref([
   position: absolute;
   right: 0;
 }
-.library__search-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.library__search-btn:hover { background: rgba(0, 0, 0, 0.06); }
 
 .library__featured { margin-bottom: var(--space-8); }
 .library__featured > .title { margin-bottom: var(--space-4); }
@@ -161,7 +161,7 @@ const categories = ref([
   border-radius: var(--radius-2xl);
   overflow: hidden;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   background: #000;
 }
 
@@ -180,7 +180,7 @@ const categories = ref([
   right: var(--space-4);
   padding: var(--space-1);
   border-radius: 4px;
-  color: white;
+  color: var(--color-text);
   z-index: 1;
 }
 
@@ -191,7 +191,7 @@ const categories = ref([
   right: 0;
   padding: var(--space-5);
   backdrop-filter: blur(13px);
-  background: #343434cf;
+  background: var(--color-surface-alt);
 }
 
 .library__featured-eyebrow {
@@ -201,21 +201,21 @@ const categories = ref([
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: white;
+  color: var(--color-text);
   margin-bottom: var(--space-1);
 }
 
 .library__featured-name {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: white;
+  color: var(--color-text);
   margin: 0 0 var(--space-1);
   line-height: var(--leading-snug);
 }
 
 .library__featured-desc {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-normal);
 }
 
@@ -229,7 +229,7 @@ const categories = ref([
 .library__see-all {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  color: white;
+  color: var(--color-text);
   text-decoration: none;
 }
 
@@ -256,7 +256,7 @@ const categories = ref([
   flex: 0 0 85%;
   scroll-snap-align: start;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -278,7 +278,7 @@ const categories = ref([
   flex-direction: column;
   justify-content: flex-end;
   padding: var(--space-5);
-  background: linear-gradient(to top, rgb(0 0 0) 0%, rgb(0 0 0 / 60%) 36%, transparent 100%);
+  background: linear-gradient(to top, rgb(255 255 255) 0%, rgb(255 255 255 / 60%) 36%, transparent 100%);
 }
 
 .library__scroll-type-label {
@@ -298,7 +298,7 @@ const categories = ref([
   font-size: var(--title-sm);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -311,7 +311,7 @@ const categories = ref([
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   margin-top: var(--space-2);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;

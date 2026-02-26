@@ -29,6 +29,7 @@
       <!-- Desktop: button inside card -->
       <UiButton
         block
+        variant="secondary"
         :disabled="!hasAnswer()"
         class="onboarding__desktop-btn"
         @click="handleContinue"
@@ -39,7 +40,7 @@
 
     <!-- Mobile: bottom-pinned button -->
     <div class="onboarding__footer">
-      <UiButton block :disabled="!hasAnswer()" @click="handleContinue">
+      <UiButton block variant="secondary" :disabled="!hasAnswer()" @click="handleContinue">
         Continuar
       </UiButton>
     </div>
@@ -179,7 +180,7 @@ function handleContinue() {
   background: none;
   border: none;
   padding: 0;
-  color: var(--color-text-inverse);
+  color: var(--color-dark-lighter);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -188,14 +189,14 @@ function handleContinue() {
 .onboarding__progress {
   flex: 1;
   height: 4px;
-  background: #ffffff30;
+  background: rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .onboarding__progress-fill {
   height: 100%;
-  background: white;
+  background: var(--color-dark-lighter);
   border-radius: var(--radius-full);
   transition: width 0.3s ease;
 }
@@ -212,7 +213,7 @@ function handleContinue() {
 .onboarding__question {
   margin-bottom: var(--space-8);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
 }
 
 .onboarding__options {
@@ -227,8 +228,8 @@ function handleContinue() {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  background: #ffffff21;
-  color: white;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-text);
   border: 1.5px solid #ffffff00;
   border-radius: var(--radius-xl);
   cursor: pointer;
@@ -238,13 +239,10 @@ function handleContinue() {
 
 
 .onboarding-opt--selected {
-  border-color: white;
+  border-color: var(--color-border);
   background: var(--color-surface);
 }
 
-.onboarding-opt--selected .onboarding-opt__label {
-  color: var(--color-accent);
-}
 
 .onboarding-opt__icon {
   font-size: 1.25rem;
@@ -258,7 +256,7 @@ function handleContinue() {
 .onboarding-opt__label {
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  color: white;
+  color: var(--color-text);
   line-height: var(--leading-normal);
 }
 
@@ -275,12 +273,6 @@ function handleContinue() {
   width: 100%;
   margin: 0 auto;
   flex-shrink: 0;
-}
-
-.onboarding__footer :deep(.btn) {
-  background: white;
-  color: var(--color-dark);
-  border: none;
 }
 
 /* ─── Desktop ─── */

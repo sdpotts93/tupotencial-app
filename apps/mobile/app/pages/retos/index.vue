@@ -98,7 +98,7 @@ const filteredPrograms = computed(() => {
 
 .retos__subtitle {
   font-size: var(--text-md);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   margin: 0 0 var(--space-5);
   text-align: left;
   line-height: var(--leading-normal);
@@ -121,7 +121,7 @@ const filteredPrograms = computed(() => {
   border-radius: var(--radius-2xl);
   overflow: hidden;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   background: #000;
 }
 
@@ -143,7 +143,7 @@ const filteredPrograms = computed(() => {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(13px);
-  background: #343434cf;
+  background: var(--color-surface-alt);
 }
 
 .retos__card-eyebrow {
@@ -153,21 +153,21 @@ const filteredPrograms = computed(() => {
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: white;
+  color: var(--color-text);
   margin-bottom: var(--space-1);
 }
 
 .retos__card-name {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: white;
+  color: var(--color-text);
   margin: 0 0 var(--space-1);
   line-height: var(--leading-snug);
 }
 
 .retos__card-desc {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-normal);
 }
 
@@ -183,7 +183,7 @@ const filteredPrograms = computed(() => {
   font-size: var(--eyebrow-sm);
   font-family: var(--font-eyebrow);
   font-weight: var(--weight-medium);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }

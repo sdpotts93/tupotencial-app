@@ -4,7 +4,7 @@
     <div class="auth-layout__branding">
       <div class="auth-layout__branding-bg" />
       <div class="auth-layout__branding-content">
-        <img src="/logo-icon/logo-icon-white.png" alt="Tu Potencial" class="auth-layout__branding-logo" />
+        <img src="/logo-icon/logo-running.png" alt="Tu Potencial" class="auth-layout__branding-logo" />
         <p class="auth-layout__branding-tagline">
           Un espacio seguro para tu crecimiento integral.
         </p>
@@ -54,7 +54,7 @@
   .auth-layout__branding-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(160deg, var(--color-navy) 0%, var(--color-dark) 50%, var(--color-green) 100%);
+    background: var(--color-light);
   }
 
   .auth-layout__branding-content {
@@ -76,7 +76,7 @@
   .auth-layout__branding-tagline {
     font-family: var(--font-title);
     font-size: var(--title-md);
-    color: var(--color-light);
+    color: var(--color-text);
     text-align: center;
     line-height: var(--leading-snug);
     max-width: 320px;

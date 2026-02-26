@@ -43,6 +43,7 @@
         <UiButton
           type="submit"
           block
+          variant="secondary"
           :loading="loading"
           :disabled="!displayName.trim()"
           class="profile-setup__desktop-btn"
@@ -56,6 +57,7 @@
     <div class="profile-setup__footer">
       <UiButton
         block
+        variant="secondary"
         :loading="loading"
         :disabled="!displayName.trim()"
         @click="handleSave"
@@ -114,7 +116,7 @@ async function handleSave() {
   background: none;
   border: none;
   padding: 0;
-  color: var(--color-text-inverse);
+  color: var(--color-dark-lighter);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -123,7 +125,7 @@ async function handleSave() {
 .profile-setup__progress {
   flex: 1;
   height: 4px;
-  background: #ffffff30;
+  background: rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -131,7 +133,7 @@ async function handleSave() {
 .profile-setup__progress-fill {
   height: 100%;
   width: 20%;
-  background: white;
+  background: var(--color-dark-lighter);
   border-radius: var(--radius-full);
 }
 
@@ -176,7 +178,7 @@ async function handleSave() {
   height: 32px;
   border-radius: var(--radius-full);
   background: var(--color-surface);
-  border: 2px solid var(--color-bg);
+  border: 2px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,34 +223,17 @@ async function handleSave() {
   margin: 0 auto;
 }
 
-.profile-setup__footer :deep(.btn) {
-  background: white;
-  color: var(--color-dark);
-  border: none;
-}
-
 .profile-setup__card :deep(.input-field__label) {
-  color: white;
+  color: var(--color-text);
 }
 
-.profile-setup__card :deep(.input-field__wrapper) {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  background: #ffffff21;
-  border: none;
-  border-bottom: 1.5px solid #a7a68e36;
-  border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
 
 /* .profile-setup__card :deep(.input-field__wrapper:focus-within) {
   border-color: white;
 } */
 
 .profile-setup__card :deep(.input-field__input) {
-  color: white;
+  color: var(--color-text);
 }
 
 /* ─── Desktop ─── */
@@ -293,10 +278,6 @@ async function handleSave() {
     color: var(--color-text);
   }
 
-  .profile-setup__card :deep(.input-field__wrapper) {
-    background: var(--color-input-bg);
-    border-bottom-color: #e3e1d6;
-  }
 
   .profile-setup__card :deep(.input-field__wrapper:focus-within) {
     border-color: var(--color-primary);

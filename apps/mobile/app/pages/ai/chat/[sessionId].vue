@@ -182,12 +182,12 @@ function getResponse(input: string): string {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.chat__back:hover { background: rgba(255, 255, 255, 0.1); }
+.chat__back:hover { background: rgba(0, 0, 0, 0.04); }
 
 /* ─── Disclaimer ─── */
 .chat__disclaimer {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-muted);
   font-style: italic;
   text-align: center;
   margin-bottom: var(--space-6);
@@ -211,18 +211,18 @@ function getResponse(input: string): string {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 10px;
   font-weight: var(--weight-semibold);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   flex-shrink: 0;
 }
 
 .chat__msg-avatar--coach {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   color: var(--color-sand);
 }
 
@@ -235,13 +235,13 @@ function getResponse(input: string): string {
   margin-bottom: 2px;
 }
 
-.chat__msg-author { font-size: var(--text-xs); font-weight: var(--weight-semibold); color: white; }
-.chat__msg-dot { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.3); }
-.chat__msg-time { font-size: var(--text-xs); color: rgba(255, 255, 255, 0.35); }
+.chat__msg-author { font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--color-text); }
+.chat__msg-dot { font-size: var(--text-xs); color: var(--color-muted); }
+.chat__msg-time { font-size: var(--text-xs); color: var(--color-muted); }
 
 .chat__msg-body {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
   white-space: pre-wrap;
 }
@@ -257,7 +257,7 @@ function getResponse(input: string): string {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.2);
   animation: typingDot 1.2s infinite;
 }
 .chat__typing-dots span:nth-child(2) { animation-delay: 0.2s; }
@@ -282,12 +282,12 @@ function getResponse(input: string): string {
 .chat__prompt-btn {
   flex-shrink: 0;
   padding: var(--space-2) var(--space-4) var(--space-1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.075);
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  color: white;
+  color: var(--color-text);
   cursor: pointer;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
@@ -303,8 +303,8 @@ function getResponse(input: string): string {
   left: 0;
   right: 0;
   z-index: var(--z-sticky, 10);
-  background: var(--color-dark);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-surface);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
   padding: var(--space-3) var(--space-5);
 }
 
@@ -316,17 +316,17 @@ function getResponse(input: string): string {
 
 .chat__input {
   flex: 1;
-  background: #ffffff21;
+  background: rgba(0, 0, 0, 0.04);
   border: none;
   border-radius: var(--radius-full);
   padding: var(--space-3) var(--space-4);
   font-size: var(--text-md);
   font-family: var(--font-body);
-  color: white;
+  color: var(--color-text);
   outline: none;
 }
-.chat__input::placeholder { color: rgba(255, 255, 255, 0.35); }
-.chat__input:focus { background: rgba(255, 255, 255, 0.12); }
+.chat__input::placeholder { color: var(--color-muted); }
+.chat__input:focus { background: rgba(0, 0, 0, 0.06); }
 
 .chat__send {
   width: 36px;

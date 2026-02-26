@@ -2,7 +2,6 @@
   <div class="register">
     <!-- Screen 1: Full-screen hero (mobile only) -->
     <div class="register__hero">
-      <div class="register__hero-bg" />
       <div class="register__hero-content">
         <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="register__wordmark" />
         <div class="register__logo">
@@ -130,7 +129,6 @@ async function handleRegister() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--color-dark);
   position: relative;
 }
 
@@ -141,13 +139,6 @@ async function handleRegister() {
   flex-direction: column;
   position: relative;
   min-height: 100dvh;
-}
-
-.register__hero-bg {
-  position: absolute;
-  inset: 0;
-  background: var(--color-light);
-  opacity: 0.9;
 }
 
 .register__hero-content {

@@ -216,7 +216,7 @@
               :rows="3"
             />
 
-            <UiButton block :loading="checkinLoading" :disabled="!selectedMood" class="hoy__checkin-submit" @click="handleCheckin">
+            <UiButton block variant="secondary" :loading="checkinLoading" :disabled="!selectedMood" class="hoy__checkin-submit" @click="handleCheckin">
               Completar check-in
             </UiButton>
           </div>
@@ -272,7 +272,7 @@
               </button>
             </div>
 
-            <UiButton block :loading="accionLoading" :disabled="!accionChoice" @click="handleAccion">
+            <UiButton block variant="secondary" :loading="accionLoading" :disabled="!accionChoice" @click="handleAccion">
               Confirmar
             </UiButton>
           </div>
@@ -527,7 +527,7 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
-  background: var(--color-dark);
+  background: var(--color-surface);
   border: none;
   border-radius: var(--radius-full);
   text-decoration: none;
@@ -649,10 +649,10 @@ function closeAccionSheet() {
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-4);
-    background: #ffffff12;
+    background: rgba(0, 0, 0, 0.04);
     border-radius: var(--radius-xl);
     border: none;
-    color: white;
+    color: var(--color-text);
     cursor: pointer;
     font-family: inherit;
     text-align: left;
@@ -661,7 +661,7 @@ function closeAccionSheet() {
 }
 
 .hoy__reto-item:hover {
-  background: #ffffff20;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .hoy__reto-item--done {
@@ -674,7 +674,7 @@ function closeAccionSheet() {
 
 .hoy__reto-check {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
   display: flex;
 }
 
@@ -691,7 +691,7 @@ function closeAccionSheet() {
 
 .hoy__reto-arrow {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-muted);
 }
 
 .hoy__reto-item--done .hoy__reto-arrow {
@@ -731,13 +731,13 @@ function closeAccionSheet() {
 .hoy__celebration-title {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
-  color: white;
+  color: var(--color-text);
   line-height: var(--leading-snug);
 }
 
 .hoy__celebration-sub {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   margin-top: 2px;
   line-height: var(--leading-normal);
 }
@@ -845,21 +845,21 @@ function closeAccionSheet() {
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: white;
+  color: var(--color-text);
   margin-bottom: var(--space-1);
 }
 
 .hoy__featured-name {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: white;
+  color: var(--color-text);
   margin: 0 0 var(--space-1);
   line-height: var(--leading-snug);
 }
 
 .hoy__featured-desc {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-normal);
 }
 
@@ -883,15 +883,15 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
-  background: #ffffff12;
+  background: rgba(0, 0, 0, 0.04);
   border-radius: var(--radius-xl);
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   transition: background var(--transition-fast);
 }
 
 .hoy__continue-card:hover {
-  background: #ffffff20;
+  background: rgba(0, 0, 0, 0.08);
   text-decoration: none;
 }
 
@@ -915,7 +915,7 @@ function closeAccionSheet() {
   justify-content: center;
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
-  color: white;
+  color: var(--color-text);
   transform: translateY(3px);
 }
 
@@ -937,13 +937,13 @@ function closeAccionSheet() {
 .hoy__continue-meta {
   display: block;
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   margin-top: 2px;
 }
 
 .hoy__continue-arrow {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-muted);
 }
 
 /* ─── Latest from Biblioteca ─── */
@@ -961,7 +961,7 @@ function closeAccionSheet() {
 .hoy__latest-see-all {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  color: white;
+  color: var(--color-text);
   text-decoration: none;
 }
 
@@ -987,7 +987,7 @@ function closeAccionSheet() {
   flex: 0 0 85%;
   scroll-snap-align: start;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -1009,7 +1009,7 @@ function closeAccionSheet() {
   flex-direction: column;
   justify-content: flex-end;
   padding: var(--space-5);
-  background: linear-gradient(to top, rgb(0 0 0) 0%, rgb(0 0 0 / 60%) 36%, transparent 100%);
+  background: linear-gradient(to top, rgb(255 255 255) 0%, rgb(255 255 255 / 60%) 36%, transparent 100%);
 }
 
 .hoy__latest-type {
@@ -1018,7 +1018,7 @@ function closeAccionSheet() {
   gap: 4px;
   font-size: var(--text-xs);
   /* font-weight: 800; */
-  color: white;
+  color: var(--color-text);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: var(--space-1);
@@ -1039,7 +1039,7 @@ function closeAccionSheet() {
   font-size: var(--title-sm);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1052,7 +1052,7 @@ function closeAccionSheet() {
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   margin-top: var(--space-2);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
@@ -1078,10 +1078,10 @@ function closeAccionSheet() {
   display: flex;
   flex-direction: column;
   padding: var(--space-4);
-  background: #ffffff12;
+  background: rgba(0, 0, 0, 0.04);
   border-radius: var(--radius-xl);
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   transition: background var(--transition-fast);
   border: none;
   width: 100%;
@@ -1111,11 +1111,11 @@ function closeAccionSheet() {
   flex-direction: row;
   text-align: left;
   gap: var(--space-4);
-  background: linear-gradient(330deg, rgb(154 179 199 / 35%) 0%, rgba(32, 32, 32, 0) 100%);
+  background: linear-gradient(330deg, rgb(154 179 199 / 35%) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 .hoy__activity:hover {
-  background: #ffffff25;
+  background: rgba(0, 0, 0, 0.1);
   text-decoration: none;
 }
 
@@ -1138,13 +1138,13 @@ function closeAccionSheet() {
 .hoy__activity-name {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
-  color: white;
+  color: var(--color-text);
   line-height: var(--leading-snug);
 }
 
 .hoy__activity-meta {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   margin-top: 2px;
 }
 
@@ -1167,7 +1167,7 @@ function closeAccionSheet() {
 }
 
 .hoy__sheet {
-  background: var(--color-surface);
+  background: var(--color-accent);
   color: var(--color-text);
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   padding: var(--space-2) var(--space-6) var(--space-10);
@@ -1187,7 +1187,7 @@ function closeAccionSheet() {
   align-items: flex-start;
   justify-content: center;
   position: relative;
-  margin-bottom: var(--space-9);
+  margin-bottom: var(--space-6);
 }
 
 .hoy__sheet-handle {
@@ -1263,7 +1263,7 @@ function closeAccionSheet() {
 
 .hoy__checkin-mood--selected {
   background: var(--color-sand);
-  color: white;
+  color: var(--color-text);
   border-color: var(--color-sand);
 }
 
@@ -1276,7 +1276,7 @@ function closeAccionSheet() {
 }
 
 .hoy__checkin-mood--selected .hoy__checkin-mood-label {
-  color: white;
+  color: var(--color-text);
 }
 
 .hoy__checkin-submit { margin-top: var(--space-6); }
@@ -1324,25 +1324,21 @@ function closeAccionSheet() {
 .hoy__accion-option {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: rgba(0, 0, 0, 0.04);
   color: var(--color-text);
+  border: 1.5px solid #ffffff00;
+  border-radius: var(--radius-xl);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.hoy__accion-option:hover {
-  border-color: var(--color-text-secondary);
-}
-
 .hoy__accion-option--selected {
-  border-color: var(--color-primary);
-  background: white;
+  border-color: var(--color-border);
+  background: var(--color-surface);
 }
 
 .hoy__accion-option-icon {

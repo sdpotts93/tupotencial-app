@@ -74,7 +74,7 @@ const event = ref({
 .edetail__hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, transparent 40%, rgba(255, 255, 255, 0.6) 100%);
 }
 
 /* ─── Nav ─── */
@@ -114,13 +114,13 @@ const event = ref({
 .edetail__actions :deep(.btn) {
   background: #FFFFFF;
   color: var(--color-text);
-  border-color: #FFFFFF;
+  border-color: var(--color-border);
 }
 
 /* ─── Description ─── */
 .edetail__desc {
   font-size: var(--text-base);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-5);
 }
@@ -153,7 +153,7 @@ const event = ref({
 
 .edetail__meta :deep(.tag) {
   background: var(--color-sand);
-  color: white;
+  color: var(--color-text);
 }
 
 /* ─── Desktop ─── */

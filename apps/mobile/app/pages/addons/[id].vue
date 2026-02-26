@@ -78,7 +78,7 @@ const addon = ref({
 .addon__hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, transparent 40%, rgba(255, 255, 255, 0.6) 100%);
 }
 
 /* ─── Nav ─── */
@@ -116,7 +116,7 @@ const addon = ref({
 /* ─── Description ─── */
 .addon__desc {
   font-size: var(--text-base);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-5);
 }
@@ -132,12 +132,12 @@ const addon = ref({
 .addon__price-value {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: white;
+  color: var(--color-text);
 }
 
 .addon__price-note {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
 }
 
 /* ─── Actions ─── */
@@ -148,7 +148,7 @@ const addon = ref({
 .addon__actions :deep(.btn) {
   background: #FFFFFF;
   color: var(--color-text);
-  border-color: #FFFFFF;
+  border-color: var(--color-border);
 }
 
 /* ─── Owned state ─── */
@@ -163,7 +163,7 @@ const addon = ref({
 
 .addon__owned p {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
 }
 
 /* ─── Meta ─── */

@@ -41,7 +41,7 @@
                 <path d="M8 12l3 3 5-5" stroke="#68D391" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
               </svg>
             </span>
           </NuxtLink>
@@ -69,7 +69,7 @@
                 <path d="M8 12l3 3 5-5" stroke="#68D391" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
               </svg>
             </span>
           </button>
@@ -296,7 +296,7 @@ function closeFormSheet() {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.day__back:hover { background: rgba(255, 255, 255, 0.1); }
+.day__back:hover { background: rgba(0, 0, 0, 0.04); }
 
 .day__counter {
   position: absolute;
@@ -306,7 +306,7 @@ function closeFormSheet() {
 /* ─── Day info ─── */
 .day__desc {
   font-size: var(--text-base);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   line-height: var(--leading-relaxed);
   margin: var(--space-3) 0 var(--space-6);
 }
@@ -327,7 +327,7 @@ function closeFormSheet() {
   gap: var(--space-4);
   width: 100%;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   border-radius: var(--radius-xl);
   overflow: hidden;
   border: none;
@@ -335,11 +335,11 @@ function closeFormSheet() {
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   transition: background var(--transition-fast);
 }
-.day__card:hover { background: rgba(255, 255, 255, 0.12); }
-.day__card:active { background: rgba(255, 255, 255, 0.15); }
+.day__card:hover { background: rgba(0, 0, 0, 0.06); }
+.day__card:active { background: rgba(0, 0, 0, 0.08); }
 
 .day__card-img {
   width: 56px;
@@ -353,12 +353,12 @@ function closeFormSheet() {
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
 }
 
 .day__card-body {
@@ -374,7 +374,7 @@ function closeFormSheet() {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -385,7 +385,7 @@ function closeFormSheet() {
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
   letter-spacing: 0.04em;

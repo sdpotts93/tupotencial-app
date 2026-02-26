@@ -65,7 +65,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   width: 100%;
   background: var(--color-input-bg);
   border: none;
-  border-bottom: 1.5px solid #e3e1d6;
+  box-shadow: 0px 0px 2px #9f9f9f;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-9) var(--space-3) var(--space-4);
   font-family: var(--font-body);

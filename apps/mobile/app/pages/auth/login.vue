@@ -2,7 +2,6 @@
   <div class="login">
     <!-- Screen 1: Full-screen hero (mobile only) -->
     <div class="login__hero">
-      <div class="login__hero-bg" />
       <div class="login__hero-content">
         <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="login__wordmark" />
         <div class="login__logo">
@@ -242,7 +241,6 @@ async function handleRegister() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--color-dark);
   position: relative;
 }
 
@@ -255,12 +253,6 @@ async function handleRegister() {
   min-height: 100dvh;
 }
 
-.login__hero-bg {
-  position: absolute;
-  inset: 0;
-  background: var(--color-light);
-  opacity: 0.9;
-}
 
 .login__hero-content {
   flex: 1;

@@ -78,7 +78,7 @@ const benefits = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.benefits__back:hover { background: rgba(255, 255, 255, 0.1); }
+.benefits__back:hover { background: rgba(0, 0, 0, 0.04); }
 
 /* ─── Intro ─── */
 .benefits__intro {
@@ -102,15 +102,15 @@ const benefits = ref([
   gap: var(--space-4);
   width: 100%;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-4);
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   transition: background var(--transition-fast);
 }
-.benefits__card:hover { background: rgba(255, 255, 255, 0.12); }
-.benefits__card:active { background: rgba(255, 255, 255, 0.15); }
+.benefits__card:hover { background: rgba(0, 0, 0, 0.06); }
+.benefits__card:active { background: rgba(0, 0, 0, 0.08); }
 
 /* ─── Colorful icon ─── */
 .benefits__icon-wrap {
@@ -138,18 +138,18 @@ const benefits = ref([
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
 }
 
 .benefits__desc {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   line-height: var(--leading-normal);
 }
 
 .benefits__chevron {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
 }
 
 /* ─── Desktop ─── */

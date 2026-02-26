@@ -104,7 +104,7 @@ const pastEvents = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.events__back:hover { background: rgba(255, 255, 255, 0.1); }
+.events__back:hover { background: rgba(0, 0, 0, 0.04); }
 
 /* ─── Sections ─── */
 .events__section { margin-bottom: var(--space-8); }
@@ -125,7 +125,7 @@ const pastEvents = ref([
   border-radius: var(--radius-2xl);
   overflow: hidden;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   background: #000;
 }
 
@@ -147,7 +147,7 @@ const pastEvents = ref([
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(13px);
-  background: #343434cf;
+  background: var(--color-surface-alt);
 }
 
 .events__card-date {
@@ -158,7 +158,7 @@ const pastEvents = ref([
   font-size: var(--eyebrow-md);
   font-weight: var(--weight-bold);
   background: rgba(0, 0, 0, 0.5);
-  color: #fff;
+  color: var(--color-text);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
   backdrop-filter: blur(4px);
@@ -171,21 +171,21 @@ const pastEvents = ref([
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: white;
+  color: var(--color-text);
   margin-bottom: var(--space-3);
 }
 
 .events__card-name {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: white;
+  color: var(--color-text);
   margin: 0 0 var(--space-1);
   line-height: var(--leading-snug);
 }
 
 .events__card-desc {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-normal);
 }
 
@@ -224,15 +224,15 @@ const pastEvents = ref([
   gap: var(--space-4);
   width: 100%;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   transition: background var(--transition-fast);
 }
-.events__past-card:hover { background: rgba(255, 255, 255, 0.12); }
-.events__past-card:active { background: rgba(255, 255, 255, 0.15); }
+.events__past-card:hover { background: rgba(0, 0, 0, 0.06); }
+.events__past-card:active { background: rgba(0, 0, 0, 0.08); }
 
 .events__past-img {
   width: 56px;
@@ -255,7 +255,7 @@ const pastEvents = ref([
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
-  color: white;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -266,7 +266,7 @@ const pastEvents = ref([
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -274,7 +274,7 @@ const pastEvents = ref([
 
 .events__past-chevron {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
 }
 
 /* ─── Desktop ─── */

@@ -125,7 +125,7 @@ function toggleReaction(id: string) {
 
 .community__subtitle {
   font-size: var(--text-md);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
   margin: 0 0 var(--space-6);
   line-height: var(--leading-normal);
 }
@@ -141,8 +141,8 @@ function toggleReaction(id: string) {
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
   border: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-muted);
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
@@ -150,7 +150,7 @@ function toggleReaction(id: string) {
   -webkit-tap-highlight-color: transparent;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
-.community__pill:not(.community__pill--active):hover { background: rgba(255, 255, 255, 0.15); }
+.community__pill:not(.community__pill--active):hover { background: rgba(0, 0, 0, 0.08); }
 
 .community__pill--active {
   background: white;
@@ -164,8 +164,8 @@ function toggleReaction(id: string) {
 }
 
 .post {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
 }
@@ -194,7 +194,7 @@ function toggleReaction(id: string) {
 
 .post__time {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-muted);
 }
 
 .post__body-link { text-decoration: none; color: inherit; }
@@ -209,7 +209,7 @@ function toggleReaction(id: string) {
 
 .post__body {
   font-size: var(--text-base);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
 }
 
@@ -218,7 +218,7 @@ function toggleReaction(id: string) {
   gap: var(--space-5);
   margin-top: var(--space-4);
   padding-top: var(--space-3);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .post__action {
@@ -229,8 +229,8 @@ function toggleReaction(id: string) {
   border: none;
   cursor: pointer;
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-muted);
   text-decoration: none;
 }
-.post__action:hover { color: rgba(255, 255, 255, 0.8); }
+.post__action:hover { color: var(--color-text-secondary); }
 </style>

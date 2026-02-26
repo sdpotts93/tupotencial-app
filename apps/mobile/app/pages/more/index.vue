@@ -102,7 +102,7 @@ function handleLogout() {
   font-weight: var(--weight-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-muted);
   margin-bottom: var(--space-3);
   margin-top: var(--space-6);
 }

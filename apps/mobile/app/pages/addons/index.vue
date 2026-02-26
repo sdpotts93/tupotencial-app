@@ -89,7 +89,7 @@ const addons = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.addons__back:hover { background: rgba(255, 255, 255, 0.1); }
+.addons__back:hover { background: rgba(0, 0, 0, 0.04); }
 
 /* ─── Intro ─── */
 .addons__intro {
@@ -115,7 +115,7 @@ const addons = ref([
   border-radius: var(--radius-2xl);
   overflow: hidden;
   text-decoration: none;
-  color: white;
+  color: var(--color-text);
   background: #000;
 }
 
@@ -143,8 +143,8 @@ const addons = ref([
   font-family: var(--font-eyebrow);
   font-size: 0.8rem;
   font-weight: var(--weight-bold);
-  background: var(--color-dark);
-  color: #fff;
+  background: var(--color-surface);
+  color: var(--color-text);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
   backdrop-filter: blur(4px);
@@ -160,7 +160,7 @@ const addons = ref([
   right: 0;
   padding: var(--space-5);
   backdrop-filter: blur(13px);
-  background: #343434cf;
+  background: var(--color-surface-alt);
 }
 
 .addons__card-eyebrow {
@@ -170,21 +170,21 @@ const addons = ref([
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: white;
+  color: var(--color-text);
   margin-bottom: var(--space-3);
 }
 
 .addons__card-name {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: white;
+  color: var(--color-text);
   margin: 0 0 var(--space-1);
   line-height: var(--leading-snug);
 }
 
 .addons__card-desc {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   line-height: var(--leading-normal);
 }
 

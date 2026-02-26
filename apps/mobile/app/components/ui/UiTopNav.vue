@@ -65,7 +65,7 @@ function goBack() {
   font-family: var(--font-body);
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
-  color: var(--color-text-inverse);
+  color: var(--color-text);
   text-align: center;
   flex: 1;
   white-space: nowrap;
@@ -82,7 +82,7 @@ function goBack() {
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--color-text-inverse);
+  color: var(--color-text);
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }

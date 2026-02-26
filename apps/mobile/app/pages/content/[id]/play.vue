@@ -305,13 +305,13 @@ onBeforeUnmount(() => {
 .player__scrim-top {
   top: 0;
   height: 120px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0%, transparent 100%);
 }
 
 .player__scrim-bottom {
   bottom: 0;
   height: 280px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.85) 0%, transparent 100%);
 }
 
 /* ─── Top bar ─── */
@@ -335,7 +335,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   background: none;
   border: none;
-  color: var(--color-light);
+  color: var(--color-text);
   cursor: pointer;
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
@@ -354,7 +354,7 @@ onBeforeUnmount(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: var(--z-sticky);
-  color: white;
+  color: var(--color-text);
   pointer-events: none;
 }
 
@@ -379,7 +379,7 @@ onBeforeUnmount(() => {
 .player__title {
   font-family: var(--font-title);
   font-size: var(--title-sm);
-  color: var(--color-light);
+  color: var(--color-text);
 }
 
 .player__subtitle {
@@ -408,7 +408,7 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   height: 4px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-full);
 }
 
@@ -460,7 +460,7 @@ onBeforeUnmount(() => {
 .player__btn {
   background: none;
   border: none;
-  color: var(--color-light);
+  color: var(--color-text);
   cursor: pointer;
   display: flex;
   align-items: center;
