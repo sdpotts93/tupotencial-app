@@ -7,9 +7,21 @@
 
       <p class="community__subtitle">El espacio donde compartir avances, sostener el proceso y crecer con otros que viven con intención.</p>
 
+      <!-- Filter pills -->
+      <div class="community__pills">
+        <button
+          v-for="f in filters"
+          :key="f.value"
+          :class="['community__pill', { 'community__pill--active': activeFilter === f.value }]"
+          @click="activeFilter = f.value"
+        >
+          {{ f.label }}
+        </button>
+      </div>
+
       <!-- Community feed -->
       <div class="community__feed">
-        <article v-for="post in posts" :key="post.id" class="post">
+        <article v-for="post in filteredPosts" :key="post.id" class="post">
           <div class="post__header">
             <img :src="post.avatar" alt="" class="post__avatar" />
             <div class="post__meta">
@@ -40,6 +52,14 @@
 </template>
 
 <script setup lang="ts">
+const activeFilter = ref('all')
+
+const filters = [
+  { value: 'all', label: 'Todos' },
+  { value: 'Gabriel', label: 'Gabriel' },
+  { value: 'Carlotta', label: 'Carlotta' },
+]
+
 const posts = ref([
   {
     id: 'mock-post-001', author: 'Gabriel', avatar: '/images/gabriel.png',
@@ -73,6 +93,11 @@ const posts = ref([
   },
 ])
 
+const filteredPosts = computed(() => {
+  if (activeFilter.value === 'all') return posts.value
+  return posts.value.filter(p => p.author === activeFilter.value)
+})
+
 function toggleReaction(id: string) {
   const post = posts.value.find(p => p.id === id)
   if (post) {
@@ -103,6 +128,33 @@ function toggleReaction(id: string) {
   color: rgba(255, 255, 255, 0.5);
   margin: 0 0 var(--space-6);
   line-height: var(--leading-normal);
+}
+
+/* ─── Filter pills ─── */
+.community__pills {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.community__pill {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.community__pill:not(.community__pill--active):hover { background: rgba(255, 255, 255, 0.15); }
+
+.community__pill--active {
+  background: white;
+  color: var(--color-dark);
 }
 
 .community__feed {
