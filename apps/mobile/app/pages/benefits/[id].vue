@@ -1,7 +1,7 @@
 <template>
   <div class="screen">
     <!-- Hero -->
-    <div class="benefit__hero" :style="{ background: benefit.bgGradient }">
+    <div class="benefit__hero">
       <div class="benefit__hero-icon">
         <Icon :name="benefit.icon" size="64" />
       </div>
@@ -65,6 +65,7 @@ function handleOpen() {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--color-gray);
 }
 
 .benefit__hero-icon {

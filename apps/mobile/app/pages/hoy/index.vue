@@ -148,14 +148,16 @@
               :class="['hoy__activity', { 'hoy__activity--wide': activity.id === 'ai-coach' }]"
               :style="{ '--activity-accent': activity.accent }"
             >
-              <Icon v-if="activity.id === 'ai-coach'" name="lucide:star" size="24" class="hoy__activity-star" />
               <div class="hoy__activity-thumb">
                 <Icon :name="activity.icon" size="28" />
               </div>
               <div class="hoy__activity-info">
-                <h3 class="hoy__activity-name">{{ activity.title }}</h3>
+                <h3 class="hoy__activity-name">{{ activity.title }}<Icon v-if="activity.id === 'ai-coach'" name="lucide:star" size="16" class="hoy__activity-star" /></h3>
                 <p class="hoy__activity-meta">{{ activity.meta }}</p>
               </div>
+              <svg class="hoy__activity-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </NuxtLink>
           </template>
         </div>
@@ -1053,11 +1055,27 @@ function closeAccionSheet() {
 }
 
 .hoy__activity-star {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: var(--space-1);
+  color: var(--color-yellow);
+  fill: var(--color-yellow);
+  margin-left: 8px;
+  margin-bottom: 4px;
+
+}
+
+.hoy__activity-chevron {
   position: absolute;
   top: var(--space-3);
   right: var(--space-3);
-  color: var(--color-yellow);
-  fill: var(--color-yellow);
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+.hoy__activity--wide .hoy__activity-chevron {
+  position: static;
+  align-self: center;
 }
 
 .hoy__activity--wide {

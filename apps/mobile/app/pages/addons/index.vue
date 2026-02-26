@@ -203,8 +203,8 @@ const addons = ref([
 }
 
 .addons__tag--unlocked {
-  background: rgba(168, 216, 110, 0.15);
-  color: #A8D86E;
+    background: rgba(72, 187, 120, 0.15);
+    color: #60a97c;
 }
 
 /* ─── Desktop ─── */
