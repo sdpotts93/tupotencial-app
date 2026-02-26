@@ -1083,7 +1083,6 @@ function closeAccionSheet() {
   flex-direction: row;
   text-align: left;
   gap: var(--space-4);
-  background: var(--color-gray);
 }
 
 /* .hoy__activity--wide .hoy__activity-name {
