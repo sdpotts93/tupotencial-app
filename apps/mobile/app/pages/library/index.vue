@@ -12,7 +12,7 @@
 
       <!-- Featured / hero -->
       <section class="library__featured">
-        <h2 class="title title--md">Destacado</h2>
+        <h2 class="library__section-title">Destacado</h2>
         <NuxtLink to="/content/mock-content-001" class="library__featured-card">
           <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
           <Icon name="lucide:headphones" size="30" class="library__featured-type" />
@@ -27,7 +27,7 @@
       <!-- Categories -->
       <section v-for="cat in categories" :key="cat.slug" class="library__section">
         <div class="section__header">
-          <h2 class="title title--md">{{ cat.title }}</h2>
+          <h2 class="library__section-title">{{ cat.title }}</h2>
           <NuxtLink :to="`/library/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
         </div>
         <div class="library__scroll">
@@ -52,7 +52,7 @@
       <!-- Eventos Grabados -->
       <section class="library__section">
         <div class="section__header">
-          <h2 class="title title--md">Eventos Grabados</h2>
+          <h2 class="library__section-title">Eventos Grabados</h2>
           <NuxtLink to="/events" class="library__see-all">Ver todo</NuxtLink>
         </div>
         <div class="library__scroll">
@@ -143,15 +143,24 @@ const categories = ref([
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-inverse);
+  color: var(--color-text);
   border-radius: var(--radius-md);
   position: absolute;
   right: 0;
 }
 .library__search-btn:hover { background: rgba(0, 0, 0, 0.06); }
 
+.library__section-title {
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: var(--space-3);
+}
+
 .library__featured { margin-bottom: var(--space-8); }
-.library__featured > .title { margin-bottom: var(--space-4); }
 
 .library__featured-card {
   position: relative;

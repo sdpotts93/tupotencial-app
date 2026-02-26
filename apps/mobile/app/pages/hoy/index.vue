@@ -85,7 +85,7 @@
 
       <!-- Continue active programs -->
       <section v-if="activePrograms.length" class="hoy__continue">
-        <h2 class="title title--md hoy__continue-title">Continua</h2>
+        <h2 class="hoy__section-title">Continua</h2>
         <div class="hoy__continue-scroll">
           <NuxtLink
             v-for="prog in activePrograms"
@@ -119,7 +119,7 @@
       <!-- Latest from Biblioteca -->
       <section class="hoy__latest">
         <div class="hoy__latest-header">
-          <h2 class="title title--md">Recientes</h2>
+          <h2 class="hoy__section-title">Recientes</h2>
           <NuxtLink to="/library" class="hoy__latest-see-all">Ver todo</NuxtLink>
         </div>
         <div class="hoy__latest-scroll">
@@ -141,7 +141,7 @@
 
       <!-- Explore -->
       <section class="hoy__start">
-        <h2 class="title title--md hoy__start-title">Explora</h2>
+        <h2 class="hoy__section-title">Explora</h2>
         <div class="hoy__start-list">
           <template v-for="activity in activities" :key="activity.id">
             <NuxtLink
@@ -866,8 +866,14 @@ function closeAccionSheet() {
   margin-bottom: var(--space-8);
 }
 
-.hoy__continue-title {
-  margin-bottom: var(--space-4);
+.hoy__section-title {
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: var(--space-3);
 }
 
 .hoy__continue-scroll {
@@ -1061,9 +1067,6 @@ function closeAccionSheet() {
   margin-bottom: var(--space-6);
 }
 
-.hoy__start-title {
-  margin-bottom: var(--space-4);
-}
 
 .hoy__start-list {
   display: grid;
