@@ -554,10 +554,11 @@ function closeAccionSheet() {
 /* ─── Greeting ─── */
 .hoy__greeting {
   font-family: var(--font-title);
-  font-size: var(--title-lg);
+  font-size: var(--title-md);
   color: white;
   line-height: var(--leading-tight);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-1);
+  margin-top: var(--space-5);
   font-weight: 100;
 }
 
@@ -571,7 +572,7 @@ function closeAccionSheet() {
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   padding: var(--space-3) var(--space-5) var(--space-3);
   margin-bottom: var(--space-5);
-  box-shadow: 2px 6px 8px rgb(0 0 0 / 16%);
+  box-shadow: 0px 1px 0px rgb(255 255 255 / 16%);
   backdrop-filter: blur(5px);
   text-decoration: none;
   color: inherit;
@@ -643,20 +644,20 @@ function closeAccionSheet() {
 }
 
 .hoy__reto-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  background: #ffffff12;
-  border-radius: var(--radius-xl);
-  box-shadow: 5px 4px 8px #28282878;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-family: inherit;
-  text-align: left;
-  width: 100%;
-  transition: background var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: #ffffff12;
+    border-radius: var(--radius-xl);
+    box-shadow: 0px 0px 2px #ffffff78;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+    transition: background var(--transition-fast);
 }
 
 .hoy__reto-item:hover {
@@ -833,7 +834,8 @@ function closeAccionSheet() {
   left: 0;
   right: 0;
   padding: var(--space-5);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  background: #6d6d6d08;
 }
 
 .hoy__featured-eyebrow {
@@ -885,8 +887,8 @@ function closeAccionSheet() {
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: white;
+  box-shadow: 0px 0px 2px #ffffff78;
   transition: background var(--transition-fast);
-  box-shadow: 5px 4px 8px #282828c7;
 }
 
 .hoy__continue-card:hover {
@@ -1077,7 +1079,7 @@ function closeAccionSheet() {
   display: flex;
   flex-direction: column;
   padding: var(--space-4);
-  background:color-mix(in srgb, var(--activity-accent, var(--color-sand)) 12%, transparent);
+  background: #ffffff12;
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: white;
@@ -1088,7 +1090,7 @@ function closeAccionSheet() {
   cursor: pointer;
   font-family: inherit;
   align-items: center;
-  box-shadow: 5px 4px 20px #2828288e;
+  box-shadow: 0px 0px 2px #ffffff78;
 }
 
 .hoy__activity-badge {
@@ -1111,7 +1113,7 @@ function closeAccionSheet() {
   flex-direction: row;
   text-align: left;
   gap: var(--space-4);
-  background: linear-gradient(330deg, rgb(154 179 199 / 35%) 0%, rgb(32 32 32 / 69%) 100%);
+  background: linear-gradient(330deg, rgb(154 179 199 / 35%) 0%, rgba(32, 32, 32, 0) 100%);
 }
 
 .hoy__activity:hover {

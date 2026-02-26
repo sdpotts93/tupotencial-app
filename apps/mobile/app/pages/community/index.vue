@@ -168,6 +168,7 @@ function toggleReaction(id: string) {
   color: white;
   border-radius: var(--radius-xl);
   padding: var(--space-5);
+  box-shadow: 0px 0px 2px #ffffff78;
 }
 
 .post__header {

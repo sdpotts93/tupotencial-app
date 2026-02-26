@@ -92,7 +92,7 @@ const benefits = ref([
 .benefits__list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 /* ─── Card ─── */
@@ -108,6 +108,7 @@ const benefits = ref([
   cursor: pointer;
   background: rgba(255, 255, 255, 0.08);
   transition: background var(--transition-fast);
+  box-shadow: 0px 0px 2px #ffffff78;
 }
 .benefits__card:hover { background: rgba(255, 255, 255, 0.12); }
 .benefits__card:active { background: rgba(255, 255, 255, 0.15); }

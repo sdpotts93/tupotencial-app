@@ -108,7 +108,7 @@ const filteredPrograms = computed(() => {
 .retos__list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-8);
   margin-top: var(--space-5);
 }
 

@@ -1,8 +1,17 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Tu progreso" show-back />
     <div class="screen__content">
-      <!-- Streak highlight (inspired by inspiration-hoy-progress) -->
+      <!-- Standard header -->
+      <header class="progress__header">
+        <button class="progress__back" aria-label="Volver" @click="$router.back()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <h1 class="progress__header-title">Mi Progreso</h1>
+      </header>
+
+      <!-- Streak highlight -->
       <div class="progress__hero">
         <div class="progress__hero-circle">
           <span class="progress__hero-number">{{ currentStreak }}</span>
@@ -15,45 +24,38 @@
       <!-- Stats -->
       <section class="progress__stats">
         <div class="progress__stat">
-          <span class="progress__stat-value">{{ totalCheckins }}</span>
-          <span class="progress__stat-label">Check-ins</span>
+          <span class="progress__stat-value progress__stat-value--checkins">{{ totalCheckins }}</span>
+          <span class="progress__stat-label">Check-ins hechos</span>
         </div>
         <div class="progress__stat">
-          <span class="progress__stat-value">{{ activeProgramsCount }}</span>
+          <span class="progress__stat-value progress__stat-value--programs">{{ activeProgramsCount }}</span>
           <span class="progress__stat-label">Programas activos</span>
         </div>
         <div class="progress__stat">
-          <span class="progress__stat-value">{{ contentViewed }}</span>
+          <span class="progress__stat-value progress__stat-value--content">{{ contentViewed }}</span>
           <span class="progress__stat-label">Contenidos vistos</span>
         </div>
       </section>
 
-      <!-- Active programs summary -->
+      <!-- Active programs (day__card style) -->
       <section class="progress__programs">
         <p class="eyebrow">PROGRAMAS ACTIVOS</p>
-        <UiList>
-          <UiListItem
+        <div class="progress__programs-list">
+          <NuxtLink
             v-for="prog in activePrograms"
             :key="prog.id"
-            :label="prog.title"
-            :description="`Día ${prog.currentDay} de ${prog.totalDays}`"
             :to="`/retos/${prog.id}`"
-          />
-        </UiList>
-      </section>
-
-      <!-- Week calendar -->
-      <section class="progress__week">
-        <p class="eyebrow">ESTA SEMANA</p>
-        <div class="progress__days">
-          <div
-            v-for="day in weekDays"
-            :key="day.label"
-            :class="['progress__day', { 'progress__day--done': day.done, 'progress__day--today': day.today }]"
+            class="progress__card"
           >
-            <span class="progress__day-label">{{ day.label }}</span>
-            <span class="progress__day-dot" />
-          </div>
+            <img :src="prog.img" :alt="prog.title" class="progress__card-img" />
+            <div class="progress__card-body">
+              <span class="progress__card-title">{{ prog.title }}</span>
+              <span class="progress__card-meta">Día {{ prog.currentDay }} de {{ prog.totalDays }}</span>
+            </div>
+            <svg class="progress__card-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </NuxtLink>
         </div>
       </section>
     </div>
@@ -70,23 +72,45 @@ const activeProgramsCount = ref(2)
 const contentViewed = ref(28)
 
 const activePrograms = ref([
-  { id: 'mock-prog-001', title: 'Reto 7 días de gratitud', currentDay: 5, totalDays: 7 },
-  { id: 'mock-prog-002', title: 'Despertar consciente', currentDay: 12, totalDays: 30 },
+  { id: 'mock-prog-001', title: 'Reto 7 días de gratitud', currentDay: 5, totalDays: 7, img: '/images/lib-4.jpg' },
+  { id: 'mock-prog-002', title: 'Despertar consciente', currentDay: 12, totalDays: 30, img: '/images/lib-6.jpg' },
 ])
-
-const weekDays = computed(() => {
-  const today = new Date()
-  const dayLabels = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
-  const dayOfWeek = (today.getDay() + 6) % 7 // Monday = 0
-  return dayLabels.map((label, i) => ({
-    label,
-    done: i < dayOfWeek,
-    today: i === dayOfWeek,
-  }))
-})
 </script>
 
 <style scoped>
+/* ─── Header (standard) ─── */
+.progress__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: var(--space-6);
+}
+
+.progress__header-title {
+  font-family: var(--font-eyebrow);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.progress__back {
+  position: absolute;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  -webkit-tap-highlight-color: transparent;
+}
+.progress__back:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* ─── Hero ─── */
 .progress__hero {
   display: flex;
   flex-direction: column;
@@ -104,6 +128,7 @@ const weekDays = computed(() => {
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-4);
+  gap: 0.5rem;
 }
 
 .progress__hero-number {
@@ -115,7 +140,7 @@ const weekDays = computed(() => {
 
 .progress__hero-label {
   font-size: var(--text-xs);
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -132,6 +157,7 @@ const weekDays = computed(() => {
   margin-top: var(--space-1);
 }
 
+/* ─── Stats ─── */
 .progress__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -143,68 +169,93 @@ const weekDays = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--space-1);
   padding: var(--space-4);
-  background: #ffffff21;
-  color: white;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-xl);
+  justify-content: center;
 }
 
 .progress__stat-value {
-  font-size: var(--title-sm);
+  font-size: var(--title-lg);
   font-weight: var(--weight-bold);
-  color: var(--color-accent);
+  line-height: 1;
 }
+
+.progress__stat-value--checkins,
+.progress__stat-value--programs,
+.progress__stat-value--content { color: white; }
 
 .progress__stat-label {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   text-align: center;
-  margin-top: 2px;
 }
 
-.progress__programs { margin-bottom: var(--space-8); }
+/* ─── Programs (day__card style) ─── */
+.progress__programs { margin-bottom: var(--space-6); }
 .progress__programs > .eyebrow { margin-bottom: var(--space-3); }
 
-.progress__week { margin-bottom: var(--space-6); }
-.progress__week > .eyebrow { margin-bottom: var(--space-3); }
-
-.progress__days {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.progress__day {
+.progress__programs-list {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
+}
+
+.progress__card {
+  display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-4);
+  width: 100%;
+  text-decoration: none;
+  color: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  transition: background var(--transition-fast);
+}
+.progress__card:hover { background: rgba(255, 255, 255, 0.12); }
+
+.progress__card-img {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.progress__card-body {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.progress__day-label {
-  font-family: var(--font-eyebrow);
-  font-size: var(--eyebrow-sm);
-  color: var(--color-muted);
+.progress__card-title {
+  font-size: var(--text-base);
   font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.progress__day-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--color-surface-alt);
-  border: 2px solid var(--color-border);
+.progress__card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-eyebrow);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.progress__day--done .progress__day-dot {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-}
-
-.progress__day--today .progress__day-dot {
-  border-color: var(--color-primary);
-  background: var(--color-surface);
-  box-shadow: 0 0 0 3px rgba(40, 55, 74, 0.15);
+.progress__card-chevron {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.4);
 }
 </style>
