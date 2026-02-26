@@ -4,9 +4,9 @@
     <div class="register__hero">
       <div class="register__hero-bg" />
       <div class="register__hero-content">
-        <img src="/logo-word/logo-word-white.png" alt="Tu Potencial" class="register__wordmark" />
+        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="register__wordmark" />
         <div class="register__logo">
-          <img src="/logo-icon/logo-icon-black.png" alt="Tu Potencial" class="register__logo-img" />
+          <img src="/logo-icon/logo-running.png" alt="Tu Potencial" class="register__logo-img" />
         </div>
         <p class="register__tagline">
           Un espacio seguro para <br> tu crecimiento integral.
@@ -74,7 +74,7 @@
             block
             :loading="loading"
             :disabled="!email || !password || !confirmPassword"
-            :variant="email && password && confirmPassword ? 'primary' : 'secondary'"
+            variant="secondary"
           >
             Crear cuenta
           </UiButton>
@@ -146,7 +146,7 @@ async function handleRegister() {
 .register__hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, var(--color-navy) 0%, var(--color-dark) 50%, var(--color-green) 100%);
+  background: var(--color-light);
   opacity: 0.9;
 }
 
@@ -163,13 +163,11 @@ async function handleRegister() {
 
 .register__logo {
   margin-bottom: var(--space-8);
-  background: var(--color-sand);
-  padding: 1rem;
   border-radius: 1rem;
 }
 
 .register__logo-img {
-  height: 80px;
+  height: 160px;
   width: auto;
   border-radius: var(--radius-xl);
   opacity: 0.75;
@@ -185,7 +183,7 @@ async function handleRegister() {
 .register__tagline {
   font-family: var(--font-title);
   font-size: var(--title-md);
-  color: var(--color-light);
+  color: var(--color-text);
   text-align: center;
   line-height: var(--leading-snug);
 }
@@ -198,25 +196,6 @@ async function handleRegister() {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-}
-
-.register__cta-area :deep(.btn--primary) {
-  background: #FFFFFF;
-  color: var(--color-text);
-  border-color: #FFFFFF;
-}
-.register__cta-area :deep(.btn--primary:hover) {
-  background: var(--color-light);
-  border-color: var(--color-light);
-}
-
-.register__cta-area :deep(.btn--outline) {
-  background: transparent;
-  color: var(--color-light);
-  border-color: var(--color-light);
-}
-.register__cta-area :deep(.btn--outline:hover) {
-  background: rgba(255, 255, 255, 0.1);
 }
 
 /* ─── Sheet overlay (mobile: slides up) ─── */
@@ -238,7 +217,7 @@ async function handleRegister() {
 }
 
 .register__sheet {
-  background: var(--color-surface);
+  background: var(--color-accent);
   color: var(--color-text);
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   padding: var(--space-2) var(--space-6) var(--space-10);
