@@ -19,7 +19,7 @@
           class="retos__card"
         >
           <img :src="item.img" alt="" class="retos__card-img" />
-          <div class="retos__card-overlay">
+          <div class="retos__card-info">
             <span class="retos__card-eyebrow">{{ item.typeLabel }} · {{ item.duration }}</span>
             <h3 class="retos__card-name">{{ item.title }}</h3>
             <p class="retos__card-desc">{{ item.description }}</p>
@@ -112,36 +112,26 @@ const filteredPrograms = computed(() => {
   margin-top: var(--space-5);
 }
 
-/* ─── Card (matches library__featured-card) ─── */
+/* ─── Card ─── */
 .retos__card {
-  position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  aspect-ratio: 1;
   border-radius: var(--radius-2xl);
-  overflow: hidden;
   text-decoration: none;
   color: var(--color-text);
 }
 
 .retos__card-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
-  object-position: bottom;
+  display: block;
   border-radius: var(--radius-2xl);
-
 }
 
-.retos__card-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: var(--space-5);
-  background: var(--color-gray);
+.retos__card-info {
+  padding: var(--space-4) var(--space-1) 0;
 }
 
 .retos__card-eyebrow {

@@ -14,6 +14,7 @@
       <!-- Streak highlight -->
       <div class="progress__hero">
         <div class="progress__hero-circle">
+          <img src="/logo-icon/logo-fire.png" alt="" class="progress__hero-fire" />
           <span class="progress__hero-number">{{ currentStreak }}</span>
           <span class="progress__hero-label">días</span>
         </div>
@@ -119,19 +120,26 @@ const activePrograms = ref([
 }
 
 .progress__hero-circle {
+  position: relative;
   width: 120px;
   height: 120px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-4);
-  gap: 0.5rem;
+}
+
+.progress__hero-fire {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .progress__hero-number {
+  position: relative;
   font-family: var(--font-title);
   font-size: var(--title-xl);
   color: var(--color-text);
@@ -139,6 +147,7 @@ const activePrograms = ref([
 }
 
 .progress__hero-label {
+  position: relative;
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
   text-transform: uppercase;
@@ -170,7 +179,7 @@ const activePrograms = ref([
   flex-direction: column;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-4);
+  padding: var(--space-8) var(--space-4) var(--space-4);
   background: rgba(0, 0, 0, 0.04);
   border-radius: var(--radius-xl);
   justify-content: center;

@@ -3,7 +3,7 @@
     <!-- Branded header (logo scrolls away, progress sticks) -->
     <div class="hoy__hero">
       <div class="hoy__hero-top">
-        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="hoy__hero-logo" />
+        <img src="/logo-icon/logo-fire.png" alt="Tu Potencial" class="hoy__hero-logo" />
         <NuxtLink to="/hoy/progress" class="hoy__streak-badge">
           <Icon name="lucide:flame" size="16" class="hoy__streak-icon" />
           <span class="hoy__streak-count">{{ streak }}</span>
@@ -63,7 +63,7 @@
       <section class="hoy__featured">
         <button class="hoy__featured-card" @click="activeSheet = 'accion'">
           <img src="/images/rojo-carlotta.jpg" alt="" class="hoy__featured-img" />
-          <div class="hoy__featured-overlay">
+          <div class="hoy__featured-info">
             <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
             <h3 class="hoy__featured-name">{{ dailyPlan.title }}</h3>
             <p class="hoy__featured-desc">{{ dailyPlan.message }}</p>
@@ -510,13 +510,13 @@ function closeAccionSheet() {
 
 .hoy__hero-top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: var(--space-4);
 }
 
 .hoy__hero-logo {
-  height: 20px;
+  height: 40px;
   width: auto;
 }
 
@@ -647,7 +647,7 @@ function closeAccionSheet() {
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-4);
-    background: rgb(0 0 0 / 7%);
+    background: rgb(0 0 0 / 4%);
     border-radius: var(--radius-xl);
     border: none;
     color: var(--color-text);
@@ -802,37 +802,28 @@ function closeAccionSheet() {
 }
 
 .hoy__featured-card {
-  position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  aspect-ratio: 1;
   border-radius: var(--radius-2xl);
-  overflow: hidden;
   border: none;
   padding: 0;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
+  background: none;
 }
 
 .hoy__featured-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
-  object-position: bottom;
   border-radius: var(--radius-2xl);
 }
 
-.hoy__featured-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: var(--space-5);
-  background: var(--color-gray);
+.hoy__featured-info {
+  padding: var(--space-4) var(--space-1) 0;
 }
 
 .hoy__featured-eyebrow {
@@ -842,7 +833,7 @@ function closeAccionSheet() {
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--color-muted);
   margin-bottom: var(--space-1);
 }
 

@@ -20,9 +20,11 @@
             :to="`/events/${event.id}`"
             class="events__card"
           >
-            <img :src="event.img" alt="" class="events__card-img" />
-            <div class="events__card-overlay">
+            <div class="events__card-hero">
+              <img :src="event.img" alt="" class="events__card-img" />
               <span class="events__card-date">{{ event.dateLabel }}</span>
+            </div>
+            <div class="events__card-info">
               <span class="events__card-eyebrow">{{ event.timeLabel }}</span>
               <h3 class="events__card-name">{{ event.title }}</h3>
               <p class="events__card-desc">{{ event.description }}</p>
@@ -110,41 +112,36 @@ const pastEvents = ref([
 .events__section { margin-bottom: var(--space-8); }
 .events__section > .eyebrow { margin-bottom: var(--space-3); }
 
-/* ─── Upcoming cards (matches retos__card) ─── */
+/* ─── Upcoming cards ─── */
 .events__list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-8);
 }
 
 .events__card {
-  position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  aspect-ratio: 7 / 8;
   border-radius: var(--radius-2xl);
-  overflow: hidden;
   text-decoration: none;
   color: var(--color-text);
 }
 
+.events__card-hero {
+  position: relative;
+}
+
 .events__card-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
-  object-position: bottom;
+  display: block;
   border-radius: var(--radius-2xl);
 }
 
-.events__card-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: var(--space-5);
-  background: var(--color-gray);
+.events__card-info {
+  padding: var(--space-4) var(--space-1) 0;
 }
 
 .events__card-date {
@@ -155,7 +152,7 @@ const pastEvents = ref([
   font-size: var(--eyebrow-md);
   font-weight: var(--weight-bold);
   background: rgba(0, 0, 0, 0.5);
-  color: var(--color-text);
+  color: white;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
   backdrop-filter: blur(4px);

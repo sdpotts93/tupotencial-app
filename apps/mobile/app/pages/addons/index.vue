@@ -19,10 +19,12 @@
           :to="`/addons/${addon.id}`"
           class="addons__card"
         >
-          <img v-if="addon.img" :src="addon.img" alt="" class="addons__card-img" />
-          <div v-else class="addons__card-gradient" :style="{ background: addon.bg }" />
-          <span class="addons__card-price">{{ addon.priceLabel }}</span>
-          <div class="addons__card-overlay">
+          <div class="addons__card-hero">
+            <img v-if="addon.img" :src="addon.img" alt="" class="addons__card-img" />
+            <div v-else class="addons__card-gradient" :style="{ background: addon.bg }" />
+            <span class="addons__card-price">{{ addon.priceLabel }}</span>
+          </div>
+          <div class="addons__card-info">
             <span class="addons__card-eyebrow">{{ addon.typeLabel }}</span>
             <h3 class="addons__card-name">{{ addon.title }}</h3>
             <p class="addons__card-desc">{{ addon.description }}</p>
@@ -106,36 +108,35 @@ const addons = ref([
   gap: var(--space-8);
 }
 
-/* ─── Card (matches events__card) ─── */
+/* ─── Card ─── */
 .addons__card {
-  position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  aspect-ratio: 1;
   border-radius: var(--radius-2xl);
-  overflow: hidden;
   text-decoration: none;
   color: var(--color-text);
 }
 
+.addons__card-hero {
+  position: relative;
+}
+
 .addons__card-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
-  object-position: bottom;
+  display: block;
   border-radius: var(--radius-2xl);
 }
 
 .addons__card-gradient {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-2xl);
 }
 
-/* ─── Price badge (floating top-right) ─── */
+/* ─── Price badge (floating top-right on image) ─── */
 .addons__card-price {
   position: absolute;
   top: var(--space-4);
@@ -152,14 +153,8 @@ const addons = ref([
   z-index: 1;
 }
 
-/* ─── Bottom overlay with backdrop-filter ─── */
-.addons__card-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: var(--space-5);
-  background: var(--color-gray);
+.addons__card-info {
+  padding: var(--space-4) var(--space-1) 0;
 }
 
 .addons__card-eyebrow {

@@ -153,8 +153,8 @@ function toggleReaction(id: string) {
 .community__pill:not(.community__pill--active):hover { background: rgba(0, 0, 0, 0.08); }
 
 .community__pill--active {
-  background: white;
-  color: var(--color-dark);
+  background: var(--color-dark);
+  color: white;
 }
 
 .community__feed {

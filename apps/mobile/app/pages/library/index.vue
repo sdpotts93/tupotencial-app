@@ -15,8 +15,7 @@
         <h2 class="library__section-title">Destacado</h2>
         <NuxtLink to="/content/mock-content-001" class="library__featured-card">
           <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
-          <Icon name="lucide:headphones" size="30" class="library__featured-type" />
-          <div class="library__featured-overlay">
+          <div class="library__featured-info">
             <span class="library__featured-eyebrow">Meditación • 10 min</span>
             <h3 class="library__featured-name">Respiración consciente</h3>
             <p class="library__featured-desc">Reconecta con tu cuerpo y tu calma en 10 minutos.</p>
@@ -38,8 +37,7 @@
             class="library__scroll-card"
           >
             <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
-            <div class="library__scroll-overlay">
-              <Icon :name="contentTypeIcon(item.typeLabel)" size="14" class="library__scroll-type-label" />
+            <div class="library__scroll-info">
               <span class="library__scroll-title">{{ item.title }}</span>
               <span v-if="item.duration" class="library__scroll-duration">
                 <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
@@ -63,8 +61,7 @@
             class="library__scroll-card"
           >
             <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
-            <div class="library__scroll-overlay">
-              <Icon name="lucide:video" size="14" class="library__scroll-type-label" />
+            <div class="library__scroll-info">
               <span class="library__scroll-title">{{ ev.title }}</span>
               <span class="library__scroll-duration">
                 <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.dateLabel }}
@@ -163,43 +160,24 @@ const categories = ref([
 .library__featured { margin-bottom: var(--space-8); }
 
 .library__featured-card {
-  position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  aspect-ratio: 1;
   border-radius: var(--radius-2xl);
-  overflow: hidden;
   text-decoration: none;
   color: var(--color-text);
 }
 
 .library__featured-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
-  object-position: bottom;
+  display: block;
   border-radius: var(--radius-2xl);
 }
 
-.library__featured-type {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
-  padding: var(--space-1);
-  border-radius: 4px;
-  color: var(--color-text);
-  z-index: 1;
-}
-
-.library__featured-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: var(--space-5);
-  background: var(--color-gray);
+.library__featured-info {
+  padding: var(--space-4) var(--space-1) 0;
 }
 
 .library__featured-eyebrow {
@@ -209,7 +187,7 @@ const categories = ref([
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-text);
+  color: var(--color-muted);
   margin-bottom: var(--space-1);
 }
 
@@ -261,57 +239,37 @@ const categories = ref([
 .library__scroll::-webkit-scrollbar { display: none; }
 
 .library__scroll-card {
-  flex: 0 0 85%;
+  flex: 0 0 60%;
   scroll-snap-align: start;
   text-decoration: none;
   color: var(--color-text);
-  position: relative;
+  display: flex;
+  flex-direction: column;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  aspect-ratio: 3 / 2;
 }
 
 .library__scroll-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
+  display: block;
+  border-radius: var(--radius-xl);
 }
 
-.library__scroll-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: var(--space-5);
-  background: linear-gradient(to top, rgb(255 255 255) 0%, rgb(255 255 255 / 60%) 36%, transparent 100%);
-}
-
-.library__scroll-type-label {
-  position: absolute;
-  bottom: var(--space-5);
-  right: var(--space-5);
-  padding: var(--space-1);
-  border-radius: 4px;
-  font-size: 10px;
-  font-family: var(--font-eyebrow);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.library__scroll-info {
+  padding: var(--space-3) var(--space-1) 0;
 }
 
 .library__scroll-title {
-  font-family: var(--font-title);
-  font-size: var(--title-sm);
-  font-weight: var(--weight-bold);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
   color: var(--color-text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: var(--space-1);
 }
 
 .library__scroll-duration {
@@ -320,7 +278,7 @@ const categories = ref([
   gap: 4px;
   font-size: 10px;
   color: var(--color-muted);
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
 }
