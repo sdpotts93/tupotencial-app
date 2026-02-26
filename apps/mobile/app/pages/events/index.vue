@@ -146,7 +146,8 @@ const pastEvents = ref([
   padding: var(--space-5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  background: #282828c7;
+  backdrop-filter: blur(13px);
+  background: #343434cf;
 }
 
 .events__card-date {

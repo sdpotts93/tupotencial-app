@@ -190,8 +190,8 @@ const categories = ref([
   left: 0;
   right: 0;
   padding: var(--space-5);
-  backdrop-filter: blur(8px);
-  background: #282828c7;
+  backdrop-filter: blur(13px);
+  background: #343434cf;
 }
 
 .library__featured-eyebrow {

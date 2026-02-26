@@ -505,7 +505,7 @@ function closeAccionSheet() {
 
 /* ─── Hero header ─── */
 .hoy__hero {
-  background: radial-gradient(ellipse at -11% 18%, rgb(174 174 174 / 14%) 0%, transparent 55%), #28282800;
+  background: radial-gradient(ellipse at -11% 18%, rgb(174 174 174 / 14%) 0%, transparent 55%), #282828c2;
   padding: var(--space-5) var(--space-5) 0;
 }
 
@@ -567,11 +567,11 @@ function closeAccionSheet() {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #28313c6b;
+  background: #282828b5;
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   padding: var(--space-3) var(--space-5) var(--space-3);
   margin-bottom: var(--space-5);
-  box-shadow: 2px 19px 24px rgb(0 0 0 / 14%);
+  box-shadow: 2px 6px 8px rgb(0 0 0 / 16%);
   backdrop-filter: blur(5px);
   text-decoration: none;
   color: inherit;
@@ -649,6 +649,7 @@ function closeAccionSheet() {
   padding: var(--space-4);
   background: #ffffff12;
   border-radius: var(--radius-xl);
+  box-shadow: 5px 4px 8px #28282878;
   border: none;
   color: white;
   cursor: pointer;
@@ -885,6 +886,7 @@ function closeAccionSheet() {
   text-decoration: none;
   color: white;
   transition: background var(--transition-fast);
+  box-shadow: 5px 4px 8px #282828c7;
 }
 
 .hoy__continue-card:hover {
@@ -1086,6 +1088,7 @@ function closeAccionSheet() {
   cursor: pointer;
   font-family: inherit;
   align-items: center;
+  box-shadow: 5px 4px 20px #2828288e;
 }
 
 .hoy__activity-badge {

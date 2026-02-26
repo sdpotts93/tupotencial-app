@@ -159,7 +159,8 @@ const addons = ref([
   left: 0;
   right: 0;
   padding: var(--space-5);
-  background: #1d1a1a;
+  backdrop-filter: blur(13px);
+  background: #343434cf;
 }
 
 .addons__card-eyebrow {

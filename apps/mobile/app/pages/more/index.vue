@@ -82,9 +82,15 @@ function handleLogout() {
 }
 
 .more__avatar {
-  width: 56px; height: 56px; border-radius: 50%; background: var(--color-primary);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--color-primary-contrast); font-size: var(--text-lg); font-weight: var(--weight-semibold);
+  width: 56px; 
+  height: 56px; 
+  border-radius: 50%; 
+  background: var(--color-sand);
+  display: flex; align-items: center; 
+  justify-content: center;
+  font-family: var(--font-title);
+  font-weight: var(--weight-semibold);
+  color: var(--color-dark);
 }
 
 .more__info { display: flex; flex-direction: column; gap: var(--space-1); }
