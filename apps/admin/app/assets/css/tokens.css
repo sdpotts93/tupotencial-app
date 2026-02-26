@@ -13,8 +13,8 @@
 
   /* ---- Semantic colors ---- */
   --color-bg: #FAFAF8;
-  --color-surface: #dcdcdc;
-  --color-surface-alt: #fafafa;
+  --color-surface: #f0efe5;
+  --color-surface-alt: #F3F2EE;
   --color-text: #282828;
   --color-text-secondary: #5A5A5A;
   --color-muted: #8A8A8A;
@@ -31,7 +31,7 @@
   --color-secondary: #A7A68E;
   --color-secondary-contrast: #282828;
 
-  --color-border: #bfbfbf;
+  --color-border: #b9b8b3;
   --color-border-light: #EEEDEA;
   --color-danger: #C53030;
   --color-danger-light: #FFF5F5;
