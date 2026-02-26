@@ -62,6 +62,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   gap: var(--space-2);
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
+  border-bottom-color: #cdcdcd;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);

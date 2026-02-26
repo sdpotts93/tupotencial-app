@@ -1250,7 +1250,7 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-3);
-  border: 2px solid var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   background: var(--color-surface-alt);
   color: var(--color-text);
