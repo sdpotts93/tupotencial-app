@@ -303,7 +303,7 @@ function getResponse(input: string): string {
   left: 0;
   right: 0;
   z-index: var(--z-sticky, 10);
-  background: var(--color-surface);
+  background: var(--color-surface-alt);
   border-top: 1px solid rgba(0, 0, 0, 0.04);
   padding: var(--space-3) var(--space-5);
 }

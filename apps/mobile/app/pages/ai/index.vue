@@ -25,20 +25,18 @@
         <p class="eyebrow">ELIGE TU TONO</p>
         <div class="ai-home__tone-options">
           <button
-            :class="['ai-home__tone-btn', { 'ai-home__tone-btn--active': selectedTone === 'carlotta' }]"
+            :class="['onboarding-opt', { 'onboarding-opt--selected': selectedTone === 'carlotta' }]"
             @click="selectedTone = 'carlotta'"
           >
-            <span class="ai-home__tone-emoji"><Icon name="lucide:flower" size="20" /></span>
-            <span class="ai-home__tone-label">Carlotta</span>
-            <span class="ai-home__tone-desc">Contención, calma y presencia</span>
+            <span class="onboarding-opt__icon"><Icon name="lucide:flower" size="20" /></span>
+            <span class="onboarding-opt__label">Carlotta</span>
           </button>
           <button
-            :class="['ai-home__tone-btn', { 'ai-home__tone-btn--active': selectedTone === 'gabriel' }]"
+            :class="['onboarding-opt', { 'onboarding-opt--selected': selectedTone === 'gabriel' }]"
             @click="selectedTone = 'gabriel'"
           >
-            <span class="ai-home__tone-emoji"><Icon name="lucide:waves" size="20" /></span>
-            <span class="ai-home__tone-label">Gabriel</span>
-            <span class="ai-home__tone-desc">Estructura, disciplina y acción</span>
+            <span class="onboarding-opt__icon"><Icon name="lucide:waves" size="20" /></span>
+            <span class="onboarding-opt__label">Gabriel</span>
           </button>
         </div>
       </section>
@@ -131,7 +129,7 @@ function startChat(prompt?: string) {
 /* ─── Hero ─── */
 .ai-home__hero { text-align: center; margin-bottom: var(--space-8); }
 
-.ai-home__icon { font-size: 3rem; margin-bottom: var(--space-3); }
+.ai-home__icon { font-size: 1rem; margin-bottom: var(--space-3); }
 
 .ai-home__desc {
   font-size: var(--text-sm);
@@ -160,14 +158,14 @@ function startChat(prompt?: string) {
   gap: var(--space-3);
 }
 
-.ai-home__tone-btn {
+.onboarding-opt {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
   background: rgba(0, 0, 0, 0.04);
   color: var(--color-text);
-  border: 1.5px solid rgba(0, 0, 0, 0);
+  border: 1.5px solid #ffffff00;
   border-radius: var(--radius-xl);
   cursor: pointer;
   text-align: left;
@@ -175,46 +173,25 @@ function startChat(prompt?: string) {
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.ai-home__tone-btn:hover { border-color: rgba(0, 0, 0, 0.2); }
-
-.ai-home__tone-btn--active {
+.onboarding-opt--selected {
   border-color: var(--color-border);
   background: var(--color-surface);
 }
 
-.ai-home__tone-btn--active .ai-home__tone-label {
-  color: var(--color-accent);
-}
-
-.ai-home__tone-btn--active .ai-home__tone-desc {
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.ai-home__tone-btn--active .ai-home__tone-emoji {
-  color: var(--color-accent);
-}
-
-.ai-home__tone-emoji {
+.onboarding-opt__icon {
   font-size: 1.25rem;
   line-height: 1;
   flex-shrink: 0;
   width: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
   color: var(--color-sand);
 }
 
-.ai-home__tone-label {
+.onboarding-opt__label {
   font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   color: var(--color-text);
-}
-
-.ai-home__tone-desc {
-  font-size: var(--text-xs);
-  color: var(--color-muted);
-  margin-left: auto;
+  line-height: var(--leading-normal);
 }
 
 /* ─── History ─── */

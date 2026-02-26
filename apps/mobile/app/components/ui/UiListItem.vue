@@ -104,7 +104,7 @@ withDefaults(defineProps<Props>(), {
 }
 
 .list-item__description--success {
-  color: #68D391;
+  color: #60a97c;
 }
 
 .list-item__suffix { flex-shrink: 0; }

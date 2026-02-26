@@ -48,7 +48,7 @@ const event = ref({
   width: 100%;
   height: 100dvh;
   background: #000;
-  color: var(--color-text);
+  color: white;
   overflow: hidden;
 }
 
@@ -76,7 +76,7 @@ const event = ref({
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
-  color: var(--color-dark-lighter);
+  color: white;
   -webkit-tap-highlight-color: transparent;
 }
 .watch__back:hover { background: rgba(0, 0, 0, 0.6); }
@@ -90,12 +90,12 @@ const event = ref({
   border-radius: var(--radius-full);
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .watch__badge--live {
   background: rgba(220, 38, 38, 0.8);
-  color: var(--color-text);
+  color: white;
 }
 
 /* ─── Player (fullscreen, centered) ─── */
@@ -113,7 +113,7 @@ const event = ref({
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.5);
   font-size: var(--text-sm);
   max-width: 100%;
 }
@@ -128,18 +128,18 @@ const event = ref({
   right: 0;
   z-index: 2;
   padding: var(--space-8) var(--space-5) var(--space-5);
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.7) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
 }
 
 .watch__title {
   font-family: var(--font-title);
   font-size: var(--title-sm);
-  color: var(--color-text);
+  color: white;
 }
 
 .watch__subtitle {
   font-size: var(--text-sm);
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.6);
   margin-top: var(--space-1);
 }
 </style>

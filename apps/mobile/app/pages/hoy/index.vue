@@ -148,7 +148,7 @@
               :class="['hoy__activity', { 'hoy__activity--wide': activity.id === 'ai-coach' }]"
               :style="{ '--activity-accent': activity.accent }"
             >
-              <span v-if="activity.featured" class="hoy__activity-badge">Nuevo</span>
+              <Icon v-if="activity.id === 'ai-coach'" name="lucide:star" size="24" class="hoy__activity-star" />
               <div class="hoy__activity-thumb">
                 <Icon :name="activity.icon" size="28" />
               </div>
@@ -416,7 +416,7 @@ const activities = ref([
     id: 'ai-coach',
     title: 'Mi Coach IA',
     meta: 'Tu coach personal',
-    icon: 'lucide:bot',
+    icon: 'lucide:brain',
     accent: '#9AB3C7',
     to: '/ai',
     featured: true,
@@ -1052,19 +1052,12 @@ function closeAccionSheet() {
   align-items: center;
 }
 
-.hoy__activity-badge {
+.hoy__activity-star {
   position: absolute;
   top: var(--space-3);
   right: var(--space-3);
-  font-family: var(--font-eyebrow);
-  font-size: var(--eyebrow-sm);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-full);
-  background: rgba(154, 179, 199, 0.25);
-  color: #9AB3C7;
+  color: var(--color-yellow);
+  fill: var(--color-yellow);
 }
 
 .hoy__activity--wide {
@@ -1072,8 +1065,12 @@ function closeAccionSheet() {
   flex-direction: row;
   text-align: left;
   gap: var(--space-4);
-  background: linear-gradient(330deg, rgb(154 179 199 / 35%) 0%, rgba(255, 255, 255, 0) 100%);
+  background: var(--color-gray);
 }
+
+/* .hoy__activity--wide .hoy__activity-name {
+  color: var(--color-light);
+} */
 
 .hoy__activity:hover {
   background: rgba(0, 0, 0, 0.1);

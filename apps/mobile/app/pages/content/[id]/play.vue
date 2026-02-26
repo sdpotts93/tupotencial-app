@@ -30,7 +30,6 @@
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <span class="player__time-display">{{ formattedCurrentTime }} / {{ formattedDuration }}</span>
       </div>
     </Transition>
 
@@ -85,12 +84,6 @@
           </button>
         </div>
 
-        <!-- Done button -->
-        <div class="player__footer">
-          <UiButton block variant="secondary" @click="navigateTo(`/content/${id}`)">
-            Terminé
-          </UiButton>
-        </div>
       </div>
     </Transition>
   </div>
@@ -98,9 +91,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'blank' })
-
-const route = useRoute()
-const id = route.params.id as string
 
 // ── Video refs ──
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -305,13 +295,13 @@ onBeforeUnmount(() => {
 .player__scrim-top {
   top: 0;
   height: 120px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
 }
 
 .player__scrim-bottom {
   bottom: 0;
   height: 280px;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.85) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
 }
 
 /* ─── Top bar ─── */
@@ -335,16 +325,10 @@ onBeforeUnmount(() => {
   justify-content: center;
   background: none;
   border: none;
-  color: var(--color-dark-lighter);
+  color: white;
   cursor: pointer;
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
-}
-
-.player__time-display {
-  font-size: var(--text-xs);
-  color: var(--color-sand);
-  font-family: var(--font-eyebrow);
 }
 
 /* ─── Center spinner (buffering) ─── */
@@ -354,7 +338,7 @@ onBeforeUnmount(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: var(--z-sticky);
-  color: var(--color-text);
+  color: white;
   pointer-events: none;
 }
 
@@ -379,12 +363,12 @@ onBeforeUnmount(() => {
 .player__title {
   font-family: var(--font-title);
   font-size: var(--title-sm);
-  color: var(--color-text);
+  color: white;
 }
 
 .player__subtitle {
   font-size: var(--text-sm);
-  color: var(--color-sand);
+  color: rgba(255, 255, 255, 0.6);
   margin-top: var(--space-1);
 }
 
@@ -408,7 +392,7 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   height: 4px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full);
 }
 
@@ -416,7 +400,7 @@ onBeforeUnmount(() => {
   position: absolute;
   left: 0;
   height: 4px;
-  background: var(--color-light);
+  background: white;
   border-radius: var(--radius-full);
   pointer-events: none;
 }
@@ -427,7 +411,7 @@ onBeforeUnmount(() => {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--color-light);
+  background: white;
   transform: translate(-50%, -50%);
   opacity: 0;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
@@ -444,7 +428,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   margin-top: var(--space-1);
   font-size: var(--text-xs);
-  color: var(--color-sand);
+  color: rgba(255, 255, 255, 0.5);
   font-family: var(--font-eyebrow);
 }
 
@@ -460,7 +444,7 @@ onBeforeUnmount(() => {
 .player__btn {
   background: none;
   border: none;
-  color: var(--color-text);
+  color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -474,16 +458,11 @@ onBeforeUnmount(() => {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: var(--color-light);
-  color: var(--color-dark);
+  background: white;
+  color: #000;
   padding: 0;
 }
 .player__btn--play:active { transform: scale(0.95); }
-
-/* ─── Footer ─── */
-.player__footer {
-  margin-top: var(--space-5);
-}
 
 /* ─── Fade transition (for controls) ─── */
 .fade-enter-active,

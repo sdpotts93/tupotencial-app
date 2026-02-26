@@ -37,8 +37,8 @@
             </div>
             <span class="day__card-check">
               <svg v-if="activity.done" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" fill="#68D391" fill-opacity="0.2" stroke="#68D391" stroke-width="1.5"/>
-                <path d="M8 12l3 3 5-5" stroke="#68D391" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="10" fill="#60a97c" fill-opacity="0.2" stroke="#60a97c" stroke-width="1.5"/>
+                <path d="M8 12l3 3 5-5" stroke="#60a97c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
@@ -65,8 +65,8 @@
             </div>
             <span class="day__card-check">
               <svg v-if="activity.done" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" fill="#68D391" fill-opacity="0.2" stroke="#68D391" stroke-width="1.5"/>
-                <path d="M8 12l3 3 5-5" stroke="#68D391" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="10" fill="#60a97c" fill-opacity="0.2" stroke="#60a97c" stroke-width="1.5"/>
+                <path d="M8 12l3 3 5-5" stroke="#60a97c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
@@ -93,8 +93,8 @@
       <Transition name="day-fade" mode="out-in">
         <div v-if="formSuccess" key="success" class="day__form-success">
           <svg class="day__form-success-icon" width="48" height="48" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" fill="#68D391" fill-opacity="0.2" stroke="#68D391" stroke-width="1.5"/>
-            <path d="M8 12l3 3 5-5" stroke="#68D391" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="10" fill="#60a97c" fill-opacity="0.2" stroke="#60a97c" stroke-width="1.5"/>
+            <path d="M8 12l3 3 5-5" stroke="#60a97c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <p class="day__form-success-title">¡Día completado!</p>
           <p class="day__form-success-msg">Excelente trabajo hoy.</p>

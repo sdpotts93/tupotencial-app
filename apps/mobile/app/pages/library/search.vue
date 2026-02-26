@@ -101,17 +101,6 @@ const filteredResults = computed(() => {
 /* ─── Input (matches profile-setup) ─── */
 .search__input { margin-bottom: var(--space-6); }
 
-.search__input :deep(.input-field__wrapper) {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  background: rgba(0, 0, 0, 0.04);
-  border: none;
-  border-bottom: 1.5px solid #a7a68e36;
-  border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
 
 .search__input :deep(.input-field__input) {
   color: var(--color-text);

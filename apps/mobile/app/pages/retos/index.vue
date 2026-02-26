@@ -117,9 +117,12 @@ const filteredPrograms = computed(() => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: var(--radius-2xl);
   text-decoration: none;
   color: var(--color-text);
+}
+.retos__card + .retos__card {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: var(--space-8);
 }
 
 .retos__card-img {
@@ -192,17 +195,17 @@ const filteredPrograms = computed(() => {
 
 .retos__tag--core {
   background: rgba(212, 175, 55, 0.15);
-  color: #D4AF37;
+  color: #9c8742;
 }
 
 .retos__tag--gratis {
   background: rgba(192, 192, 192, 0.15);
-  color: #C0C0C0;
+  color: #9c9c9c;
 }
 
 .retos__tag--inscrito {
   background: rgba(72, 187, 120, 0.15);
-  color: #68D391;
+  color: #60a97c;
 }
 
 /* ─── Desktop ─── */

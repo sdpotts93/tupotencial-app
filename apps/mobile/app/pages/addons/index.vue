@@ -113,9 +113,12 @@ const addons = ref([
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: var(--radius-2xl);
   text-decoration: none;
   color: var(--color-text);
+}
+.addons__card + .addons__card {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: var(--space-8);
 }
 
 .addons__card-hero {

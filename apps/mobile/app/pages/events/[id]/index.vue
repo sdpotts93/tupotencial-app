@@ -19,7 +19,7 @@
       <h1 class="title title--lg edetail__title">{{ event.title }}</h1>
 
       <div class="edetail__actions">
-        <UiButton block :to="`/events/${id}/watch`">
+        <UiButton variant="outline" block :to="`/events/${id}/watch`">
           {{ event.isLive ? 'Ver en vivo' : 'Ver grabación' }}
         </UiButton>
       </div>
@@ -74,7 +74,6 @@ const event = ref({
 .edetail__hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, transparent 40%, rgba(255, 255, 255, 0.6) 100%);
 }
 
 /* ─── Nav ─── */
@@ -111,11 +110,6 @@ const event = ref({
 /* ─── Actions ─── */
 .edetail__actions { margin: var(--space-5) 0; }
 
-.edetail__actions :deep(.btn) {
-  background: #FFFFFF;
-  color: var(--color-text);
-  border-color: var(--color-border);
-}
 
 /* ─── Description ─── */
 .edetail__desc {
@@ -148,12 +142,12 @@ const event = ref({
 
 .edetail__tag--member {
   background: rgba(212, 175, 55, 0.15);
-  color: #D4AF37;
+  color: #9c8742;
 }
 
 .edetail__meta :deep(.tag) {
   background: var(--color-sand);
-  color: var(--color-text);
+  color: white;
 }
 
 /* ─── Desktop ─── */

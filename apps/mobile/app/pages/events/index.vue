@@ -123,9 +123,12 @@ const pastEvents = ref([
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: var(--radius-2xl);
   text-decoration: none;
   color: var(--color-text);
+}
+.events__card + .events__card {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: var(--space-8);
 }
 
 .events__card-hero {
@@ -202,7 +205,7 @@ const pastEvents = ref([
 
 .events__tag--member {
   background: rgba(212, 175, 55, 0.15);
-  color: #D4AF37;
+  color: #9c8742;
 }
 
 /* ─── Past events (day__card style) ─── */

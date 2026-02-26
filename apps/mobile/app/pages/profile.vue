@@ -286,7 +286,7 @@ function handleManageSub() {
 
 .profile__membership :deep(.tag--accent) {
   background: rgba(212, 175, 55, 0.15);
-  color: #D4AF37;
+  color: #9c8742;
 }
 
 .profile__membership :deep(.tag--default) {

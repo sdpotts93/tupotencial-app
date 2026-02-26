@@ -27,7 +27,7 @@
 
       <!-- Actions -->
       <div class="detail__actions">
-        <UiButton block @click="navigateTo(`/content/${id}/play`)">
+        <UiButton variant="outline" block @click="navigateTo(`/content/${id}/play`)">
           {{ content.type === 'text' ? 'Leer' : 'Reproducir' }}
         </UiButton>
       </div>
@@ -92,7 +92,6 @@ const content = ref({
 .detail__hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, transparent 40%, rgba(255, 255, 255, 0.6) 100%);
 }
 
 /* ─── Nav overlaid on hero ─── */
@@ -155,11 +154,7 @@ const content = ref({
 
 .detail__actions { margin: var(--space-5) 0; }
 
-.detail__actions :deep(.btn) {
-  background: #FFFFFF;
-  color: var(--color-text);
-  border-color: var(--color-border);
-}
+
 
 .detail__description {
   font-size: var(--text-base);
@@ -176,7 +171,7 @@ const content = ref({
 
 .detail__meta :deep(.tag) {
   background: var(--color-sand);
-  color: var(--color-text);
+  color: white;
 }
 
 /* ─── Desktop ─── */

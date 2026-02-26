@@ -78,7 +78,6 @@ const addon = ref({
 .addon__hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, transparent 40%, rgba(255, 255, 255, 0.6) 100%);
 }
 
 /* ─── Nav ─── */
