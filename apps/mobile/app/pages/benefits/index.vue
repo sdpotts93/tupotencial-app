@@ -1,25 +1,36 @@
 <template>
   <div class="screen">
-    <UiTopNav title="Beneficios" show-back />
     <div class="screen__content">
+      <header class="benefits__header">
+        <button class="benefits__back" aria-label="Volver" @click="$router.back()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <h1 class="benefits__header-title">Beneficios</h1>
+      </header>
+
       <p class="benefits__intro">Disfruta descuentos y ofertas exclusivas para miembros de Tu Potencial.</p>
 
       <div class="benefits__list">
-        <UiCard
+        <NuxtLink
           v-for="benefit in benefits"
           :key="benefit.id"
-          variant="default"
-          clickable
           :to="`/benefits/${benefit.id}`"
+          class="benefits__card"
+          :style="{ '--benefit-accent': benefit.color, '--benefit-bg': benefit.bgColor }"
         >
-          <div style="display: flex; align-items: center; gap: var(--space-3);">
-            <span class="benefits__emoji"><Icon :name="benefit.emoji" size="32" /></span>
-            <div>
-              <h3 style="font-weight: var(--weight-semibold); font-size: var(--text-md);">{{ benefit.title }}</h3>
-              <p style="font-size: var(--text-sm); color: var(--color-muted); margin-top: 2px;">{{ benefit.description }}</p>
-            </div>
+          <div class="benefits__icon-wrap">
+            <Icon :name="benefit.emoji" size="28" />
           </div>
-        </UiCard>
+          <div class="benefits__body">
+            <h3 class="benefits__name">{{ benefit.title }}</h3>
+            <p class="benefits__desc">{{ benefit.description }}</p>
+          </div>
+          <svg class="benefits__chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </NuxtLink>
       </div>
     </div>
   </div>
@@ -29,22 +40,117 @@
 definePageMeta({ layout: 'blank' })
 
 const benefits = ref([
-  { id: 'mock-ben-001', title: 'Descuento en retiros', description: '15% de descuento en retiros presenciales', emoji: 'lucide:mountain' },
-  { id: 'mock-ben-002', title: 'Acceso a comunidad VIP', description: 'Grupo exclusivo de WhatsApp con mentores', emoji: 'lucide:message-circle' },
-  { id: 'mock-ben-003', title: 'Sesión 1:1 gratuita', description: 'Una sesión de coaching al mes sin costo', emoji: 'lucide:target' },
-  { id: 'mock-ben-004', title: 'Descuento en libros', description: '20% en la tienda de libros recomendados', emoji: 'lucide:book-open' },
+  { id: 'mock-ben-001', title: 'Descuento en retiros', description: '15% de descuento en retiros presenciales', emoji: 'lucide:mountain', color: '#4ECDC4', bgColor: 'rgba(78, 205, 196, 0.15)' },
+  { id: 'mock-ben-002', title: 'Acceso a comunidad VIP', description: 'Grupo exclusivo de WhatsApp con mentores', emoji: 'lucide:message-circle', color: '#9B7FE6', bgColor: 'rgba(155, 127, 230, 0.15)' },
+  { id: 'mock-ben-003', title: 'Sesión 1:1 gratuita', description: 'Una sesión de coaching al mes sin costo', emoji: 'lucide:target', color: '#F09A5E', bgColor: 'rgba(240, 154, 94, 0.15)' },
+  { id: 'mock-ben-004', title: 'Descuento en libros', description: '20% en la tienda de libros recomendados', emoji: 'lucide:book-open', color: '#E05A7A', bgColor: 'rgba(224, 90, 122, 0.15)' },
 ])
 </script>
 
 <style scoped>
-.benefits__intro {
-  font-size: var(--text-sm); color: var(--color-muted);
-  margin-bottom: var(--space-6); line-height: var(--leading-relaxed);
+/* ─── Header (standard) ─── */
+.benefits__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: var(--space-6);
 }
 
-.benefits__list { display: flex; flex-direction: column; gap: var(--space-3); }
+.benefits__header-title {
+  font-family: var(--font-eyebrow);
+  font-size: 12px;
+  text-transform: uppercase;
+}
 
-.benefits__emoji { font-size: 2rem; flex-shrink: 0; }
+.benefits__back {
+  position: absolute;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  -webkit-tap-highlight-color: transparent;
+}
+.benefits__back:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* ─── Intro ─── */
+.benefits__intro {
+  font-size: var(--text-md);
+  color: var(--color-muted);
+  margin-bottom: var(--space-6);
+  line-height: var(--leading-relaxed);
+}
+
+/* ─── Card list ─── */
+.benefits__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ─── Card ─── */
+.benefits__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  text-decoration: none;
+  color: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  transition: background var(--transition-fast);
+}
+.benefits__card:hover { background: rgba(255, 255, 255, 0.12); }
+.benefits__card:active { background: rgba(255, 255, 255, 0.15); }
+
+/* ─── Colorful icon ─── */
+.benefits__icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--benefit-bg);
+  color: var(--benefit-accent);
+}
+
+/* ─── Body ─── */
+.benefits__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.benefits__name {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: white;
+}
+
+.benefits__desc {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.5);
+  line-height: var(--leading-normal);
+}
+
+.benefits__chevron {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.4);
+}
 
 /* ─── Desktop ─── */
 @media (min-width: 1024px) {

@@ -206,7 +206,7 @@ const baseActivities: DayActivity[] = [
   {
     id: 'act-003',
     type: 'ai',
-    title: 'Reflexión con AI Coach',
+    title: 'Reflexión con Coach IA',
     description: 'Habla con tu coach sobre el tema del día.',
     thumbnail: '/images/lib-3.jpg',
     duration: '5 min',

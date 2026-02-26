@@ -15,6 +15,7 @@
         <h2 class="title title--md">Destacado</h2>
         <NuxtLink to="/content/mock-content-001" class="library__featured-card">
           <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
+          <Icon name="lucide:headphones" size="30" class="library__featured-type" />
           <div class="library__featured-overlay">
             <span class="library__featured-eyebrow">Meditación • 10 min</span>
             <h3 class="library__featured-name">Respiración consciente</h3>
@@ -171,6 +172,16 @@ const categories = ref([
   height: 100%;
   object-fit: cover;
   object-position: bottom;
+}
+
+.library__featured-type {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  padding: var(--space-1);
+  border-radius: 4px;
+  color: white;
+  z-index: 1;
 }
 
 .library__featured-overlay {

@@ -12,7 +12,7 @@
       <h1 class="hoy__greeting">{{ greeting }}</h1>
     </div>
 
-    <div class="hoy__hero-progress">
+    <NuxtLink to="/hoy/progress" class="hoy__hero-progress">
       <div class="hoy__hero-progress-row">
         <span class="hoy__hero-label">{{ currentRetoLabel }}</span>
         <span class="hoy__hero-count"><Icon name="lucide:star" size="14" /> {{ retosCompleted }} / {{ retosTotal }}</span>
@@ -20,7 +20,8 @@
       <div class="hoy__hero-bar">
         <div class="hoy__hero-bar-fill" :style="{ width: animatedProgressWidth }" />
       </div>
-    </div>
+      <span class="hoy__hero-link">Ver progreso <Icon name="lucide:chevron-right" size="12" /></span>
+    </NuxtLink>
 
     <div class="screen__content">
 
@@ -28,15 +29,15 @@
       <section class="hoy__retos">
         <Transition name="fade" mode="out-in">
           <!-- Celebration state when all complete -->
-          <div v-if="allRetosComplete" key="complete" class="hoy__celebration">
+          <NuxtLink v-if="allRetosComplete" key="complete" to="/hoy/progress" class="hoy__celebration">
             <div class="hoy__celebration-icon">
               <Icon name="lucide:party-popper" size="32" />
             </div>
             <div class="hoy__celebration-text">
               <p class="hoy__celebration-title">Dia completado</p>
-              <p class="hoy__celebration-sub">Racha de {{ streak + 1 }} dias. Explora mas contenido abajo.</p>
+              <p class="hoy__celebration-sub">Racha de {{ streak + 1 }} dias. Ver tu progreso <Icon name="lucide:arrow-right" size="14" /></p>
             </div>
-          </div>
+          </NuxtLink>
 
           <!-- Task list when not all complete -->
           <div v-else key="tasks" class="hoy__retos-list">
@@ -414,7 +415,7 @@ function contentTypeIcon(type: string) {
 const activities = ref([
   {
     id: 'ai-coach',
-    title: 'AI Coach',
+    title: 'Mi Coach IA',
     meta: 'Tu coach personal',
     icon: 'lucide:bot',
     accent: '#9AB3C7',
@@ -562,15 +563,18 @@ function closeAccionSheet() {
 
 /* ─── Progress bar ─── */
 .hoy__hero-progress {
+  display: block;
   position: sticky;
   top: 0;
   z-index: 100;
   background: #28313c6b;
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
-  padding: var(--space-3) var(--space-5) var(--space-5);
+  padding: var(--space-3) var(--space-5) var(--space-3);
   margin-bottom: var(--space-5);
   box-shadow: 2px 19px 24px rgb(0 0 0 / 14%);
   backdrop-filter: blur(5px);
+  text-decoration: none;
+  color: inherit;
 }
 
 .hoy__hero-progress-row {
@@ -602,6 +606,17 @@ function closeAccionSheet() {
   color: #ffe726;
 }
 
+.hoy__hero-link {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  margin-top: var(--space-3);
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
 .hoy__hero-bar {
   height: 4px;
   background: #ffffff30;
@@ -624,7 +639,7 @@ function closeAccionSheet() {
 .hoy__retos-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-4);
 }
 
 .hoy__reto-item {
@@ -690,6 +705,8 @@ function closeAccionSheet() {
   background: linear-gradient(135deg, rgba(78, 205, 196, 0.15), rgba(168, 216, 110, 0.12));
   border: 1px solid rgba(168, 216, 110, 0.25);
   border-radius: var(--radius-xl);
+  text-decoration: none;
+  color: inherit;
 }
 
 .hoy__celebration-icon {
