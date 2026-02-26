@@ -275,12 +275,13 @@ function getResponse(input: string): string {
   padding-bottom: var(--space-4);
   overflow-x: auto;
   scrollbar-width: none;
+  margin-right: -1rem;
 }
 .chat__prompts::-webkit-scrollbar { display: none; }
 
 .chat__prompt-btn {
   flex-shrink: 0;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-4) var(--space-1);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.08);
@@ -292,6 +293,9 @@ function getResponse(input: string): string {
   -webkit-tap-highlight-color: transparent;
 }
 
+.chat__prompt-btn:last-child {
+  margin-right: 1rem;
+}
 /* ─── Fixed input bar (community post style) ─── */
 .chat__add {
   position: fixed;
@@ -312,11 +316,11 @@ function getResponse(input: string): string {
 
 .chat__input {
   flex: 1;
-  background: rgba(255, 255, 255, 0.08);
+  background: #ffffff21;
   border: none;
   border-radius: var(--radius-full);
   padding: var(--space-3) var(--space-4);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-family: var(--font-body);
   color: white;
   outline: none;

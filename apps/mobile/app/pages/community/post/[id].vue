@@ -232,7 +232,7 @@ const newComment = ref('')
   left: 0;
   right: 0;
   z-index: var(--z-sticky, 10);
-  background: var(--color-dark);
+  background: #1d1d1d;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: var(--space-3) var(--space-5);
 }
@@ -245,11 +245,11 @@ const newComment = ref('')
 
 .post-detail__input {
   flex: 1;
-  background: rgba(255, 255, 255, 0.08);
+  background: #ffffff21;
   border: none;
   border-radius: var(--radius-full);
   padding: var(--space-3) var(--space-4);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-family: var(--font-body);
   color: white;
   outline: none;
