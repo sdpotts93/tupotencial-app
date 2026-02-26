@@ -505,7 +505,7 @@ function closeAccionSheet() {
 
 /* ─── Hero header ─── */
 .hoy__hero {
-  background: var(--color-surface);
+  background: var(--color-gray);
   padding: var(--space-5) var(--space-5) 0;
 }
 
@@ -527,7 +527,7 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
-  background: var(--color-surface);
+  background: var(--color-dark);
   border: none;
   border-radius: var(--radius-full);
   text-decoration: none;
@@ -568,11 +568,10 @@ function closeAccionSheet() {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--color-surface);
+  background: var(--color-gray);
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   padding: var(--space-3) var(--space-5) var(--space-3);
   margin-bottom: var(--space-5);
-  box-shadow: 0 1px 0 var(--color-border);
   backdrop-filter: blur(5px);
   text-decoration: none;
   color: var(--color-text);
@@ -604,7 +603,7 @@ function closeAccionSheet() {
   top: 2px;
   position: relative;
   margin-right: 4px;
-  color: var(--color-sand);
+  color: var(--color-yellow);
 }
 
 .hoy__hero-link {
@@ -649,7 +648,7 @@ function closeAccionSheet() {
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-4);
-    background: rgba(0, 0, 0, 0.04);
+    background: rgb(0 0 0 / 7%);
     border-radius: var(--radius-xl);
     border: none;
     color: var(--color-text);
@@ -815,7 +814,6 @@ function closeAccionSheet() {
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  background: #000;
 }
 
 .hoy__featured-img {
@@ -826,6 +824,7 @@ function closeAccionSheet() {
   object-fit: cover;
   display: block;
   object-position: bottom;
+  border-radius: var(--radius-2xl);
 }
 
 .hoy__featured-overlay {
@@ -834,8 +833,7 @@ function closeAccionSheet() {
   left: 0;
   right: 0;
   padding: var(--space-5);
-  backdrop-filter: blur(12px);
-  background: #6d6d6d08;
+  background: var(--color-gray);
 }
 
 .hoy__featured-eyebrow {
@@ -1223,7 +1221,8 @@ function closeAccionSheet() {
   font-size: var(--title-xl);
   color: var(--color-text);
   line-height: var(--leading-tight);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
+  margin-top: var(--space-10);
   font-weight: 100;
 }
 

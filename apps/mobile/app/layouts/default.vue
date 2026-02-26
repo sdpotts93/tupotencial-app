@@ -39,6 +39,7 @@ const navItems = [
 .app-layout {
   min-height: 100dvh;
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  background: #FFFFFF;
 }
 
 /* ─── Desktop: offset content for sidebar ─── */
