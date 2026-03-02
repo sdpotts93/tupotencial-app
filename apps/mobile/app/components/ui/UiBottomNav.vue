@@ -1,7 +1,7 @@
 <template>
   <nav ref="navRef" class="bottom-nav">
     <div class="bottom-nav__logo">
-      <img src="/logo-icon/logo-icon-green.png" alt="Tu Potencial" />
+      <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" />
     </div>
     <div class="bottom-nav__pill" :style="pillStyle" />
 
@@ -268,7 +268,7 @@ onBeforeUnmount(() => ro?.disconnect())
   }
 
   .bottom-nav__logo img {
-    height: 28px;
+    height: 20px;
     width: auto;
   }
 

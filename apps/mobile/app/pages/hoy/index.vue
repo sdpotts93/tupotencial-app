@@ -7,6 +7,7 @@
         <NuxtLink to="/hoy/progress" class="hoy__streak-badge">
           <Icon name="lucide:flame" size="16" class="hoy__streak-icon" />
           <span class="hoy__streak-count">{{ streak }}</span>
+          <span class="hoy__streak-label">días</span>
         </NuxtLink>
       </div>
       <h1 class="hoy__greeting">{{ greeting }}</h1>
@@ -551,6 +552,10 @@ function closeAccionSheet() {
   font-weight: var(--weight-bold);
   color: #ffaa32;
   letter-spacing: 0.02em;
+}
+
+.hoy__streak-label {
+  display: none;
 }
 
 /* ─── Greeting ─── */
@@ -1370,52 +1375,67 @@ function closeAccionSheet() {
   }
 
   .hoy__hero-logo {
-    height: 32px;
+    display: none;
+  }
+
+  .hoy__greeting {
+    font-size: var(--title-md);
+    margin-top: 0;
+    order: -1;
+    flex: 1;
   }
 
   .hoy__streak-badge {
     margin-left: auto;
   }
 
-  .hoy__greeting {
-    font-size: var(--title-md);
-    margin-top: 0;
+  .hoy__streak-label {
+    display: inline;
+    font-family: var(--font-eyebrow);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    color: #ffaa32;
+    letter-spacing: 0.02em;
   }
 
-  /* Progress bar: inline sticky card */
+  /* Progress bar: inline card (not sticky) */
   .hoy__hero-progress {
-    position: sticky;
-    top: var(--topbar-height);
+    position: static;
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
     margin: var(--space-4) var(--space-8) 0;
     padding: var(--space-3) var(--space-6);
-    z-index: 10;
+    z-index: auto;
   }
 
   .hoy__hero-link {
     display: none;
   }
 
-  /* Content area */
+  /* Content area: 2-col grid on desktop */
   .screen__content {
     max-width: none;
     padding: var(--space-6) var(--space-8);
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: var(--space-4);
   }
 
-  /* Retos: inline row */
+  /* Retos: right column, below mensaje */
   .hoy__retos {
-    margin-bottom: var(--space-5);
+    grid-column: 2;
+    grid-row: 2;
+    margin-bottom: 0;
   }
 
   .hoy__retos-list {
     display: flex;
+    flex-direction: column;
     gap: var(--space-3);
   }
 
   .hoy__reto-item {
-    flex: 1;
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
@@ -1431,19 +1451,22 @@ function closeAccionSheet() {
     background: linear-gradient(135deg, rgba(78, 205, 196, 0.08), rgba(168, 216, 110, 0.06));
   }
 
-  /* Featured + Mensaje: side-by-side 2-col */
+  /* Flatten duo-row so children participate in parent grid */
   .hoy__duo-row {
-    display: grid;
-    grid-template-columns: 3fr 2fr;
-    gap: var(--space-4);
-    margin-bottom: var(--space-6);
+    display: contents;
   }
 
+  /* Featured: left column, spans both rows */
   .hoy__featured {
+    grid-column: 1;
+    grid-row: 1 / 3;
     margin-bottom: 0;
   }
 
+  /* Mensaje: right column, row 1 */
   .hoy__mensaje {
+    grid-column: 2;
+    grid-row: 1;
     margin-bottom: 0;
   }
 
@@ -1458,7 +1481,7 @@ function closeAccionSheet() {
   }
 
   .hoy__featured-img {
-    width: 200px;
+    width: 250px;
     height: auto;
     aspect-ratio: auto;
     border-radius: var(--radius-lg);
@@ -1482,6 +1505,13 @@ function closeAccionSheet() {
     display: flex;
     flex-direction: column;
     justify-content: center;
+  }
+
+  /* Full-width sections in grid */
+  .hoy__continue,
+  .hoy__latest,
+  .hoy__start {
+    grid-column: 1 / -1;
   }
 
   /* Continue + Recientes + Explora: side-by-side rows */

@@ -9,7 +9,7 @@
       </div>
       <div class="blank-layout__topbar-right">
         <NuxtLink to="/hoy/progress" class="blank-layout__streak">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffaa32" stroke-width="2"><path d="M12 2c.3 3.5-1.1 5.8-2.3 7.6C8.5 11.5 9.7 14 12 14c2.8 0 4.7-2.3 5-5 .4 3.2-1.3 8-5 11-3.7-3-5.4-7.8-5-11 .3 2.7 2.2 5 5 5 2.3 0 3.5-2.5 2.3-4.4C13.1 7.8 11.7 5.5 12 2z"/></svg>
+          <Icon name="lucide:flame" size="14" class="blank-layout__streak-icon" />
           <span>{{ streak }}</span>
         </NuxtLink>
         <div class="blank-layout__avatar" @click="navigateTo('/more')">
@@ -195,6 +195,10 @@ const desktopBottomItems = [
     font-weight: var(--weight-bold);
     color: #d4940a;
     transition: background var(--transition-fast);
+  }
+
+  .blank-layout__streak-icon {
+    color: #ffaa32;
   }
 
   .blank-layout__streak:hover {
