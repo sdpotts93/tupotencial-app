@@ -68,7 +68,7 @@
   }
 
   .auth-layout__branding-logo {
-    height: 80px;
+    height: 200px;
     width: auto;
     border-radius: var(--radius-xl);
   }
