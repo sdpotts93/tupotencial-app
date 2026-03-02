@@ -51,11 +51,14 @@
         <UiListItem
           v-for="day in program.days"
           :key="day.index"
-          :label="`Día ${day.index}: ${day.title}`"
-          :description="day.done ? 'Completado ✓' : ''"
-          :description-variant="day.done ? 'success' : 'default'"
+          :label="`Día ${day.index}`"
+          :description="day.title"
           :to="`/retos/${id}/day/${day.index}`"
-        />
+        >
+          <template v-if="day.done" #suffix>
+            <span class="detail__done">Completado ✓</span>
+          </template>
+        </UiListItem>
       </UiList>
     </section>
   </div>
@@ -225,6 +228,12 @@ function enroll() {
   color: white;
 }
 
+/* ─── Completed badge ─── */
+.detail__done {
+  font-size: var(--text-xs);
+  color: #60a97c;
+}
+
 /* ─── Day list ─── */
 .detail__days {
   padding: 0 var(--space-4);
@@ -317,12 +326,58 @@ function enroll() {
   .detail__days {
     padding: 0 var(--space-6);
     margin-left: var(--space-6);
-    max-width: 700px;
+    max-width: 900px;
     margin-top: var(--space-2);
   }
 
   .detail__days > .eyebrow {
     font-size: var(--eyebrow-lg);
+  }
+
+  /* Calendar-style grid for day list */
+  .detail__days :deep(.list) {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-3);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .detail__days :deep(.list-item) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-4) var(--space-2);
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    min-height: auto;
+    gap: var(--space-2);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .detail__days :deep(.list-item:hover) {
+    border-color: var(--color-border);
+  }
+
+  .detail__days :deep(.list-item + .list-item) {
+    border-top: none;
+  }
+
+  .detail__days :deep(.list-item__content) {
+    align-items: center;
+    min-height: auto;
+  }
+
+  .detail__days :deep(.list-item__label) {
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+  }
+
+  .detail__days :deep(.list-item__chevron) {
+    display: none;
   }
 }
 </style>

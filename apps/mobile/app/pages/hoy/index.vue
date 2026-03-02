@@ -1,28 +1,30 @@
 <template>
   <div class="screen">
     <!-- Branded header (logo scrolls away, progress sticks) -->
-    <div class="hoy__hero">
-      <div class="hoy__hero-top">
-        <img src="/logo-icon/logo-fire.png" alt="Tu Potencial" class="hoy__hero-logo" />
-        <NuxtLink to="/hoy/progress" class="hoy__streak-badge">
-          <Icon name="lucide:flame" size="16" class="hoy__streak-icon" />
-          <span class="hoy__streak-count">{{ streak }}</span>
-          <span class="hoy__streak-label">días</span>
-        </NuxtLink>
+    <div class="hoy__hero-row">
+      <div class="hoy__hero">
+        <div class="hoy__hero-top">
+          <img src="/logo-icon/logo-fire.png" alt="Tu Potencial" class="hoy__hero-logo" />
+          <NuxtLink to="/hoy/progress" class="hoy__streak-badge">
+            <Icon name="lucide:flame" size="16" class="hoy__streak-icon" />
+            <span class="hoy__streak-count">{{ streak }}</span>
+            <span class="hoy__streak-label">días</span>
+          </NuxtLink>
+        </div>
+        <h1 class="hoy__greeting">{{ greeting }}</h1>
       </div>
-      <h1 class="hoy__greeting">{{ greeting }}</h1>
-    </div>
 
-    <NuxtLink to="/hoy/progress" class="hoy__hero-progress">
-      <div class="hoy__hero-progress-row">
-        <span class="hoy__hero-label">{{ currentRetoLabel }}</span>
-        <span class="hoy__hero-count"><Icon name="lucide:star" size="14" /> {{ retosCompleted }} / {{ retosTotal }}</span>
-      </div>
-      <div class="hoy__hero-bar">
-        <div class="hoy__hero-bar-fill" :style="{ width: animatedProgressWidth }" />
-      </div>
-      <span class="hoy__hero-link">Ver progreso <Icon name="lucide:chevron-right" size="12" /></span>
-    </NuxtLink>
+      <NuxtLink to="/hoy/progress" class="hoy__hero-progress">
+        <div class="hoy__hero-progress-row">
+          <span class="hoy__hero-label">{{ currentRetoLabel }}</span>
+          <span class="hoy__hero-count"><Icon name="lucide:star" size="14" /> {{ retosCompleted }} / {{ retosTotal }}</span>
+        </div>
+        <div class="hoy__hero-bar">
+          <div class="hoy__hero-bar-fill" :style="{ width: animatedProgressWidth }" />
+        </div>
+        <span class="hoy__hero-link">Ver progreso <Icon name="lucide:chevron-right" size="12" /></span>
+      </NuxtLink>
+    </div>
 
     <div class="screen__content">
 
@@ -505,6 +507,11 @@ function closeAccionSheet() {
 </script>
 
 <style scoped>
+
+/* ─── Hero row (transparent on mobile, grid on desktop) ─── */
+.hoy__hero-row {
+  display: contents;
+}
 
 /* ─── Hero header ─── */
 .hoy__hero {
@@ -1364,12 +1371,20 @@ function closeAccionSheet() {
     padding-top: 2rem;
     font-size: 1.3rem;
   }
+  /* Hero row: 2-col layout */
+  .hoy__hero-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin: var(--space-6) var(--space-8) 0;
+  }
+
   /* Hero: compact greeting row */
   .hoy__hero {
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
-    margin: var(--space-6) var(--space-8) 0;
+    margin: 0;
     padding: var(--space-5) var(--space-6);
     display: flex;
     align-items: center;
@@ -1410,9 +1425,12 @@ function closeAccionSheet() {
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
-    margin: var(--space-4) var(--space-8) 0;
+    margin: 0;
     padding: var(--space-3) var(--space-6);
     z-index: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .hoy__hero-link {

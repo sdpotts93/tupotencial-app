@@ -320,9 +320,8 @@ const categories = ref([
   }
 
   .library__featured-img {
-    width: 320px;
-    aspect-ratio: auto;
-    height: 100%;
+    width: 520px;
+    aspect-ratio: 4 / 3;
     border-radius: var(--radius-lg);
     margin: var(--space-4);
     flex-shrink: 0;
@@ -333,6 +332,7 @@ const categories = ref([
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin: 0 auto;
   }
 
   .library__scroll {
