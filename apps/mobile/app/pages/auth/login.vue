@@ -491,7 +491,7 @@ async function handleRegister() {
     max-width: 440px;
     width: 100%;
     border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-2);
+    box-shadow: none;
     padding: var(--space-8);
     max-height: none;
     overflow-y: visible;
