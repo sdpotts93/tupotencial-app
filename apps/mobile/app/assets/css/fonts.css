@@ -9,9 +9,6 @@
   font-weight: 300;
   font-style: normal;
   font-display: swap;
-  ascent-override: 50%;
-  descent-override: 5%;
-  line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Founders Grotesk';
@@ -19,9 +16,6 @@
   font-weight: 300;
   font-style: italic;
   font-display: swap;
-  ascent-override: 50%;
-  descent-override: 5%;
-  line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Founders Grotesk';
@@ -29,9 +23,6 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
-  ascent-override: 50%;
-  descent-override: 5%;
-  line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Founders Grotesk';
@@ -39,9 +30,6 @@
   font-weight: 400;
   font-style: italic;
   font-display: swap;
-  ascent-override: 50%;
-  descent-override: 5%;
-  line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Founders Grotesk';
@@ -69,9 +57,6 @@
   font-weight: 600;
   font-style: normal;
   font-display: swap;
-  ascent-override: 50%;
-  descent-override: 5%;
-  line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Founders Grotesk';
@@ -79,9 +64,6 @@
   font-weight: 600;
   font-style: italic;
   font-display: swap;
-  ascent-override: 50%;
-  descent-override: 5%;
-  line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Founders Grotesk';
@@ -89,9 +71,6 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
-  ascent-override: 50%;
-  descent-override: 5%;
-  line-gap-override: 0%;
 }
 @font-face {
   font-family: 'Founders Grotesk';
@@ -99,9 +78,6 @@
   font-weight: 700;
   font-style: italic;
   font-display: swap;
-  ascent-override: 50%;
-  descent-override: 5%;
-  line-gap-override: 0%;
 }
 
 /* --- IvyPresto Headline (Titles) --- */
