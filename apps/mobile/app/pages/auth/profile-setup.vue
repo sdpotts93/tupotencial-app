@@ -253,10 +253,10 @@ async function handleSave() {
   }
 
   .profile-setup__card {
-    background: var(--color-surface);
+    background: var(--color-accent);
     color: var(--color-text);
     border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-2);
+    box-shadow: none;
     padding: var(--space-8);
     max-width: 440px;
     flex: none;

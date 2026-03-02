@@ -292,10 +292,10 @@ function handleContinue() {
   }
 
   .onboarding__body {
-    background: var(--color-surface);
+    background: var(--color-accent);
     color: var(--color-text);
     border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-2);
+    box-shadow: none;
     padding: var(--space-8);
     max-width: 440px;
     flex: none;
@@ -316,7 +316,7 @@ function handleContinue() {
   .onboarding-opt {
     background: var(--color-surface);
     color: var(--color-text);
-    border: 1.5px solid var(--color-border);
+    border: 1.5px solid var(--color-surface);
   }
 
   .onboarding-opt:hover {
@@ -324,8 +324,8 @@ function handleContinue() {
   }
 
   .onboarding-opt--selected {
-    border-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+    border-color: var(--color-border);
+    background: var(--color-surface-alt);
   }
 
   .onboarding-opt__label {
