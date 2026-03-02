@@ -1,43 +1,46 @@
 <template>
   <div class="screen">
-    <!-- Hero — full bleed to top -->
-    <div class="detail__hero">
-      <img :src="content.thumbnail" alt="" class="detail__hero-img" />
-      <div class="detail__hero-overlay" />
-
-      <!-- Back button overlaid on hero -->
-      <div class="detail__nav safe-top">
-        <button class="detail__back" aria-label="Volver" @click="$router.back()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
+    <div class="detail">
+      <!-- Media -->
+      <div class="detail__media">
+        <img :src="content.thumbnail" alt="" class="detail__img" />
+        <div class="detail__overlay" />
+        <div class="detail__nav safe-top">
+          <button class="detail__back" aria-label="Volver" @click="$router.back()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+        </div>
+        <button class="detail__play-btn" aria-label="Reproducir" @click="navigateTo(`/content/${id}/play`)">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
         </button>
       </div>
 
-      <button class="detail__play-btn" aria-label="Reproducir" @click="navigateTo(`/content/${id}/play`)">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
-      </button>
-    </div>
+      <!-- Info -->
+      <div class="detail__info">
+        <button class="detail__back-link" @click="$router.back()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Volver
+        </button>
 
-    <div class="screen__content">
-      <!-- Content info -->
-      <p class="eyebrow">{{ content.typeLabel }}</p>
-      <h1 class="title title--lg detail__title">{{ content.title }}</h1>
-      <p v-if="content.subtitle" class="detail__subtitle">{{ content.subtitle }}</p>
+        <p class="eyebrow">{{ content.typeLabel }}</p>
+        <h1 class="title title--lg detail__title">{{ content.title }}</h1>
+        <p v-if="content.subtitle" class="detail__subtitle">{{ content.subtitle }}</p>
 
-      <!-- Actions -->
-      <div class="detail__actions">
-        <UiButton variant="outline" block @click="navigateTo(`/content/${id}/play`)">
-          {{ content.type === 'text' ? 'Leer' : 'Reproducir' }}
-        </UiButton>
-      </div>
+        <div class="detail__actions">
+          <UiButton variant="outline" block @click="navigateTo(`/content/${id}/play`)">
+            {{ content.type === 'text' ? 'Leer' : 'Reproducir' }}
+          </UiButton>
+        </div>
 
-      <!-- Description -->
-      <p class="detail__description">{{ content.description }}</p>
+        <p class="detail__description">{{ content.description }}</p>
 
-      <!-- Duration -->
-      <div class="detail__meta">
-        <UiTag v-if="content.duration">{{ content.duration }}</UiTag>
+        <div class="detail__meta">
+          <UiTag v-if="content.duration">{{ content.duration }}</UiTag>
+        </div>
       </div>
     </div>
   </div>
@@ -71,17 +74,20 @@ const content = ref({
 </script>
 
 <style scoped>
-.screen__content {
-  padding-bottom: 2rem;
+/* ─── Mobile layout ─── */
+.detail {
+  display: flex;
+  flex-direction: column;
 }
-/* ─── Hero — full bleed to top ─── */
-.detail__hero {
+
+/* ─── Media ─── */
+.detail__media {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
 }
 
-.detail__hero-img {
+.detail__img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -89,12 +95,12 @@ const content = ref({
   object-fit: cover;
 }
 
-.detail__hero-overlay {
+.detail__overlay {
   position: absolute;
   inset: 0;
 }
 
-/* ─── Nav overlaid on hero ─── */
+/* ─── Nav (mobile back) ─── */
 .detail__nav {
   position: absolute;
   top: 0;
@@ -137,15 +143,29 @@ const content = ref({
   align-items: center;
   justify-content: center;
   z-index: 1;
+  transition: background var(--transition-fast);
 }
 .detail__play-btn:hover { background: rgba(0, 0, 0, 0.65); }
+
+/* ─── Back link (desktop only) ─── */
+.detail__back-link {
+  display: none;
+}
+
+/* ─── Info ─── */
+.detail__info {
+  padding: var(--space-4);
+  padding-bottom: 2rem;
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+}
 
 .detail__title {
   margin-top: var(--space-1);
   margin-bottom: var(--space-2);
 }
 
-/* ─── Content info (dark bg) ─── */
 .detail__subtitle {
   font-size: var(--text-md);
   color: var(--color-muted);
@@ -153,8 +173,6 @@ const content = ref({
 }
 
 .detail__actions { margin: var(--space-5) 0; }
-
-
 
 .detail__description {
   font-size: var(--text-base);
@@ -174,13 +192,85 @@ const content = ref({
   color: white;
 }
 
+/* ─── Tablet ─── */
+@media (min-width: 768px) {
+  .detail__info {
+    max-width: var(--max-page-width);
+    padding: var(--space-6);
+  }
+}
+
 /* ─── Desktop ─── */
 @media (min-width: 1024px) {
-  .detail__hero {
-    border-radius: var(--radius-xl);
+  .detail {
+    display: grid;
+    grid-template-columns: 55fr 45fr;
+    background: var(--color-desktop-card);
+    border-radius: var(--radius-2xl);
     overflow: hidden;
-    margin: var(--space-4);
-    width: calc(100% - var(--space-4) * 2);
+    border: 1px solid var(--color-desktop-border);
+    margin: var(--space-6);
+    min-height: 480px;
+    max-width: 1100px;
+  }
+
+  .detail__media {
+    order: 2;
+    aspect-ratio: unset;
+  }
+
+  .detail__play-btn {
+    width: 72px;
+    height: 72px;
+  }
+
+  .detail__nav { display: none; }
+
+  .detail__back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: var(--space-6);
+    transition: color var(--transition-fast);
+  }
+  .detail__back-link:hover { color: var(--color-text); }
+
+  .detail__info {
+    order: 1;
+    max-width: none;
+    margin: 0;
+    padding: var(--space-10);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .detail__title {
+    font-size: var(--title-xl);
+  }
+
+  .detail__subtitle {
+    font-size: var(--text-lg);
+  }
+
+  .detail__description {
+    font-size: var(--text-lg);
+  }
+
+  .detail__info > .eyebrow {
+    font-size: var(--eyebrow-lg);
+  }
+
+  .detail__actions :deep(.btn) {
+    width: auto;
+    display: inline-flex;
   }
 }
 </style>

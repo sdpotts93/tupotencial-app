@@ -1,34 +1,43 @@
 <template>
   <div class="screen">
-    <!-- Hero -->
-    <div class="edetail__hero">
-      <img :src="event.img" alt="" class="edetail__hero-img" />
-      <div class="edetail__hero-overlay" />
+    <div class="edetail">
+      <!-- Media -->
+      <div class="edetail__media">
+        <img :src="event.img" alt="" class="edetail__img" />
+        <div class="edetail__overlay" />
+        <div class="edetail__nav safe-top">
+          <button class="edetail__back" aria-label="Volver" @click="$router.back()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
 
-      <div class="edetail__nav safe-top">
-        <button class="edetail__back" aria-label="Volver" @click="$router.back()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Info -->
+      <div class="edetail__info">
+        <button class="edetail__back-link" @click="$router.back()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
+          Volver
         </button>
-      </div>
-    </div>
 
-    <div class="screen__content">
-      <p class="eyebrow">{{ event.dateLabel }}</p>
-      <h1 class="title title--lg edetail__title">{{ event.title }}</h1>
+        <p class="eyebrow">{{ event.dateLabel }}</p>
+        <h1 class="title title--lg edetail__title">{{ event.title }}</h1>
 
-      <div class="edetail__actions">
-        <UiButton variant="outline" block :to="`/events/${id}/watch`">
-          {{ event.isLive ? 'Ver en vivo' : 'Ver grabación' }}
-        </UiButton>
-      </div>
+        <div class="edetail__actions">
+          <UiButton variant="outline" block :to="`/events/${id}/watch`">
+            {{ event.isLive ? 'Ver en vivo' : 'Ver grabación' }}
+          </UiButton>
+        </div>
 
-      <p class="edetail__desc">{{ event.description }}</p>
+        <p class="edetail__desc">{{ event.description }}</p>
 
-      <div class="edetail__meta">
-        <span v-if="event.requiresSub" class="edetail__tag edetail__tag--member">Solo miembros</span>
-        <UiTag>{{ event.status }}</UiTag>
+        <div class="edetail__meta">
+          <span v-if="event.requiresSub" class="edetail__tag edetail__tag--member">Solo miembros</span>
+          <UiTag>{{ event.status }}</UiTag>
+        </div>
       </div>
     </div>
   </div>
@@ -52,18 +61,20 @@ const event = ref({
 </script>
 
 <style scoped>
-.screen__content {
-  padding-bottom: 2rem;
+/* ─── Mobile layout ─── */
+.edetail {
+  display: flex;
+  flex-direction: column;
 }
 
-/* ─── Hero ─── */
-.edetail__hero {
+/* ─── Media ─── */
+.edetail__media {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
 }
 
-.edetail__hero-img {
+.edetail__img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -71,12 +82,12 @@ const event = ref({
   object-fit: cover;
 }
 
-.edetail__hero-overlay {
+.edetail__overlay {
   position: absolute;
   inset: 0;
 }
 
-/* ─── Nav ─── */
+/* ─── Nav (mobile back) ─── */
 .edetail__nav {
   position: absolute;
   top: 0;
@@ -102,6 +113,20 @@ const event = ref({
 }
 .edetail__back:hover { background: rgba(255, 255, 255, 1); }
 
+/* ─── Back link (desktop only) ─── */
+.edetail__back-link {
+  display: none;
+}
+
+/* ─── Info ─── */
+.edetail__info {
+  padding: var(--space-4);
+  padding-bottom: 2rem;
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+}
+
 .edetail__title {
   margin-top: var(--space-1);
   margin-bottom: var(--space-2);
@@ -109,7 +134,6 @@ const event = ref({
 
 /* ─── Actions ─── */
 .edetail__actions { margin: var(--space-5) 0; }
-
 
 /* ─── Description ─── */
 .edetail__desc {
@@ -150,13 +174,76 @@ const event = ref({
   color: white;
 }
 
+/* ─── Tablet ─── */
+@media (min-width: 768px) {
+  .edetail__info {
+    max-width: var(--max-page-width);
+    padding: var(--space-6);
+  }
+}
+
 /* ─── Desktop ─── */
 @media (min-width: 1024px) {
-  .edetail__hero {
-    border-radius: var(--radius-xl);
+  .edetail {
+    display: grid;
+    grid-template-columns: 55fr 45fr;
+    background: var(--color-desktop-card);
+    border-radius: var(--radius-2xl);
     overflow: hidden;
-    margin: var(--space-4);
-    width: calc(100% - var(--space-4) * 2);
+    border: 1px solid var(--color-desktop-border);
+    margin: var(--space-6);
+    min-height: 480px;
+    max-width: 1100px;
+  }
+
+  .edetail__media {
+    order: 2;
+    aspect-ratio: unset;
+  }
+
+  .edetail__nav { display: none; }
+
+  .edetail__back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: var(--space-6);
+    transition: color var(--transition-fast);
+  }
+  .edetail__back-link:hover { color: var(--color-text); }
+
+  .edetail__info {
+    order: 1;
+    max-width: none;
+    margin: 0;
+    padding: var(--space-10);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .edetail__title {
+    font-size: var(--title-xl);
+  }
+
+  .edetail__desc {
+    font-size: var(--text-lg);
+  }
+
+  .edetail__info > .eyebrow {
+    font-size: var(--eyebrow-lg);
+  }
+
+  .edetail__actions :deep(.btn) {
+    width: auto;
+    display: inline-flex;
   }
 }
 </style>

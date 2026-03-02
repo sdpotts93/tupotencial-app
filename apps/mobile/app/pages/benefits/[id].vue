@@ -1,33 +1,42 @@
 <template>
   <div class="screen">
-    <!-- Hero -->
-    <div class="benefit__hero">
-      <div class="benefit__hero-icon">
-        <Icon :name="benefit.icon" size="64" />
+    <div class="benefit">
+      <!-- Media (icon on gradient) -->
+      <div class="benefit__media" :style="{ background: benefit.bgGradient }">
+        <div class="benefit__icon" :style="{ color: benefit.color }">
+          <Icon :name="benefit.icon" size="64" />
+        </div>
+        <div class="benefit__nav safe-top">
+          <button class="benefit__back" aria-label="Volver" @click="$router.back()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div class="benefit__nav safe-top">
-        <button class="benefit__back" aria-label="Volver" @click="$router.back()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Info -->
+      <div class="benefit__info">
+        <button class="benefit__back-link" @click="$router.back()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
+          Volver
         </button>
-      </div>
-    </div>
 
-    <div class="screen__content">
-      <p class="eyebrow" :style="{ color: benefit.color }">BENEFICIO EXCLUSIVO</p>
-      <h1 class="title title--lg benefit__title">{{ benefit.title }}</h1>
+        <p class="eyebrow" :style="{ color: benefit.color }">BENEFICIO EXCLUSIVO</p>
+        <h1 class="title title--lg benefit__title">{{ benefit.title }}</h1>
 
-      <p class="benefit__desc">{{ benefit.description }}</p>
+        <p class="benefit__desc">{{ benefit.description }}</p>
 
-      <div v-if="benefit.code" class="benefit__code">
-        <p class="benefit__code-label">TU CÓDIGO</p>
-        <p class="benefit__code-value" :style="{ color: benefit.color }">{{ benefit.code }}</p>
-      </div>
+        <div v-if="benefit.code" class="benefit__code">
+          <p class="benefit__code-label">TU CÓDIGO</p>
+          <p class="benefit__code-value" :style="{ color: benefit.color }">{{ benefit.code }}</p>
+        </div>
 
-      <div class="benefit__actions">
-        <UiButton block @click="handleOpen">Abrir enlace</UiButton>
+        <div class="benefit__actions">
+          <UiButton block @click="handleOpen">Abrir enlace</UiButton>
+        </div>
       </div>
     </div>
   </div>
@@ -53,12 +62,14 @@ function handleOpen() {
 </script>
 
 <style scoped>
-.screen__content {
-  padding-bottom: 2rem;
+/* ─── Mobile layout ─── */
+.benefit {
+  display: flex;
+  flex-direction: column;
 }
 
-/* ─── Hero ─── */
-.benefit__hero {
+/* ─── Media (icon hero) ─── */
+.benefit__media {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -68,11 +79,11 @@ function handleOpen() {
   background: var(--color-gray);
 }
 
-.benefit__hero-icon {
+.benefit__icon {
   color: var(--color-text-secondary);
 }
 
-/* ─── Nav ─── */
+/* ─── Nav (mobile back) ─── */
 .benefit__nav {
   position: absolute;
   top: 0;
@@ -98,6 +109,20 @@ function handleOpen() {
   -webkit-tap-highlight-color: transparent;
 }
 .benefit__back:hover { background: rgba(0, 0, 0, 0.5); }
+
+/* ─── Back link (desktop only) ─── */
+.benefit__back-link {
+  display: none;
+}
+
+/* ─── Info ─── */
+.benefit__info {
+  padding: var(--space-4);
+  padding-bottom: 2rem;
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+}
 
 .benefit__title {
   margin-top: var(--space-1);
@@ -148,13 +173,86 @@ function handleOpen() {
   border-color: var(--color-border);
 }
 
+/* ─── Tablet ─── */
+@media (min-width: 768px) {
+  .benefit__info {
+    max-width: var(--max-page-width);
+    padding: var(--space-6);
+  }
+}
+
 /* ─── Desktop ─── */
 @media (min-width: 1024px) {
-  .benefit__hero {
-    border-radius: var(--radius-xl);
+  .benefit {
+    display: grid;
+    grid-template-columns: 55fr 45fr;
+    background: var(--color-desktop-card);
+    border-radius: var(--radius-2xl);
     overflow: hidden;
-    margin: var(--space-4);
-    width: calc(100% - var(--space-4) * 2);
+    border: 1px solid var(--color-desktop-border);
+    margin: var(--space-6);
+    min-height: 480px;
+    max-width: 1100px;
+  }
+
+  .benefit__media {
+    order: 2;
+    aspect-ratio: unset;
+    min-height: 100%;
+  }
+
+  .benefit__icon :deep(svg) {
+    width: 96px;
+    height: 96px;
+  }
+
+  .benefit__nav { display: none; }
+
+  .benefit__back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: var(--space-6);
+    transition: color var(--transition-fast);
+  }
+  .benefit__back-link:hover { color: var(--color-text); }
+
+  .benefit__info {
+    order: 1;
+    max-width: none;
+    margin: 0;
+    padding: var(--space-10);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .benefit__title {
+    font-size: var(--title-xl);
+  }
+
+  .benefit__desc {
+    font-size: var(--text-lg);
+  }
+
+  .benefit__info > .eyebrow {
+    font-size: var(--eyebrow-lg);
+  }
+
+  .benefit__code-value {
+    font-size: var(--title-lg);
+  }
+
+  .benefit__actions :deep(.btn) {
+    width: auto;
+    display: inline-flex;
   }
 }
 </style>
