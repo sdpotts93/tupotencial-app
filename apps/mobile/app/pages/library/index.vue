@@ -284,10 +284,61 @@ const categories = ref([
 }
 
 
-/* ─── Desktop ─── */
+/* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {
+  .library__header {
+    justify-content: flex-start;
+    gap: var(--space-4);
+  }
+
+  .library__title {
+    font-size: var(--text-lg);
+    display: none; /* title shown in top bar */
+  }
+
+  .library__search-btn {
+    position: static;
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-md);
+    width: 36px;
+    height: 36px;
+    color: var(--color-muted);
+  }
+
+  .library__search-btn:hover {
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .library__featured-card {
+    flex-direction: row;
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .library__featured-img {
+    width: 320px;
+    aspect-ratio: auto;
+    height: 100%;
+    border-radius: var(--radius-lg);
+    margin: var(--space-4);
+    flex-shrink: 0;
+  }
+
+  .library__featured-info {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   .library__scroll {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
     overflow-x: visible;
     margin: 0;
   }
@@ -298,9 +349,12 @@ const categories = ref([
   }
 
   .library__scroll-card {
-    min-width: 200px;
-    max-width: none;
-    flex: 1 1 200px;
+    flex: none;
+    min-width: 0;
+  }
+
+  .library__scroll-img {
+    border-radius: var(--radius-lg);
   }
 }
 </style>

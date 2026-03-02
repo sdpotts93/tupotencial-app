@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({ layout: 'default' })
 
 const benefits = ref([
   { id: 'mock-ben-001', title: 'Descuento en retiros', description: '15% de descuento en retiros presenciales', emoji: 'lucide:mountain', color: '#4ECDC4', bgColor: 'rgba(78, 205, 196, 0.15)' },
@@ -152,11 +152,36 @@ const benefits = ref([
   color: var(--color-muted);
 }
 
-/* ─── Desktop ─── */
+/* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {
+  .benefits__header {
+    justify-content: flex-start;
+  }
+
+  .benefits__header-title {
+    display: none;
+  }
+
+  .benefits__back {
+    display: none;
+  }
+
   .benefits__list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .benefits__card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--transition-fast);
+  }
+
+  .benefits__card:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
   }
 }
 </style>

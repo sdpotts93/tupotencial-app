@@ -112,4 +112,19 @@ function handleLogout() {
 /* Plan tier tag colors */
 .more__info :deep(.tag--accent) { width: fit-content; background: rgba(212, 175, 55, 0.15); color: #9c8742; }
 .more__info :deep(.tag--default) {  background: rgba(192, 192, 192, 0.15); color: #C0C0C0; }
+
+/* ─── Desktop SaaS ─── */
+@media (min-width: 1024px) {
+  .more__profile {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+  }
+
+  .more__avatar {
+    width: 48px;
+    height: 48px;
+  }
+}
 </style>

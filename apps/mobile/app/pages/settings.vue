@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({ layout: 'default' })
 </script>
 
 <style scoped>
@@ -81,5 +81,24 @@ definePageMeta({ layout: 'blank' })
   font-size: var(--text-xs);
   color: var(--color-muted);
   margin-top: var(--space-4);
+}
+
+/* ─── Desktop SaaS ─── */
+@media (min-width: 1024px) {
+  .settings__header {
+    justify-content: flex-start;
+  }
+
+  .settings__header-title {
+    display: none;
+  }
+
+  .settings__back {
+    display: none;
+  }
+
+  .settings__version {
+    text-align: left;
+  }
 }
 </style>

@@ -233,4 +233,47 @@ function toggleReaction(id: string) {
   text-decoration: none;
 }
 .post__action:hover { color: var(--color-text-secondary); }
+
+/* ─── Desktop SaaS ─── */
+@media (min-width: 1024px) {
+  .community__header {
+    justify-content: flex-start;
+  }
+
+  .community__header-title {
+    display: none;
+  }
+
+  .community__feed {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .post {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .post:hover {
+    border-color: var(--color-border);
+  }
+
+  .community__pill {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+  }
+
+  .community__pill--active {
+    background: var(--color-dark);
+    border-color: var(--color-dark);
+    color: white;
+  }
+
+  .community__pill:not(.community__pill--active):hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
+  }
+}
 </style>

@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({ layout: 'default' })
 
 const addons = ref([
   {
@@ -207,11 +207,50 @@ const addons = ref([
     color: #60a97c;
 }
 
-/* ─── Desktop ─── */
+/* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {
+  .addons__header {
+    justify-content: flex-start;
+  }
+
+  .addons__header-title {
+    display: none;
+  }
+
+  .addons__back {
+    display: none;
+  }
+
   .addons__list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
+  }
+
+  .addons__card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+  }
+
+  .addons__card:hover {
+    border-color: var(--color-border);
+  }
+
+  .addons__card + .addons__card {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .addons__card-img {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .addons__card-info {
+    padding: var(--space-4) var(--space-5);
   }
 }
 </style>

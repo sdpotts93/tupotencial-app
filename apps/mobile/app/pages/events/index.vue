@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({ layout: 'default' })
 
 const upcomingEvents = ref([
   { id: 'mock-event-001', title: 'Live: Meditación grupal', description: 'Sesión guiada de meditación con Carlotta.', dateLabel: '28 Feb', timeLabel: 'JUEVES 19:00 CDMX', img: '/images/lib-4.jpg', requiresSub: true },
@@ -274,11 +274,61 @@ const pastEvents = ref([
   color: var(--color-muted);
 }
 
-/* ─── Desktop ─── */
+/* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {
+  .events__header {
+    justify-content: flex-start;
+  }
+
+  .events__header-title {
+    display: none;
+  }
+
+  .events__back {
+    display: none;
+  }
+
   .events__list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
+  }
+
+  .events__card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+  }
+
+  .events__card:hover {
+    border-color: var(--color-border);
+  }
+
+  .events__card + .events__card {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .events__card-img {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .events__card-info {
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .events__past-card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .events__past-card:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
   }
 }
 </style>

@@ -208,11 +208,46 @@ const filteredPrograms = computed(() => {
   color: #60a97c;
 }
 
-/* ─── Desktop ─── */
+/* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {
+  .retos__header {
+    justify-content: flex-start;
+  }
+
+  .retos__title {
+    display: none; /* shown in top bar */
+  }
+
   .retos__list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
+  }
+
+  .retos__card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+  }
+
+  .retos__card:hover {
+    border-color: var(--color-border);
+  }
+
+  .retos__card + .retos__card {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .retos__card-img {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .retos__card-info {
+    padding: var(--space-4) var(--space-5);
   }
 }
 </style>

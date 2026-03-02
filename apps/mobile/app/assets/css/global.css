@@ -122,10 +122,15 @@ img, video {
 @media (min-width: 1024px) {
   .screen {
     padding-bottom: 0;
+    background: transparent;
+    min-height: auto;
   }
 
   .screen__content {
-    padding: var(--space-8);
+    max-width: 960px;
+    padding: var(--space-6) var(--space-8) var(--space-10);
+    background: transparent;
+    margin: 0;
   }
 }
 

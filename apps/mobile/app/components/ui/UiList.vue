@@ -17,4 +17,16 @@
 .list > :deep(.list-item + .list-item) {
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
+
+@media (min-width: 1024px) {
+  .list {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .list > :deep(.list-item + .list-item) {
+    border-top-color: var(--color-desktop-border);
+  }
+}
 </style>

@@ -1349,4 +1349,201 @@ function closeAccionSheet() {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ─── Desktop SaaS layout ─── */
+@media (min-width: 1024px) {
+  /* Hero becomes a card */
+  .hoy__hero {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    margin: var(--space-6) var(--space-8) 0;
+    padding: var(--space-6);
+  }
+
+  .hoy__hero-logo {
+    height: 32px;
+  }
+
+  .hoy__greeting {
+    font-size: var(--title-lg);
+    margin-top: var(--space-4);
+  }
+
+  /* Progress bar becomes inline card */
+  .hoy__hero-progress {
+    position: sticky;
+    top: var(--topbar-height);
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    margin: var(--space-4) var(--space-8) 0;
+    padding: var(--space-4) var(--space-6);
+    z-index: 10;
+  }
+
+  .hoy__hero-link {
+    display: none;
+  }
+
+  /* Content area */
+  .screen__content {
+    max-width: 960px;
+    padding: var(--space-6) var(--space-8);
+  }
+
+  /* Two-column layout for retos + featured */
+  .hoy__retos {
+    margin-bottom: var(--space-5);
+  }
+
+  .hoy__retos-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  .hoy__reto-item {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .hoy__reto-item:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
+  }
+
+  .hoy__celebration {
+    border: 1px solid rgba(168, 216, 110, 0.3);
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.08), rgba(168, 216, 110, 0.06));
+  }
+
+  /* Featured card: horizontal layout */
+  .hoy__featured {
+    margin-bottom: var(--space-6);
+  }
+
+  .hoy__featured-card {
+    flex-direction: row;
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .hoy__featured-img {
+    width: 280px;
+    height: auto;
+    aspect-ratio: auto;
+    border-radius: var(--radius-lg);
+    margin: var(--space-4);
+    flex-shrink: 0;
+  }
+
+  .hoy__featured-info {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Mensaje del dia card */
+  .hoy__mensaje-card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Continue programs - horizontal row */
+  .hoy__continue-scroll {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .hoy__continue-card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .hoy__continue-card:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
+  }
+
+  /* Latest from biblioteca - grid */
+  .hoy__latest-scroll {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+    overflow-x: visible;
+    margin: 0;
+  }
+
+  .hoy__latest-scroll::before,
+  .hoy__latest-scroll::after {
+    display: none;
+  }
+
+  .hoy__latest-card {
+    flex: none;
+  }
+
+  .hoy__latest-img {
+    border-radius: var(--radius-lg);
+  }
+
+  /* Explore grid */
+  .hoy__start-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .hoy__activity {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .hoy__activity:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
+  }
+
+  .hoy__activity--wide {
+    grid-column: span 1;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hoy__activity--wide .hoy__activity-chevron {
+    display: none;
+  }
+
+  /* Sheets become centered modals on desktop */
+  .hoy__overlay {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .hoy__sheet {
+    border-radius: var(--radius-xl);
+    max-width: 480px;
+    width: 100%;
+    max-height: 80dvh;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+
+  .hoy__overlay--active .hoy__sheet {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .hoy__sheet-handle {
+    display: none;
+  }
+}
 </style>

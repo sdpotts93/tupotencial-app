@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({ layout: 'default' })
 
 const selectedTone = ref<'carlotta' | 'gabriel'>('carlotta')
 const limitReached = ref(false)
@@ -296,5 +296,71 @@ function startChat(prompt?: string) {
   font-size: var(--text-sm);
   color: #F09A5E;
   line-height: var(--leading-relaxed);
+}
+
+/* ─── Desktop SaaS ─── */
+@media (min-width: 1024px) {
+  .ai__header {
+    justify-content: flex-start;
+  }
+
+  .ai__header-title {
+    display: none;
+  }
+
+  .ai__back {
+    display: none;
+  }
+
+  .ai-home__hero {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+  }
+
+  .ai-home__icon {
+    margin-bottom: 0;
+  }
+
+  .ai-home__desc {
+    margin-left: 0;
+    max-width: none;
+  }
+
+  .ai-home__tone-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .onboarding-opt {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+  }
+
+  .onboarding-opt--selected {
+    border-color: var(--color-primary);
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .ai-home__session {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .ai-home__session:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
+  }
+
+  .ai-home__actions :deep(.btn--primary) {
+    max-width: 280px;
+  }
 }
 </style>

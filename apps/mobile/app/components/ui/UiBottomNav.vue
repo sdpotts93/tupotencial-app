@@ -4,6 +4,8 @@
       <img src="/logo-icon/logo-icon-green.png" alt="Tu Potencial" />
     </div>
     <div class="bottom-nav__pill" :style="pillStyle" />
+
+    <!-- Primary nav items (shown on mobile bottom bar + desktop sidebar) -->
     <NuxtLink
       v-for="(item, idx) in items"
       :key="item.to"
@@ -14,6 +16,36 @@
       <span class="bottom-nav__icon" v-html="item.icon" />
       <span class="bottom-nav__label">{{ item.label }}</span>
     </NuxtLink>
+
+    <!-- Desktop-only: additional sections -->
+    <template v-for="section in sections" :key="section.title">
+      <div class="bottom-nav__section">
+        <span class="bottom-nav__section-title">{{ section.title }}</span>
+        <NuxtLink
+          v-for="item in section.items"
+          :key="item.to"
+          :to="item.to"
+          :class="['bottom-nav__item', { 'bottom-nav__item--active': isActive(item.to) }]"
+        >
+          <span class="bottom-nav__icon" v-html="item.icon" />
+          <span class="bottom-nav__label">{{ item.label }}</span>
+        </NuxtLink>
+      </div>
+    </template>
+
+    <!-- Desktop-only: bottom items (pushed to bottom with spacer) -->
+    <div class="bottom-nav__spacer" />
+    <div class="bottom-nav__bottom">
+      <NuxtLink
+        v-for="item in bottomItems"
+        :key="item.to"
+        :to="item.to"
+        :class="['bottom-nav__item bottom-nav__item--bottom', { 'bottom-nav__item--active': isActive(item.to) }]"
+      >
+        <span class="bottom-nav__icon" v-html="item.icon" />
+        <span class="bottom-nav__label">{{ item.label }}</span>
+      </NuxtLink>
+    </div>
   </nav>
 </template>
 
@@ -26,11 +58,22 @@ interface NavItem {
   icon: string
 }
 
-interface Props {
+interface NavSection {
+  title: string
   items: NavItem[]
 }
 
-const props = defineProps<Props>()
+interface Props {
+  items: NavItem[]
+  sections?: NavSection[]
+  bottomItems?: NavItem[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  sections: () => [],
+  bottomItems: () => [],
+})
+
 const route = useRoute()
 const navRef = ref<HTMLElement | null>(null)
 const itemEls: (HTMLElement | null)[] = []
@@ -95,7 +138,7 @@ onBeforeUnmount(() => ro?.disconnect())
 </script>
 
 <style scoped>
-/* ─── Mobile: Floating bottom bar (Match style) ─── */
+/* ─── Mobile: Floating bottom bar ─── */
 .bottom-nav {
   position: fixed;
   bottom: calc(20px + env(safe-area-inset-bottom, 0px));
@@ -113,6 +156,13 @@ onBeforeUnmount(() => ro?.disconnect())
 }
 
 .bottom-nav__logo {
+  display: none;
+}
+
+/* Desktop-only sections hidden on mobile */
+.bottom-nav__section,
+.bottom-nav__spacer,
+.bottom-nav__bottom {
   display: none;
 }
 
@@ -154,8 +204,6 @@ onBeforeUnmount(() => ro?.disconnect())
   text-decoration: none;
 }
 
-/* Active icon: outline only, no fill */
-
 .bottom-nav__icon {
   display: flex;
   align-items: center;
@@ -176,7 +224,12 @@ onBeforeUnmount(() => ro?.disconnect())
   letter-spacing: 0.02em;
 }
 
-/* ─── Desktop: Left sidebar ─── */
+/* ─── Section title (desktop only) ─── */
+.bottom-nav__section-title {
+  display: none;
+}
+
+/* ─── Desktop: SaaS left sidebar ─── */
 @media (min-width: 1024px) {
   .bottom-nav {
     position: fixed;
@@ -184,66 +237,145 @@ onBeforeUnmount(() => ro?.disconnect())
     left: 0;
     bottom: 0;
     right: auto;
-    width: 220px;
+    width: var(--sidebar-width);
     height: 100dvh;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    background: var(--color-surface);
+    background: var(--color-desktop-card);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     border-radius: 0;
-    border-right: 1px solid var(--color-border-light);
+    border: none;
+    border-right: 1px solid var(--color-desktop-border);
+    box-shadow: none;
     padding: 0;
-    padding-top: var(--space-2);
-    gap: var(--space-1);
+    gap: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+
+  .bottom-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .bottom-nav__logo {
     display: flex;
     align-items: center;
-    padding: var(--space-4) var(--space-5) var(--space-6);
+    padding: var(--space-5) var(--space-6) var(--space-6);
+    flex-shrink: 0;
   }
 
   .bottom-nav__logo img {
-    height: 32px;
+    height: 28px;
     width: auto;
   }
 
+  /* Hide mobile pill on desktop */
   .bottom-nav__pill {
-    background: var(--color-surface-alt);
-    border-radius: var(--radius-lg);
+    display: none;
   }
 
+  /* ─── Nav items (desktop) ─── */
   .bottom-nav__item {
     flex-direction: row;
     gap: var(--space-3);
-    padding: var(--space-3) var(--space-5);
-    border-radius: var(--radius-lg);
-    margin: 0 var(--space-2);
-    color: var(--color-muted);
+    padding: 9px var(--space-5);
+    border-radius: var(--radius-md);
+    margin: 1px var(--space-3);
+    color: var(--color-text-secondary);
+    flex: none;
+    min-width: 0;
+    border-left: 3px solid transparent;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   }
 
   .bottom-nav__item:hover {
-    color: var(--color-text-secondary);
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--color-text);
+    text-decoration: none;
   }
 
   .bottom-nav__item--active {
-    color: var(--color-primary);
+    flex: none;
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--color-text);
+    border-left-color: var(--color-primary);
   }
 
   .bottom-nav__item--active .bottom-nav__icon :deep(svg) {
     fill: none;
   }
 
+  .bottom-nav__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .bottom-nav__icon :deep(svg) {
+    width: 18px;
+    height: 18px;
+  }
+
   .bottom-nav__label {
     font-size: var(--text-sm);
     font-weight: var(--weight-medium);
     letter-spacing: normal;
+    margin-top: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .bottom-nav__item--active .bottom-nav__label {
     font-weight: var(--weight-semibold);
+  }
+
+  /* ─── Desktop sections ─── */
+  .bottom-nav__section {
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--space-4);
+    margin-top: var(--space-2);
+    border-top: 1px solid var(--color-desktop-border);
+  }
+
+  .bottom-nav__section-title {
+    display: block;
+    font-family: var(--font-eyebrow);
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    padding: 0 var(--space-6) var(--space-2);
+  }
+
+  /* ─── Desktop spacer + bottom items ─── */
+  .bottom-nav__spacer {
+    display: block;
+    flex: 1;
+  }
+
+  .bottom-nav__bottom {
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-4);
+    margin-top: var(--space-2);
+    border-top: 1px solid var(--color-desktop-border);
+    flex-shrink: 0;
+  }
+
+  .bottom-nav__item--bottom {
+    color: var(--color-muted);
+    font-size: var(--text-xs);
+  }
+
+  .bottom-nav__item--bottom:hover {
+    color: var(--color-text-secondary);
   }
 }
 </style>

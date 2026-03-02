@@ -75,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({ layout: 'default' })
 
 const { user, isSubscriber, updateProfile, setSegment } = useAuth()
 
@@ -368,5 +368,41 @@ function handleManageSub() {
 .profile__acceso-chevron {
   flex-shrink: 0;
   color: var(--color-muted);
+}
+
+/* ─── Desktop SaaS ─── */
+@media (min-width: 1024px) {
+  .profile__header {
+    justify-content: flex-start;
+  }
+
+  .profile__header-title {
+    display: none;
+  }
+
+  .profile__back {
+    display: none;
+  }
+
+  .profile__form {
+    max-width: 480px;
+  }
+
+  .profile__membership {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .profile__acceso {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .profile__acceso:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
+  }
 }
 </style>
