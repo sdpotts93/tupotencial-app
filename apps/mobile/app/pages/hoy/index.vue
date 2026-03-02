@@ -1358,6 +1358,12 @@ function closeAccionSheet() {
 
 /* ─── Desktop SaaS layout ─── */
 @media (min-width: 1024px) {
+
+  .hoy__mensaje-text {
+    padding-inline: 3rem;
+    padding-top: 2rem;
+    font-size: 1.3rem;
+  }
   /* Hero: compact greeting row */
   .hoy__hero {
     background: var(--color-desktop-card);

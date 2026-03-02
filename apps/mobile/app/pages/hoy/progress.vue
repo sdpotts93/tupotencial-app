@@ -267,4 +267,34 @@ const activePrograms = ref([
   flex-shrink: 0;
   color: var(--color-muted);
 }
+
+/* ─── Desktop ─── */
+@media (min-width: 1024px) {
+  .progress__stats {
+    gap: var(--space-4);
+  }
+
+  .progress__stat {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .progress__programs-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .progress__card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .progress__card:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
+  }
+}
 </style>
