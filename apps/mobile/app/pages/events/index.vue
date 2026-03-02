@@ -320,6 +320,12 @@ const pastEvents = ref([
     padding: var(--space-4) var(--space-5);
   }
 
+  .events__past-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
   .events__past-card {
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);

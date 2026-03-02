@@ -19,11 +19,10 @@
 
       <!-- Info -->
       <div class="detail__info">
-        <button class="detail__back-link" @click="$router.back()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <button class="detail__back-link" aria-label="Volver" @click="$router.back()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          Volver
         </button>
 
         <p class="eyebrow">{{ content.typeLabel }}</p>
@@ -227,20 +226,20 @@ const content = ref({
   .detail__nav { display: none; }
 
   .detail__back-link {
-    display: inline-flex;
+    display: flex;
+    width: 40px;
+    height: 40px;
     align-items: center;
-    gap: var(--space-2);
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
+    justify-content: center;
+    color: var(--color-dark-lighter);
     background: none;
     border: none;
+    border-radius: var(--radius-md);
     cursor: pointer;
     padding: 0;
     margin-bottom: var(--space-6);
-    transition: color var(--transition-fast);
   }
-  .detail__back-link:hover { color: var(--color-text); }
+  .detail__back-link:hover { background: rgba(0, 0, 0, 0.06); }
 
   .detail__info {
     order: 1;

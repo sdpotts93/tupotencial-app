@@ -12,7 +12,7 @@
           <Icon name="lucide:flame" size="14" class="app-topbar__streak-icon" />
           <span>{{ streak }}</span>
         </NuxtLink>
-        <div class="app-topbar__avatar" @click="navigateTo('/more')">
+        <div class="app-topbar__avatar" @click="navigateTo('/profile')">
           {{ initials }}
         </div>
       </div>

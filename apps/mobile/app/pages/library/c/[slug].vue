@@ -129,4 +129,37 @@ const items = ref([
   letter-spacing: 0.04em;
   color: var(--color-sand);
 }
+
+/* ─── Desktop ─── */
+@media (min-width: 1024px) {
+  .cat__header {
+    justify-content: flex-start;
+  }
+
+  .cat__title {
+    display: none;
+  }
+
+  .cat__back {
+    display: none;
+  }
+
+  .cat__list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .cat__item {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    transition: border-color var(--transition-fast);
+  }
+
+  .cat__item:hover {
+    border-color: var(--color-border);
+  }
+}
 </style>
