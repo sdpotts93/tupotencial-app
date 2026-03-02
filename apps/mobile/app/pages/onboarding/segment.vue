@@ -299,6 +299,9 @@ function handleContinue() {
     padding: var(--space-8);
     max-width: 440px;
     flex: none;
+    min-height: 540px;
+    display: flex;
+    flex-direction: column;
   }
 
   .onboarding__options {
@@ -307,6 +310,7 @@ function handleContinue() {
 
   .onboarding__desktop-btn {
     display: flex;
+    margin-top: auto;
   }
 
   .onboarding__question {

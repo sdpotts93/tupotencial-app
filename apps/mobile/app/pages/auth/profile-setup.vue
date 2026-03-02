@@ -260,6 +260,13 @@ async function handleSave() {
     padding: var(--space-8);
     max-width: 440px;
     flex: none;
+    min-height: 540px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .profile-setup__form {
+    margin-top: auto;
   }
 
   .profile-setup__desktop-btn {
