@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({ layout: 'ai-chat', pageTransition: false })
 
 const route = useRoute()
 
@@ -358,9 +358,11 @@ function getResponse(input: string): string {
 
   .screen__content {
     max-width: 760px;
+    width: 100%;
     margin: 0 auto;
     flex: 1;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding-bottom: 120px;
   }
 

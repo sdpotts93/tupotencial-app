@@ -1,0 +1,356 @@
+<template>
+  <div class="ai-layout">
+    <!-- Desktop sidebar: chat history -->
+    <aside class="ai-sidebar">
+      <div class="ai-sidebar__top">
+        <NuxtLink to="/hoy" class="ai-sidebar__logo">
+          <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" />
+        </NuxtLink>
+
+        <button class="ai-sidebar__new" @click="navigateTo('/ai/chat/mock-ai-session-new')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva conversación
+        </button>
+      </div>
+
+      <div class="ai-sidebar__sessions">
+        <p class="ai-sidebar__section-title">Historial</p>
+        <NuxtLink
+          v-for="session in sessions"
+          :key="session.id"
+          :to="`/ai/chat/${session.id}`"
+          :class="['ai-sidebar__session', { 'ai-sidebar__session--active': isActiveSession(session.id) }]"
+        >
+          <span class="ai-sidebar__session-preview">{{ session.preview }}</span>
+          <span class="ai-sidebar__session-meta">
+            <span :class="['ai-sidebar__session-tone', `ai-sidebar__session-tone--${session.tone}`]">{{ session.tone === 'carlotta' ? 'Carlotta' : 'Gabriel' }}</span>
+            <span class="ai-sidebar__session-date">{{ session.date }}</span>
+          </span>
+        </NuxtLink>
+      </div>
+
+      <div class="ai-sidebar__bottom">
+        <NuxtLink to="/ai" class="ai-sidebar__back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Coach IA
+        </NuxtLink>
+      </div>
+    </aside>
+
+    <!-- Desktop top bar -->
+    <header class="ai-layout__topbar">
+      <div class="ai-layout__topbar-left">
+        <h1 class="ai-layout__topbar-title">Coach IA</h1>
+      </div>
+      <div class="ai-layout__topbar-right">
+        <NuxtLink to="/hoy/progress" class="ai-layout__streak">
+          <Icon name="lucide:flame" size="14" class="ai-layout__streak-icon" />
+          <span>{{ streak }}</span>
+        </NuxtLink>
+        <div class="ai-layout__avatar" @click="navigateTo('/profile')">
+          {{ initials }}
+        </div>
+      </div>
+    </header>
+
+    <slot />
+  </div>
+</template>
+
+<script setup lang="ts">
+const { user } = useAuth()
+const route = useRoute()
+
+const streak = ref(7)
+
+const initials = computed(() => {
+  const name = user.value?.display_name || '?'
+  return name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
+})
+
+function isActiveSession(id: string) {
+  return route.params.sessionId === id
+}
+
+const sessions = ref([
+  { id: 'mock-ai-session-001', preview: 'Hablamos sobre gratitud y propósito...', tone: 'carlotta', date: 'Hoy, 8:30' },
+  { id: 'mock-ai-session-002', preview: 'Plan de productividad matutina', tone: 'gabriel', date: 'Ayer, 7:15' },
+  { id: 'mock-ai-session-003', preview: 'Reflexión sobre mis metas del mes', tone: 'carlotta', date: '27 Feb' },
+  { id: 'mock-ai-session-004', preview: 'Manejo de estrés laboral', tone: 'gabriel', date: '25 Feb' },
+  { id: 'mock-ai-session-005', preview: 'Rutina de meditación matutina', tone: 'carlotta', date: '23 Feb' },
+])
+</script>
+
+<style scoped>
+/* Mobile: completely blank — no sidebar, no top bar */
+.ai-layout {
+  min-height: 100dvh;
+}
+
+.ai-sidebar {
+  display: none;
+}
+
+.ai-layout__topbar {
+  display: none;
+}
+
+/* ─── Desktop ─── */
+@media (min-width: 1024px) {
+  .ai-layout {
+    padding-left: var(--sidebar-width);
+    background: var(--color-desktop-bg);
+  }
+
+  /* ─── Sidebar ─── */
+  .ai-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    height: 100dvh;
+    background: var(--color-desktop-card);
+    border-right: 1px solid var(--color-desktop-border);
+    z-index: var(--z-fixed);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+
+  .ai-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-sidebar__top {
+    padding: var(--space-5) var(--space-5) var(--space-4);
+    flex-shrink: 0;
+  }
+
+  .ai-sidebar__logo {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-5);
+    text-decoration: none;
+  }
+
+  .ai-sidebar__logo img {
+    height: 20px;
+    width: auto;
+  }
+
+  .ai-sidebar__new {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: 10px var(--space-4);
+    background: none;
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .ai-sidebar__new:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: var(--color-border);
+  }
+
+  /* ─── Sessions list ─── */
+  .ai-sidebar__sessions {
+    flex: 1;
+    padding: 0 var(--space-3);
+  }
+
+  .ai-sidebar__section-title {
+    font-family: var(--font-eyebrow);
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    padding: var(--space-3) var(--space-3) var(--space-2);
+  }
+
+  .ai-sidebar__session {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px var(--space-3);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    border-left: 3px solid transparent;
+    margin-bottom: 1px;
+  }
+
+  .ai-sidebar__session:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .ai-sidebar__session--active {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--color-text);
+    border-left-color: var(--color-primary);
+  }
+
+  .ai-sidebar__session-preview {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ai-sidebar__session--active .ai-sidebar__session-preview {
+    font-weight: var(--weight-semibold);
+  }
+
+  .ai-sidebar__session-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .ai-sidebar__session-tone {
+    font-family: var(--font-eyebrow);
+    font-size: 9px;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: var(--radius-full);
+  }
+
+  .ai-sidebar__session-tone--carlotta {
+    background: rgba(192, 138, 138, 0.2);
+    color: #C08A8A;
+  }
+
+  .ai-sidebar__session-tone--gabriel {
+    background: rgba(154, 179, 199, 0.2);
+    color: #9AB3C7;
+  }
+
+  .ai-sidebar__session-date {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+  }
+
+  /* ─── Bottom link ─── */
+  .ai-sidebar__bottom {
+    flex-shrink: 0;
+    padding: var(--space-3) var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-desktop-border);
+  }
+
+  .ai-sidebar__back-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 9px var(--space-3);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-muted);
+    transition: background var(--transition-fast), color var(--transition-fast);
+  }
+
+  .ai-sidebar__back-link:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  /* ─── Top bar ─── */
+  .ai-layout__topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--topbar-height);
+    padding: 0 var(--space-8);
+    background: var(--color-desktop-bg);
+    border-bottom: 1px solid var(--color-desktop-border);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+  }
+
+  .ai-layout__topbar-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .ai-layout__topbar-title {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .ai-layout__topbar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .ai-layout__streak {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px var(--space-3);
+    background: rgba(255, 170, 50, 0.1);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    font-family: var(--font-eyebrow);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    color: #d4940a;
+    transition: background var(--transition-fast);
+  }
+
+  .ai-layout__streak-icon {
+    color: #ffaa32;
+  }
+
+  .ai-layout__streak:hover {
+    background: rgba(255, 170, 50, 0.18);
+    text-decoration: none;
+  }
+
+  .ai-layout__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-full);
+    background: var(--color-sand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--color-dark);
+    cursor: pointer;
+    transition: box-shadow var(--transition-fast);
+  }
+
+  .ai-layout__avatar:hover {
+    box-shadow: 0 0 0 2px var(--color-desktop-border);
+  }
+}
+</style>
