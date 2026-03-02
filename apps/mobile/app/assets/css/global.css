@@ -127,7 +127,7 @@ img, video {
   }
 
   .screen__content {
-    max-width: 960px;
+    max-width: none;
     padding: var(--space-6) var(--space-8) var(--space-10);
     background: transparent;
     margin: 0;

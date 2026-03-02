@@ -59,29 +59,30 @@
         </Transition>
       </section>
 
-      <!-- Featured card — opens "accion del dia" sheet -->
-      <section class="hoy__featured">
-        <button class="hoy__featured-card" @click="activeSheet = 'accion'">
-          <img src="/images/rojo-carlotta.jpg" alt="" class="hoy__featured-img" />
-          <div class="hoy__featured-info">
-            <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
-            <h3 class="hoy__featured-name">{{ dailyPlan.title }}</h3>
-            <p class="hoy__featured-desc">{{ dailyPlan.message }}</p>
-          </div>
-        </button>
-      </section>
+      <!-- Featured + Mensaje: side-by-side on desktop -->
+      <div class="hoy__duo-row">
+        <section class="hoy__featured">
+          <button class="hoy__featured-card" @click="activeSheet = 'accion'">
+            <img src="/images/rojo-carlotta.jpg" alt="" class="hoy__featured-img" />
+            <div class="hoy__featured-info">
+              <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
+              <h3 class="hoy__featured-name">{{ dailyPlan.title }}</h3>
+              <p class="hoy__featured-desc">{{ dailyPlan.message }}</p>
+            </div>
+          </button>
+        </section>
 
-      <!-- Mensaje del dia -->
-      <section class="hoy__mensaje">
-        <div class="hoy__mensaje-card">
-          <Icon name="lucide:quote" size="18" class="hoy__mensaje-icon" />
-          <p class="hoy__mensaje-text">{{ mensajeDelDia.text }}</p>
-          <div class="hoy__mensaje-author">
-            <img :src="`/images/${mensajeDelDia.author}.png`" :alt="mensajeDelDia.author" class="hoy__mensaje-avatar" />
-            <span class="hoy__mensaje-name">{{ mensajeDelDia.author === 'gabriel' ? 'Gabriel' : 'Carlotta' }}</span>
+        <section class="hoy__mensaje">
+          <div class="hoy__mensaje-card">
+            <Icon name="lucide:quote" size="18" class="hoy__mensaje-icon" />
+            <p class="hoy__mensaje-text">{{ mensajeDelDia.text }}</p>
+            <div class="hoy__mensaje-author">
+              <img :src="`/images/${mensajeDelDia.author}.png`" :alt="mensajeDelDia.author" class="hoy__mensaje-avatar" />
+              <span class="hoy__mensaje-name">{{ mensajeDelDia.author === 'gabriel' ? 'Gabriel' : 'Carlotta' }}</span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <!-- Continue active programs -->
       <section v-if="activePrograms.length" class="hoy__continue">
@@ -1352,25 +1353,36 @@ function closeAccionSheet() {
 
 /* ─── Desktop SaaS layout ─── */
 @media (min-width: 1024px) {
-  /* Hero becomes a card */
+  /* Hero: compact greeting row */
   .hoy__hero {
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
     margin: var(--space-6) var(--space-8) 0;
-    padding: var(--space-6);
+    padding: var(--space-5) var(--space-6);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .hoy__hero-top {
+    display: contents;
   }
 
   .hoy__hero-logo {
     height: 32px;
   }
 
-  .hoy__greeting {
-    font-size: var(--title-lg);
-    margin-top: var(--space-4);
+  .hoy__streak-badge {
+    margin-left: auto;
   }
 
-  /* Progress bar becomes inline card */
+  .hoy__greeting {
+    font-size: var(--title-md);
+    margin-top: 0;
+  }
+
+  /* Progress bar: inline sticky card */
   .hoy__hero-progress {
     position: sticky;
     top: var(--topbar-height);
@@ -1378,7 +1390,7 @@ function closeAccionSheet() {
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
     margin: var(--space-4) var(--space-8) 0;
-    padding: var(--space-4) var(--space-6);
+    padding: var(--space-3) var(--space-6);
     z-index: 10;
   }
 
@@ -1388,22 +1400,22 @@ function closeAccionSheet() {
 
   /* Content area */
   .screen__content {
-    max-width: 960px;
+    max-width: none;
     padding: var(--space-6) var(--space-8);
   }
 
-  /* Two-column layout for retos + featured */
+  /* Retos: inline row */
   .hoy__retos {
     margin-bottom: var(--space-5);
   }
 
   .hoy__retos-list {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: var(--space-3);
   }
 
   .hoy__reto-item {
+    flex: 1;
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
@@ -1419,21 +1431,34 @@ function closeAccionSheet() {
     background: linear-gradient(135deg, rgba(78, 205, 196, 0.08), rgba(168, 216, 110, 0.06));
   }
 
-  /* Featured card: horizontal layout */
-  .hoy__featured {
+  /* Featured + Mensaje: side-by-side 2-col */
+  .hoy__duo-row {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: var(--space-4);
     margin-bottom: var(--space-6);
   }
 
+  .hoy__featured {
+    margin-bottom: 0;
+  }
+
+  .hoy__mensaje {
+    margin-bottom: 0;
+  }
+
+  /* Use CSS grid on the parent .screen__content to create a 2-col row for featured+mensaje */
   .hoy__featured-card {
     flex-direction: row;
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
+    height: 100%;
   }
 
   .hoy__featured-img {
-    width: 280px;
+    width: 200px;
     height: auto;
     aspect-ratio: auto;
     border-radius: var(--radius-lg);
@@ -1448,21 +1473,26 @@ function closeAccionSheet() {
     justify-content: center;
   }
 
-  /* Mensaje del dia card */
+  /* Mensaje card: fill height */
   .hoy__mensaje-card {
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
-  /* Continue programs - horizontal row */
+  /* Continue + Recientes + Explora: side-by-side rows */
   .hoy__continue-scroll {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: flex;
+    flex-direction: row;
     gap: var(--space-3);
   }
 
   .hoy__continue-card {
+    flex: 1;
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
@@ -1476,7 +1506,7 @@ function closeAccionSheet() {
   /* Latest from biblioteca - grid */
   .hoy__latest-scroll {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--space-4);
     overflow-x: visible;
     margin: 0;
@@ -1497,7 +1527,7 @@ function closeAccionSheet() {
 
   /* Explore grid */
   .hoy__start-list {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
 
   .hoy__activity {
