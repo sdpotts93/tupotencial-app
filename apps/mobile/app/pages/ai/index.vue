@@ -67,7 +67,7 @@
 
       <!-- Actions -->
       <div class="ai-home__actions">
-        <UiButton block @click="startChat()">Nueva conversación</UiButton>
+        <UiButton variant="outline" block @click="startChat()">Nueva conversación</UiButton>
       </div>
 
       <!-- Limit state -->
@@ -283,16 +283,6 @@ function startChat(prompt?: string) {
   margin-bottom: var(--space-6);
 }
 
-.ai-home__actions :deep(.btn--primary) {
-  background: #FFFFFF;
-  color: var(--color-text);
-  border-color: var(--color-border);
-}
-.ai-home__actions :deep(.btn--primary:hover) {
-  background: var(--color-light);
-  border-color: var(--color-border);
-}
-
 /* ─── Limit warning ─── */
 .ai-home__limit {
   background: rgba(240, 154, 94, 0.12);
@@ -378,7 +368,7 @@ function startChat(prompt?: string) {
     border-color: var(--color-border);
   }
 
-  .ai-home__actions :deep(.btn--primary) {
+  .ai-home__actions :deep(.btn) {
     max-width: 280px;
   }
 }

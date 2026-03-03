@@ -34,7 +34,7 @@
         </div>
 
         <div class="benefit__actions">
-          <UiButton block @click="handleOpen">Abrir enlace</UiButton>
+          <UiButton variant="outline" block @click="handleOpen">Abrir enlace</UiButton>
         </div>
       </div>
     </div>
@@ -166,12 +166,6 @@ function handleOpen() {
   margin-bottom: var(--space-5);
 }
 
-.benefit__actions :deep(.btn) {
-  background: #FFFFFF;
-  color: var(--color-dark);
-  border-color: var(--color-border);
-}
-
 /* ─── Tablet ─── */
 @media (min-width: 768px) {
   .benefit__info {
@@ -251,7 +245,6 @@ function handleOpen() {
 
   .benefit__actions :deep(.btn) {
     width: auto;
-    display: inline-flex;
   }
 }
 </style>

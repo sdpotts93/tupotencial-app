@@ -32,7 +32,7 @@
           <form class="profile__form" @submit.prevent="handleSave">
             <UiInput v-model="displayName" label="Nombre" placeholder="Tu nombre" />
             <UiSelect v-model="segment" label="Comunidad" :options="segmentOptions" />
-            <UiButton type="submit" block :loading="saving">Guardar cambios</UiButton>
+            <UiButton type="submit" block variant="secondary" :loading="saving">Guardar cambios</UiButton>
           </form>
         </div>
 
@@ -44,11 +44,12 @@
             <p class="eyebrow">MEMBRESÍA</p>
             <div class="profile__membership">
               <div class="profile__membership-info">
-                <span class="profile__membership-plan">{{ isSubscriber ? 'Core' : 'Gratis' }}</span>
-                <span class="profile__membership-detail">{{ isSubscriber ? 'Renovación: 15 Mar 2026' : 'Suscríbete para desbloquear todo' }}</span>
+                <span :class="['profile__membership-tag', isSubscriber ? 'profile__membership-tag--core' : 'profile__membership-tag--gratis']">
+                  {{ isSubscriber ? 'Core' : 'Gratis' }}
+                </span>
+                <span v-if="!isSubscriber" class="profile__membership-detail">Suscríbete para desbloquear todo</span>
               </div>
-              <UiTag v-if="isSubscriber" variant="accent">Activa</UiTag>
-              <UiTag v-else variant="default">Gratis</UiTag>
+              <span v-if="isSubscriber" class="profile__membership-renewal">Renovación: 15 Mar 2026</span>
             </div>
             <UiButton v-if="isSubscriber" block variant="outline" @click="handleManageSub">
               Administrar suscripción
@@ -210,9 +211,6 @@ function handleManageSub() {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  background: rgba(0, 0, 0, 0.04);
-  border: none;
-  border-bottom: 1.5px solid #a7a68e36;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   transition: border-color var(--transition-fast);
@@ -227,9 +225,6 @@ function handleManageSub() {
 }
 
 .profile__form :deep(.select-field__input) {
-  background: rgba(0, 0, 0, 0.04);
-  border: none;
-  border-bottom: 1.5px solid #a7a68e36;
   border-radius: var(--radius-lg);
   color: var(--color-text);
 }
@@ -242,16 +237,6 @@ function handleManageSub() {
 
 .profile__form :deep(.select-field__chevron) {
   color: var(--color-muted);
-}
-
-.profile__form :deep(.btn--primary) {
-  background: white;
-  color: var(--color-dark);
-  border-color: var(--color-border);
-}
-.profile__form :deep(.btn--primary:hover) {
-  background: var(--color-light);
-  border-color: var(--color-light);
 }
 
 /* ─── Sections ─── */
@@ -281,10 +266,28 @@ function handleManageSub() {
   gap: 2px;
 }
 
-.profile__membership-plan {
+.profile__membership-tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-eyebrow);
+  font-size: 10px;
   font-weight: var(--weight-semibold);
-  font-size: var(--text-base);
-  color: var(--color-text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  width: fit-content;
+  white-space: nowrap;
+}
+
+.profile__membership-tag--core {
+  background: rgba(212, 175, 55, 0.15);
+  color: #9c8742;
+}
+
+.profile__membership-tag--gratis {
+  background: rgba(192, 192, 192, 0.15);
+  color: #9c9c9c;
 }
 
 .profile__membership-detail {
@@ -292,26 +295,14 @@ function handleManageSub() {
   color: var(--color-muted);
 }
 
-.profile__membership :deep(.tag--accent) {
-  background: rgba(212, 175, 55, 0.15);
-  color: #9c8742;
-}
-
-.profile__membership :deep(.tag--default) {
-  background: rgba(192, 192, 192, 0.15);
-  color: #C0C0C0;
+.profile__membership-renewal {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  white-space: nowrap;
 }
 
 .profile__section :deep(.btn--outline) {
   margin-top: var(--space-3);
-  background: rgba(0, 0, 0, 0.03);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: var(--color-text);
-}
-.profile__section :deep(.btn--outline:hover) {
-  background: rgba(0, 0, 0, 0.06);
 }
 
 /* ─── Accesos VIP (progress__card style) ─── */
@@ -418,8 +409,7 @@ function handleManageSub() {
   .profile__membership {
     background: none;
     border-radius: 0;
-    padding: var(--space-5) 0;
-    border-bottom: 1px solid var(--color-desktop-border);
+    padding: var(--space-5) 0 0;
   }
 
   .profile__section :deep(.btn--outline) {

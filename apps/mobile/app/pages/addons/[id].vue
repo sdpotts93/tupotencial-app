@@ -33,7 +33,7 @@
         </div>
 
         <div class="addon__actions">
-          <UiButton v-if="!addon.owned" block>
+          <UiButton v-if="!addon.owned" variant="outline" block>
             Comprar
           </UiButton>
           <div v-else class="addon__owned">
@@ -168,12 +168,6 @@ const addon = ref({
   margin-bottom: var(--space-5);
 }
 
-.addon__actions :deep(.btn) {
-  background: #FFFFFF;
-  color: var(--color-text);
-  border-color: var(--color-border);
-}
-
 /* ─── Owned state ─── */
 .addon__owned {
   display: flex;
@@ -288,7 +282,6 @@ const addon = ref({
 
   .addon__actions :deep(.btn) {
     width: auto;
-    display: inline-flex;
   }
 }
 </style>
