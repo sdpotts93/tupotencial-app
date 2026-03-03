@@ -19,6 +19,11 @@
           :options="statusOptions"
           placeholder="Estado"
         />
+        <UiSelect
+          v-model="filterSegment"
+          :options="segmentFilterOptions"
+          placeholder="Segmento"
+        />
       </template>
 
       <template #cell-program_type="{ value }">
@@ -38,6 +43,7 @@
       </template>
 
       <template #actions="{ row }">
+        <UiButton variant="ghost" size="sm" @click.stop="handleDuplicate(row)">Duplicar</UiButton>
         <UiButton variant="ghost" size="sm" :to="`/admin/programs/${row.id}`">Editar</UiButton>
       </template>
     </UiDataTable>
@@ -51,6 +57,7 @@ const router = useRouter()
 
 const filterType = ref('')
 const filterStatus = ref('')
+const filterSegment = ref('')
 
 const typeOptions = [
   { value: '', label: 'Todos los tipos' },
@@ -67,6 +74,14 @@ const statusOptions = [
   { value: 'archived', label: 'Archivado' },
 ]
 
+const segmentFilterOptions = [
+  { value: '', label: 'Todos los segmentos' },
+  { value: 'all', label: 'General' },
+  { value: 'free', label: 'Gratuito' },
+  { value: 'premium', label: 'Premium' },
+  { value: 'enterprise', label: 'Empresarial' },
+]
+
 const columns = [
   { key: 'title', label: 'Titulo', width: '30%' },
   { key: 'program_type', label: 'Tipo' },
@@ -76,20 +91,21 @@ const columns = [
 ]
 
 const rows = ref([
-  { id: 'prg-001', title: 'Reto 21 dias de meditacion', program_type: 'challenge', duration_days: 21, status: 'active', enrolled_count: 3420 },
-  { id: 'prg-002', title: 'Curso de nutricion consciente', program_type: 'course', duration_days: 30, status: 'active', enrolled_count: 1856 },
-  { id: 'prg-003', title: 'Ruta de bienestar integral', program_type: 'path', duration_days: 90, status: 'active', enrolled_count: 978 },
-  { id: 'prg-004', title: 'Taller de manejo del estres', program_type: 'workshop', duration_days: 5, status: 'active', enrolled_count: 2105 },
-  { id: 'prg-005', title: 'Reto 7 dias de gratitud', program_type: 'challenge', duration_days: 7, status: 'active', enrolled_count: 4512 },
-  { id: 'prg-006', title: 'Curso de yoga para principiantes', program_type: 'course', duration_days: 28, status: 'draft', enrolled_count: 0 },
-  { id: 'prg-007', title: 'Ruta de productividad personal', program_type: 'path', duration_days: 60, status: 'draft', enrolled_count: 0 },
-  { id: 'prg-008', title: 'Reto detox digital', program_type: 'challenge', duration_days: 14, status: 'archived', enrolled_count: 1230 },
+  { id: 'prg-001', title: 'Reto 21 dias de meditacion', program_type: 'challenge', duration_days: 21, status: 'active', enrolled_count: 3420, segment: 'premium' },
+  { id: 'prg-002', title: 'Curso de nutricion consciente', program_type: 'course', duration_days: 30, status: 'active', enrolled_count: 1856, segment: 'premium' },
+  { id: 'prg-003', title: 'Ruta de bienestar integral', program_type: 'path', duration_days: 90, status: 'active', enrolled_count: 978, segment: 'all' },
+  { id: 'prg-004', title: 'Taller de manejo del estres', program_type: 'workshop', duration_days: 5, status: 'active', enrolled_count: 2105, segment: 'free' },
+  { id: 'prg-005', title: 'Reto 7 dias de gratitud', program_type: 'challenge', duration_days: 7, status: 'active', enrolled_count: 4512, segment: 'free' },
+  { id: 'prg-006', title: 'Curso de yoga para principiantes', program_type: 'course', duration_days: 28, status: 'draft', enrolled_count: 0, segment: 'premium' },
+  { id: 'prg-007', title: 'Ruta de productividad personal', program_type: 'path', duration_days: 60, status: 'draft', enrolled_count: 0, segment: 'enterprise' },
+  { id: 'prg-008', title: 'Reto detox digital', program_type: 'challenge', duration_days: 14, status: 'archived', enrolled_count: 1230, segment: 'all' },
 ])
 
 const filteredRows = computed(() => {
   return rows.value.filter(row => {
     if (filterType.value && row.program_type !== filterType.value) return false
     if (filterStatus.value && row.status !== filterStatus.value) return false
+    if (filterSegment.value && row.segment !== filterSegment.value) return false
     return true
   })
 })
@@ -112,6 +128,11 @@ function statusVariant(status: string) {
 function statusLabel(status: string) {
   const map: Record<string, string> = { active: 'Activo', draft: 'Borrador', archived: 'Archivado' }
   return map[status] ?? status
+}
+
+function handleDuplicate(row: Record<string, any>) {
+  alert(`Programa duplicado como "Copia de ${row.title}" (mock)`)
+  navigateTo('/admin/programs/new')
 }
 
 function goToEdit(row: Record<string, any>) {

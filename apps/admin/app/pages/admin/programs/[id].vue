@@ -4,6 +4,7 @@
       <h1 class="page-header__title">Editar programa</h1>
       <div class="page-header__actions">
         <UiButton variant="ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="outline" size="sm" @click="handleDuplicate">Duplicar</UiButton>
         <UiButton variant="outline" size="sm" to="/admin/programs">Cancelar</UiButton>
         <UiButton size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
@@ -146,6 +147,11 @@ function editDay(day: any) {
 
 function handleSave() {
   alert('Programa actualizado (mock)')
+}
+
+function handleDuplicate() {
+  alert(`Programa duplicado como "Copia de ${form.title}" (mock)`)
+  navigateTo('/admin/programs/new')
 }
 
 function handleDelete() {

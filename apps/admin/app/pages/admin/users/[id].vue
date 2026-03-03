@@ -81,6 +81,10 @@
               <span class="info-row__value">{{ user.gender }}</span>
             </div>
             <div class="info-row">
+              <span class="info-row__label">Segmento</span>
+              <span class="info-row__value">{{ segmentLabel(user.segment) }}</span>
+            </div>
+            <div class="info-row">
               <span class="info-row__label">Registro</span>
               <span class="info-row__value">{{ formatDate(user.created_at) }}</span>
             </div>
@@ -138,6 +142,7 @@ const user = reactive({
   phone: '+52 55 1234 5678',
   birth_date: '15 mar 1990',
   gender: 'Femenino',
+  segment: 'carlotta',
   plan: 'premium',
   status: 'active',
   streak_days: 45,
@@ -179,6 +184,11 @@ function planVariant(plan: string) {
 function planLabel(plan: string) {
   const map: Record<string, string> = { free: 'Gratuito', premium: 'Premium', enterprise: 'Empresarial' }
   return map[plan] ?? plan
+}
+
+function segmentLabel(segment: string) {
+  const map: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
+  return map[segment] ?? segment
 }
 
 function formatDate(iso: string) {

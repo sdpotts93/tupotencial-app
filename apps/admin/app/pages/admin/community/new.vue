@@ -38,9 +38,9 @@
             />
 
             <UiSelect
-              v-model="form.visibility"
-              label="Visibilidad"
-              :options="visibilityOptions"
+              v-model="form.segment"
+              label="Segmento de comunidad"
+              :options="segmentOptions"
             />
 
             <UiSelect
@@ -68,7 +68,7 @@ const form = reactive({
   body: '',
   media_url: '',
   post_type: 'announcement',
-  visibility: 'all',
+  segment: 'conjunta',
   status: 'published',
 })
 
@@ -79,10 +79,10 @@ const typeOptions = [
   { value: 'poll', label: 'Encuesta' },
 ]
 
-const visibilityOptions = [
-  { value: 'all', label: 'Todos los usuarios' },
-  { value: 'premium', label: 'Solo premium' },
-  { value: 'enterprise', label: 'Solo empresarial' },
+const segmentOptions = [
+  { value: 'conjunta', label: 'Todos (Conjunta)' },
+  { value: 'gabriel', label: 'Gabriel' },
+  { value: 'carlotta', label: 'Carlotta' },
 ]
 
 const statusOptions = [

@@ -24,6 +24,11 @@
           :options="segmentOptions"
           placeholder="Segmento"
         />
+        <UiSelect
+          v-model="filterCategory"
+          :options="categoryFilterOptions"
+          placeholder="Categoria"
+        />
       </template>
 
       <template #cell-status="{ value }">
@@ -43,6 +48,7 @@
       </template>
 
       <template #actions="{ row }">
+        <UiButton variant="ghost" size="sm" @click.stop="handleDuplicate(row)">Duplicar</UiButton>
         <UiButton variant="ghost" size="sm" :to="`/admin/content/${row.id}`">
           Editar
         </UiButton>
@@ -59,6 +65,7 @@ const router = useRouter()
 const filterStatus = ref('')
 const filterType = ref('')
 const filterSegment = ref('')
+const filterCategory = ref('')
 
 const statusOptions = [
   { value: '', label: 'Todos los estados' },
@@ -83,6 +90,16 @@ const segmentOptions = [
   { value: 'enterprise', label: 'Empresarial' },
 ]
 
+const categoryFilterOptions = [
+  { value: '', label: 'Todas las categorias' },
+  { value: 'cat-001', label: 'Mindfulness' },
+  { value: 'cat-002', label: 'Nutricion' },
+  { value: 'cat-003', label: 'Ejercicio' },
+  { value: 'cat-004', label: 'Sueno' },
+  { value: 'cat-005', label: 'Productividad' },
+  { value: 'cat-006', label: 'Relaciones' },
+]
+
 const columns = [
   { key: 'title', label: 'Titulo', width: '30%' },
   { key: 'content_type', label: 'Tipo' },
@@ -92,14 +109,14 @@ const columns = [
 ]
 
 const rows = ref([
-  { id: 'cnt-001', title: '5 pasos para el bienestar emocional', content_type: 'article', segment: 'all', status: 'published', published_at: '2026-02-20T08:00:00' },
-  { id: 'cnt-002', title: 'Meditacion guiada para la manana', content_type: 'audio', segment: 'premium', status: 'published', published_at: '2026-02-18T06:00:00' },
-  { id: 'cnt-003', title: 'Nutricion consciente: guia basica', content_type: 'article', segment: 'free', status: 'published', published_at: '2026-02-15T10:00:00' },
-  { id: 'cnt-004', title: 'Rutina de yoga para principiantes', content_type: 'video', segment: 'premium', status: 'published', published_at: '2026-02-12T07:00:00' },
-  { id: 'cnt-005', title: 'Infografia: ciclo del sueno', content_type: 'infographic', segment: 'all', status: 'draft', published_at: null },
-  { id: 'cnt-006', title: 'Como manejar el estres laboral', content_type: 'article', segment: 'enterprise', status: 'draft', published_at: null },
-  { id: 'cnt-007', title: 'Ejercicios de respiracion 4-7-8', content_type: 'video', segment: 'free', status: 'published', published_at: '2026-02-10T09:00:00' },
-  { id: 'cnt-008', title: 'Alimentacion para la energia diaria', content_type: 'article', segment: 'premium', status: 'archived', published_at: '2026-01-28T08:00:00' },
+  { id: 'cnt-001', title: '5 pasos para el bienestar emocional', content_type: 'article', segment: 'all', category: 'cat-001', status: 'published', published_at: '2026-02-20T08:00:00' },
+  { id: 'cnt-002', title: 'Meditacion guiada para la manana', content_type: 'audio', segment: 'premium', category: 'cat-001', status: 'published', published_at: '2026-02-18T06:00:00' },
+  { id: 'cnt-003', title: 'Nutricion consciente: guia basica', content_type: 'article', segment: 'free', category: 'cat-002', status: 'published', published_at: '2026-02-15T10:00:00' },
+  { id: 'cnt-004', title: 'Rutina de yoga para principiantes', content_type: 'video', segment: 'premium', category: 'cat-003', status: 'published', published_at: '2026-02-12T07:00:00' },
+  { id: 'cnt-005', title: 'Infografia: ciclo del sueno', content_type: 'infographic', segment: 'all', category: 'cat-004', status: 'draft', published_at: null },
+  { id: 'cnt-006', title: 'Como manejar el estres laboral', content_type: 'article', segment: 'enterprise', category: 'cat-005', status: 'draft', published_at: null },
+  { id: 'cnt-007', title: 'Ejercicios de respiracion 4-7-8', content_type: 'video', segment: 'free', category: 'cat-001', status: 'published', published_at: '2026-02-10T09:00:00' },
+  { id: 'cnt-008', title: 'Alimentacion para la energia diaria', content_type: 'article', segment: 'premium', category: 'cat-002', status: 'archived', published_at: '2026-01-28T08:00:00' },
 ])
 
 const filteredRows = computed(() => {
@@ -107,6 +124,7 @@ const filteredRows = computed(() => {
     if (filterStatus.value && row.status !== filterStatus.value) return false
     if (filterType.value && row.content_type !== filterType.value) return false
     if (filterSegment.value && row.segment !== filterSegment.value) return false
+    if (filterCategory.value && row.category !== filterCategory.value) return false
     return true
   })
 })
@@ -133,6 +151,11 @@ function segmentLabel(segment: string) {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function handleDuplicate(row: Record<string, any>) {
+  alert(`Contenido duplicado como "Copia de ${row.title}" (mock)`)
+  navigateTo('/admin/content/new')
 }
 
 function goToEdit(row: Record<string, any>) {

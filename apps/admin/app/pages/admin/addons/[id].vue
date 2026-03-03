@@ -17,6 +17,20 @@
             <UiTextarea v-model="form.description" label="Descripcion" :rows="4" />
             <UiInput v-model="form.cover_url" label="URL de imagen" />
             <UiTextarea v-model="form.features" label="Caracteristicas incluidas" :rows="4" />
+
+            <UiInput
+              v-model="form.stripe_price_id"
+              label="Stripe Price ID"
+              placeholder="price_..."
+              hint="ID del precio en Stripe para el cobro automatico"
+            />
+
+            <UiInput
+              v-model="form.entitlement_key"
+              label="Clave de entitlement"
+              placeholder="vip_nutrition"
+              hint="La clave que se otorga al comprar (ej. vip_nutrition)"
+            />
           </div>
         </UiCard>
       </div>
@@ -55,6 +69,8 @@ const form = reactive({
   description: 'Un modulo completo de nutricion personalizada que incluye planes alimenticios semanales adaptados a tus objetivos, lista de compras automatica, recetas saludables y seguimiento de macronutrientes.',
   cover_url: 'https://images.tupotencial.app/addons/nutricion.jpg',
   features: 'Plan alimenticio semanal personalizado\nLista de compras automatica\n200+ recetas saludables\nSeguimiento de macronutrientes\nChat con nutriologo (1 sesion/mes)',
+  stripe_price_id: 'price_1N2x3Y4Z5abc',
+  entitlement_key: 'vip_nutrition',
   addon_type: 'module',
   price: '149',
   billing_period: 'monthly',

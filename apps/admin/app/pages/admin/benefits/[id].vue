@@ -18,6 +18,14 @@
             <UiTextarea v-model="form.description" label="Descripcion" :rows="4" />
             <UiInput v-model="form.cover_url" label="URL de imagen" />
             <UiInput v-model="form.redemption_url" label="URL de canje" />
+
+            <UiInput
+              v-model="form.utm_template"
+              label="Plantilla UTM"
+              placeholder="?utm_source=tupotencial&utm_medium=benefit&utm_campaign=..."
+              hint="Parametros UTM que se agregan a la URL de canje"
+            />
+
             <UiInput v-model="form.promo_code" label="Codigo promocional" />
 
             <div class="form-row">
@@ -63,6 +71,7 @@ const form = reactive({
   description: 'Obtén un 20% de descuento en toda la línea de suplementos NutriVida. Incluye vitaminas, minerales, proteínas y más. Válido en compras en línea y tiendas físicas.',
   cover_url: 'https://images.tupotencial.app/benefits/nutrivida.jpg',
   redemption_url: 'https://nutrivida.com/tupotencial',
+  utm_template: '?utm_source=tupotencial&utm_medium=benefit&utm_campaign=nutrivida',
   promo_code: 'TUPOTENCIAL20',
   valid_from: '2026-01-01',
   valid_until: '2026-06-30',

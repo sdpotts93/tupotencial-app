@@ -38,6 +38,20 @@
               :rows="4"
               hint="Escribe una caracteristica por linea"
             />
+
+            <UiInput
+              v-model="form.stripe_price_id"
+              label="Stripe Price ID"
+              placeholder="price_..."
+              hint="ID del precio en Stripe para el cobro automatico"
+            />
+
+            <UiInput
+              v-model="form.entitlement_key"
+              label="Clave de entitlement"
+              placeholder="vip_nutrition"
+              hint="La clave que se otorga al comprar (ej. vip_nutrition)"
+            />
           </div>
         </UiCard>
       </div>
@@ -90,6 +104,8 @@ const form = reactive({
   description: '',
   cover_url: '',
   features: '',
+  stripe_price_id: '',
+  entitlement_key: '',
   addon_type: 'module',
   price: '',
   billing_period: 'monthly',

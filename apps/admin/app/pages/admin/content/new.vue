@@ -65,6 +65,20 @@
               :options="statusOptions"
               placeholder="Selecciona el estado"
             />
+
+            <UiInput
+              v-if="form.status === 'scheduled'"
+              v-model="form.scheduled_at"
+              label="Fecha de publicacion programada"
+              type="datetime-local"
+            />
+
+            <UiInput
+              v-model="form.unpublished_at"
+              label="Despublicar automaticamente (opcional)"
+              type="datetime-local"
+              hint="Fecha en que el contenido se archivara automaticamente"
+            />
           </div>
         </UiCard>
       </div>
@@ -83,6 +97,8 @@ const form = reactive({
   segment: 'all',
   category_id: '',
   status: 'draft',
+  scheduled_at: '',
+  unpublished_at: '',
 })
 
 const typeOptions = [
@@ -110,6 +126,7 @@ const categoryOptions = [
 
 const statusOptions = [
   { value: 'draft', label: 'Borrador' },
+  { value: 'scheduled', label: 'Programado' },
   { value: 'published', label: 'Publicado' },
   { value: 'archived', label: 'Archivado' },
 ]

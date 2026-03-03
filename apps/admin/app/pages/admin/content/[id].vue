@@ -4,6 +4,7 @@
       <h1 class="page-header__title">Editar contenido</h1>
       <div class="page-header__actions">
         <UiButton variant="ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="outline" size="sm" @click="handleDuplicate">Duplicar</UiButton>
         <UiButton variant="outline" size="sm" to="/admin/content">Cancelar</UiButton>
         <UiButton size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
@@ -66,6 +67,20 @@
               :options="statusOptions"
               placeholder="Selecciona el estado"
             />
+
+            <UiInput
+              v-if="form.status === 'scheduled'"
+              v-model="form.scheduled_at"
+              label="Fecha de publicacion programada"
+              type="datetime-local"
+            />
+
+            <UiInput
+              v-model="form.unpublished_at"
+              label="Despublicar automaticamente (opcional)"
+              type="datetime-local"
+              hint="Fecha en que el contenido se archivara automaticamente"
+            />
           </div>
         </UiCard>
 
@@ -94,6 +109,8 @@ const form = reactive({
   segment: 'all',
   category_id: 'cat-001',
   status: 'published',
+  scheduled_at: '',
+  unpublished_at: '',
 })
 
 const typeOptions = [
@@ -121,12 +138,18 @@ const categoryOptions = [
 
 const statusOptions = [
   { value: 'draft', label: 'Borrador' },
+  { value: 'scheduled', label: 'Programado' },
   { value: 'published', label: 'Publicado' },
   { value: 'archived', label: 'Archivado' },
 ]
 
 function handleSave() {
   alert('Cambios guardados (mock)')
+}
+
+function handleDuplicate() {
+  alert(`Contenido duplicado como "Copia de ${form.title}" (mock)`)
+  navigateTo('/admin/content/new')
 }
 
 function handleDelete() {

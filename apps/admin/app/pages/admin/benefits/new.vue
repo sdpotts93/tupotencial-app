@@ -45,6 +45,13 @@
             />
 
             <UiInput
+              v-model="form.utm_template"
+              label="Plantilla UTM"
+              placeholder="?utm_source=tupotencial&utm_medium=benefit&utm_campaign=..."
+              hint="Parametros UTM que se agregan a la URL de canje"
+            />
+
+            <UiInput
               v-model="form.promo_code"
               label="Codigo promocional"
               placeholder="TUPOTENCIAL20"
@@ -117,6 +124,7 @@ const form = reactive({
   description: '',
   cover_url: '',
   redemption_url: '',
+  utm_template: '',
   promo_code: '',
   valid_from: '',
   valid_until: '',

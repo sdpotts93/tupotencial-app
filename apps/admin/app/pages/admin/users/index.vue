@@ -24,6 +24,11 @@
           :options="statusOptions"
           placeholder="Estado"
         />
+        <UiSelect
+          v-model="filterSegment"
+          :options="segmentFilterOptions"
+          placeholder="Segmento"
+        />
       </template>
 
       <template #cell-full_name="{ value, row }">
@@ -44,6 +49,10 @@
         <UiTag :variant="value === 'active' ? 'success' : value === 'suspended' ? 'danger' : 'default'">
           {{ statusLabel(value) }}
         </UiTag>
+      </template>
+
+      <template #cell-segment="{ value }">
+        {{ segmentLabel(value) }}
       </template>
 
       <template #cell-streak_days="{ value }">
@@ -68,6 +77,7 @@ const router = useRouter()
 const search = ref('')
 const filterPlan = ref('')
 const filterStatus = ref('')
+const filterSegment = ref('')
 
 const planOptions = [
   { value: '', label: 'Todos los planes' },
@@ -83,25 +93,32 @@ const statusOptions = [
   { value: 'suspended', label: 'Suspendido' },
 ]
 
+const segmentFilterOptions = [
+  { value: '', label: 'Todos los segmentos' },
+  { value: 'gabriel', label: 'Gabriel' },
+  { value: 'carlotta', label: 'Carlotta' },
+]
+
 const columns = [
-  { key: 'full_name', label: 'Usuario', width: '28%' },
+  { key: 'full_name', label: 'Usuario', width: '24%' },
   { key: 'plan', label: 'Plan' },
+  { key: 'segment', label: 'Segmento' },
   { key: 'status', label: 'Estado' },
   { key: 'streak_days', label: 'Racha' },
   { key: 'created_at', label: 'Registro' },
 ]
 
 const rows = ref([
-  { id: 'usr-001', full_name: 'Maria Lopez Hernandez', email: 'maria.lopez@gmail.com', plan: 'premium', status: 'active', streak_days: 45, created_at: '2025-08-15T10:00:00' },
-  { id: 'usr-002', full_name: 'Carlos Ramirez Torres', email: 'carlos.rt@outlook.com', plan: 'premium', status: 'active', streak_days: 23, created_at: '2025-10-03T14:30:00' },
-  { id: 'usr-003', full_name: 'Ana Sofia Gutierrez', email: 'ana.gtz@gmail.com', plan: 'free', status: 'active', streak_days: 7, created_at: '2026-01-20T09:00:00' },
-  { id: 'usr-004', full_name: 'Roberto Diaz Mora', email: 'rdiaz@empresa.com', plan: 'enterprise', status: 'active', streak_days: 120, created_at: '2025-05-10T08:00:00' },
-  { id: 'usr-005', full_name: 'Laura Mendez', email: 'laura.mendez@yahoo.com', plan: 'free', status: 'inactive', streak_days: 0, created_at: '2025-12-01T16:00:00' },
-  { id: 'usr-006', full_name: 'Fernando Castillo', email: 'fcastillo@gmail.com', plan: 'premium', status: 'active', streak_days: 15, created_at: '2026-01-05T11:30:00' },
-  { id: 'usr-007', full_name: 'Sofia Torres Vega', email: 'sofia.tv@hotmail.com', plan: 'free', status: 'active', streak_days: 3, created_at: '2026-02-15T13:00:00' },
-  { id: 'usr-008', full_name: 'Pedro Sanchez', email: 'pedro.s@empresa.com', plan: 'enterprise', status: 'suspended', streak_days: 0, created_at: '2025-09-20T10:00:00' },
-  { id: 'usr-009', full_name: 'Valentina Morales', email: 'val.morales@gmail.com', plan: 'premium', status: 'active', streak_days: 67, created_at: '2025-07-12T07:00:00' },
-  { id: 'usr-010', full_name: 'Diego Herrera Ruiz', email: 'dherrera@outlook.com', plan: 'free', status: 'active', streak_days: 1, created_at: '2026-02-22T20:00:00' },
+  { id: 'usr-001', full_name: 'Maria Lopez Hernandez', email: 'maria.lopez@gmail.com', plan: 'premium', segment: 'carlotta', status: 'active', streak_days: 45, created_at: '2025-08-15T10:00:00' },
+  { id: 'usr-002', full_name: 'Carlos Ramirez Torres', email: 'carlos.rt@outlook.com', plan: 'premium', segment: 'gabriel', status: 'active', streak_days: 23, created_at: '2025-10-03T14:30:00' },
+  { id: 'usr-003', full_name: 'Ana Sofia Gutierrez', email: 'ana.gtz@gmail.com', plan: 'free', segment: 'carlotta', status: 'active', streak_days: 7, created_at: '2026-01-20T09:00:00' },
+  { id: 'usr-004', full_name: 'Roberto Diaz Mora', email: 'rdiaz@empresa.com', plan: 'enterprise', segment: 'gabriel', status: 'active', streak_days: 120, created_at: '2025-05-10T08:00:00' },
+  { id: 'usr-005', full_name: 'Laura Mendez', email: 'laura.mendez@yahoo.com', plan: 'free', segment: 'carlotta', status: 'inactive', streak_days: 0, created_at: '2025-12-01T16:00:00' },
+  { id: 'usr-006', full_name: 'Fernando Castillo', email: 'fcastillo@gmail.com', plan: 'premium', segment: 'gabriel', status: 'active', streak_days: 15, created_at: '2026-01-05T11:30:00' },
+  { id: 'usr-007', full_name: 'Sofia Torres Vega', email: 'sofia.tv@hotmail.com', plan: 'free', segment: 'carlotta', status: 'active', streak_days: 3, created_at: '2026-02-15T13:00:00' },
+  { id: 'usr-008', full_name: 'Pedro Sanchez', email: 'pedro.s@empresa.com', plan: 'enterprise', segment: 'gabriel', status: 'suspended', streak_days: 0, created_at: '2025-09-20T10:00:00' },
+  { id: 'usr-009', full_name: 'Valentina Morales', email: 'val.morales@gmail.com', plan: 'premium', segment: 'carlotta', status: 'active', streak_days: 67, created_at: '2025-07-12T07:00:00' },
+  { id: 'usr-010', full_name: 'Diego Herrera Ruiz', email: 'dherrera@outlook.com', plan: 'free', segment: 'gabriel', status: 'active', streak_days: 1, created_at: '2026-02-22T20:00:00' },
 ])
 
 const filteredRows = computed(() => {
@@ -112,6 +129,7 @@ const filteredRows = computed(() => {
     }
     if (filterPlan.value && row.plan !== filterPlan.value) return false
     if (filterStatus.value && row.status !== filterStatus.value) return false
+    if (filterSegment.value && row.segment !== filterSegment.value) return false
     return true
   })
 })
@@ -129,6 +147,11 @@ function planLabel(plan: string) {
 function statusLabel(status: string) {
   const map: Record<string, string> = { active: 'Activo', inactive: 'Inactivo', suspended: 'Suspendido' }
   return map[status] ?? status
+}
+
+function segmentLabel(segment: string) {
+  const map: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
+  return map[segment] ?? segment
 }
 
 function formatDate(iso: string) {

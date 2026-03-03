@@ -55,9 +55,9 @@
             />
 
             <UiSelect
-              v-model="form.visibility"
-              label="Visibilidad"
-              :options="visibilityOptions"
+              v-model="form.segment"
+              label="Segmento de comunidad"
+              :options="segmentOptions"
             />
           </div>
         </UiCard>
@@ -85,7 +85,7 @@ const form = reactive({
   body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar habitos saludables. Que van a hacer hoy para cuidarse?',
   media_url: '',
   status: 'published',
-  visibility: 'all',
+  segment: 'conjunta',
   author_name: 'Tu Potencial',
   is_official: true,
   likes_count: 245,
@@ -99,10 +99,10 @@ const statusOptions = [
   { value: 'draft', label: 'Borrador' },
 ]
 
-const visibilityOptions = [
-  { value: 'all', label: 'Todos los usuarios' },
-  { value: 'premium', label: 'Solo premium' },
-  { value: 'enterprise', label: 'Solo empresarial' },
+const segmentOptions = [
+  { value: 'conjunta', label: 'Todos (Conjunta)' },
+  { value: 'gabriel', label: 'Gabriel' },
+  { value: 'carlotta', label: 'Carlotta' },
 ]
 
 const comments = ref([

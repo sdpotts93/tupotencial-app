@@ -25,6 +25,13 @@
 
             <UiInput v-model="form.host_name" label="Anfitrion" />
             <UiInput v-model="form.max_capacity" label="Capacidad maxima" type="number" />
+
+            <UiInput
+              v-model="form.vimeo_url"
+              label="URL de Vimeo (grabacion)"
+              placeholder="https://vimeo.com/..."
+              hint="URL del video en Vimeo para la grabacion del evento"
+            />
           </div>
         </UiCard>
       </div>
@@ -34,7 +41,10 @@
           <div class="form-section">
             <UiSelect v-model="form.event_type" label="Tipo" :options="typeOptions" />
             <UiSelect v-model="form.modality" label="Modalidad" :options="modalityOptions" />
-            <UiSelect v-model="form.segment" label="Segmento" :options="segmentOptions" />
+            <UiSelect v-model="form.segment" label="Segmento de comunidad" :options="segmentOptions" />
+
+            <UiSelect v-model="form.requires_subscription" label="Requiere suscripcion" :options="gatingOptions" />
+
             <UiSelect v-model="form.status" label="Estado" :options="statusOptions" />
           </div>
         </UiCard>
@@ -66,9 +76,11 @@ const form = reactive({
   ends_at: '2026-03-05T19:30',
   host_name: 'Dra. Elena Rojas',
   max_capacity: '500',
+  vimeo_url: '',
   event_type: 'workshop',
   modality: 'online',
-  segment: 'all',
+  segment: 'conjunta',
+  requires_subscription: 'no',
   status: 'published',
 })
 
@@ -86,10 +98,14 @@ const modalityOptions = [
 ]
 
 const segmentOptions = [
-  { value: 'all', label: 'General' },
-  { value: 'free', label: 'Gratuito' },
-  { value: 'premium', label: 'Premium' },
-  { value: 'enterprise', label: 'Empresarial' },
+  { value: 'conjunta', label: 'Todos (Conjunta)' },
+  { value: 'gabriel', label: 'Gabriel' },
+  { value: 'carlotta', label: 'Carlotta' },
+]
+
+const gatingOptions = [
+  { value: 'no', label: 'No (acceso libre)' },
+  { value: 'yes', label: 'Si (solo suscriptores)' },
 ]
 
 const statusOptions = [

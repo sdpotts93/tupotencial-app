@@ -63,6 +63,13 @@
               placeholder="100"
               hint="Dejar vacio para sin limite"
             />
+
+            <UiInput
+              v-model="form.vimeo_url"
+              label="URL de Vimeo (grabacion)"
+              placeholder="https://vimeo.com/..."
+              hint="URL del video en Vimeo para la grabacion del evento"
+            />
           </div>
         </UiCard>
       </div>
@@ -84,8 +91,14 @@
 
             <UiSelect
               v-model="form.segment"
-              label="Segmento"
+              label="Segmento de comunidad"
               :options="segmentOptions"
+            />
+
+            <UiSelect
+              v-model="form.requires_subscription"
+              label="Requiere suscripcion"
+              :options="gatingOptions"
             />
 
             <UiSelect
@@ -112,9 +125,11 @@ const form = reactive({
   ends_at: '',
   host_name: '',
   max_capacity: '',
+  vimeo_url: '',
   event_type: 'workshop',
   modality: 'online',
-  segment: 'all',
+  segment: 'conjunta',
+  requires_subscription: 'no',
   status: 'draft',
 })
 
@@ -132,10 +147,14 @@ const modalityOptions = [
 ]
 
 const segmentOptions = [
-  { value: 'all', label: 'General' },
-  { value: 'free', label: 'Gratuito' },
-  { value: 'premium', label: 'Premium' },
-  { value: 'enterprise', label: 'Empresarial' },
+  { value: 'conjunta', label: 'Todos (Conjunta)' },
+  { value: 'gabriel', label: 'Gabriel' },
+  { value: 'carlotta', label: 'Carlotta' },
+]
+
+const gatingOptions = [
+  { value: 'no', label: 'No (acceso libre)' },
+  { value: 'yes', label: 'Si (solo suscriptores)' },
 ]
 
 const statusOptions = [
