@@ -122,8 +122,8 @@
 </template>
 
 <script setup lang="ts">
-const searching = ref(true) // MOCKUP: set to false for default state
-const query = ref('meditación') // MOCKUP: set to '' for default state
+const searching = ref(false) // MOCKUP: set to false for default state
+const query = ref('') // MOCKUP: set to '' for default state
 const searchInputRef = ref()
 
 function openSearch() {
