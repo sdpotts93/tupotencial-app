@@ -7,45 +7,89 @@
 
       <p class="community__subtitle">El espacio donde compartir avances, sostener el proceso y crecer con otros que viven con intención.</p>
 
-      <!-- Filter pills -->
-      <div class="community__pills">
-        <button
-          v-for="f in filters"
-          :key="f.value"
-          :class="['community__pill', { 'community__pill--active': activeFilter === f.value }]"
-          @click="activeFilter = f.value"
-        >
-          {{ f.label }}
-        </button>
-      </div>
+      <div class="community__desktop-wrapper">
+        <!-- Main feed column -->
+        <div class="community__main">
+          <!-- Filter pills -->
+          <div class="community__pills">
+            <button
+              v-for="f in filters"
+              :key="f.value"
+              :class="['community__pill', { 'community__pill--active': activeFilter === f.value }]"
+              @click="activeFilter = f.value"
+            >
+              {{ f.label }}
+            </button>
+          </div>
 
-      <!-- Community feed -->
-      <div class="community__feed">
-        <article v-for="post in filteredPosts" :key="post.id" class="post">
-          <div class="post__header">
-            <img :src="post.avatar" alt="" class="post__avatar" />
-            <div class="post__meta">
-              <span class="post__author">{{ post.author }}</span>
-              <span class="post__time">{{ post.timeAgo }}</span>
+          <!-- Community feed -->
+          <div class="community__feed">
+            <article v-for="post in filteredPosts" :key="post.id" class="post">
+              <div class="post__header">
+                <img :src="post.avatar" alt="" class="post__avatar" />
+                <div class="post__meta">
+                  <span class="post__author">{{ post.author }}</span>
+                  <span class="post__time">{{ post.timeAgo }}</span>
+                </div>
+              </div>
+
+              <NuxtLink :to="`/community/post/${post.id}`" class="post__body-link">
+                <h3 v-if="post.title" class="post__title">{{ post.title }}</h3>
+                <p class="post__body">{{ post.body }}</p>
+              </NuxtLink>
+
+              <div class="post__actions">
+                <button class="post__action" @click="toggleReaction(post.id)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" :fill="post.liked ? 'var(--color-danger)' : 'none'" :stroke="post.liked ? 'var(--color-danger)' : 'currentColor'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                  <span>{{ post.reactions }}</span>
+                </button>
+                <NuxtLink :to="`/community/post/${post.id}`" class="post__action">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                  <span>{{ post.comments }}</span>
+                </NuxtLink>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Desktop right sidebar -->
+        <aside class="community__sidebar">
+          <div class="sidebar__section">
+            <h3 class="sidebar__title">Atajos</h3>
+            <div class="sidebar__cards">
+              <NuxtLink
+                v-for="shortcut in shortcuts"
+                :key="shortcut.to"
+                :to="shortcut.to"
+                class="shortcut-card"
+              >
+                <span class="shortcut-card__icon" v-html="shortcut.icon" />
+                <div class="shortcut-card__text">
+                  <span class="shortcut-card__label">{{ shortcut.label }}</span>
+                  <span class="shortcut-card__desc">{{ shortcut.description }}</span>
+                </div>
+              </NuxtLink>
             </div>
           </div>
 
-          <NuxtLink :to="`/community/post/${post.id}`" class="post__body-link">
-            <h3 v-if="post.title" class="post__title">{{ post.title }}</h3>
-            <p class="post__body">{{ post.body }}</p>
-          </NuxtLink>
-
-          <div class="post__actions">
-            <button class="post__action" @click="toggleReaction(post.id)">
-              <svg width="18" height="18" viewBox="0 0 24 24" :fill="post.liked ? 'var(--color-danger)' : 'none'" :stroke="post.liked ? 'var(--color-danger)' : 'currentColor'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-              <span>{{ post.reactions }}</span>
-            </button>
-            <NuxtLink :to="`/community/post/${post.id}`" class="post__action">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-              <span>{{ post.comments }}</span>
-            </NuxtLink>
+          <div class="sidebar__section">
+            <h3 class="sidebar__title">Recientes</h3>
+            <div class="sidebar__recent">
+              <NuxtLink
+                v-for="post in recentPosts"
+                :key="post.id"
+                :to="`/community/post/${post.id}`"
+                class="recent-post"
+              >
+                <span class="recent-post__reactions">{{ post.reactions }}</span>
+                <div class="recent-post__text">
+                  <span class="recent-post__title">{{ post.title || post.body.slice(0, 60) + '...' }}</span>
+                  <span class="recent-post__meta">{{ post.comments }} comentarios · {{ post.timeAgo }}</span>
+                </div>
+              </NuxtLink>
+            </div>
           </div>
-        </article>
+        </aside>
       </div>
     </div>
   </div>
@@ -58,6 +102,45 @@ const filters = [
   { value: 'all', label: 'Todos' },
   { value: 'Gabriel', label: 'Gabriel' },
   { value: 'Carlotta', label: 'Carlotta' },
+]
+
+const shortcuts = [
+  {
+    label: 'Biblioteca',
+    description: 'Meditaciones, audios y más',
+    to: '/library',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+  },
+  {
+    label: 'Programas',
+    description: 'Retos y programas activos',
+    to: '/retos',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+  },
+  {
+    label: 'Coach IA',
+    description: 'Tu coach personal inteligente',
+    to: '/ai',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>',
+  },
+  {
+    label: 'Eventos',
+    description: 'Próximos eventos en vivo',
+    to: '/events',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  },
+  {
+    label: 'VIP',
+    description: 'Contenido exclusivo premium',
+    to: '/addons',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  },
+  {
+    label: 'Beneficios',
+    description: 'Descuentos y alianzas',
+    to: '/benefits',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  },
 ]
 
 const posts = ref([
@@ -98,6 +181,8 @@ const filteredPosts = computed(() => {
   return posts.value.filter(p => p.author === activeFilter.value)
 })
 
+const recentPosts = computed(() => posts.value.slice(0, 4))
+
 function toggleReaction(id: string) {
   const post = posts.value.find(p => p.id === id)
   if (post) {
@@ -128,6 +213,16 @@ function toggleReaction(id: string) {
   color: var(--color-muted);
   margin: 0 0 var(--space-6);
   line-height: var(--leading-normal);
+}
+
+/* ─── Desktop wrapper (hidden on mobile) ─── */
+.community__desktop-wrapper {
+  display: contents;
+}
+
+/* ─── Right sidebar (hidden on mobile) ─── */
+.community__sidebar {
+  display: none;
 }
 
 /* ─── Filter pills ─── */
@@ -244,16 +339,30 @@ function toggleReaction(id: string) {
     display: none;
   }
 
-  .community__feed {
+  /* Two-column Reddit-style layout */
+  .community__desktop-wrapper {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-4);
+    grid-template-columns: 1fr 300px;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .community__main {
+    min-width: 0;
+  }
+
+  /* Feed stays single column on desktop */
+  .community__feed {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
   }
 
   .post {
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
+    transition: border-color var(--transition-fast);
   }
 
   .post:hover {
@@ -274,6 +383,149 @@ function toggleReaction(id: string) {
   .community__pill:not(.community__pill--active):hover {
     background: var(--color-desktop-card);
     border-color: var(--color-border);
+  }
+
+  /* ─── Right sidebar ─── */
+  .community__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    position: sticky;
+    top: calc(var(--topbar-height) + var(--space-5));
+  }
+
+  .sidebar__section {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .sidebar__title {
+    font-family: var(--font-eyebrow);
+    font-size: var(--eyebrow-md);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    padding: var(--space-4) var(--space-4) var(--space-2);
+    margin: 0;
+  }
+
+  /* ─── Shortcut cards ─── */
+  .sidebar__cards {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .shortcut-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: background var(--transition-fast);
+  }
+
+  .shortcut-card:hover {
+    background: rgba(0, 0, 0, 0.03);
+    text-decoration: none;
+  }
+
+  .shortcut-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    background: var(--color-desktop-bg);
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .shortcut-card__icon :deep(svg) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .shortcut-card__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .shortcut-card__label {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+  }
+
+  .shortcut-card__desc {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    line-height: var(--leading-snug);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ─── Recent posts ─── */
+  .sidebar__recent {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .recent-post {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: background var(--transition-fast);
+  }
+
+  .recent-post:hover {
+    background: rgba(0, 0, 0, 0.03);
+    text-decoration: none;
+  }
+
+  .recent-post__reactions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    background: var(--color-desktop-bg);
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-secondary);
+  }
+
+  .recent-post__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .recent-post__title {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .recent-post__meta {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin-top: 2px;
   }
 }
 </style>
