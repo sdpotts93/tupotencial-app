@@ -68,10 +68,10 @@ defineExpose({ show })
   font-size: var(--text-sm);
 }
 
-.toast--success { background: var(--color-success); color: #fff; }
-.toast--error { background: var(--color-danger); color: #fff; }
+.toast--success { background: var(--color-success); color: var(--color-white); }
+.toast--error { background: var(--color-danger); color: var(--color-white); }
 .toast--info { background: var(--color-primary); color: var(--color-primary-contrast); }
-.toast--warning { background: var(--color-warning); color: #fff; }
+.toast--warning { background: var(--color-warning); color: var(--color-white); }
 
 .toast__message { flex: 1; }
 

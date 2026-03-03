@@ -88,25 +88,25 @@ const classes = computed(() => [
 
 /* Variants */
 .btn--primary {
-  background: var(--color-primary);
-  color: var(--color-primary-contrast);
-  border-color: var(--color-primary);
+  background: var(--color-white);
+  color: var(--color-dark);
+  border-color: var(--color-white);
 }
-.btn--primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.btn--primary:hover { background: var(--color-light); border-color: var(--color-light); }
 
 .btn--secondary {
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  border-color: var(--color-accent);
+  background: var(--color-sand);
+  color: var(--color-white);
+  border-color: var(--color-sand);
 }
-.btn--secondary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+.btn--secondary:hover { opacity: 0.9; }
 
 .btn--outline {
   background: transparent;
-  color: var(--color-text);
-  border-color: var(--color-border);
+  color: var(--color-dark);
+  border-color: var(--color-dark);
 }
-.btn--outline:hover { background: var(--color-surface-alt); border-color: var(--color-text); }
+.btn--outline:hover { background: rgba(var(--tint-rgb), 0.05); }
 
 .btn--ghost {
   background: transparent;
@@ -117,7 +117,7 @@ const classes = computed(() => [
 
 .btn--danger {
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-white);
   border-color: var(--color-danger);
 }
 .btn--danger:hover { opacity: 0.9; }

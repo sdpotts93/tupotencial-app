@@ -52,7 +52,7 @@ function close() {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(var(--tint-rgb), 0.4);
   z-index: var(--z-modal-backdrop);
   display: flex;
   align-items: flex-end;
@@ -61,6 +61,7 @@ function close() {
 
 .modal {
   background: var(--color-surface);
+  color: var(--color-text);
   width: 100%;
   max-height: 90dvh;
   overflow-y: auto;

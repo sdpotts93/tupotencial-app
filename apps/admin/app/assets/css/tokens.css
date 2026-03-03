@@ -4,28 +4,32 @@
    ============================================ */
 
 :root {
-  /* ---- Base palette ---- */
+  /* ---- Base palette (brand — DO NOT CHANGE) ---- */
   --color-dark: #282828;
   --color-navy: #28374A;
   --color-light: #E8E6E2;
   --color-green: #384637;
   --color-sand: #A7A68E;
 
-  /* ---- Semantic colors ---- */
-  --color-bg: #FAFAF8;
   --color-dark-lighter: #282828a3;
+  --color-yellow: #d6cd74;
+  --color-gray: #ededed;
+  /* ---- Semantic colors ---- */
+  --color-bg: #d5d3cf;
   --color-surface: #f0efe5;
   --color-surface-alt: #F3F2EE;
+  --color-input-bg: #FFFFFF;
   --color-text: #282828;
   --color-text-secondary: #5A5A5A;
+  --color-text-inverse: var(--color-light);
   --color-muted: #8A8A8A;
   --color-placeholder: #B0AFA8;
 
-  --color-primary: #28374A;
-  --color-primary-contrast: #FFFFFF;
-  --color-primary-hover: #1E2C3D;
+  --color-primary: var(--color-dark);
+  --color-primary-contrast: var(--color-light);
+  --color-primary-hover: #343434;
 
-  --color-accent: #384637;
+  --color-accent: #FFFFFF;
   --color-accent-contrast: #FFFFFF;
   --color-accent-hover: #2D3A2D;
 
@@ -41,6 +45,62 @@
   --color-warning: #C27803;
   --color-warning-light: #FFFFF0;
   --color-info: #2B6CB0;
+
+  /* ---- Tint system (overlays, hover states, borders) ---- */
+  --tint-rgb: 0, 0, 0;
+  --tint-inverse-rgb: 255, 255, 255;
+
+  /* ---- Explicit white / black ---- */
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+
+  /* ---- Badge / tag colors ---- */
+  --color-gold: #9c8742;
+  --color-gold-bg: rgba(212, 175, 55, 0.15);
+  --color-silver: #9c9c9c;
+  --color-silver-text: #C0C0C0;
+  --color-silver-bg: rgba(192, 192, 192, 0.15);
+  --color-complete: #60a97c;
+  --color-complete-bg: rgba(72, 187, 120, 0.15);
+  --color-info-bg: rgba(43, 108, 176, 0.1);
+
+  /* ---- Pro / streak ---- */
+  --color-pro: #ffaa32;
+  --color-pro-dark: #d4940a;
+  --color-pro-bg: rgba(255, 170, 50, 0.1);
+  --color-pro-bg-strong: rgba(255, 170, 50, 0.18);
+
+  /* ---- AI personality ---- */
+  --color-ai-warm: #C08A8A;
+  --color-ai-warm-bg: rgba(192, 138, 138, 0.2);
+  --color-ai-cool: #9AB3C7;
+  --color-ai-cool-bg: rgba(154, 179, 199, 0.2);
+  --color-ai-earth: #C9A88E;
+  --color-ai-action: #F09A5E;
+  --color-ai-action-bg: rgba(240, 154, 94, 0.12);
+
+  /* ---- Mood check-in ---- */
+  --color-mood-great: #4ECDC4;
+  --color-mood-great-rgb: 78, 205, 196;
+  --color-mood-good: #A8D86E;
+  --color-mood-good-rgb: 168, 216, 110;
+  --color-mood-ok: #F5D547;
+  --color-mood-low: #F09A5E;
+  --color-mood-low-rgb: 240, 154, 94;
+  --color-mood-tough: #E05A5A;
+
+  /* ---- Benefit accents ---- */
+  --color-benefit-purple: #9B7FE6;
+  --color-benefit-purple-rgb: 155, 127, 230;
+  --color-benefit-pink: #E05A7A;
+  --color-benefit-pink-rgb: 224, 90, 122;
+
+  /* ---- Live indicator ---- */
+  --color-live: rgba(220, 38, 38, 0.8);
+
+  /* ---- Input focus ---- */
+  --color-input-shadow: #9f9f9f;
+  --color-input-focus-ring: rgba(40, 55, 74, 0.1);
 
   /* ---- Typography scale ---- */
   --text-xs: 0.6875rem;     /* 11px */
@@ -103,7 +163,7 @@
 
   /* ---- Button tokens ---- */
   --btn-px: var(--space-6);
-  --btn-py: var(--space-3);
+  --btn-py: var(--space-4);
   --btn-radius: var(--radius-lg);
   --btn-bg: var(--color-primary);
   --btn-fg: var(--color-primary-contrast);
@@ -121,9 +181,9 @@
   --radius-full: 9999px;
 
   /* ---- Shadows ---- */
-  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-3: 0 10px 30px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-1: 0 1px 3px rgba(var(--tint-rgb), 0.06), 0 1px 2px rgba(var(--tint-rgb), 0.04);
+  --shadow-2: 0 4px 12px rgba(var(--tint-rgb), 0.08), 0 2px 4px rgba(var(--tint-rgb), 0.04);
+  --shadow-3: 0 10px 30px rgba(var(--tint-rgb), 0.12), 0 4px 8px rgba(var(--tint-rgb), 0.06);
 
   /* ---- Z-index ---- */
   --z-base: 1;
@@ -148,9 +208,20 @@
   --max-page-width: 48rem;     /* 768px – web content cap */
 }
 
-/* ─── Desktop split layout ─── */
+/* ─── Desktop SaaS layout ─── */
 @media (min-width: 1024px) {
   :root {
     --color-surface-alt: #FFF;
+    --shadow-2: 0 1px 3px rgba(var(--tint-rgb), 0.08), 0 1px 2px rgba(var(--tint-rgb), 0.06);
+
+    /* SaaS shell */
+    --sidebar-width: 260px;
+    --topbar-height: 56px;
+    --max-page-width: 100%;
+
+    /* Desktop surfaces */
+    --color-desktop-bg: #F5F4F1;
+    --color-desktop-card: #FFFFFF;
+    --color-desktop-border: #E8E6E2;
   }
 }

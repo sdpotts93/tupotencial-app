@@ -55,18 +55,18 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped>
 .card {
-  background: var(--color-surface);
+  background: rgba(var(--tint-rgb), 0.04);
   border-radius: var(--radius-xl);
   overflow: hidden;
   text-decoration: none;
-  color: inherit;
+  color: var(--color-text);
 }
 
-.card--default { box-shadow: var(--shadow-1); }
+.card--default { }
 .card--elevated { box-shadow: var(--shadow-2); }
 .card--outlined { box-shadow: none; border: 1px solid var(--color-border); }
-.card--filled { background: var(--color-surface-alt); box-shadow: none; }
-.card--dark { background: var(--color-dark); color: var(--color-light); }
+.card--filled { background: var(--color-surface-alt); }
+.card--dark { background: var(--color-surface); color: var(--color-text); }
 
 .card--clickable {
   cursor: pointer;
@@ -98,7 +98,7 @@ withDefaults(defineProps<Props>(), {
   gap: var(--space-1);
 }
 
-.card__eyebrow { margin-bottom: var(--space-1); }
+.card__eyebrow { margin-bottom: var(--space-1); color: var(--color-muted); }
 
 .card__title {
   font-family: var(--font-body);
@@ -109,7 +109,7 @@ withDefaults(defineProps<Props>(), {
 
 .card__subtitle {
   font-size: var(--text-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-muted);
   line-height: var(--leading-normal);
 }
 

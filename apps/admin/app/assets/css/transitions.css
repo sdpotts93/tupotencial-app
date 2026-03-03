@@ -1,0 +1,98 @@
+/* ============================================
+   Tu Potencial — Page & layout transitions
+   ============================================ */
+
+/* ---- Page transition (fade + slight slide) ---- */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* ---- Layout transition ---- */
+.layout-enter-active,
+.layout-leave-active {
+  transition: opacity var(--transition-slow);
+}
+
+.layout-enter-from,
+.layout-leave-to {
+  opacity: 0;
+}
+
+/* ---- Slide up (for drawers / modals) ---- */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform var(--transition-base), opacity var(--transition-base);
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+/* ---- Fade ---- */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--transition-fast);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* ---- Scale fade (for toasts / chips) ---- */
+.scale-fade-enter-active,
+.scale-fade-leave-active {
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.scale-fade-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.scale-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+/* ---- Respect reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-leave-active,
+  .layout-enter-active,
+  .layout-leave-active,
+  .slide-up-enter-active,
+  .slide-up-leave-active,
+  .fade-enter-active,
+  .fade-leave-active,
+  .scale-fade-enter-active,
+  .scale-fade-leave-active {
+    transition: none;
+  }
+
+  .page-enter-from,
+  .page-leave-to,
+  .slide-up-enter-from,
+  .slide-up-leave-to,
+  .scale-fade-enter-from,
+  .scale-fade-leave-to {
+    transform: none;
+  }
+}

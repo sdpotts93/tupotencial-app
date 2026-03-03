@@ -37,5 +37,5 @@ withDefaults(defineProps<Props>(), {
 .tag--success { background: var(--color-success-light); color: var(--color-success); }
 .tag--warning { background: var(--color-warning-light); color: var(--color-warning); }
 .tag--danger { background: var(--color-danger-light); color: var(--color-danger); }
-.tag--info { background: rgba(43, 108, 176, 0.1); color: var(--color-info); }
+.tag--info { background: var(--color-info-bg); color: var(--color-info); }
 </style>

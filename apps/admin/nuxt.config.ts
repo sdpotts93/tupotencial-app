@@ -22,12 +22,14 @@ export default defineNuxtConfig({
       ],
     },
     pageTransition: { name: 'page', mode: 'out-in' },
+    layoutTransition: { name: 'layout', mode: 'out-in' },
   },
 
   css: [
     '~/assets/css/tokens.css',
     '~/assets/css/fonts.css',
     '~/assets/css/global.css',
+    '~/assets/css/transitions.css',
     '~/assets/css/admin.css',
   ],
 
