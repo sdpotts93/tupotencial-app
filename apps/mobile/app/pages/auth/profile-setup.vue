@@ -98,6 +98,7 @@ async function handleSave() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  background: #FFFFFF;
 }
 
 /* ─── Header ─── */

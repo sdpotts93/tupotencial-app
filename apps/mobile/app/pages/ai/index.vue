@@ -363,7 +363,7 @@ function startChat(prompt?: string) {
   }
 
   .onboarding-opt--selected {
-    border-color: var(--color-primary);
+    border-color: var(--color-sand);
     background:var(--color-surface);
   }
 

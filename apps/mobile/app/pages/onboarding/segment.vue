@@ -162,6 +162,7 @@ function handleContinue() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  background: #FFFFFF;
 }
 
 /* ─── Header ─── */
@@ -318,18 +319,14 @@ function handleContinue() {
   }
 
   .onboarding-opt {
-    background: var(--color-surface);
+    background: var(--color-desktop-card);
     color: var(--color-text);
-    border: 1.5px solid var(--color-surface);
-  }
-
-  .onboarding-opt:hover {
-    border-color: var(--color-text-secondary);
+    border: 1px solid var(--color-desktop-border);
   }
 
   .onboarding-opt--selected {
-    border-color: var(--color-border);
-    background: var(--color-surface-alt);
+    border-color: var(--color-sand);
+    background: var(--color-surface);
   }
 
   .onboarding-opt__label {
