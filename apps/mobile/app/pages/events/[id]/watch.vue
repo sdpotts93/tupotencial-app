@@ -142,4 +142,18 @@ const event = ref({
   color: rgba(255, 255, 255, 0.6);
   margin-top: var(--space-1);
 }
+
+/* ─── Desktop ─── */
+@media (min-width: 1024px) {
+  .watch {
+    position: fixed;
+    top: calc(var(--topbar-height) + 16px);
+    left: calc(var(--sidebar-width) + 16px);
+    right: 16px;
+    bottom: 16px;
+    width: auto;
+    height: auto;
+    border-radius: 12px;
+  }
+}
 </style>
