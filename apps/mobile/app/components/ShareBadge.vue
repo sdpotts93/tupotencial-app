@@ -1,26 +1,28 @@
 <template>
   <Teleport to="body">
     <Transition name="share-fade">
-      <div v-if="modelValue" class="share-overlay">
-        <!-- ═══ Hidden capture target (fixed 390×520 for html2canvas) ═══ -->
+      <div v-if="modelValue" class="share-overlay" @click.self="close">
+        <!-- ═══ Hidden capture target (fixed 360×640 for html2canvas) ═══ -->
         <div ref="captureRef" class="share-capture" aria-hidden="true">
           <div class="share-capture__top">
             <img src="/logo-word/logo-word-white.png" alt="Tu Potencial" class="share-capture__logo" crossorigin="anonymous" />
             <span class="share-capture__date">{{ formattedDate }}</span>
           </div>
           <div class="share-capture__center">
-            <span class="share-capture__eyebrow">ACCION DEL DIA</span>
+            <span class="share-capture__eyebrow">{{ eyebrow }}</span>
             <h2 class="share-capture__title">{{ actionTitle }}</h2>
             <p v-if="resolvedShareText" class="share-capture__text">{{ resolvedShareText }}</p>
           </div>
           <div class="share-capture__streak">
-            <span class="share-capture__fire">🔥</span>
+            <svg class="share-capture__flame-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffaa32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+            </svg>
             <span class="share-capture__count">{{ streakCount }}</span>
-            <span class="share-capture__label">DIAS</span>
+            <span class="share-capture__label">días</span>
           </div>
           <div class="share-capture__bottom">
             <img src="/logo-icon/logo-icon-white.png" alt="" class="share-capture__icon" crossorigin="anonymous" />
-            <span class="share-capture__url">tupotencial.com</span>
+            <span class="share-capture__url">tupotencial.app</span>
           </div>
         </div>
 
@@ -31,18 +33,18 @@
             <span class="share-screen__date">{{ formattedDate }}</span>
           </div>
           <div class="share-screen__center">
-            <span class="share-screen__eyebrow">ACCION DEL DIA</span>
+            <span class="share-screen__eyebrow">{{ eyebrow }}</span>
             <h2 class="share-screen__title">{{ actionTitle }}</h2>
             <p v-if="resolvedShareText" class="share-screen__text">{{ resolvedShareText }}</p>
           </div>
           <div class="share-screen__streak">
-            <span class="share-screen__fire">🔥</span>
+            <Icon name="lucide:flame" size="16" class="share-screen__flame-icon" />
             <span class="share-screen__count">{{ streakCount }}</span>
-            <span class="share-screen__streak-label">DIAS</span>
+            <span class="share-screen__streak-label">días</span>
           </div>
           <div class="share-screen__bottom">
             <img src="/logo-icon/logo-icon-white.png" alt="" class="share-screen__icon" />
-            <span class="share-screen__url">tupotencial.com</span>
+            <span class="share-screen__url">tupotencial.app</span>
           </div>
         </div>
 
@@ -71,6 +73,7 @@
 <script setup lang="ts">
 interface Props {
   modelValue: boolean
+  eyebrow?: string
   actionTitle: string
   streakCount: number
   shareText: string | null
@@ -79,6 +82,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  eyebrow: '{{ eyebrow }}',
   date: () => new Date().toISOString().slice(0, 10),
 })
 
@@ -86,6 +90,14 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const captureRef = ref<HTMLElement | null>(null)
 const { isCapturing, saveImage, shareImage } = useShareBadge()
+
+watch(() => props.modelValue, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
 
 const formattedDate = computed(() => {
   return new Date(props.date + 'T12:00:00').toLocaleDateString('es-MX', {
@@ -123,9 +135,13 @@ function handleShare() {
    ═══════════════════════════════════════════════════════ */
 .share-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 9999;
   background: #111;
+  overflow: hidden;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -219,31 +235,35 @@ function handleShare() {
   margin: 4px 0 0;
 }
 
+/* Streak — pill style matching navbar */
 .share-capture__streak {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
   position: relative;
   z-index: 1;
 }
 
-.share-capture__fire { font-size: 28px; line-height: 1; }
+.share-capture__flame-icon {
+  flex-shrink: 0;
+}
 
 .share-capture__count {
   font-family: 'Neue DIN XXWide', sans-serif;
-  font-size: 32px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 700;
   color: #ffaa32;
+  letter-spacing: 0.02em;
   line-height: 1;
 }
 
 .share-capture__label {
   font-family: 'Neue DIN XXWide', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  color: rgba(232, 230, 226, 0.6);
+  color: #ffaa32;
+  letter-spacing: 0.02em;
   line-height: 1;
 }
 
@@ -269,7 +289,10 @@ function handleShare() {
    ═══════════════════════════════════════════════════════ */
 .share-screen {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(160deg, var(--color-dark) 0%, var(--color-navy) 100%);
   padding: calc(var(--safe-area-top) + var(--space-6)) var(--space-6) calc(100px + var(--safe-area-bottom)) var(--space-6);
   display: flex;
@@ -352,35 +375,34 @@ function handleShare() {
   margin: 0;
 }
 
+/* Streak — matches navbar .hoy__streak-badge style */
 .share-screen__streak {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
   position: relative;
   z-index: 1;
 }
 
-.share-screen__fire {
-  font-size: 28px;
-  line-height: 1;
+.share-screen__flame-icon {
+  color: var(--color-pro);
 }
 
 .share-screen__count {
   font-family: var(--font-eyebrow);
-  font-size: var(--title-lg);
-  font-weight: 800;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   color: var(--color-pro);
-  line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 .share-screen__streak-label {
   font-family: var(--font-eyebrow);
-  font-size: var(--eyebrow-md);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: rgba(232, 230, 226, 0.5);
-  line-height: 1;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-pro);
+  letter-spacing: 0.02em;
 }
 
 .share-screen__bottom {
@@ -517,11 +539,11 @@ function handleShare() {
 
   .share-screen {
     position: relative;
-    inset: auto;
+    top: auto;
+    left: auto;
     width: 375px;
     height: 812px;
     border-radius: 44px;
-    border: 3px solid rgba(255, 255, 255, 0.12);
     padding: 56px 24px 110px;
     box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
   }
@@ -537,7 +559,6 @@ function handleShare() {
     bottom: auto;
     left: 50%;
     transform: translateX(-50%);
-    /* Position below the phone frame */
     margin-top: var(--space-6);
     width: 375px;
     top: calc(50% + 406px + var(--space-4));

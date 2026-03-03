@@ -1212,3 +1212,8 @@ Must implement:
 - Ensure client owns accounts and has at least 2 admin users provisioned
 
 ---
+
+## 14) Future enhancements (post-MVP)
+
+### Direct Instagram Stories sharing
+The ShareBadge currently uses the Web Share API (`navigator.share`) which opens the OS share sheet — the user picks Instagram from there. For a **direct-to-Instagram-Stories** flow, Instagram provides a URL scheme (`instagram-stories://share`) that accepts a background image via the pasteboard (iOS) or Intent (Android). This requires a native bridge (Capacitor plugin), not just the browser. Implement when the app ships with Capacitor.

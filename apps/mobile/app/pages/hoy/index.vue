@@ -233,12 +233,12 @@
     <div
       class="hoy__overlay"
       :class="{ 'hoy__overlay--active': activeSheet === 'accion' }"
-      @click.self="activeSheet = 'none'"
+      @click.self="closeAccionSheet"
     >
       <div class="hoy__sheet">
         <div class="hoy__sheet-header">
           <div class="hoy__sheet-handle" />
-          <button class="hoy__sheet-close" aria-label="Cerrar" @click="activeSheet = 'none'">
+          <button class="hoy__sheet-close" aria-label="Cerrar" @click="closeAccionSheet">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
@@ -252,14 +252,14 @@
             <p class="hoy__checkin-success-streak">{{ accionChoice === 'done' ? 'Accion completada' : 'Listo para manana' }}</p>
             <p class="hoy__checkin-success-msg">{{ accionChoice === 'done' ? 'Excelente trabajo hoy. Cada accion cuenta.' : 'No pasa nada. Manana es una nueva oportunidad.' }}</p>
 
-            <UiButton block variant="primary" @click="showShareBadge = true">
+            <UiButton block variant="outline" @click="showShareBadge = true">
               <template #icon><Icon name="lucide:share-2" size="18" /></template>
               Compartir logro
             </UiButton>
-            <UiButton block variant="secondary" @click="closeAccionSheet">Listo</UiButton>
 
             <ShareBadge
               v-model="showShareBadge"
+              :eyebrow="dailyPlan.eyebrow"
               :action-title="dailyPlan.title"
               :streak-count="streak + 1"
               :share-text="dailyPlan.badgeShareText"
