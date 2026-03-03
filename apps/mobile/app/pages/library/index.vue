@@ -190,13 +190,7 @@
 const searching = ref(false)
 const query = ref('')
 const searchInputRef = ref()
-const route = useRoute()
-const router = useRouter()
-const activeTab = ref((route.query.tab as string) || 'categorias')
-
-watch(activeTab, (tab) => {
-  router.replace({ query: tab === 'categorias' ? {} : { tab } })
-})
+const activeTab = useState('library-tab', () => 'categorias')
 
 const tabs = [
   { value: 'categorias', label: 'Categorías' },
@@ -458,10 +452,11 @@ const objectives = ref([
 
 /* ─── Tab intro text ─── */
 .library__tab-intro {
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   color: var(--color-muted);
+  margin: var(--space-5) 0 var(--space-4);
+  text-align: left;
   line-height: var(--leading-normal);
-  margin: var(--space-5) 0 var(--space-2);
 }
 
 /* ─── Section titles ─── */
@@ -619,6 +614,7 @@ const objectives = ref([
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  margin-block: var(--space-1);
 }
 
 .library__prog-badge {
