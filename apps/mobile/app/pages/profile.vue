@@ -11,65 +11,73 @@
         <h1 class="profile__header-title">Mi Perfil</h1>
       </header>
 
-      <!-- Avatar with camera overlay -->
-      <div class="profile__avatar-area">
-        <div class="profile__avatar">
-          <span class="profile__avatar-initials">{{ initials }}</span>
-        </div>
-        <button type="button" class="profile__camera" aria-label="Subir foto">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-            <circle cx="12" cy="13" r="4"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Form -->
-      <form class="profile__form" @submit.prevent="handleSave">
-        <UiInput v-model="displayName" label="Nombre" placeholder="Tu nombre" />
-        <UiSelect v-model="segment" label="Comunidad" :options="segmentOptions" />
-        <UiButton type="submit" block :loading="saving">Guardar cambios</UiButton>
-      </form>
-
-      <hr class="profile__divider" />
-
-      <!-- Membership -->
-      <section class="profile__section">
-        <p class="eyebrow">MEMBRESÍA</p>
-        <div class="profile__membership">
-          <div class="profile__membership-info">
-            <span class="profile__membership-plan">{{ isSubscriber ? 'Core' : 'Gratis' }}</span>
-            <span class="profile__membership-detail">{{ isSubscriber ? 'Renovación: 15 Mar 2026' : 'Suscríbete para desbloquear todo' }}</span>
-          </div>
-          <UiTag v-if="isSubscriber" variant="accent">Activa</UiTag>
-          <UiTag v-else variant="default">Gratis</UiTag>
-        </div>
-        <UiButton v-if="isSubscriber" block variant="outline" @click="handleManageSub">
-          Administrar suscripción
-        </UiButton>
-      </section>
-
-      <!-- Accesos VIP -->
-      <section v-if="vipAccesos.length" class="profile__section">
-        <p class="eyebrow">ACCESOS VIP</p>
-        <div class="profile__accesos-list">
-          <NuxtLink
-            v-for="item in vipAccesos"
-            :key="item.id"
-            :to="`/addons/${item.id}`"
-            class="profile__acceso"
-          >
-            <img :src="item.img" :alt="item.title" class="profile__acceso-img" />
-            <div class="profile__acceso-body">
-              <span class="profile__acceso-title">{{ item.title }}</span>
-              <span class="profile__acceso-meta">{{ item.typeLabel }}</span>
+      <!-- Desktop two-column layout wrapper -->
+      <div class="profile__top-grid">
+        <!-- Left column: Avatar + Form -->
+        <div class="profile__top-left">
+          <!-- Avatar with camera overlay -->
+          <div class="profile__avatar-area">
+            <div class="profile__avatar">
+              <span class="profile__avatar-initials">{{ initials }}</span>
             </div>
-            <svg class="profile__acceso-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </NuxtLink>
+            <button type="button" class="profile__camera" aria-label="Subir foto">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Form -->
+          <form class="profile__form" @submit.prevent="handleSave">
+            <UiInput v-model="displayName" label="Nombre" placeholder="Tu nombre" />
+            <UiSelect v-model="segment" label="Comunidad" :options="segmentOptions" />
+            <UiButton type="submit" block :loading="saving">Guardar cambios</UiButton>
+          </form>
         </div>
-      </section>
+
+        <!-- Right column: Membership + Accesos VIP -->
+        <div class="profile__top-right">
+          <hr class="profile__divider" />
+
+          <section class="profile__section">
+            <p class="eyebrow">MEMBRESÍA</p>
+            <div class="profile__membership">
+              <div class="profile__membership-info">
+                <span class="profile__membership-plan">{{ isSubscriber ? 'Core' : 'Gratis' }}</span>
+                <span class="profile__membership-detail">{{ isSubscriber ? 'Renovación: 15 Mar 2026' : 'Suscríbete para desbloquear todo' }}</span>
+              </div>
+              <UiTag v-if="isSubscriber" variant="accent">Activa</UiTag>
+              <UiTag v-else variant="default">Gratis</UiTag>
+            </div>
+            <UiButton v-if="isSubscriber" block variant="outline" @click="handleManageSub">
+              Administrar suscripción
+            </UiButton>
+          </section>
+
+          <!-- Accesos VIP -->
+          <section v-if="vipAccesos.length" class="profile__section">
+            <p class="eyebrow">ACCESOS VIP</p>
+            <div class="profile__accesos-list">
+              <NuxtLink
+                v-for="item in vipAccesos"
+                :key="item.id"
+                :to="`/addons/${item.id}`"
+                class="profile__acceso"
+              >
+                <img :src="item.img" :alt="item.title" class="profile__acceso-img" />
+                <div class="profile__acceso-body">
+                  <span class="profile__acceso-title">{{ item.title }}</span>
+                  <span class="profile__acceso-meta">{{ item.typeLabel }}</span>
+                </div>
+                <svg class="profile__acceso-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </NuxtLink>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -370,7 +378,7 @@ function handleManageSub() {
   color: var(--color-muted);
 }
 
-/* ─── Desktop SaaS ─── */
+/* ─── Desktop SaaS (Wise-style single column) ─── */
 @media (min-width: 1024px) {
   .profile__header {
     justify-content: flex-start;
@@ -384,25 +392,59 @@ function handleManageSub() {
     display: none;
   }
 
-  .profile__form {
-    max-width: 480px;
+  /* Single centered column */
+  .profile__top-grid {
+    max-width: 640px;
+    margin: 0 auto;
   }
 
+  .profile__top-right .profile__divider {
+    display: none;
+  }
+
+  /* Form: clean, no max-width constraint */
+  .profile__form {
+    margin-bottom: var(--space-6);
+  }
+
+  /* Section eyebrows: Wise-style with bottom border */
+  .profile__section > .eyebrow {
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-desktop-border);
+    margin-bottom: 0;
+  }
+
+  /* Membership row: flat, no card bg, bottom border */
   .profile__membership {
-    background: var(--color-desktop-card);
-    border: 1px solid var(--color-desktop-border);
-    border-radius: var(--radius-lg);
+    background: none;
+    border-radius: 0;
+    padding: var(--space-5) 0;
+    border-bottom: 1px solid var(--color-desktop-border);
+  }
+
+  .profile__section :deep(.btn--outline) {
+    margin-top: var(--space-4);
+    max-width: 240px;
+  }
+
+  /* Accesos VIP rows: flat with bottom borders */
+  .profile__accesos-list {
+    gap: 0;
   }
 
   .profile__acceso {
-    background: var(--color-desktop-card);
-    border: 1px solid var(--color-desktop-border);
-    border-radius: var(--radius-lg);
+    background: none;
+    border-radius: 0;
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--color-desktop-border);
   }
 
   .profile__acceso:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+    background: none;
+  }
+
+  .profile__acceso:last-child {
+    border-bottom: none;
   }
 }
 </style>

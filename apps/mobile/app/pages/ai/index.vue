@@ -10,18 +10,19 @@
         <h1 class="ai__header-title">Mi Coach IA</h1>
       </header>
 
-      <!-- Intro -->
-      <div class="ai-home__hero">
-        <div class="ai-home__icon"><Icon name="lucide:brain" size="48" /></div>
-        <h1 class="title title--lg">Tu acompañamiento diario</h1>
-        <p class="ai-home__desc">
-          Orientación personalizada según tu energía y ánimo.
-        </p>
-        <p class="ai-home__disclaimer">No es consejo médico/terapéutico.</p>
-      </div>
+      <!-- Intro + Tone (side-by-side on desktop) -->
+      <div class="ai-home__top-row">
+        <div class="ai-home__hero">
+          <div class="ai-home__icon"><Icon name="lucide:brain" size="48" /></div>
+          <h1 class="title title--lg">Tu acompañamiento diario</h1>
+          <p class="ai-home__desc">
+            Orientación personalizada según tu energía y ánimo.
+          </p>
+          <p class="ai-home__disclaimer">No es consejo médico/terapéutico.</p>
+        </div>
 
-      <!-- Tone selector -->
-      <section class="ai-home__tone">
+        <!-- Tone selector -->
+        <section class="ai-home__tone">
         <p class="eyebrow">ELIGE TU TONO</p>
         <div class="ai-home__tone-options">
           <button
@@ -40,6 +41,7 @@
           </button>
         </div>
       </section>
+      </div>
 
       <!-- Session history -->
       <section v-if="sessions.length" class="ai-home__history">
@@ -125,6 +127,9 @@ function startChat(prompt?: string) {
   -webkit-tap-highlight-color: transparent;
 }
 .ai__back:hover { background: rgba(0, 0, 0, 0.04); }
+
+/* ─── Top row wrapper (transparent on mobile) ─── */
+.ai-home__top-row { display: contents; }
 
 /* ─── Hero ─── */
 .ai-home__hero { text-align: center; margin-bottom: var(--space-8); }
@@ -312,15 +317,29 @@ function startChat(prompt?: string) {
     display: none;
   }
 
+  .ai-home__top-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    align-items: stretch;
+    margin-bottom: var(--space-6);
+  }
+
   .ai-home__hero {
     text-align: left;
     display: flex;
-    align-items: center;
-    gap: var(--space-5);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
     padding: var(--space-6);
+    margin-bottom: 0;
+  }
+
+  .ai-home__tone {
+    margin-bottom: 0;
   }
 
   .ai-home__icon {
@@ -333,8 +352,8 @@ function startChat(prompt?: string) {
   }
 
   .ai-home__tone-options {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: var(--space-3);
   }
 

@@ -291,7 +291,12 @@ const newComment = ref('')
     margin: 0 auto;
     flex: 1;
     overflow: auto;
+    scrollbar-color: transparent transparent;
     padding-bottom: 120px;
+  }
+
+  .screen__content:hover {
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
   }
 
   /* Hide mobile header on desktop */
