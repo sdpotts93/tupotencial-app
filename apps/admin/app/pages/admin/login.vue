@@ -1,47 +1,93 @@
 <template>
-  <div>
-    <h1 class="auth-title">Iniciar sesion</h1>
-    <p class="auth-subtitle">Accede al panel de administracion de Tu Potencial</p>
+  <div class="login">
+    <!-- Screen 1: Full-screen hero (mobile only) -->
+    <div class="login__hero">
+      <div class="login__hero-content">
+        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="login__wordmark" />
+        <div class="login__logo">
+          <img src="/logo-icon/logo-running.png" alt="Tu Potencial" class="login__logo-img" />
+        </div>
+        <p class="login__tagline">
+          Panel de administración
+        </p>
+      </div>
 
-    <form class="auth-form" @submit.prevent="handleLogin">
-      <UiInput
-        v-model="email"
-        label="Correo electronico"
-        type="email"
-        placeholder="admin@tupotencial.app"
-        :error="errors.email"
-        autocomplete="email"
-      />
+      <!-- Bottom CTA area -->
+      <div class="login__cta-area">
+        <UiButton variant="primary" block @click="sheetOpen = true">
+          Iniciar sesión
+        </UiButton>
+        <p class="login__legal">
+          Acceso exclusivo para administradores de Tu Potencial.
+        </p>
+      </div>
+    </div>
 
-      <UiInput
-        v-model="password"
-        label="Contrasena"
-        type="password"
-        placeholder="Tu contrasena"
-        :error="errors.password"
-        autocomplete="current-password"
-      />
+    <!-- Login sheet overlay -->
+    <div
+      class="login__overlay"
+      :class="{ 'login__overlay--active': sheetOpen }"
+      @click.self="sheetOpen = false"
+    >
+      <div class="login__sheet">
+        <div class="login__sheet-header">
+          <div class="login__handle" />
+          <button class="login__close" aria-label="Cerrar" @click="sheetOpen = false">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
 
-      <p v-if="loginError" class="auth-error">{{ loginError }}</p>
+        <h1 class="login__sheet-title">Inicia sesión</h1>
+        <p class="login__sheet-subtitle">Accede al panel de administración de Tu Potencial.</p>
 
-      <UiButton type="submit" block :loading="isLoading">
-        Entrar
-      </UiButton>
-    </form>
+        <form class="login__form" @submit.prevent="handleLogin">
+          <UiInput
+            v-model="email"
+            label="Correo electrónico"
+            type="email"
+            placeholder="admin@tupotencial.app"
+            autocomplete="email"
+            :error="errors.email"
+          />
 
-    <p class="auth-hint">
-      Credenciales de prueba: admin@tupotencial.app / admin123
-    </p>
+          <UiInput
+            v-model="password"
+            label="Contraseña"
+            type="password"
+            placeholder="Tu contraseña"
+            autocomplete="current-password"
+            :error="errors.password"
+          />
+
+          <p v-if="loginError" class="login__error">{{ loginError }}</p>
+
+          <UiButton
+            type="submit"
+            block
+            :loading="isLoading"
+            :disabled="!email || !password"
+            variant="secondary"
+          >
+            Entrar
+          </UiButton>
+        </form>
+
+        <p class="login__sheet-help">
+          Credenciales de prueba: <strong>admin@tupotencial.app / admin123</strong>
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: 'auth',
-})
+definePageMeta({ layout: 'auth' })
 
 const { login, isLoading, isAuthenticated } = useAdminAuth()
 
+const sheetOpen = ref(false)
 const email = ref('')
 const password = ref('')
 const loginError = ref('')
@@ -62,7 +108,7 @@ async function handleLogin() {
     return
   }
   if (!password.value) {
-    errors.password = 'La contrasena es obligatoria'
+    errors.password = 'La contraseña es obligatoria'
     return
   }
 
@@ -76,37 +122,243 @@ async function handleLogin() {
 </script>
 
 <style scoped>
-.auth-title {
+.login {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ─── Hero (Screen 1 — mobile only) ─── */
+.login__hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 100dvh;
+}
+
+.login__hero-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  padding: var(--space-10) var(--space-6);
+}
+
+.login__logo {
+  margin-bottom: var(--space-8);
+  border-radius: 1rem;
+}
+
+.login__logo-img {
+  height: 160px;
+  width: auto;
+  border-radius: var(--radius-xl);
+  opacity: 0.75;
+}
+
+.login__wordmark {
+  height: 18px;
+  width: auto;
+  display: block;
+  margin-bottom: var(--space-8);
+}
+
+.login__tagline {
   font-family: var(--font-title);
   font-size: var(--title-md);
   color: var(--color-text);
   text-align: center;
+  line-height: var(--leading-snug);
 }
 
-.auth-subtitle {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
+/* ─── CTA area at bottom of hero ─── */
+.login__cta-area {
+  position: relative;
+  z-index: 1;
+  padding: 0 var(--space-6) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.login__legal {
   text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-dark-lighter);
+  line-height: var(--leading-normal);
   margin-top: var(--space-2);
 }
 
-.auth-form {
+/* ─── Sheet overlay ─── */
+.login__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: rgba(var(--tint-rgb), 0);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+  transition: background var(--transition-base);
+}
+
+.login__overlay--active {
+  background: rgba(var(--tint-rgb), 0.4);
+  pointer-events: auto;
+}
+
+.login__sheet {
+  background: var(--color-accent);
+  color: var(--color-text);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  padding: var(--space-2) var(--space-6) var(--space-10);
+  max-height: 85dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.login__overlay--active .login__sheet {
+  transform: translateY(0);
+}
+
+.login__sheet-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+  margin-bottom: var(--space-6);
+}
+
+.login__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  margin-top: var(--space-2);
+}
+
+.login__close {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.login__close:hover {
+  background: var(--color-border-light);
+}
+
+.login__sheet-title {
+  font-family: var(--font-title);
+  font-size: var(--title-xl);
+  color: var(--color-text);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-3);
+  font-weight: 100;
+}
+
+.login__sheet-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: var(--leading-normal);
+  margin-bottom: var(--space-8);
+}
+
+.login__form {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  margin-top: var(--space-6);
 }
 
-.auth-error {
+.login__error {
   font-size: var(--text-sm);
   color: var(--color-danger);
   text-align: center;
 }
 
-.auth-hint {
+.login__sheet-help {
+  margin-top: var(--space-8);
+  text-align: center;
   font-size: var(--text-xs);
   color: var(--color-muted);
-  text-align: center;
-  margin-top: var(--space-4);
+}
+
+/* ─── Tablet (768px–1023px) ─── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .login__overlay--active {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login__sheet {
+    max-width: 440px;
+    width: 100%;
+    border-radius: var(--radius-2xl);
+    max-height: 90dvh;
+  }
+}
+
+/* ─── Desktop (≥1024px) ─── */
+@media (min-width: 1024px) {
+  .login {
+    background: transparent;
+    min-height: auto;
+    flex: 1;
+  }
+
+  .login__hero {
+    display: none;
+  }
+
+  /* Login overlay: static, always visible */
+  .login__overlay {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    background: none !important;
+    pointer-events: auto !important;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login__overlay .login__sheet {
+    transform: none !important;
+    max-width: 440px;
+    width: 100%;
+    border-radius: var(--radius-2xl);
+    box-shadow: none;
+    padding: var(--space-8);
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  /* Hide mobile sheet chrome */
+  .login__overlay .login__sheet-header {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login__overlay,
+  .login__sheet {
+    transition-duration: 0.01ms !important;
+  }
 }
 </style>
