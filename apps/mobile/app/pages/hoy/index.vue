@@ -898,6 +898,8 @@ function closeAccionSheet() {
 /* ─── Continue active programs ─── */
 .hoy__continue {
   margin-bottom: var(--space-8);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.04);
+  padding-top: var(--space-5);
 }
 
 .hoy__section-title {
@@ -987,6 +989,8 @@ function closeAccionSheet() {
 /* ─── Latest from Biblioteca ─── */
 .hoy__latest {
   margin-bottom: var(--space-8);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.04);
+  padding-top: var(--space-5);
 }
 
 .hoy__latest-header {
@@ -1069,6 +1073,8 @@ function closeAccionSheet() {
 /* ─── Explore grid ─── */
 .hoy__start {
   margin-bottom: var(--space-6);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.04);
+  padding-top: var(--space-5);
 }
 
 
@@ -1573,6 +1579,7 @@ function closeAccionSheet() {
   .hoy__latest,
   .hoy__start {
     grid-column: 1 / -1;
+    border-top: none;
   }
 
   /* Continue + Recientes + Explora: side-by-side rows */
