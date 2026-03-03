@@ -78,8 +78,8 @@ definePageMeta({ layout: 'auth' })
 }
 
 .pricing__plan {
-  background: rgba(0, 0, 0, 0.04); color: var(--color-text); border-radius: var(--radius-xl);
-  padding: var(--space-6); border: 1px solid rgba(0, 0, 0, 0.075);
+  background: rgba(var(--tint-rgb), 0.04); color: var(--color-text); border-radius: var(--radius-xl);
+  padding: var(--space-6); border: 1px solid rgba(var(--tint-rgb), 0.075);
 }
 
 .pricing__plan--featured {

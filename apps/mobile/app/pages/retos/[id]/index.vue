@@ -147,14 +147,14 @@ function enroll() {
   align-items: center;
   justify-content: center;
   color: var(--color-dark-lighter);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(var(--tint-inverse-rgb), 0.85);
   backdrop-filter: blur(8px);
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.detail__back:hover { background: rgba(255, 255, 255, 1); }
+.detail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
 
 /* ─── Back link (desktop only) ─── */
 .detail__back-link {
@@ -208,29 +208,29 @@ function enroll() {
 }
 
 .detail__tag--core {
-  background: rgba(212, 175, 55, 0.15);
-  color: #9c8742;
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
 }
 
 .detail__tag--gratis {
-  background: rgba(192, 192, 192, 0.15);
-  color: #9c9c9c;
+  background: var(--color-silver-bg);
+  color: var(--color-silver);
 }
 
 .detail__tag--inscrito {
-  background: rgba(72, 187, 120, 0.15);
-  color: #60a97c;
+  background: var(--color-complete-bg);
+  color: var(--color-complete);
 }
 
 .detail__meta :deep(.tag) {
   background: var(--color-sand);
-  color: white;
+  color: var(--color-white);
 }
 
 /* ─── Completed badge ─── */
 .detail__done {
   font-size: var(--text-xs);
-  color: #60a97c;
+  color: var(--color-complete);
 }
 
 /* ─── Day list ─── */
@@ -293,7 +293,7 @@ function enroll() {
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .detail__back-link:hover { background: rgba(0, 0, 0, 0.06); }
+  .detail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
 
   .detail__info {
     order: 1;
@@ -359,10 +359,6 @@ function enroll() {
 
   .detail__days :deep(.list-item:hover) {
     border-color: var(--color-border);
-  }
-
-  .detail__days :deep(.list-item + .list-item) {
-    border-top: none;
   }
 
   .detail__days :deep(.list-item__content) {

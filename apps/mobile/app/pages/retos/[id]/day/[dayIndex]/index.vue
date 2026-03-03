@@ -37,11 +37,11 @@
             </div>
             <span class="day__card-check">
               <svg v-if="activity.done" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" fill="#60a97c" fill-opacity="0.2" stroke="#60a97c" stroke-width="1.5"/>
-                <path d="M8 12l3 3 5-5" stroke="#60a97c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="10" style="fill: var(--color-complete); fill-opacity: 0.2; stroke: var(--color-complete)" stroke-width="1.5"/>
+                <path d="M8 12l3 3 5-5" style="stroke: var(--color-complete)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="10" style="stroke: rgba(var(--tint-rgb), 0.2)" stroke-width="1.5"/>
               </svg>
             </span>
           </NuxtLink>
@@ -65,11 +65,11 @@
             </div>
             <span class="day__card-check">
               <svg v-if="activity.done" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" fill="#60a97c" fill-opacity="0.2" stroke="#60a97c" stroke-width="1.5"/>
-                <path d="M8 12l3 3 5-5" stroke="#60a97c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="10" style="fill: var(--color-complete); fill-opacity: 0.2; stroke: var(--color-complete)" stroke-width="1.5"/>
+                <path d="M8 12l3 3 5-5" style="stroke: var(--color-complete)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.2)" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="10" style="stroke: rgba(var(--tint-rgb), 0.2)" stroke-width="1.5"/>
               </svg>
             </span>
           </button>
@@ -93,8 +93,8 @@
       <Transition name="day-fade" mode="out-in">
         <div v-if="formSuccess" key="success" class="day__form-success">
           <svg class="day__form-success-icon" width="48" height="48" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" fill="#60a97c" fill-opacity="0.2" stroke="#60a97c" stroke-width="1.5"/>
-            <path d="M8 12l3 3 5-5" stroke="#60a97c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="10" style="fill: var(--color-complete); fill-opacity: 0.2; stroke: var(--color-complete)" stroke-width="1.5"/>
+            <path d="M8 12l3 3 5-5" style="stroke: var(--color-complete)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <p class="day__form-success-title">¡Día completado!</p>
           <p class="day__form-success-msg">Excelente trabajo hoy.</p>
@@ -296,7 +296,7 @@ function closeFormSheet() {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.day__back:hover { background: rgba(0, 0, 0, 0.04); }
+.day__back:hover { background: rgba(var(--tint-rgb), 0.04); }
 
 .day__counter {
   position: absolute;
@@ -335,11 +335,11 @@ function closeFormSheet() {
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.day__card:hover { background: rgba(0, 0, 0, 0.06); }
-.day__card:active { background: rgba(0, 0, 0, 0.08); }
+.day__card:hover { background: rgba(var(--tint-rgb), 0.06); }
+.day__card:active { background: rgba(var(--tint-rgb), 0.08); }
 
 .day__card-img {
   width: 56px;
@@ -353,7 +353,7 @@ function closeFormSheet() {
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -446,6 +446,22 @@ function closeFormSheet() {
   .day__activities-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .day__card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .day__card:hover {
+    background: var(--color-desktop-card);
+    border-color: var(--color-border);
+  }
+
+  .day__card:active {
+    background: var(--color-desktop-card);
   }
 }
 </style>

@@ -121,7 +121,7 @@ const filteredPrograms = computed(() => {
   color: var(--color-text);
 }
 .retos__card + .retos__card {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.1);
   padding-top: var(--space-8);
 }
 
@@ -194,18 +194,18 @@ const filteredPrograms = computed(() => {
 }
 
 .retos__tag--core {
-  background: rgba(212, 175, 55, 0.15);
-  color: #9c8742;
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
 }
 
 .retos__tag--gratis {
-  background: rgba(192, 192, 192, 0.15);
-  color: #9c9c9c;
+  background: var(--color-silver-bg);
+  color: var(--color-silver);
 }
 
 .retos__tag--inscrito {
-  background: rgba(72, 187, 120, 0.15);
-  color: #60a97c;
+  background: var(--color-complete-bg);
+  color: var(--color-complete);
 }
 
 /* ─── Desktop SaaS ─── */

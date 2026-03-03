@@ -55,7 +55,7 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped>
 .card {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   border-radius: var(--radius-xl);
   overflow: hidden;
   text-decoration: none;

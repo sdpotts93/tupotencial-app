@@ -40,10 +40,10 @@
 definePageMeta({ layout: 'default' })
 
 const benefits = ref([
-  { id: 'mock-ben-001', title: 'Descuento en retiros', description: '15% de descuento en retiros presenciales', emoji: 'lucide:mountain', color: '#4ECDC4', bgColor: 'rgba(78, 205, 196, 0.15)' },
-  { id: 'mock-ben-002', title: 'Acceso a comunidad VIP', description: 'Grupo exclusivo de WhatsApp con mentores', emoji: 'lucide:message-circle', color: '#9B7FE6', bgColor: 'rgba(155, 127, 230, 0.15)' },
-  { id: 'mock-ben-003', title: 'Sesión 1:1 gratuita', description: 'Una sesión de coaching al mes sin costo', emoji: 'lucide:target', color: '#F09A5E', bgColor: 'rgba(240, 154, 94, 0.15)' },
-  { id: 'mock-ben-004', title: 'Descuento en libros', description: '20% en la tienda de libros recomendados', emoji: 'lucide:book-open', color: '#E05A7A', bgColor: 'rgba(224, 90, 122, 0.15)' },
+  { id: 'mock-ben-001', title: 'Descuento en retiros', description: '15% de descuento en retiros presenciales', emoji: 'lucide:mountain', color: 'var(--color-mood-great)', bgColor: 'rgba(var(--color-mood-great-rgb), 0.15)' },
+  { id: 'mock-ben-002', title: 'Acceso a comunidad VIP', description: 'Grupo exclusivo de WhatsApp con mentores', emoji: 'lucide:message-circle', color: 'var(--color-benefit-purple)', bgColor: 'rgba(var(--color-benefit-purple-rgb), 0.15)' },
+  { id: 'mock-ben-003', title: 'Sesión 1:1 gratuita', description: 'Una sesión de coaching al mes sin costo', emoji: 'lucide:target', color: 'var(--color-mood-low)', bgColor: 'rgba(var(--color-mood-low-rgb), 0.15)' },
+  { id: 'mock-ben-004', title: 'Descuento en libros', description: '20% en la tienda de libros recomendados', emoji: 'lucide:book-open', color: 'var(--color-benefit-pink)', bgColor: 'rgba(var(--color-benefit-pink-rgb), 0.15)' },
 ])
 </script>
 
@@ -78,7 +78,7 @@ const benefits = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.benefits__back:hover { background: rgba(0, 0, 0, 0.04); }
+.benefits__back:hover { background: rgba(var(--tint-rgb), 0.04); }
 
 /* ─── Intro ─── */
 .benefits__intro {
@@ -106,11 +106,11 @@ const benefits = ref([
   border-radius: var(--radius-xl);
   padding: var(--space-4);
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.benefits__card:hover { background: rgba(0, 0, 0, 0.06); }
-.benefits__card:active { background: rgba(0, 0, 0, 0.08); }
+.benefits__card:hover { background: rgba(var(--tint-rgb), 0.06); }
+.benefits__card:active { background: rgba(var(--tint-rgb), 0.08); }
 
 /* ─── Colorful icon ─── */
 .benefits__icon-wrap {

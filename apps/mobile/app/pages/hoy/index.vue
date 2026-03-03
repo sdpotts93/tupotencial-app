@@ -99,7 +99,7 @@
           >
             <div class="hoy__continue-progress">
               <svg viewBox="0 0 36 36" class="hoy__continue-ring">
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke="#ffffff15" stroke-width="3" />
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(var(--tint-inverse-rgb), 0.08)" stroke-width="3" />
                 <circle
                   cx="18" cy="18" r="15.5" fill="none"
                   stroke="var(--color-sand)"
@@ -423,7 +423,7 @@ const activities = ref([
     title: 'Mi Coach IA',
     meta: 'Tu coach personal',
     icon: 'lucide:brain',
-    accent: '#9AB3C7',
+    accent: 'var(--color-ai-cool)',
     to: '/ai',
     featured: true,
   },
@@ -432,7 +432,7 @@ const activities = ref([
     title: 'Eventos',
     meta: 'En vivo y grabados',
     icon: 'lucide:calendar',
-    accent: '#C08A8A',
+    accent: 'var(--color-ai-warm)',
     to: '/events',
     featured: false,
   },
@@ -441,7 +441,7 @@ const activities = ref([
     title: 'VIP',
     meta: 'Acceso premium',
     icon: 'lucide:crown',
-    accent: '#C9A88E',
+    accent: 'var(--color-ai-earth)',
     to: '/addons',
     featured: false,
   },
@@ -457,11 +457,11 @@ const checkinLoading = ref(false)
 const checkinSuccess = ref(false)
 
 const moods = [
-  { value: 'great', emoji: 'lucide:laugh', label: 'Increible', color: '#4ECDC4' },
-  { value: 'good', emoji: 'lucide:smile', label: 'Bien', color: '#A8D86E' },
-  { value: 'ok', emoji: 'lucide:meh', label: 'Regular', color: '#F5D547' },
-  { value: 'low', emoji: 'lucide:frown', label: 'Bajo', color: '#F09A5E' },
-  { value: 'tough', emoji: 'lucide:annoyed', label: 'Dificil', color: '#E05A5A' },
+  { value: 'great', emoji: 'lucide:laugh', label: 'Increible', color: 'var(--color-mood-great)' },
+  { value: 'good', emoji: 'lucide:smile', label: 'Bien', color: 'var(--color-mood-good)' },
+  { value: 'ok', emoji: 'lucide:meh', label: 'Regular', color: 'var(--color-mood-ok)' },
+  { value: 'low', emoji: 'lucide:frown', label: 'Bajo', color: 'var(--color-mood-low)' },
+  { value: 'tough', emoji: 'lucide:annoyed', label: 'Dificil', color: 'var(--color-mood-tough)' },
 ]
 
 async function handleCheckin() {
@@ -550,14 +550,14 @@ function closeAccionSheet() {
 }
 
 .hoy__streak-icon {
-  color: #ffaa32;
+  color: var(--color-pro);
 }
 
 .hoy__streak-count {
   font-family: var(--font-eyebrow);
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
-  color: #ffaa32;
+  color: var(--color-pro);
   letter-spacing: 0.02em;
 }
 
@@ -662,7 +662,7 @@ function closeAccionSheet() {
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-4);
-    background: rgb(0 0 0 / 4%);
+    background: rgba(var(--tint-rgb), 0.04);
     border-radius: var(--radius-xl);
     border: none;
     color: var(--color-text);
@@ -674,7 +674,7 @@ function closeAccionSheet() {
 }
 
 .hoy__reto-item:hover {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(var(--tint-rgb), 0.08);
 }
 
 .hoy__reto-item--done {
@@ -692,7 +692,7 @@ function closeAccionSheet() {
 }
 
 .hoy__reto-item--done .hoy__reto-check {
-  color: #A8D86E;
+  color: var(--color-mood-good);
 }
 
 .hoy__reto-label {
@@ -717,8 +717,8 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-5);
-  background: linear-gradient(135deg, rgba(78, 205, 196, 0.15), rgba(168, 216, 110, 0.12));
-  border: 1px solid rgba(168, 216, 110, 0.25);
+  background: linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.15), rgba(var(--color-mood-good-rgb), 0.12));
+  border: 1px solid rgba(var(--color-mood-good-rgb), 0.25);
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: inherit;
@@ -731,9 +731,9 @@ function closeAccionSheet() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(168, 216, 110, 0.2);
+  background: rgba(var(--color-mood-good-rgb), 0.2);
   border-radius: var(--radius-lg);
-  color: #A8D86E;
+  color: var(--color-mood-good);
 }
 
 .hoy__celebration-text {
@@ -772,7 +772,7 @@ function closeAccionSheet() {
 
 .hoy__mensaje-icon {
   flex-shrink: 0;
-  color: rgba(0, 0, 0, 0.35);
+  color: rgba(var(--tint-rgb), 0.35);
   font-size: 1rem;
   margin-left: auto;
   position: absolute;
@@ -808,7 +808,7 @@ function closeAccionSheet() {
 .hoy__mensaje-name {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(var(--tint-rgb), 0.45);
 }
 
 /* ─── Featured card ─── */
@@ -892,7 +892,7 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: var(--color-text);
@@ -900,7 +900,7 @@ function closeAccionSheet() {
 }
 
 .hoy__continue-card:hover {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(var(--tint-rgb), 0.08);
   text-decoration: none;
 }
 
@@ -1054,7 +1054,7 @@ function closeAccionSheet() {
   display: flex;
   flex-direction: column;
   padding: var(--space-4);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: var(--color-text);
@@ -1103,7 +1103,7 @@ function closeAccionSheet() {
 } */
 
 .hoy__activity:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(var(--tint-rgb), 0.1);
   text-decoration: none;
 }
 
@@ -1141,7 +1141,7 @@ function closeAccionSheet() {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0);
+  background: rgba(var(--tint-rgb), 0);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -1150,7 +1150,7 @@ function closeAccionSheet() {
 }
 
 .hoy__overlay--active {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(var(--tint-rgb), 0.4);
   pointer-events: auto;
 }
 
@@ -1315,9 +1315,9 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   color: var(--color-text);
-  border: 1.5px solid #ffffff00;
+  border: 1.5px solid transparent;
   border-radius: var(--radius-xl);
   cursor: pointer;
   text-align: left;
@@ -1415,7 +1415,7 @@ function closeAccionSheet() {
     font-family: var(--font-eyebrow);
     font-size: var(--text-sm);
     font-weight: var(--weight-bold);
-    color: #ffaa32;
+    color: var(--color-pro);
     letter-spacing: 0.02em;
   }
 
@@ -1471,8 +1471,8 @@ function closeAccionSheet() {
   }
 
   .hoy__celebration {
-    border: 1px solid rgba(168, 216, 110, 0.3);
-    background: linear-gradient(135deg, rgba(78, 205, 196, 0.08), rgba(168, 216, 110, 0.06));
+    border: 1px solid rgba(var(--color-mood-good-rgb), 0.3);
+    background: linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.08), rgba(var(--color-mood-good-rgb), 0.06));
   }
 
   /* Flatten duo-row so children participate in parent grid */

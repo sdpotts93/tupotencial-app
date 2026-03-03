@@ -98,7 +98,7 @@ async function handleSave() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: #FFFFFF;
+  background: var(--color-white);
 }
 
 /* ─── Header ─── */
@@ -126,7 +126,7 @@ async function handleSave() {
 .profile-setup__progress {
   flex: 1;
   height: 4px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(var(--tint-rgb), 0.08);
   border-radius: var(--radius-full);
   overflow: hidden;
 }

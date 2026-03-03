@@ -65,12 +65,12 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  box-shadow: 0px 0px 2px #9f9f9f;
+  box-shadow: 0px 0px 2px var(--color-input-shadow);
 }
 
 /* .input-field__wrapper:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(40, 55, 74, 0.1);
+  box-shadow: 0 0 0 3px var(--color-input-focus-ring);
 } */
 
 .input-field__input {

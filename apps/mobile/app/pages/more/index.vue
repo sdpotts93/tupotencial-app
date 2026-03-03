@@ -110,8 +110,8 @@ function handleLogout() {
 .more__section-title:first-of-type { margin-top: 0; }
 
 /* Plan tier tag colors */
-.more__info :deep(.tag--accent) { width: fit-content; background: rgba(212, 175, 55, 0.15); color: #9c8742; }
-.more__info :deep(.tag--default) {  background: rgba(192, 192, 192, 0.15); color: #C0C0C0; }
+.more__info :deep(.tag--accent) { width: fit-content; background: var(--color-gold-bg); color: var(--color-gold); }
+.more__info :deep(.tag--default) {  background: var(--color-silver-bg); color: var(--color-silver-text); }
 
 /* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {

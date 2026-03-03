@@ -162,7 +162,7 @@ function handleContinue() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: #FFFFFF;
+  background: var(--color-white);
 }
 
 /* ─── Header ─── */
@@ -190,7 +190,7 @@ function handleContinue() {
 .onboarding__progress {
   flex: 1;
   height: 4px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(var(--tint-rgb), 0.08);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -229,9 +229,9 @@ function handleContinue() {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   color: var(--color-text);
-  border: 1.5px solid #ffffff00;
+  border: 1.5px solid transparent;
   border-radius: var(--radius-xl);
   cursor: pointer;
   text-align: left;

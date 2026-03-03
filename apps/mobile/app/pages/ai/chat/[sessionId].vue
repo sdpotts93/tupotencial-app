@@ -182,7 +182,7 @@ function getResponse(input: string): string {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.chat__back:hover { background: rgba(0, 0, 0, 0.04); }
+.chat__back:hover { background: rgba(var(--tint-rgb), 0.04); }
 
 /* ─── Disclaimer ─── */
 .chat__disclaimer {
@@ -211,7 +211,7 @@ function getResponse(input: string): string {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(var(--tint-rgb), 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -222,7 +222,7 @@ function getResponse(input: string): string {
 }
 
 .chat__msg-avatar--coach {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   color: var(--color-sand);
 }
 
@@ -257,7 +257,7 @@ function getResponse(input: string): string {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(var(--tint-rgb), 0.2);
   animation: typingDot 1.2s infinite;
 }
 .chat__typing-dots span:nth-child(2) { animation-delay: 0.2s; }
@@ -282,9 +282,9 @@ function getResponse(input: string): string {
 .chat__prompt-btn {
   flex-shrink: 0;
   padding: var(--space-2) var(--space-4) var(--space-1);
-  border: 1px solid rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(var(--tint-rgb), 0.075);
   border-radius: var(--radius-full);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   font-family: var(--font-body);
   font-size: var(--text-sm);
   color: var(--color-text);
@@ -303,7 +303,7 @@ function getResponse(input: string): string {
   left: 0;
   right: 0;
   z-index: var(--z-sticky, 10);
-  background: white;
+  background: var(--color-white);
   border-top: none;
   padding: var(--space-3) var(--space-5);
 }
@@ -312,11 +312,11 @@ function getResponse(input: string): string {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--color-white);
+  border: 1px solid rgba(var(--tint-rgb), 0.1);
   border-radius: 24px;
   padding: 6px 6px 6px var(--space-5);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(var(--tint-rgb), 0.06);
 }
 
 .chat__input {
@@ -339,10 +339,10 @@ function getResponse(input: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-dark, #1a1a1a);
+  background: var(--color-dark);
   border: none;
   border-radius: 50%;
-  color: white;
+  color: var(--color-white);
   cursor: pointer;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;

@@ -50,9 +50,9 @@ const benefit = ref({
   code: 'TPRETIRO15',
   url: 'https://example.com/retiros',
   icon: 'lucide:mountain',
-  color: '#4ECDC4',
-  bgColor: 'rgba(78, 205, 196, 0.15)',
-  bgGradient: 'linear-gradient(135deg, rgba(78, 205, 196, 0.3), rgba(78, 205, 196, 0.08))',
+  color: 'var(--color-mood-great)',
+  bgColor: 'rgba(var(--color-mood-great-rgb), 0.15)',
+  bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))',
 })
 
 function handleOpen() {
@@ -99,7 +99,7 @@ function handleOpen() {
   align-items: center;
   justify-content: center;
   color: var(--color-dark-lighter);
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(var(--tint-rgb), 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: none;
@@ -107,7 +107,7 @@ function handleOpen() {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.benefit__back:hover { background: rgba(0, 0, 0, 0.5); }
+.benefit__back:hover { background: rgba(var(--tint-rgb), 0.5); }
 
 /* ─── Back link (desktop only) ─── */
 .benefit__back-link {
@@ -138,7 +138,7 @@ function handleOpen() {
 
 /* ─── Code ─── */
 .benefit__code {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   margin-bottom: var(--space-5);
@@ -215,7 +215,7 @@ function handleOpen() {
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .benefit__back-link:hover { background: rgba(0, 0, 0, 0.06); }
+  .benefit__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
 
   .benefit__info {
     order: 1;

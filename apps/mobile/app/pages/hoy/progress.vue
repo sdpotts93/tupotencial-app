@@ -109,7 +109,7 @@ const activePrograms = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.progress__back:hover { background: rgba(0, 0, 0, 0.05); }
+.progress__back:hover { background: rgba(var(--tint-rgb), 0.05); }
 
 /* ─── Hero ─── */
 .progress__hero {
@@ -180,7 +180,7 @@ const activePrograms = ref([
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-8) var(--space-4) var(--space-4);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   border-radius: var(--radius-xl);
   justify-content: center;
 }
@@ -221,10 +221,10 @@ const activePrograms = ref([
   border-radius: var(--radius-xl);
   padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.progress__card:hover { background: rgba(0, 0, 0, 0.06); }
+.progress__card:hover { background: rgba(var(--tint-rgb), 0.06); }
 
 .progress__card-img {
   width: 56px;

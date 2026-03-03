@@ -65,7 +65,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   width: 100%;
   background: var(--color-input-bg);
   border: none;
-  box-shadow: 0px 0px 2px #9f9f9f;
+  box-shadow: 0px 0px 2px var(--color-input-shadow);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-9) var(--space-3) var(--space-4);
   font-family: var(--font-body);
@@ -78,7 +78,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 .select-field__input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(40, 55, 74, 0.1);
+  box-shadow: 0 0 0 3px var(--color-input-focus-ring);
 }
 
 .select-field__chevron {

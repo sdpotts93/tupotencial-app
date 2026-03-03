@@ -116,14 +116,14 @@ const content = ref({
   align-items: center;
   justify-content: center;
   color: var(--color-dark-lighter);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(var(--tint-inverse-rgb), 0.85);
   backdrop-filter: blur(8px);
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.detail__back:hover { background: rgba(255, 255, 255, 1); }
+.detail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
 
 /* ─── Play button ─── */
 .detail__play-btn {
@@ -134,7 +134,7 @@ const content = ref({
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(var(--tint-rgb), 0.45);
   backdrop-filter: blur(8px);
   border: none;
   cursor: pointer;
@@ -144,7 +144,7 @@ const content = ref({
   z-index: 1;
   transition: background var(--transition-fast);
 }
-.detail__play-btn:hover { background: rgba(0, 0, 0, 0.65); }
+.detail__play-btn:hover { background: rgba(var(--tint-rgb), 0.65); }
 
 /* ─── Back link (desktop only) ─── */
 .detail__back-link {
@@ -188,7 +188,7 @@ const content = ref({
 
 .detail__meta :deep(.tag) {
   background: var(--color-sand);
-  color: white;
+  color: var(--color-white);
 }
 
 /* ─── Tablet ─── */
@@ -239,7 +239,7 @@ const content = ref({
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .detail__back-link:hover { background: rgba(0, 0, 0, 0.06); }
+  .detail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
 
   .detail__info {
     order: 1;

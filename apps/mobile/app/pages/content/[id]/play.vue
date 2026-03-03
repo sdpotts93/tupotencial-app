@@ -254,7 +254,7 @@ onBeforeUnmount(() => {
   position: relative;
   width: 100%;
   height: 100dvh;
-  background: #000;
+  background: var(--color-black);
   overflow: hidden;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -295,13 +295,13 @@ onBeforeUnmount(() => {
 .player__scrim-top {
   top: 0;
   height: 120px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(var(--tint-rgb), 0.7) 0%, transparent 100%);
 }
 
 .player__scrim-bottom {
   bottom: 0;
   height: 280px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(var(--tint-rgb), 0.85) 0%, transparent 100%);
 }
 
 /* ─── Top bar ─── */
@@ -325,7 +325,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   background: none;
   border: none;
-  color: white;
+  color: var(--color-white);
   cursor: pointer;
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
@@ -338,7 +338,7 @@ onBeforeUnmount(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: var(--z-sticky);
-  color: white;
+  color: var(--color-white);
   pointer-events: none;
 }
 
@@ -363,12 +363,12 @@ onBeforeUnmount(() => {
 .player__title {
   font-family: var(--font-title);
   font-size: var(--title-sm);
-  color: white;
+  color: var(--color-white);
 }
 
 .player__subtitle {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(var(--tint-inverse-rgb), 0.6);
   margin-top: var(--space-1);
 }
 
@@ -392,7 +392,7 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   height: 4px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(var(--tint-inverse-rgb), 0.2);
   border-radius: var(--radius-full);
 }
 
@@ -400,7 +400,7 @@ onBeforeUnmount(() => {
   position: absolute;
   left: 0;
   height: 4px;
-  background: white;
+  background: var(--color-white);
   border-radius: var(--radius-full);
   pointer-events: none;
 }
@@ -411,7 +411,7 @@ onBeforeUnmount(() => {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: white;
+  background: var(--color-white);
   transform: translate(-50%, -50%);
   opacity: 0;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
@@ -428,7 +428,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   margin-top: var(--space-1);
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(var(--tint-inverse-rgb), 0.5);
   font-family: var(--font-eyebrow);
 }
 
@@ -444,7 +444,7 @@ onBeforeUnmount(() => {
 .player__btn {
   background: none;
   border: none;
-  color: white;
+  color: var(--color-white);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -458,8 +458,8 @@ onBeforeUnmount(() => {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: white;
-  color: #000;
+  background: var(--color-white);
+  color: var(--color-black);
   padding: 0;
 }
 .player__btn--play:active { transform: scale(0.95); }

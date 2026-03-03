@@ -151,7 +151,7 @@ function handleManageSub() {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.profile__back:hover { background: rgba(0, 0, 0, 0.05); }
+.profile__back:hover { background: rgba(var(--tint-rgb), 0.05); }
 
 /* ─── Avatar with camera overlay (profile-setup style) ─── */
 .profile__avatar-area {
@@ -243,7 +243,7 @@ function handleManageSub() {
 /* ─── Divider ─── */
 .profile__divider {
   border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.04);
   margin: 0 0 var(--space-6);
 }
 
@@ -256,7 +256,7 @@ function handleManageSub() {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   border-radius: var(--radius-xl);
 }
 
@@ -281,13 +281,13 @@ function handleManageSub() {
 }
 
 .profile__membership-tag--core {
-  background: rgba(212, 175, 55, 0.15);
-  color: #9c8742;
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
 }
 
 .profile__membership-tag--gratis {
-  background: rgba(192, 192, 192, 0.15);
-  color: #9c9c9c;
+  background: var(--color-silver-bg);
+  color: var(--color-silver);
 }
 
 .profile__membership-detail {
@@ -322,10 +322,10 @@ function handleManageSub() {
   border-radius: var(--radius-xl);
   padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.profile__acceso:hover { background: rgba(0, 0, 0, 0.06); }
+.profile__acceso:hover { background: rgba(var(--tint-rgb), 0.06); }
 
 .profile__acceso-img {
   width: 56px;

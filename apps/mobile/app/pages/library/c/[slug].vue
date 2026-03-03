@@ -74,7 +74,7 @@ const items = ref([
   position: absolute;
   left: 0;
 }
-.cat__back:hover { background: rgba(0, 0, 0, 0.06); }
+.cat__back:hover { background: rgba(var(--tint-rgb), 0.06); }
 
 /* ─── Item list ─── */
 .cat__list {

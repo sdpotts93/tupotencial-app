@@ -223,7 +223,7 @@ const categories = ref([
   -webkit-tap-highlight-color: transparent;
 }
 .library__search-btn-label { display: none; }
-.library__search-btn:hover { background: rgba(0, 0, 0, 0.06); }
+.library__search-btn:hover { background: rgba(var(--tint-rgb), 0.06); }
 
 /* ─── Inline search ─── */
 .library__search-input { margin-bottom: var(--space-6); }

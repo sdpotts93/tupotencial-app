@@ -159,7 +159,7 @@ const sessions = ref([
   }
 
   .ai-sidebar__new:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(var(--tint-rgb), 0.04);
     border-color: var(--color-border);
   }
 
@@ -194,13 +194,13 @@ const sessions = ref([
   }
 
   .ai-sidebar__session:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(var(--tint-rgb), 0.04);
     color: var(--color-text);
     text-decoration: none;
   }
 
   .ai-sidebar__session--active {
-    background: rgba(0, 0, 0, 0.06);
+    background: rgba(var(--tint-rgb), 0.06);
     color: var(--color-text);
     border-left-color: var(--color-primary);
   }
@@ -235,13 +235,13 @@ const sessions = ref([
   }
 
   .ai-sidebar__session-tone--carlotta {
-    background: rgba(192, 138, 138, 0.2);
-    color: #C08A8A;
+    background: var(--color-ai-warm-bg);
+    color: var(--color-ai-warm);
   }
 
   .ai-sidebar__session-tone--gabriel {
-    background: rgba(154, 179, 199, 0.2);
-    color: #9AB3C7;
+    background: var(--color-ai-cool-bg);
+    color: var(--color-ai-cool);
   }
 
   .ai-sidebar__session-date {
@@ -270,7 +270,7 @@ const sessions = ref([
   }
 
   .ai-sidebar__back-link:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(var(--tint-rgb), 0.04);
     color: var(--color-text-secondary);
     text-decoration: none;
   }
@@ -314,22 +314,22 @@ const sessions = ref([
     align-items: center;
     gap: 6px;
     padding: 6px var(--space-3);
-    background: rgba(255, 170, 50, 0.1);
+    background: var(--color-pro-bg);
     border-radius: var(--radius-full);
     text-decoration: none;
     font-family: var(--font-eyebrow);
     font-size: var(--text-sm);
     font-weight: var(--weight-bold);
-    color: #d4940a;
+    color: var(--color-pro-dark);
     transition: background var(--transition-fast);
   }
 
   .ai-layout__streak-icon {
-    color: #ffaa32;
+    color: var(--color-pro);
   }
 
   .ai-layout__streak:hover {
-    background: rgba(255, 170, 50, 0.18);
+    background: var(--color-pro-bg-strong);
     text-decoration: none;
   }
 

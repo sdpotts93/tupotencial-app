@@ -8,14 +8,14 @@
 .list {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   color: var(--color-text);
   border-radius: var(--radius-xl);
   overflow: hidden;
 }
 
 .list > :deep(.list-item + .list-item) {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.08);
 }
 
 @media (min-width: 1024px) {

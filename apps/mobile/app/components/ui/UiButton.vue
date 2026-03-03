@@ -88,15 +88,15 @@ const classes = computed(() => [
 
 /* Variants */
 .btn--primary {
-  background: #FFFFFF;
+  background: var(--color-white);
   color: var(--color-dark);
-  border-color: #FFFFFF;
+  border-color: var(--color-white);
 }
 .btn--primary:hover { background: var(--color-light); border-color: var(--color-light); }
 
 .btn--secondary {
   background: var(--color-sand);
-  color: white;
+  color: var(--color-white);
   border-color: var(--color-sand);
 }
 .btn--secondary:hover { opacity: 0.9; }
@@ -106,7 +106,7 @@ const classes = computed(() => [
   color: var(--color-dark);
   border-color: var(--color-dark);
 }
-.btn--outline:hover { background: rgba(0, 0, 0, 0.05); }
+.btn--outline:hover { background: rgba(var(--tint-rgb), 0.05); }
 
 .btn--ghost {
   background: transparent;
@@ -117,7 +117,7 @@ const classes = computed(() => [
 
 .btn--danger {
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-white);
   border-color: var(--color-danger);
 }
 .btn--danger:hover { opacity: 0.9; }

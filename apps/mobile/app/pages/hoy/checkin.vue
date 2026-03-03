@@ -92,20 +92,20 @@ async function handleSubmit() {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-3);
-  border: 2px solid rgba(0, 0, 0, 0.075);
+  border: 2px solid rgba(var(--tint-rgb), 0.075);
   border-radius: var(--radius-xl);
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   color: var(--color-text);
   cursor: pointer;
   flex: 1;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.checkin__mood:hover { border-color: rgba(0, 0, 0, 0.2); }
+.checkin__mood:hover { border-color: rgba(var(--tint-rgb), 0.2); }
 
 .checkin__mood--selected {
   border-color: var(--color-accent);
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(var(--tint-rgb), 0.08);
 }
 
 .checkin__mood-emoji { font-size: 1.5rem; }

@@ -107,7 +107,7 @@ const addon = ref({
   align-items: center;
   justify-content: center;
   color: var(--color-dark-lighter);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(var(--tint-inverse-rgb), 0.85);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: none;
@@ -115,7 +115,7 @@ const addon = ref({
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.addon__back:hover { background: rgba(255, 255, 255, 1); }
+.addon__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
 
 /* ─── Back link (desktop only) ─── */
 .addon__back-link {
@@ -174,7 +174,7 @@ const addon = ref({
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4);
-  background: rgba(168, 216, 110, 0.1);
+  background: rgba(var(--color-mood-good-rgb), 0.1);
   border-radius: var(--radius-lg);
 }
 
@@ -205,8 +205,8 @@ const addon = ref({
 }
 
 .addon__tag--unlocked {
-  background: rgba(72, 187, 120, 0.15);
-  color: #60a97c;
+  background: var(--color-complete-bg);
+  color: var(--color-complete);
 }
 
 /* ─── Tablet ─── */
@@ -252,7 +252,7 @@ const addon = ref({
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .addon__back-link:hover { background: rgba(0, 0, 0, 0.06); }
+  .addon__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
 
   .addon__info {
     order: 1;

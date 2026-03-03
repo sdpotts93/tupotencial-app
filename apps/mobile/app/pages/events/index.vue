@@ -106,7 +106,7 @@ const pastEvents = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.events__back:hover { background: rgba(0, 0, 0, 0.04); }
+.events__back:hover { background: rgba(var(--tint-rgb), 0.04); }
 
 /* ─── Sections ─── */
 .events__section { margin-bottom: var(--space-8); }
@@ -127,7 +127,7 @@ const pastEvents = ref([
   color: var(--color-text);
 }
 .events__card + .events__card {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.1);
   padding-top: var(--space-8);
 }
 
@@ -154,8 +154,8 @@ const pastEvents = ref([
   font-family: var(--font-eyebrow);
   font-size: var(--eyebrow-md);
   font-weight: var(--weight-bold);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
+  background: rgba(var(--tint-rgb), 0.5);
+  color: var(--color-white);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
   backdrop-filter: blur(4px);
@@ -204,8 +204,8 @@ const pastEvents = ref([
 }
 
 .events__tag--member {
-  background: rgba(212, 175, 55, 0.15);
-  color: #9c8742;
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
 }
 
 /* ─── Past events (day__card style) ─── */
@@ -225,11 +225,11 @@ const pastEvents = ref([
   border-radius: var(--radius-xl);
   padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.events__past-card:hover { background: rgba(0, 0, 0, 0.06); }
-.events__past-card:active { background: rgba(0, 0, 0, 0.08); }
+.events__past-card:hover { background: rgba(var(--tint-rgb), 0.06); }
+.events__past-card:active { background: rgba(var(--tint-rgb), 0.08); }
 
 .events__past-img {
   width: 56px;

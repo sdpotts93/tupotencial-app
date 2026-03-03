@@ -45,17 +45,17 @@ const addons = ref([
   {
     id: 'mock-addon-001', title: 'Mentoría 1:1 con Gabriel', typeLabel: 'EXPERIENCIA',
     description: '4 sesiones de coaching personalizado de 45 minutos.',
-    priceLabel: '$2,499 MXN', bg: 'linear-gradient(135deg, #28374A, #282828)', img: '/images/lib-4.jpg', owned: false,
+    priceLabel: '$2,499 MXN', bg: 'linear-gradient(135deg, var(--color-navy), var(--color-dark))', img: '/images/lib-4.jpg', owned: false,
   },
   {
     id: 'mock-addon-002', title: 'Módulo VIP: Liderazgo avanzado', typeLabel: 'CONTENIDO PREMIUM',
     description: '12 lecciones exclusivas + material descargable.',
-    priceLabel: '$799 MXN', bg: 'linear-gradient(135deg, #384637, #A7A68E)', img: '/images/lib-8.jpg', owned: true,
+    priceLabel: '$799 MXN', bg: 'linear-gradient(135deg, var(--color-green), var(--color-sand))', img: '/images/lib-8.jpg', owned: true,
   },
   {
     id: 'mock-addon-003', title: 'Retiro presencial — Marzo 2026', typeLabel: 'EXPERIENCIA',
     description: 'Fin de semana de inmersión en Valle de Bravo.',
-    priceLabel: '$8,999 MXN', bg: 'linear-gradient(135deg, #A7A68E, #28374A)', img: '/images/lib-6.jpg', owned: false,
+    priceLabel: '$8,999 MXN', bg: 'linear-gradient(135deg, var(--color-sand), var(--color-navy))', img: '/images/lib-6.jpg', owned: false,
   },
 ])
 </script>
@@ -91,7 +91,7 @@ const addons = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.addons__back:hover { background: rgba(0, 0, 0, 0.04); }
+.addons__back:hover { background: rgba(var(--tint-rgb), 0.04); }
 
 /* ─── Intro ─── */
 .addons__intro {
@@ -117,7 +117,7 @@ const addons = ref([
   color: var(--color-text);
 }
 .addons__card + .addons__card {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.1);
   padding-top: var(--space-8);
 }
 
@@ -203,8 +203,8 @@ const addons = ref([
 }
 
 .addons__tag--unlocked {
-    background: rgba(72, 187, 120, 0.15);
-    color: #60a97c;
+    background: var(--color-complete-bg);
+    color: var(--color-complete);
 }
 
 /* ─── Desktop SaaS ─── */

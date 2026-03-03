@@ -95,7 +95,7 @@ img, video {
   min-height: 100dvh;
   padding-bottom: calc(var(--safe-area-bottom));
   overflow-x: clip;
-  background: white;
+  background: var(--color-white);
 }
 
 .screen__content {
@@ -105,7 +105,7 @@ img, video {
   max-width: var(--max-content-width);
   margin: 0 auto;
   margin-bottom: 2rem;
-  background-color: white;
+  background-color: var(--color-white);
 }
 
 .icon-t {

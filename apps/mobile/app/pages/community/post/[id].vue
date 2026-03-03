@@ -125,10 +125,10 @@ const newComment = ref('')
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.pdetail__back:hover { background: rgba(0, 0, 0, 0.06); }
+.pdetail__back:hover { background: rgba(var(--tint-rgb), 0.06); }
 
 .post-detail {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(var(--tint-rgb), 0.04);
   color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
@@ -166,7 +166,7 @@ const newComment = ref('')
   gap: var(--space-4);
   margin-top: var(--space-4);
   padding-top: var(--space-3);
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-top: 1px solid rgba(var(--tint-rgb), 0.04);
 }
 
 .post-detail__like {
@@ -200,7 +200,7 @@ const newComment = ref('')
 }
 
 .comment__avatar {
-  width: 28px; height: 28px; border-radius: 50%; background: rgba(0, 0, 0, 0.06);
+  width: 28px; height: 28px; border-radius: 50%; background: rgba(var(--tint-rgb), 0.06);
   display: flex; align-items: center; justify-content: center;
   font-size: 10px; font-weight: var(--weight-semibold); color: var(--color-muted);
   flex-shrink: 0;
@@ -232,7 +232,7 @@ const newComment = ref('')
   left: 0;
   right: 0;
   z-index: var(--z-sticky, 10);
-  background: white;
+  background: var(--color-white);
   border-top: none;
   padding: var(--space-3) var(--space-5);
 }
@@ -241,11 +241,11 @@ const newComment = ref('')
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--color-white);
+  border: 1px solid rgba(var(--tint-rgb), 0.1);
   border-radius: 24px;
   padding: 6px 6px 6px var(--space-5);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(var(--tint-rgb), 0.06);
 }
 
 .post-detail__input {
@@ -268,10 +268,10 @@ const newComment = ref('')
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-dark, #1a1a1a);
+  background: var(--color-dark);
   border: none;
   border-radius: 50%;
-  color: white;
+  color: var(--color-white);
   cursor: pointer;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
@@ -305,7 +305,7 @@ const newComment = ref('')
   }
 
   .screen__content:hover {
-    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+    scrollbar-color: rgba(var(--tint-rgb), 0.15) transparent;
   }
 
   /* Hide mobile header on desktop */

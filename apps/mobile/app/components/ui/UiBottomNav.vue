@@ -145,10 +145,10 @@ onBeforeUnmount(() => ro?.disconnect())
   left: 16px;
   right: 16px;
   z-index: var(--z-fixed);
-  background: rgb(255 255 255 / 60%);
+  background: rgba(var(--tint-inverse-rgb), 0.6);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(var(--tint-rgb), 0.08);
+  box-shadow: 0 8px 32px rgba(var(--tint-rgb), 0.1);
   border-radius: 40px;
   display: flex;
   align-items: center;
@@ -173,7 +173,7 @@ onBeforeUnmount(() => ro?.disconnect())
   left: 0;
   bottom: 3px;
   border-radius: 32px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(var(--tint-rgb), 0.08);
   pointer-events: none;
   z-index: 0;
 }
@@ -292,14 +292,14 @@ onBeforeUnmount(() => ro?.disconnect())
   }
 
   .bottom-nav__item:hover {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(var(--tint-rgb), 0.04);
     color: var(--color-text);
     text-decoration: none;
   }
 
   .bottom-nav__item--active {
     flex: none;
-    background: rgba(0, 0, 0, 0.06);
+    background: rgba(var(--tint-rgb), 0.06);
     color: var(--color-text);
     border-left-color: var(--color-primary);
   }

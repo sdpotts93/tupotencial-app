@@ -194,7 +194,7 @@ async function handleRegister() {
   position: fixed;
   inset: 0;
   z-index: var(--z-modal);
-  background: rgba(0, 0, 0, 0);
+  background: rgba(var(--tint-rgb), 0);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -203,7 +203,7 @@ async function handleRegister() {
 }
 
 .register__overlay--active {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(var(--tint-rgb), 0.4);
   pointer-events: auto;
 }
 

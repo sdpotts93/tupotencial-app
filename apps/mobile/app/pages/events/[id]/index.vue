@@ -103,14 +103,14 @@ const event = ref({
   align-items: center;
   justify-content: center;
   color: var(--color-dark-lighter);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(var(--tint-inverse-rgb), 0.85);
   backdrop-filter: blur(8px);
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.edetail__back:hover { background: rgba(255, 255, 255, 1); }
+.edetail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
 
 /* ─── Back link (desktop only) ─── */
 .edetail__back-link {
@@ -164,13 +164,13 @@ const event = ref({
 }
 
 .edetail__tag--member {
-  background: rgba(212, 175, 55, 0.15);
-  color: #9c8742;
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
 }
 
 .edetail__meta :deep(.tag) {
   background: var(--color-sand);
-  color: white;
+  color: var(--color-white);
 }
 
 /* ─── Tablet ─── */
@@ -216,7 +216,7 @@ const event = ref({
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .edetail__back-link:hover { background: rgba(0, 0, 0, 0.06); }
+  .edetail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
 
   .edetail__info {
     order: 1;

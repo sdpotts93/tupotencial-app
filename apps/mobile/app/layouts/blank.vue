@@ -187,22 +187,22 @@ const desktopBottomItems = [
     align-items: center;
     gap: 6px;
     padding: 6px var(--space-3);
-    background: rgba(255, 170, 50, 0.1);
+    background: var(--color-pro-bg);
     border-radius: var(--radius-full);
     text-decoration: none;
     font-family: var(--font-eyebrow);
     font-size: var(--text-sm);
     font-weight: var(--weight-bold);
-    color: #d4940a;
+    color: var(--color-pro-dark);
     transition: background var(--transition-fast);
   }
 
   .blank-layout__streak-icon {
-    color: #ffaa32;
+    color: var(--color-pro);
   }
 
   .blank-layout__streak:hover {
-    background: rgba(255, 170, 50, 0.18);
+    background: var(--color-pro-bg-strong);
     text-decoration: none;
   }
 
