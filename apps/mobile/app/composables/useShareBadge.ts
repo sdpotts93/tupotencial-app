@@ -5,17 +5,28 @@ export function useShareBadge() {
   const captureError = ref<string | null>(null)
 
   async function captureElement(el: HTMLElement): Promise<Blob> {
-    // Wait for all fonts to load before capturing
     await document.fonts.ready
+    const imgs = Array.from(el.querySelectorAll('img'))
+    await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r })))
 
-    const canvas = await html2canvas(el, {
+    // Clone off-screen so the visible card doesn't move during capture
+    const clone = el.cloneNode(true) as HTMLElement
+    clone.style.position = 'fixed'
+    clone.style.left = '-9999px'
+    clone.style.top = '0'
+    clone.style.transform = 'none'
+    document.body.appendChild(clone)
+
+    const canvas = await html2canvas(clone, {
       scale: 3,
       useCORS: true,
       backgroundColor: null,
       logging: false,
-      width: el.offsetWidth,
-      height: el.offsetHeight,
+      width: clone.offsetWidth,
+      height: clone.offsetHeight,
     })
+
+    document.body.removeChild(clone)
 
     return new Promise<Blob>((resolve, reject) => {
       canvas.toBlob(
@@ -83,6 +94,7 @@ export function useShareBadge() {
   return {
     isCapturing,
     captureError,
+    captureElement,
     saveImage,
     shareImage,
   }
