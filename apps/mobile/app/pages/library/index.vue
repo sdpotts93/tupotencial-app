@@ -56,75 +56,153 @@
 
       <!-- Library content (hidden while searching) -->
       <template v-else>
-        <!-- Featured / hero -->
-        <section class="library__featured">
-          <h2 class="library__section-title">Destacado</h2>
-          <NuxtLink to="/content/mock-content-001" class="library__featured-card">
-            <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
-            <div class="library__featured-info">
-              <span class="library__featured-eyebrow">Meditación • 10 min</span>
-              <h3 class="library__featured-name">Respiración consciente</h3>
-              <p class="library__featured-desc">Reconecta con tu cuerpo y tu calma en 10 minutos.</p>
+        <!-- Tabs -->
+        <UiTabs v-model="activeTab" :tabs="tabs" />
+
+        <!-- ═══════════ TAB: Categorías ═══════════ -->
+        <template v-if="activeTab === 'categorias'">
+          <!-- Featured / hero -->
+          <section class="library__featured">
+            <h2 class="library__section-title">Destacado</h2>
+            <NuxtLink to="/content/mock-content-001" class="library__featured-card">
+              <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
+              <div class="library__featured-info">
+                <span class="library__featured-eyebrow">Meditación • 10 min</span>
+                <h3 class="library__featured-name">Respiración consciente</h3>
+                <p class="library__featured-desc">Reconecta con tu cuerpo y tu calma en 10 minutos.</p>
+              </div>
+            </NuxtLink>
+          </section>
+
+          <!-- Categories -->
+          <section v-for="cat in categories" :key="cat.slug" class="library__section">
+            <div class="section__header">
+              <h2 class="library__section-title">{{ cat.title }}</h2>
+              <NuxtLink :to="`/library/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
             </div>
-          </NuxtLink>
-        </section>
+            <div class="library__scroll">
+              <NuxtLink
+                v-for="item in cat.items"
+                :key="item.id"
+                :to="`/content/${item.id}`"
+                class="library__scroll-card"
+              >
+                <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
+                <div class="library__scroll-info">
+                  <span class="library__scroll-title">{{ item.title }}</span>
+                  <span v-if="item.duration" class="library__scroll-duration">
+                    <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
+                  </span>
+                </div>
+              </NuxtLink>
+            </div>
+          </section>
 
-        <!-- Categories -->
-        <section v-for="cat in categories" :key="cat.slug" class="library__section">
-          <div class="section__header">
-            <h2 class="library__section-title">{{ cat.title }}</h2>
-            <NuxtLink :to="`/library/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
-          </div>
-          <div class="library__scroll">
-            <NuxtLink
-              v-for="item in cat.items"
-              :key="item.id"
-              :to="`/content/${item.id}`"
-              class="library__scroll-card"
-            >
-              <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
-              <div class="library__scroll-info">
-                <span class="library__scroll-title">{{ item.title }}</span>
-                <span v-if="item.duration" class="library__scroll-duration">
-                  <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
-                </span>
+          <!-- Eventos Grabados -->
+          <section class="library__section">
+            <div class="section__header">
+              <h2 class="library__section-title">Eventos Grabados</h2>
+              <NuxtLink to="/events" class="library__see-all">Ver todo</NuxtLink>
+            </div>
+            <div class="library__scroll">
+              <NuxtLink
+                v-for="ev in recordedEvents"
+                :key="ev.id"
+                :to="`/events/${ev.id}`"
+                class="library__scroll-card"
+              >
+                <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
+                <div class="library__scroll-info">
+                  <span class="library__scroll-title">{{ ev.title }}</span>
+                  <span class="library__scroll-duration">
+                    <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.dateLabel }}
+                  </span>
+                </div>
+              </NuxtLink>
+            </div>
+          </section>
+        </template>
+
+        <!-- ═══════════ TAB: Programas ═══════════ -->
+        <template v-if="activeTab === 'programas'">
+          <p class="library__tab-intro">Contenido incluido en cada programa, reto o bootcamp.</p>
+
+          <section v-for="prog in programsWithContent" :key="prog.id" class="library__section">
+            <div class="section__header">
+              <div class="library__prog-header">
+                <h2 class="library__section-title library__section-title--prog">{{ prog.title }}</h2>
+                <div class="library__prog-tags">
+                  <span class="library__prog-badge">{{ prog.typeLabel }}</span>
+                  <span :class="['library__prog-status', prog.enrolled ? 'library__prog-status--inscrito' : (prog.free ? 'library__prog-status--gratis' : 'library__prog-status--core')]">
+                    {{ prog.enrolled ? 'Inscrito' : (prog.free ? 'Gratis' : 'Core') }}
+                  </span>
+                </div>
               </div>
+              <NuxtLink :to="`/retos/${prog.id}`" class="library__see-all">Ver programa</NuxtLink>
+            </div>
+            <div class="library__scroll">
+              <NuxtLink
+                v-for="item in prog.items"
+                :key="item.id"
+                :to="`/content/${item.id}`"
+                class="library__scroll-card"
+              >
+                <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
+                <div class="library__scroll-info">
+                  <span class="library__scroll-title">{{ item.title }}</span>
+                  <span v-if="item.duration" class="library__scroll-duration">
+                    <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
+                  </span>
+                </div>
+              </NuxtLink>
+            </div>
+          </section>
+        </template>
+
+        <!-- ═══════════ TAB: Objetivos ═══════════ -->
+        <template v-if="activeTab === 'objetivos'">
+          <p class="library__tab-intro">Encuentra contenido según lo que quieres trabajar.</p>
+
+          <div class="library__objectives-grid">
+            <NuxtLink
+              v-for="obj in objectives"
+              :key="obj.slug"
+              :to="`/library/o/${obj.slug}`"
+              class="library__objective-card"
+            >
+              <div class="library__objective-icon-wrap">
+                <Icon :name="obj.icon" size="22" class="library__objective-icon" />
+              </div>
+              <div class="library__objective-body">
+                <h3 class="library__objective-name">{{ obj.title }}</h3>
+                <p class="library__objective-desc">{{ obj.description }}</p>
+              </div>
+              <span class="library__objective-count">{{ obj.count }} {{ obj.count === 1 ? 'contenido' : 'contenidos' }}</span>
             </NuxtLink>
           </div>
-        </section>
-
-        <!-- Eventos Grabados -->
-        <section class="library__section">
-          <div class="section__header">
-            <h2 class="library__section-title">Eventos Grabados</h2>
-            <NuxtLink to="/events" class="library__see-all">Ver todo</NuxtLink>
-          </div>
-          <div class="library__scroll">
-            <NuxtLink
-              v-for="ev in recordedEvents"
-              :key="ev.id"
-              :to="`/events/${ev.id}`"
-              class="library__scroll-card"
-            >
-              <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
-              <div class="library__scroll-info">
-                <span class="library__scroll-title">{{ ev.title }}</span>
-                <span class="library__scroll-duration">
-                  <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.dateLabel }}
-                </span>
-              </div>
-            </NuxtLink>
-          </div>
-        </section>
+        </template>
       </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const searching = ref(false) // MOCKUP: set to false for default state
-const query = ref('') // MOCKUP: set to '' for default state
+const searching = ref(false)
+const query = ref('')
 const searchInputRef = ref()
+const route = useRoute()
+const router = useRouter()
+const activeTab = ref((route.query.tab as string) || 'categorias')
+
+watch(activeTab, (tab) => {
+  router.replace({ query: tab === 'categorias' ? {} : { tab } })
+})
+
+const tabs = [
+  { value: 'categorias', label: 'Categorías' },
+  { value: 'programas', label: 'Programas' },
+  { value: 'objetivos', label: 'Objetivos' },
+]
 
 function openSearch() {
   searching.value = true
@@ -138,6 +216,7 @@ function closeSearch() {
   query.value = ''
 }
 
+// ─── Search data ───
 const allContent = [
   { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio', category: 'Meditación', thumbnail: '/images/lib-1.jpg' },
   { id: 'mock-content-002', title: 'Escaneo corporal', meta: '15 min • Audio', category: 'Meditación', thumbnail: '/images/lib-2.jpg' },
@@ -157,6 +236,7 @@ const filteredResults = computed(() => {
   )
 })
 
+// ─── Tab: Categorías ───
 const recordedEvents = ref([
   { id: 'mock-event-003', title: 'Live: Respiración y estrés', dateLabel: '15 Feb 2026', img: '/images/lib-2.jpg' },
   { id: 'mock-event-004', title: 'Taller: Diario de gratitud', dateLabel: '8 Feb 2026', img: '/images/lib-6.jpg' },
@@ -190,9 +270,99 @@ const categories = ref([
     ],
   },
 ])
+
+// ─── Tab: Programas ───
+// Mock: content grouped by program (simulates program → days → day_items → content join)
+const programsWithContent = ref([
+  {
+    id: 'mock-uuid-prog-001',
+    type: 'reto',
+    typeLabel: 'RETO',
+    title: 'Reto 7 días de gratitud',
+    enrolled: true,
+    free: true,
+    items: [
+      { id: 'mock-content-001', title: 'Meditación matutina: Gratitud y presencia', duration: '10 min', thumbnail: '/images/lib-1.jpg' },
+      { id: 'mock-content-006', title: 'Las 5 preguntas que transforman tu mañana', duration: '5 min lectura', thumbnail: '/images/lib-6.jpg' },
+      { id: 'mock-content-004', title: 'Meditación nocturna: Soltar el día', duration: '15 min', thumbnail: '/images/lib-3.jpg' },
+    ],
+  },
+  {
+    id: 'mock-uuid-prog-002',
+    type: 'program',
+    typeLabel: 'PROGRAMA',
+    title: 'Despertar consciente',
+    enrolled: true,
+    free: false,
+    items: [
+      { id: 'mock-content-002', title: 'Rutina energizante de 5 minutos', duration: '5 min', thumbnail: '/images/lib-5.jpg' },
+      { id: 'mock-content-001', title: 'Meditación matutina: Gratitud y presencia', duration: '10 min', thumbnail: '/images/lib-1.jpg' },
+      { id: 'mock-content-006', title: 'Las 5 preguntas que transforman tu mañana', duration: '5 min lectura', thumbnail: '/images/lib-6.jpg' },
+    ],
+  },
+  {
+    id: 'mock-uuid-prog-003',
+    type: 'bootcamp',
+    typeLabel: 'BOOTCAMP',
+    title: 'Liderazgo interior',
+    enrolled: false,
+    free: false,
+    items: [
+      { id: 'mock-content-005', title: 'Visualización guiada: Tu mejor versión', duration: '15 min', thumbnail: '/images/lib-7.jpg' },
+      { id: 'mock-content-006', title: 'Las 5 preguntas que transforman tu mañana', duration: '5 min lectura', thumbnail: '/images/lib-6.jpg' },
+    ],
+  },
+])
+
+// ─── Tab: Objetivos ───
+const objectives = ref([
+  {
+    slug: 'reducir-estres',
+    title: 'Reducir estrés',
+    description: 'Técnicas para calmar la mente y soltar la tensión acumulada.',
+    icon: 'lucide:wind',
+    count: 6,
+  },
+  {
+    slug: 'rutina-matutina',
+    title: 'Rutina matutina',
+    description: 'Empieza cada día con intención, energía y claridad.',
+    icon: 'lucide:sunrise',
+    count: 4,
+  },
+  {
+    slug: 'crecimiento-personal',
+    title: 'Crecimiento personal',
+    description: 'Herramientas para tu desarrollo integral como ser humano.',
+    icon: 'lucide:sprout',
+    count: 5,
+  },
+  {
+    slug: 'inteligencia-emocional',
+    title: 'Inteligencia emocional',
+    description: 'Reconoce, entiende y gestiona tus emociones.',
+    icon: 'lucide:heart',
+    count: 3,
+  },
+  {
+    slug: 'mindfulness',
+    title: 'Mindfulness',
+    description: 'Prácticas de atención plena para vivir el presente.',
+    icon: 'lucide:brain',
+    count: 4,
+  },
+  {
+    slug: 'habitos-positivos',
+    title: 'Hábitos positivos',
+    description: 'Construye rutinas que transformen tu vida paso a paso.',
+    icon: 'lucide:repeat',
+    count: 3,
+  },
+])
 </script>
 
 <style scoped>
+/* ─── Header ─── */
 .library__header {
   display: flex;
   align-items: center;
@@ -286,6 +456,15 @@ const categories = ref([
   color: var(--color-sand);
 }
 
+/* ─── Tab intro text ─── */
+.library__tab-intro {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: var(--leading-normal);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+/* ─── Section titles ─── */
 .library__section-title {
   font-family: var(--font-eyebrow);
   font-size: var(--eyebrow-sm);
@@ -296,7 +475,12 @@ const categories = ref([
   margin-bottom: var(--space-3);
 }
 
-.library__featured { margin-bottom: var(--space-8); }
+.library__section-title--prog {
+  margin-bottom: 0;
+}
+
+/* ─── Featured ─── */
+.library__featured { margin-bottom: var(--space-8); margin-top: var(--space-5); }
 
 .library__featured-card {
   display: flex;
@@ -344,6 +528,7 @@ const categories = ref([
   line-height: var(--leading-normal);
 }
 
+/* ─── Sections ─── */
 .library__section { margin-bottom: var(--space-8); }
 
 .section__header {
@@ -358,6 +543,7 @@ const categories = ref([
   text-decoration: none;
 }
 
+/* ─── Horizontal scroll ─── */
 .library__scroll {
   display: flex;
   gap: var(--space-3);
@@ -420,6 +606,132 @@ const categories = ref([
   margin-top: var(--space-1);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
+}
+
+/* ─── Programs tab: header + badge ─── */
+.library__prog-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.library__prog-tags {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.library__prog-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+}
+
+.library__prog-status {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.library__prog-status--core {
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
+}
+
+.library__prog-status--gratis {
+  background: var(--color-silver-bg);
+  color: var(--color-silver);
+}
+
+.library__prog-status--inscrito {
+  background: var(--color-complete-bg);
+  color: var(--color-complete);
+}
+
+/* ─── Objectives tab: grid ─── */
+.library__objectives-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.library__objective-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-alt);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.library__objective-card:hover {
+  background: var(--color-surface);
+}
+
+.library__objective-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: rgba(var(--tint-rgb), 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+.library__objective-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.library__objective-name {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  margin-bottom: var(--space-1);
+}
+
+.library__objective-desc {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: var(--leading-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.library__objective-count {
+  display: block;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-sand);
+  margin-top: var(--space-3);
 }
 
 
@@ -520,6 +832,23 @@ const categories = ref([
 
   .library__search-item:hover {
     border-color: var(--color-border);
+  }
+
+  /* Objectives: 3 columns on desktop */
+  .library__objectives-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+
+  .library__objective-card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .library__objective-card:hover {
+    border-color: var(--color-border);
+    background: var(--color-desktop-card);
   }
 }
 </style>
