@@ -21,7 +21,7 @@
     "@iconify-json/lucide": "^1.2.93"
   },
   "dependencies": {
-    "html2canvas": "^1.4.1",
+    "html-to-image": "^1.11.13",
     "nuxt": "^4.3.1"
   }
 }

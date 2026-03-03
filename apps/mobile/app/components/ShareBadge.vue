@@ -3,12 +3,13 @@
     <Transition name="share-fade">
       <div v-if="modelValue" class="share-overlay" @click.self="close">
         <!-- ═══ Capture card (360×640, scaled to fit viewport — WYSIWYG) ═══ -->
-        <div ref="captureRef" class="share-capture" :style="{ '--capture-scale': captureScale }" aria-hidden="true">
+        <div ref="captureRef" class="share-capture" :style="{ '--capture-scale': captureScale }" aria-hidden="true" @click.stop>
           <div class="share-capture__top">
             <img src="/logo-word/logo-word-white.png" alt="Tu Potencial" class="share-capture__logo" crossorigin="anonymous" />
             <span class="share-capture__date">{{ formattedDate }}</span>
           </div>
           <div class="share-capture__center">
+            <img src="/logo-icon/logo-fire.png" alt="" class="share-capture__badge-icon" crossorigin="anonymous" />
             <span class="share-capture__eyebrow">{{ eyebrow }}</span>
             <h2 class="share-capture__title">{{ actionTitle }}</h2>
             <p v-if="resolvedShareText" class="share-capture__text">{{ resolvedShareText }}</p>
@@ -19,7 +20,6 @@
             <span class="share-capture__label">días</span>
           </div>
           <div class="share-capture__bottom">
-            <img src="/logo-icon/logo-icon-white.png" alt="" class="share-capture__icon" crossorigin="anonymous" />
             <span class="share-capture__url">tupotencial.app</span>
           </div>
         </div>
@@ -55,12 +55,12 @@ interface Props {
   streakCount: number
   shareText: string | null
   outcome: 'done' | 'skip'
-  date?: string
+
 }
 
 const props = withDefaults(defineProps<Props>(), {
   eyebrow: 'ACCION DEL DIA',
-  date: () => new Date().toISOString().slice(0, 10),
+
 })
 
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
@@ -94,7 +94,7 @@ onUnmounted(() => {
 })
 
 const formattedDate = computed(() => {
-  return new Date(props.date + 'T12:00:00').toLocaleDateString('es-MX', {
+  return new Date().toLocaleDateString('es-MX', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -151,7 +151,7 @@ function handleShare() {
   transform-origin: center center;
   width: 360px;
   height: 640px;
-  background: linear-gradient(160deg, #282828 0%, #28374A 100%);
+  background: linear-gradient(160deg, #282828 0%, var(--color-dark) 100%);
   border-radius: 0;
   padding: 48px 32px;
   display: flex;
@@ -161,7 +161,7 @@ function handleShare() {
   color: #E8E6E2;
   overflow: hidden;
   box-sizing: border-box;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .share-capture::before {
@@ -206,12 +206,17 @@ function handleShare() {
   gap: 12px;
 }
 
+.share-capture__badge-icon {
+  height: 70px;
+  width: auto;
+}
+
 .share-capture__eyebrow {
   font-family: 'Neue DIN XXWide', sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: #ffaa32;
+  color: #e87d4d;
 }
 
 .share-capture__title {
@@ -254,7 +259,7 @@ function handleShare() {
   font-family: 'Neue DIN XXWide', sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: #ffaa32;
+  color: #e87d4d;
   letter-spacing: 0.02em;
   line-height: 20px;
 }
@@ -265,7 +270,7 @@ function handleShare() {
   font-family: 'Neue DIN XXWide', sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: #ffaa32;
+  color: #e87d4d;
   letter-spacing: 0.02em;
   line-height: 20px;
   margin-left: 2px;

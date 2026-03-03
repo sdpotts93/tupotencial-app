@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas'
+import { toBlob } from 'html-to-image'
 
 export function useShareBadge() {
   const isCapturing = ref(false)
@@ -6,38 +6,22 @@ export function useShareBadge() {
 
   async function captureElement(el: HTMLElement): Promise<Blob> {
     await document.fonts.ready
-    const imgs = Array.from(el.querySelectorAll('img'))
-    await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r })))
 
-    // Clone off-screen so the visible card doesn't move during capture
-    const clone = el.cloneNode(true) as HTMLElement
-    clone.style.position = 'fixed'
-    clone.style.left = '-9999px'
-    clone.style.top = '0'
-    clone.style.transform = 'none'
-    document.body.appendChild(clone)
-
-    const canvas = await html2canvas(clone, {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: null,
-      logging: false,
-      width: clone.offsetWidth,
-      height: clone.offsetHeight,
+    const blob = await toBlob(el, {
+      pixelRatio: 3,
+      cacheBust: true,
+      width: 360,
+      height: 640,
+      style: {
+        transform: 'none',
+        position: 'static',
+        left: 'auto',
+        top: 'auto',
+      },
     })
 
-    document.body.removeChild(clone)
-
-    return new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob(
-        (blob) => {
-          if (blob) resolve(blob)
-          else reject(new Error('Canvas toBlob returned null'))
-        },
-        'image/png',
-        1.0,
-      )
-    })
+    if (!blob) throw new Error('toBlob returned null')
+    return blob
   }
 
   async function saveImage(el: HTMLElement, fileName?: string) {
