@@ -68,7 +68,10 @@
           <button class="hoy__featured-card" @click="activeSheet = 'accion'">
             <img src="/images/rojo-carlotta.jpg" alt="" class="hoy__featured-img" />
             <div class="hoy__featured-info">
-              <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
+              <div class="hoy__featured-eyebrow-row">
+                <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
+                <Icon name="lucide:arrow-up-right" size="16" class="hoy__featured-arrow" />
+              </div>
               <h3 class="hoy__featured-name">{{ dailyPlan.title }}</h3>
               <p class="hoy__featured-desc">{{ dailyPlan.message }}</p>
             </div>
@@ -89,7 +92,7 @@
 
       <!-- Continue active programs -->
       <section v-if="activePrograms.length" class="hoy__continue">
-        <h2 class="hoy__section-title">Continua</h2>
+        <h2 class="hoy__section-title">Continua con tus programas</h2>
         <div class="hoy__continue-scroll">
           <NuxtLink
             v-for="prog in activePrograms"
@@ -123,7 +126,7 @@
       <!-- Latest from Biblioteca -->
       <section class="hoy__latest">
         <div class="hoy__latest-header">
-          <h2 class="hoy__section-title">Recientes</h2>
+          <h2 class="hoy__section-title">Contenido Reciente</h2>
           <NuxtLink to="/library" class="hoy__latest-see-all">Ver todo</NuxtLink>
         </div>
         <div class="hoy__latest-scroll">
@@ -144,7 +147,7 @@
 
       <!-- Explore -->
       <section class="hoy__start">
-        <h2 class="hoy__section-title">Explora</h2>
+        <h2 class="hoy__section-title">Explora otras secciones</h2>
         <div class="hoy__start-list">
           <template v-for="activity in activities" :key="activity.id">
             <NuxtLink
@@ -435,7 +438,7 @@ const activities = ref([
   {
     id: 'ai-coach',
     title: 'Mi Coach IA',
-    meta: 'Tu coach personal',
+    meta: 'Conversaciones guiadas para tu crecimiento',
     icon: 'lucide:brain',
     accent: 'var(--color-ai-cool)',
     to: '/ai',
@@ -444,7 +447,7 @@ const activities = ref([
   {
     id: 'eventos',
     title: 'Eventos',
-    meta: 'En vivo y grabados',
+    meta: 'Talleres en vivo y grabaciones',
     icon: 'lucide:calendar',
     accent: 'var(--color-ai-warm)',
     to: '/events',
@@ -453,7 +456,7 @@ const activities = ref([
   {
     id: 'vip',
     title: 'VIP',
-    meta: 'Acceso premium',
+    meta: 'Contenido exclusivo y beneficios',
     icon: 'lucide:crown',
     accent: 'var(--color-ai-earth)',
     to: '/addons',
@@ -857,15 +860,20 @@ function closeAccionSheet() {
   padding: var(--space-4) var(--space-1) 0;
 }
 
+.hoy__featured-eyebrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-1);
+}
+
 .hoy__featured-eyebrow {
-  display: block;
   font-family: var(--font-eyebrow);
   font-size: var(--eyebrow-sm);
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-muted);
-  margin-bottom: var(--space-1);
 }
 
 .hoy__featured-name {
@@ -880,6 +888,11 @@ function closeAccionSheet() {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: var(--leading-normal);
+}
+
+.hoy__featured-arrow {
+  color: var(--color-muted);
+  flex-shrink: 0;
 }
 
 /* ─── Continue active programs ─── */
@@ -1450,7 +1463,7 @@ function closeAccionSheet() {
   }
 
   .hoy__hero-link {
-    display: none;
+    justify-content: flex-end;
   }
 
   /* Content area: 2-col grid on desktop */
@@ -1512,6 +1525,7 @@ function closeAccionSheet() {
 
   /* Use CSS grid on the parent .screen__content to create a 2-col row for featured+mensaje */
   .hoy__featured-card {
+    position: relative;
     flex-direction: row;
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
@@ -1534,6 +1548,13 @@ function closeAccionSheet() {
     display: flex;
     flex-direction: column;
     justify-content: center;
+  }
+
+  .hoy__featured-arrow {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    color: var(--color-muted);
   }
 
   /* Mensaje card: fill height */
@@ -1615,10 +1636,13 @@ function closeAccionSheet() {
     grid-column: span 1;
     flex-direction: column;
     text-align: center;
+    gap: 0;
   }
 
   .hoy__activity--wide .hoy__activity-chevron {
-    display: none;
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
   }
 
   /* Sheets become centered modals on desktop */
