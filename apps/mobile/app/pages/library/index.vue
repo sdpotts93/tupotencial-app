@@ -67,7 +67,10 @@
             <NuxtLink to="/content/mock-content-001" class="library__featured-card">
               <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
               <div class="library__featured-info">
-                <span class="library__featured-eyebrow">Meditación • 10 min</span>
+                <div class="library__featured-eyebrow-row">
+                  <span class="library__featured-eyebrow">Meditación • 10 min</span>
+                  <Icon name="lucide:arrow-up-right" size="16" class="library__featured-arrow" />
+                </div>
                 <h3 class="library__featured-name">Respiración consciente</h3>
                 <p class="library__featured-desc">Reconecta con tu cuerpo y tu calma en 10 minutos.</p>
               </div>
@@ -498,15 +501,25 @@ const objectives = ref([
   padding: var(--space-4) var(--space-1) 0;
 }
 
+.library__featured-eyebrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-1);
+}
+
 .library__featured-eyebrow {
-  display: block;
   font-family: var(--font-eyebrow);
   font-size: var(--eyebrow-sm);
   font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-muted);
-  margin-bottom: var(--space-1);
+}
+
+.library__featured-arrow {
+  color: var(--color-muted);
+  flex-shrink: 0;
 }
 
 .library__featured-name {
@@ -772,6 +785,14 @@ const objectives = ref([
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
+    position: relative;
+  }
+
+  .library__featured-arrow {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    color: var(--color-muted);
   }
 
   .library__featured-img {
