@@ -251,7 +251,20 @@
             <div class="hoy__checkin-success-badge"><Icon name="lucide:check-circle" size="48" /></div>
             <p class="hoy__checkin-success-streak">{{ accionChoice === 'done' ? 'Accion completada' : 'Listo para manana' }}</p>
             <p class="hoy__checkin-success-msg">{{ accionChoice === 'done' ? 'Excelente trabajo hoy. Cada accion cuenta.' : 'No pasa nada. Manana es una nueva oportunidad.' }}</p>
+
+            <UiButton block variant="primary" @click="showShareBadge = true">
+              <template #icon><Icon name="lucide:share-2" size="18" /></template>
+              Compartir logro
+            </UiButton>
             <UiButton block variant="secondary" @click="closeAccionSheet">Listo</UiButton>
+
+            <ShareBadge
+              v-model="showShareBadge"
+              :action-title="dailyPlan.title"
+              :streak-count="streak + 1"
+              :share-text="dailyPlan.badgeShareText"
+              :outcome="accionChoice!"
+            />
           </div>
 
           <!-- Form state -->
@@ -367,6 +380,7 @@ const dailyPlan = ref({
   eyebrow: 'Accion del dia',
   title: 'Prioriza una sola cosa',
   message: 'Enfoca tu energia en una accion clave. Hazla con intencion.',
+  badgeShareText: 'Hoy priorice lo importante. Una sola cosa, con intencion. #TuPotencial' as string | null,
 })
 
 // ─── Active programs (mock) ───
@@ -487,6 +501,7 @@ function closeCheckinSheet() {
 const accionChoice = ref<'done' | 'skip' | null>(null)
 const accionLoading = ref(false)
 const accionSuccess = ref(false)
+const showShareBadge = ref(false)
 
 async function handleAccion() {
   if (!accionChoice.value) return
@@ -502,6 +517,7 @@ function closeAccionSheet() {
   setTimeout(() => {
     accionChoice.value = null
     accionSuccess.value = false
+    showShareBadge.value = false
   }, 400)
 }
 </script>
@@ -1299,7 +1315,7 @@ function closeAccionSheet() {
 .hoy__checkin-success-msg {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
 }
 
 /* ─── Accion del dia sheet content ─── */

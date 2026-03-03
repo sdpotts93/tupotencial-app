@@ -24,6 +24,14 @@
               placeholder="Una frase inspiradora para iniciar el dia..."
               :rows="2"
             />
+
+            <UiTextarea
+              v-model="form.badge_share_text"
+              label="Texto para badge compartible"
+              placeholder="Texto que aparecera en la imagen compartible cuando el usuario completa la accion del dia..."
+              :rows="2"
+              hint="Si se deja vacio, se usara un texto predeterminado."
+            />
           </div>
         </UiCard>
 
@@ -101,6 +109,7 @@ const dateParam = computed(() => route.params.date as string)
 const form = reactive({
   theme: 'Bienestar emocional',
   motivational_quote: 'Cada dia es una nueva oportunidad para cuidar de ti.',
+  badge_share_text: '',
   status: 'published',
   publish_time: '06:00',
 })

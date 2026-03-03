@@ -159,6 +159,7 @@ export interface DailyPlan {
   primary_action_type: DailyPlanActionType;
   primary_action_ref: string | null;
   primary_action_payload: Record<string, unknown> | null;
+  badge_share_text: string | null;
   status: DailyPlanStatus;
   created_by: string | null;
 }

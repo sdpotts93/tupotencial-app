@@ -12,6 +12,7 @@ export interface MockDailyPlan {
   primary_action_type: 'content' | 'program_day' | 'custom' | 'ai_prompt';
   primary_action_ref: string | null;
   primary_action_payload: Record<string, unknown>;
+  badge_share_text: string | null;
   status: 'scheduled' | 'published' | 'archived';
   created_by: string | null;
 }
@@ -47,6 +48,7 @@ export const mockDailyPlans: MockDailyPlan[] = [
     primary_action_type: 'content',
     primary_action_ref: 'mock-uuid-ci-001', // Meditación matutina: Gratitud y presencia
     primary_action_payload: {},
+    badge_share_text: 'Hoy pause, respire y me reconecte conmigo. #TuPotencial',
     status: 'published',
     created_by: 'mock-uuid-user-001',
   },
@@ -60,6 +62,7 @@ export const mockDailyPlans: MockDailyPlan[] = [
     primary_action_type: 'content',
     primary_action_ref: 'mock-uuid-ci-002', // Rutina energizante de 5 minutos
     primary_action_payload: {},
+    badge_share_text: 'Hoy desperte con intencion y energia. #Carlotta #TuPotencial',
     status: 'published',
     created_by: 'mock-uuid-user-001',
   },
@@ -73,6 +76,7 @@ export const mockDailyPlans: MockDailyPlan[] = [
     primary_action_type: 'content',
     primary_action_ref: 'mock-uuid-ci-003', // Respiración 4-7-8
     primary_action_payload: {},
+    badge_share_text: 'Hoy respire con intencion antes de liderar. #Gabriel #TuPotencial',
     status: 'published',
     created_by: 'mock-uuid-user-002',
   },
@@ -88,6 +92,7 @@ export const mockDailyPlans: MockDailyPlan[] = [
     primary_action_type: 'content',
     primary_action_ref: 'mock-uuid-ci-006', // Las 5 preguntas
     primary_action_payload: {},
+    badge_share_text: null,
     status: 'published',
     created_by: 'mock-uuid-user-001',
   },
@@ -103,6 +108,7 @@ export const mockDailyPlans: MockDailyPlan[] = [
     primary_action_type: 'content',
     primary_action_ref: 'mock-uuid-ci-005', // Visualización guiada
     primary_action_payload: {},
+    badge_share_text: 'Hoy visualice mi mejor version. #TuPotencial',
     status: 'published',
     created_by: 'mock-uuid-user-001',
   },
@@ -122,6 +128,7 @@ export const mockDailyPlans: MockDailyPlan[] = [
       type: 'simple_check',
       prompt: '¿Completaste tu momento de observación hoy?',
     },
+    badge_share_text: 'Hoy observe mi respiracion por 60 segundos. Pequeños momentos, grandes cambios. #TuPotencial',
     status: 'published',
     created_by: 'mock-uuid-user-002',
   },
@@ -137,6 +144,7 @@ export const mockDailyPlans: MockDailyPlan[] = [
     primary_action_type: 'content',
     primary_action_ref: 'mock-uuid-ci-004', // Meditación nocturna (used as morning experiment)
     primary_action_payload: {},
+    badge_share_text: null,
     status: 'scheduled',
     created_by: 'mock-uuid-user-001',
   },
