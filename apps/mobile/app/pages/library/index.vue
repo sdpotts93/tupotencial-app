@@ -3,86 +3,159 @@
     <div class="screen__content">
       <header class="library__header">
         <h1 class="library__title">Biblioteca</h1>
-        <NuxtLink to="/library/search" class="library__search-btn" aria-label="Buscar">
+        <button v-if="!searching" class="library__search-btn" aria-label="Buscar" @click="openSearch">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-        </NuxtLink>
+          <span class="library__search-btn-label">Buscar</span>
+        </button>
+        <button v-else class="library__search-btn" aria-label="Cerrar búsqueda" @click="closeSearch">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          <span class="library__search-btn-label">Cerrar</span>
+        </button>
       </header>
 
-      <!-- Featured / hero -->
-      <section class="library__featured">
-        <h2 class="library__section-title">Destacado</h2>
-        <NuxtLink to="/content/mock-content-001" class="library__featured-card">
-          <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
-          <div class="library__featured-info">
-            <span class="library__featured-eyebrow">Meditación • 10 min</span>
-            <h3 class="library__featured-name">Respiración consciente</h3>
-            <p class="library__featured-desc">Reconecta con tu cuerpo y tu calma en 10 minutos.</p>
+      <!-- Inline search -->
+      <div v-if="searching" class="library__search">
+        <UiInput
+          ref="searchInputRef"
+          v-model="query"
+          placeholder="Buscar contenido..."
+          type="search"
+          class="library__search-input"
+        >
+          <template #prefix>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </template>
+        </UiInput>
+
+        <div v-if="query" class="library__search-results">
+          <p v-if="filteredResults.length" class="eyebrow library__search-results-label">RESULTADOS</p>
+
+          <div class="library__search-list">
+            <NuxtLink
+              v-for="item in filteredResults"
+              :key="item.id"
+              :to="`/content/${item.id}`"
+              class="library__search-item"
+            >
+              <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__search-item-thumb" />
+              <div class="library__search-item-body">
+                <h3 class="library__search-item-name">{{ item.title }}</h3>
+                <p class="library__search-item-meta">{{ item.meta }}</p>
+                <span class="library__search-item-category">{{ item.category }}</span>
+              </div>
+            </NuxtLink>
           </div>
-        </NuxtLink>
-      </section>
 
-      <!-- Categories -->
-      <section v-for="cat in categories" :key="cat.slug" class="library__section">
-        <div class="section__header">
-          <h2 class="library__section-title">{{ cat.title }}</h2>
-          <NuxtLink :to="`/library/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
+          <UiEmptyState v-if="!filteredResults.length" title="Sin resultados" description="Intenta con otros términos de búsqueda." />
         </div>
-        <div class="library__scroll">
-          <NuxtLink
-            v-for="item in cat.items"
-            :key="item.id"
-            :to="`/content/${item.id}`"
-            class="library__scroll-card"
-          >
-            <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
-            <div class="library__scroll-info">
-              <span class="library__scroll-title">{{ item.title }}</span>
-              <span v-if="item.duration" class="library__scroll-duration">
-                <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
-              </span>
+      </div>
+
+      <!-- Library content (hidden while searching) -->
+      <template v-else>
+        <!-- Featured / hero -->
+        <section class="library__featured">
+          <h2 class="library__section-title">Destacado</h2>
+          <NuxtLink to="/content/mock-content-001" class="library__featured-card">
+            <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
+            <div class="library__featured-info">
+              <span class="library__featured-eyebrow">Meditación • 10 min</span>
+              <h3 class="library__featured-name">Respiración consciente</h3>
+              <p class="library__featured-desc">Reconecta con tu cuerpo y tu calma en 10 minutos.</p>
             </div>
           </NuxtLink>
-        </div>
-      </section>
+        </section>
 
-      <!-- Eventos Grabados -->
-      <section class="library__section">
-        <div class="section__header">
-          <h2 class="library__section-title">Eventos Grabados</h2>
-          <NuxtLink to="/events" class="library__see-all">Ver todo</NuxtLink>
-        </div>
-        <div class="library__scroll">
-          <NuxtLink
-            v-for="ev in recordedEvents"
-            :key="ev.id"
-            :to="`/events/${ev.id}`"
-            class="library__scroll-card"
-          >
-            <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
-            <div class="library__scroll-info">
-              <span class="library__scroll-title">{{ ev.title }}</span>
-              <span class="library__scroll-duration">
-                <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.dateLabel }}
-              </span>
-            </div>
-          </NuxtLink>
-        </div>
-      </section>
+        <!-- Categories -->
+        <section v-for="cat in categories" :key="cat.slug" class="library__section">
+          <div class="section__header">
+            <h2 class="library__section-title">{{ cat.title }}</h2>
+            <NuxtLink :to="`/library/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
+          </div>
+          <div class="library__scroll">
+            <NuxtLink
+              v-for="item in cat.items"
+              :key="item.id"
+              :to="`/content/${item.id}`"
+              class="library__scroll-card"
+            >
+              <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
+              <div class="library__scroll-info">
+                <span class="library__scroll-title">{{ item.title }}</span>
+                <span v-if="item.duration" class="library__scroll-duration">
+                  <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
+                </span>
+              </div>
+            </NuxtLink>
+          </div>
+        </section>
+
+        <!-- Eventos Grabados -->
+        <section class="library__section">
+          <div class="section__header">
+            <h2 class="library__section-title">Eventos Grabados</h2>
+            <NuxtLink to="/events" class="library__see-all">Ver todo</NuxtLink>
+          </div>
+          <div class="library__scroll">
+            <NuxtLink
+              v-for="ev in recordedEvents"
+              :key="ev.id"
+              :to="`/events/${ev.id}`"
+              class="library__scroll-card"
+            >
+              <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
+              <div class="library__scroll-info">
+                <span class="library__scroll-title">{{ ev.title }}</span>
+                <span class="library__scroll-duration">
+                  <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.dateLabel }}
+                </span>
+              </div>
+            </NuxtLink>
+          </div>
+        </section>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-function contentTypeIcon(typeLabel: string) {
-  switch (typeLabel.toLowerCase()) {
-    case 'video': return 'lucide:video'
-    case 'audio': return 'lucide:headphones'
-    case 'texto': return 'lucide:file-text'
-    default: return 'lucide:file'
-  }
+const searching = ref(true) // MOCKUP: set to false for default state
+const query = ref('meditación') // MOCKUP: set to '' for default state
+const searchInputRef = ref()
+
+function openSearch() {
+  searching.value = true
+  nextTick(() => {
+    searchInputRef.value?.$el?.querySelector('input')?.focus()
+  })
 }
+
+function closeSearch() {
+  searching.value = false
+  query.value = ''
+}
+
+const allContent = [
+  { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio', category: 'Meditación', thumbnail: '/images/lib-1.jpg' },
+  { id: 'mock-content-002', title: 'Escaneo corporal', meta: '15 min • Audio', category: 'Meditación', thumbnail: '/images/lib-2.jpg' },
+  { id: 'mock-content-003', title: 'Atención plena', meta: '8 min • Video', category: 'Mindfulness', thumbnail: '/images/lib-3.jpg' },
+  { id: 'mock-content-004', title: 'Despertar con energía', meta: '12 min • Video', category: 'Rutinas De Mañana', thumbnail: '/images/lib-5.jpg' },
+  { id: 'mock-content-005', title: 'Diario de gratitud', meta: '5 min • Texto', category: 'Rutinas De Mañana', thumbnail: '/images/lib-6.jpg' },
+  { id: 'mock-content-006', title: 'Mentalidad de crecimiento', meta: '20 min • Video', category: 'Crecimiento Personal', thumbnail: '/images/lib-7.jpg' },
+  { id: 'mock-content-007', title: 'Hábitos atómicos', meta: '8 min • Texto', category: 'Crecimiento Personal', thumbnail: '/images/lib-2.jpg' },
+]
+
+const filteredResults = computed(() => {
+  const q = query.value.toLowerCase()
+  return allContent.filter(c =>
+    c.title.toLowerCase().includes(q)
+    || c.meta.toLowerCase().includes(q)
+    || c.category.toLowerCase().includes(q),
+  )
+})
 
 const recordedEvents = ref([
   { id: 'mock-event-003', title: 'Live: Respiración y estrés', dateLabel: '15 Feb 2026', img: '/images/lib-2.jpg' },
@@ -141,11 +214,77 @@ const categories = ref([
   align-items: center;
   justify-content: center;
   color: var(--color-text);
+  background: none;
+  border: none;
   border-radius: var(--radius-md);
+  cursor: pointer;
   position: absolute;
   right: 0;
+  -webkit-tap-highlight-color: transparent;
 }
+.library__search-btn-label { display: none; }
 .library__search-btn:hover { background: rgba(0, 0, 0, 0.06); }
+
+/* ─── Inline search ─── */
+.library__search-input { margin-bottom: var(--space-6); }
+
+.library__search-input :deep(.input-field__input) {
+  color: var(--color-text);
+}
+
+.library__search-results-label { margin-bottom: var(--space-4); }
+
+.library__search-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.library__search-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.library__search-item-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.library__search-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.library__search-item-name {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.library__search-item-meta {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: var(--leading-normal);
+  margin-bottom: 4px;
+}
+
+.library__search-item-category {
+  display: inline-block;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  color: var(--color-sand);
+}
 
 .library__section-title {
   font-family: var(--font-eyebrow);
@@ -301,14 +440,22 @@ const categories = ref([
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-md);
-    width: 36px;
+    width: auto;
     height: 36px;
+    padding: 0 var(--space-3);
+    gap: var(--space-2);
     color: var(--color-muted);
   }
 
   .library__search-btn:hover {
     border-color: var(--color-border);
     color: var(--color-text);
+  }
+
+  .library__search-btn-label {
+    display: inline;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
   }
 
   .library__featured-card {
@@ -355,6 +502,24 @@ const categories = ref([
 
   .library__scroll-img {
     border-radius: var(--radius-lg);
+  }
+
+  .library__search-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .library__search-item {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    transition: border-color var(--transition-fast);
+  }
+
+  .library__search-item:hover {
+    border-color: var(--color-border);
   }
 }
 </style>
