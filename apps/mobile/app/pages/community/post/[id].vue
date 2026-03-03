@@ -232,8 +232,8 @@ const newComment = ref('')
   left: 0;
   right: 0;
   z-index: var(--z-sticky, 10);
-  background: var(--color-surface-alt);
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  background: white;
+  border-top: none;
   padding: var(--space-3) var(--space-5);
 }
 
@@ -241,39 +241,48 @@ const newComment = ref('')
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  padding: 6px 6px 6px var(--space-5);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .post-detail__input {
   flex: 1;
-  background: rgba(0, 0, 0, 0.04);
+  background: transparent;
   border: none;
-  border-radius: var(--radius-full);
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-md);
+  border-radius: 0;
+  padding: var(--space-3) 0;
+  font-size: var(--text-base);
   font-family: var(--font-body);
   color: var(--color-text);
   outline: none;
 }
 .post-detail__input::placeholder { color: var(--color-muted); }
-.post-detail__input:focus { background: rgba(0, 0, 0, 0.06); }
+.post-detail__input:focus { background: transparent; }
 
 .post-detail__send {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--color-dark, #1a1a1a);
   border: none;
   border-radius: 50%;
-  color: var(--color-dark);
+  color: white;
   cursor: pointer;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--transition-fast);
 }
 .post-detail__send:disabled {
-  opacity: 0.3;
+  opacity: 0.15;
   cursor: default;
+}
+.post-detail__send:not(:disabled):hover {
+  opacity: 0.85;
 }
 
 /* ─── Desktop SaaS ─── */
@@ -333,40 +342,6 @@ const newComment = ref('')
   .post-detail__add-inner {
     max-width: 760px;
     margin: 0 auto;
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 24px;
-    padding: 6px 6px 6px var(--space-5);
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-  }
-
-  .post-detail__input {
-    background: transparent;
-    padding: var(--space-3) 0;
-    font-size: var(--text-base);
-  }
-
-  .post-detail__input:focus {
-    background: transparent;
-  }
-
-  .post-detail__send {
-    width: 40px;
-    height: 40px;
-    background: var(--color-dark, #1a1a1a);
-    color: white;
-    border-radius: 50%;
-    transition: opacity var(--transition-fast);
-  }
-
-  .post-detail__send:disabled {
-    opacity: 0.15;
-    background: var(--color-dark, #1a1a1a);
-    color: white;
-  }
-
-  .post-detail__send:not(:disabled):hover {
-    opacity: 0.85;
   }
 }
 </style>
