@@ -275,4 +275,93 @@ const newComment = ref('')
   opacity: 0.3;
   cursor: default;
 }
+
+/* ─── Desktop SaaS ─── */
+@media (min-width: 1024px) {
+  .screen {
+    height: calc(100dvh - var(--topbar-height));
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen__content {
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+    overflow: auto;
+    padding-bottom: 120px;
+  }
+
+  /* Hide mobile header on desktop */
+  .pdetail__header {
+    display: none;
+  }
+
+  /* Post card – match desktop cards */
+  .post-detail {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .post-detail__body {
+    font-size: var(--text-base);
+    line-height: 1.7;
+  }
+
+  /* Comments – match chat message style */
+  .comment__body {
+    font-size: var(--text-base);
+    line-height: 1.7;
+  }
+
+  /* ─── Floating card input bar ─── */
+  .post-detail__add {
+    left: var(--sidebar-width);
+    background: var(--color-desktop-bg);
+    border-top: none;
+    padding: 0 var(--space-6) var(--space-5);
+  }
+
+  .post-detail__add-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 24px;
+    padding: 6px 6px 6px var(--space-5);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  .post-detail__input {
+    background: transparent;
+    padding: var(--space-3) 0;
+    font-size: var(--text-base);
+  }
+
+  .post-detail__input:focus {
+    background: transparent;
+  }
+
+  .post-detail__send {
+    width: 40px;
+    height: 40px;
+    background: var(--color-dark, #1a1a1a);
+    color: white;
+    border-radius: 50%;
+    transition: opacity var(--transition-fast);
+  }
+
+  .post-detail__send:disabled {
+    opacity: 0.15;
+    background: var(--color-dark, #1a1a1a);
+    color: white;
+  }
+
+  .post-detail__send:not(:disabled):hover {
+    opacity: 0.85;
+  }
+}
 </style>

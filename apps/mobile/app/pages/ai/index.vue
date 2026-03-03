@@ -345,7 +345,7 @@ function startChat(prompt?: string) {
 
   .onboarding-opt--selected {
     border-color: var(--color-primary);
-    background: rgba(0, 0, 0, 0.02);
+    background:var(--color-surface);
   }
 
   .ai-home__session {

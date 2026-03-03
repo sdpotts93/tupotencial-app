@@ -24,7 +24,7 @@
 
           <!-- Community feed -->
           <div class="community__feed">
-            <article v-for="post in filteredPosts" :key="post.id" class="post">
+            <article v-for="post in filteredPosts" :key="post.id" class="post" @click="navigateTo(`/community/post/${post.id}`)">
               <div class="post__header">
                 <img :src="post.avatar" alt="" class="post__avatar" />
                 <div class="post__meta">
@@ -33,20 +33,18 @@
                 </div>
               </div>
 
-              <NuxtLink :to="`/community/post/${post.id}`" class="post__body-link">
-                <h3 v-if="post.title" class="post__title">{{ post.title }}</h3>
-                <p class="post__body">{{ post.body }}</p>
-              </NuxtLink>
+              <h3 v-if="post.title" class="post__title">{{ post.title }}</h3>
+              <p class="post__body">{{ post.body }}</p>
 
               <div class="post__actions">
-                <button class="post__action" @click="toggleReaction(post.id)">
+                <button class="post__action" @click.stop="toggleReaction(post.id)">
                   <svg width="18" height="18" viewBox="0 0 24 24" :fill="post.liked ? 'var(--color-danger)' : 'none'" :stroke="post.liked ? 'var(--color-danger)' : 'currentColor'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
                   <span>{{ post.reactions }}</span>
                 </button>
-                <NuxtLink :to="`/community/post/${post.id}`" class="post__action">
+                <span class="post__action">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                   <span>{{ post.comments }}</span>
-                </NuxtLink>
+                </span>
               </div>
             </article>
           </div>
@@ -263,6 +261,8 @@ function toggleReaction(id: string) {
   color: var(--color-text);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .post__header {
@@ -291,9 +291,6 @@ function toggleReaction(id: string) {
   font-size: var(--text-xs);
   color: var(--color-muted);
 }
-
-.post__body-link { text-decoration: none; color: inherit; }
-.post__body-link:hover { text-decoration: none; }
 
 .post__title {
   font-family: var(--font-body);
