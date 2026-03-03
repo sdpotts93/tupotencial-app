@@ -14,7 +14,7 @@
         <h1 class="hoy__greeting">{{ greeting }}</h1>
       </div>
 
-      <NuxtLink to="/hoy/progress" class="hoy__hero-progress">
+      <NuxtLink to="/hoy/progress" :class="['hoy__hero-progress', { 'hoy__hero-progress--complete': allRetosComplete }]">
         <div class="hoy__hero-progress-row">
           <span class="hoy__hero-label">{{ currentRetoLabel }}</span>
           <span class="hoy__hero-count"><Icon name="lucide:star" size="14" /> {{ retosCompleted }} / {{ retosTotal }}</span>
@@ -29,7 +29,7 @@
     <div class="screen__content">
 
       <!-- Daily retos task list / Celebration state -->
-      <section class="hoy__retos">
+      <section :class="['hoy__retos', { 'hoy__retos--complete': allRetosComplete }]">
         <Transition name="fade" mode="out-in">
           <!-- Celebration state when all complete -->
           <NuxtLink v-if="allRetosComplete" key="complete" to="/hoy/progress" class="hoy__celebration">
@@ -38,8 +38,9 @@
             </div>
             <div class="hoy__celebration-text">
               <p class="hoy__celebration-title">Dia completado</p>
-              <p class="hoy__celebration-sub">Racha de {{ streak + 1 }} dias. Ver tu progreso <Icon name="lucide:arrow-right" size="14" /></p>
+              <p class="hoy__celebration-sub">Racha de {{ streak + 1 }} dias</p>
             </div>
+            <span class="hoy__celebration-cta">Ver progreso <Icon name="lucide:chevron-right" size="14" /></span>
           </NuxtLink>
 
           <!-- Task list when not all complete -->
@@ -670,6 +671,10 @@ function closeAccionSheet() {
   margin-bottom: var(--space-6);
 }
 
+.hoy__retos--complete {
+  margin-bottom: 0;
+}
+
 .hoy__retos-list {
   display: flex;
   flex-direction: column;
@@ -736,8 +741,8 @@ function closeAccionSheet() {
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-5);
-  background: linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.15), rgba(var(--color-mood-good-rgb), 0.12));
-  border: 1px solid rgba(var(--color-mood-good-rgb), 0.25);
+  background: var(--color-complete-bg);
+  border: 1px solid rgba(72, 187, 120, 0.25);
   border-radius: var(--radius-xl);
   text-decoration: none;
   color: inherit;
@@ -750,9 +755,9 @@ function closeAccionSheet() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--color-mood-good-rgb), 0.2);
+  background: rgba(72, 187, 120, 0.2);
   border-radius: var(--radius-lg);
-  color: var(--color-mood-good);
+  color: var(--color-complete);
 }
 
 .hoy__celebration-text {
@@ -772,6 +777,25 @@ function closeAccionSheet() {
   color: var(--color-muted);
   margin-top: 2px;
   line-height: var(--leading-normal);
+}
+
+/* Hide celebration on mobile */
+.hoy__celebration {
+  display: none;
+}
+
+/* CTA button inside celebration (visible on desktop) */
+.hoy__celebration-cta {
+  display: none;
+}
+
+/* Hero progress complete state (mobile) */
+.hoy__hero-progress--complete {
+  position: static;
+}
+
+.hoy__hero-progress--complete .hoy__hero-label {
+  color: var(--color-complete);
 }
 
 /* ─── Mensaje del dia ─── */
@@ -1506,8 +1530,27 @@ function closeAccionSheet() {
   }
 
   .hoy__celebration {
-    border: 1px solid rgba(var(--color-mood-good-rgb), 0.3);
-    background: linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.08), rgba(var(--color-mood-good-rgb), 0.06));
+    display: flex;
+    border: 1px solid rgba(72, 187, 120, 0.2);
+    background: var(--color-complete-bg);
+  }
+
+  .hoy__celebration-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    flex-shrink: 0;
+    font-family: var(--font-eyebrow);
+    font-size: var(--eyebrow-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-complete);
+    background: none;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
   }
 
   /* Flatten duo-row so children participate in parent grid */
