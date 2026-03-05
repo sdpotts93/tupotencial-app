@@ -66,7 +66,7 @@ export function useAuth() {
 
   function logout() {
     user.value = null
-    navigateTo('/auth/login')
+    navigateTo('/login')
   }
 
   function setSegment(segment: 'gabriel' | 'carlotta' | 'conjunta') {

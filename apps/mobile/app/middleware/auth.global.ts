@@ -12,59 +12,59 @@ export default defineNuxtRouteMiddleware((to) => {
   const path = to.path
 
   // ---- Public routes (no auth required) ----
-  const publicRoutes = ['/auth/login', '/auth/register', '/pricing']
+  const publicRoutes = ['/login', '/register', '/pricing']
   if (publicRoutes.some(r => path === r || path.startsWith(r + '/'))) return
 
   // ---- Root redirect ----
   if (path === '/') {
-    if (!isLoggedIn.value) return navigateTo('/auth/login')
-    if (!isOnboarded.value) return navigateTo('/onboarding/segment')
-    return navigateTo('/hoy')
+    if (!isLoggedIn.value) return navigateTo('/login')
+    if (!isOnboarded.value) return navigateTo('/account/onboarding/segment')
+    return navigateTo('/account/hoy')
   }
 
   // ---- Authed routes ----
   if (!isLoggedIn.value) {
-    return navigateTo('/auth/login')
+    return navigateTo('/login')
   }
 
   // ---- Authed-only routes (don't need onboarding) ----
-  const authedOnlyRoutes = ['/auth/profile-setup', '/billing/return']
+  const authedOnlyRoutes = ['/profile-setup', '/account/billing/return']
   if (authedOnlyRoutes.some(r => path === r || path.startsWith(r + '/'))) return
 
   // ---- Onboarding redirect ----
-  if (path === '/onboarding/segment') {
-    if (isOnboarded.value) return navigateTo('/hoy')
+  if (path === '/account/onboarding/segment') {
+    if (isOnboarded.value) return navigateTo('/account/hoy')
     return
   }
 
   // ---- Onboarded routes ----
   if (!isOnboarded.value) {
-    return navigateTo('/onboarding/segment')
+    return navigateTo('/account/onboarding/segment')
   }
 
   // ---- Subscriber-only routes ----
-  const subscriberRoutes = ['/community', '/events']
+  const subscriberRoutes = ['/account/community', '/account/events']
   const isSubscriberRoute = subscriberRoutes.some(r => path === r || path.startsWith(r + '/'))
 
-  // /events/[id]/watch is subscriber-only
-  if (path.match(/^\/events\/[^/]+\/watch$/)) {
+  // /account/events/[id]/watch is subscriber-only
+  if (path.match(/^\/account\/events\/[^/]+\/watch$/)) {
     if (!isSubscriber.value) {
-      const eventId = path.split('/')[2]
-      return navigateTo(`/events/${eventId}`)
+      const eventId = path.split('/')[3]
+      return navigateTo(`/account/events/${eventId}`)
     }
   }
 
   // Community is subscriber-only
-  if (path.startsWith('/community') && !isSubscriber.value) {
+  if (path.startsWith('/account/community') && !isSubscriber.value) {
     // Show locked state by allowing the page to render with gating
     // (handled in the component)
   }
 
   // ---- Entitlement-gated routes ----
-  if (path.startsWith('/vip')) {
+  if (path.startsWith('/account/vip')) {
     const { hasEntitlement } = useAuth()
     if (!hasEntitlement('vip')) {
-      return navigateTo('/addons')
+      return navigateTo('/account/addons')
     }
   }
 })

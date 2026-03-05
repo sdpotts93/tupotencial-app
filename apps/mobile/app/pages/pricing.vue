@@ -1,10 +1,9 @@
 <template>
   <div class="pricing">
-    <UiTopNav title="Membresía" show-back />
     <div class="screen__content">
       <div class="pricing__hero">
         <img src="/logo-icon/logo-icon-green.png" alt="" class="pricing__logo" />
-        <h1 class="title title--xl">Redefine tu balance</h1>
+        <h1 class="title title--xl">Conoce nuestros planes</h1>
         <p class="pricing__subtitle">Elige el plan que mejor se adapte a tu momento de transformación.</p>
       </div>
 
@@ -17,11 +16,10 @@
           <p class="pricing__plan-price">$0 <span>MXN/mes</span></p>
           <ul class="pricing__features">
             <li>Canal diario con reflexiones y micro-acciones</li>
-            <li>Guías y retos introductorios de 7-15-30 días</li>
+            <li>Guías y retos limitados</li>
             <li>Biblioteca limitada (rutinas y meditaciones básicas)</li>
-            <li>Coach IA — orientación introductoria</li>
           </ul>
-          <UiButton variant="outline" block to="/auth/register">
+          <UiButton variant="outline" block to="/register">
             Crear cuenta gratis
           </UiButton>
         </div>
@@ -39,7 +37,7 @@
             <li>Comunidad privada + lives semanales con Gabriel y Carlotta</li>
             <li>Programas guiados de 30 días con check-ins</li>
             <li>Coach IA — recomendaciones por estado de energía y ánimo</li>
-            <li>Gamificación: rachas, logros y avances visibles</li>
+            <li>Rachas, logros y avances visibles</li>
           </ul>
           <UiButton block>
             Empezar Core
@@ -55,11 +53,11 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'auth' })
+definePageMeta({ layout: false })
 </script>
 
 <style scoped>
-.pricing { min-height: 100dvh; background: var(--color-light); }
+.pricing { min-height: 100dvh; background: var(--color-white); }
 
 .pricing__hero {
   text-align: center;
