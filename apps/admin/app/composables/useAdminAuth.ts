@@ -48,12 +48,12 @@ export function useAdminAuth() {
   function logout() {
     adminUser.value = null
     isAuthenticated.value = false
-    navigateTo('/admin/login')
+    navigateTo('/login')
   }
 
   function requireAuth() {
     if (!isAuthenticated.value) {
-      navigateTo('/admin/login')
+      navigateTo('/login')
     }
   }
 

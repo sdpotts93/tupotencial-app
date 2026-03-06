@@ -46,7 +46,7 @@ const pageTitle = computed(() => {
   if (path.startsWith('/account/profile')) return 'Mi Perfil'
   if (path.startsWith('/account/settings')) return 'Configuración'
   if (path.startsWith('/account/more')) return 'Cuenta'
-  if (path.startsWith('/content')) return 'Contenido'
+  if (path.startsWith('/account/content')) return 'Contenido'
   if (path.startsWith('/account/billing')) return 'Facturación'
   return 'Tu Potencial'
 })
