@@ -26,11 +26,12 @@
 
         <!-- Core -->
         <div class="pricing__plan pricing__plan--featured">
-          <UiTag variant="primary">MÁS POPULAR</UiTag>
-          <p class="eyebrow" style="margin-top: var(--space-3);">TRANSFORMA Y CRECE</p>
-          <h3 class="pricing__plan-name">Core</h3>
+          <p class="eyebrow">TRANSFORMA Y CRECE</p>
+          <div class="pricing__header">
+            <h3 class="pricing__plan-name">Core</h3> <UiTag variant="primary">MÁS POPULAR</UiTag>
+          </div>
           <p class="pricing__plan-price">$399 <span>MXN/mes</span></p>
-          <p class="pricing__plan-annual">o $3,499/año (ahorra 27%)</p>
+          <!-- <p class="pricing__plan-annual">o $3,499/año (ahorra 27%)</p> -->
           <ul class="pricing__features">
             <li>Todo lo del plan gratuito +</li>
             <li>Biblioteca completa de rutinas, meditaciones y contenido</li>
@@ -59,6 +60,11 @@ definePageMeta({ layout: false })
 <style scoped>
 .pricing { min-height: 100dvh; background: var(--color-white); }
 
+.pricing__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
 .pricing__hero {
   text-align: center;
   padding: var(--space-6) 0 var(--space-8);
@@ -73,6 +79,7 @@ definePageMeta({ layout: false })
 .pricing__plans {
   display: flex; flex-direction: column; gap: var(--space-4);
   margin-bottom: var(--space-6);
+  max-width: 800px;
 }
 
 .pricing__plan {
@@ -89,7 +96,7 @@ definePageMeta({ layout: false })
 }
 
 .pricing__plan-price {
-  font-size: var(--title-lg); font-weight: var(--weight-bold); color: var(--color-accent);
+  font-size: var(--title-lg); font-weight: var(--weight-bold); color: var(--color-dark-lighter);
 }
 
 .pricing__plan-price span {
@@ -111,8 +118,11 @@ definePageMeta({ layout: false })
 }
 
 .pricing__features li::before {
-  content: '✓'; position: absolute; left: 0;
-  color: var(--color-accent); font-weight: var(--weight-bold);
+  content: '✓'; 
+  position: absolute; 
+  left: 0;
+  color: var(--color-dark-lighter); 
+  font-weight: var(--weight-bold);
 }
 
 .pricing__note {
@@ -124,6 +134,7 @@ definePageMeta({ layout: false })
   .pricing__plans {
     flex-direction: row;
     align-items: flex-start;
+    margin: 0 auto;
   }
 
   .pricing__plan { flex: 1; }
