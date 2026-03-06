@@ -3,7 +3,7 @@
     <div class="screen__content">
       <div class="pricing__hero">
         <img src="/logo-icon/logo-icon-green.png" alt="" class="pricing__logo" />
-        <h1 class="title title--xl">Conoce nuestros planes</h1>
+        <h1 class="title title--lg">Conoce nuestros planes</h1>
         <p class="pricing__subtitle">Elige el plan que mejor se adapte a tu momento de transformación.</p>
       </div>
 
@@ -11,38 +11,40 @@
       <div class="pricing__plans">
         <!-- Free -->
         <div class="pricing__plan">
-          <p class="eyebrow">EXPLORA Y CONECTA</p>
           <h3 class="pricing__plan-name">Gratis</h3>
           <p class="pricing__plan-price">$0 <span>MXN/mes</span></p>
+          <p class="pricing__plan-desc">Reflexiones diarias y contenido básico para comenzar tu camino.</p>
+          <UiButton variant="outline" block to="/register">
+            Crear cuenta gratis
+          </UiButton>
+          <div class="pricing__divider" />
           <ul class="pricing__features">
             <li>Canal diario con reflexiones y micro-acciones</li>
             <li>Guías y retos limitados</li>
             <li>Biblioteca limitada (rutinas y meditaciones básicas)</li>
           </ul>
-          <UiButton variant="outline" block to="/register">
-            Crear cuenta gratis
-          </UiButton>
         </div>
 
         <!-- Core -->
-        <div class="pricing__plan pricing__plan--featured">
-          <p class="eyebrow">TRANSFORMA Y CRECE</p>
-          <div class="pricing__header">
-            <h3 class="pricing__plan-name">Core</h3> <UiTag variant="primary">MÁS POPULAR</UiTag>
+        <div class="pricing__plan pricing__plan--core">
+          <div class="pricing__plan-header">
+            <h3 class="pricing__plan-name">Core</h3>
+            <span class="pricing__tag-core">MÁS POPULAR</span>
           </div>
           <p class="pricing__plan-price">$399 <span>MXN/mes</span></p>
-          <!-- <p class="pricing__plan-annual">o $3,499/año (ahorra 27%)</p> -->
+          <p class="pricing__plan-desc">Acceso completo a programas, comunidad y herramientas de cambio.</p>
+          <UiButton block class="pricing__cta-core">
+            Empezar Core
+          </UiButton>
+          <div class="pricing__divider" />
           <ul class="pricing__features">
-            <li>Todo lo del plan gratuito +</li>
+            <li>Todo lo del plan gratuito</li>
             <li>Biblioteca completa de rutinas, meditaciones y contenido</li>
             <li>Comunidad privada + lives semanales con Gabriel y Carlotta</li>
             <li>Programas guiados de 30 días con check-ins</li>
             <li>Coach IA — recomendaciones por estado de energía y ánimo</li>
             <li>Rachas, logros y avances visibles</li>
           </ul>
-          <UiButton block>
-            Empezar Core
-          </UiButton>
         </div>
       </div>
 
@@ -60,11 +62,6 @@ definePageMeta({ layout: false })
 <style scoped>
 .pricing { min-height: 100dvh; background: var(--color-white); }
 
-.pricing__header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
 .pricing__hero {
   text-align: center;
   padding: var(--space-6) 0 var(--space-8);
@@ -76,58 +73,126 @@ definePageMeta({ layout: false })
   font-size: var(--text-sm); color: var(--color-muted); margin-top: var(--space-2);
 }
 
+/* Plans grid */
 .pricing__plans {
   display: flex; flex-direction: column; gap: var(--space-4);
   margin-bottom: var(--space-6);
   max-width: 800px;
 }
 
+/* Base card */
 .pricing__plan {
-  background: rgba(var(--tint-rgb), 0.04); color: var(--color-text); border-radius: var(--radius-xl);
-  padding: var(--space-6); border: 1px solid rgba(var(--tint-rgb), 0.075);
+  background: var(--color-desktop-card);
+  color: var(--color-text);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
 }
 
-.pricing__plan--featured {
-  border: 2px solid var(--color-accent);
+/* Core featured card */
+.pricing__plan--core {
+  border: 2px solid var(--color-gold);
+  background-color: #9c87420a;
+}
+
+.pricing__plan-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .pricing__plan-name {
-  font-family: var(--font-title); font-size: var(--title-md); margin: var(--space-2) 0;
+  font-family: var(--font-title);
+  font-size: var(--title-md);
+  margin: 0 0 var(--space-1);
+}
+
+.pricing__plan-header .pricing__plan-name {
+  margin-bottom: 0;
 }
 
 .pricing__plan-price {
-  font-size: var(--title-lg); font-weight: var(--weight-bold); color: var(--color-dark-lighter);
+  font-size: var(--title-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-dark-lighter);
+  margin-top: var(--space-2);
 }
 
 .pricing__plan-price span {
-  font-size: var(--text-sm); font-weight: var(--weight-regular); color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-muted);
 }
 
-.pricing__plan-annual {
-  font-size: var(--text-sm); color: var(--color-accent); margin-top: var(--space-1);
+/* Short description */
+.pricing__plan-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
+  line-height: var(--leading-relaxed);
 }
 
+/* Divider between CTA and features */
+.pricing__divider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: var(--space-4) 0;
+}
+
+/* Core tag */
+.pricing__tag-core {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  white-space: nowrap;
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
+}
+
+/* Core CTA override */
+.pricing__cta-core {
+  background: var(--color-gold) !important;
+  color: #fff !important;
+}
+
+/* Feature list */
 .pricing__features {
-  list-style: none; padding: 0; margin: var(--space-4) 0 var(--space-5);
+  list-style: none; padding: 0; margin: 0;
   display: flex; flex-direction: column; gap: var(--space-2);
 }
 
 .pricing__features li {
-  font-size: var(--text-sm); color: var(--color-text-secondary);
-  padding-left: var(--space-5); position: relative;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  padding-left: var(--space-5);
+  position: relative;
 }
 
 .pricing__features li::before {
-  content: '✓'; 
-  position: absolute; 
+  content: '\2713';
+  position: absolute;
   left: 0;
-  color: var(--color-dark-lighter); 
+  color: var(--color-dark-lighter);
   font-weight: var(--weight-bold);
 }
 
+.pricing__plan--core .pricing__features li::before {
+  color: var(--color-gold);
+}
+
 .pricing__note {
-  text-align: center; font-size: var(--text-xs); color: var(--color-muted);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
   line-height: var(--leading-relaxed);
+  margin-top: var(--space-6);
 }
 
 @media (min-width: 768px) {
