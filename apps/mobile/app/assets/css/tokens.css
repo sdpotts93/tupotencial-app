@@ -30,7 +30,8 @@
   --color-primary-hover: #343434;
 
   --color-accent: #FFFFFF;
-  --color-accent-contrast: #FFFFFF;
+  --color-accent-contrast: var(--color-green);
+  --color-accent-bg: rgba(56, 70, 55, 0.1);
   --color-accent-hover: #2D3A2D;
 
   --color-secondary: #A7A68E;

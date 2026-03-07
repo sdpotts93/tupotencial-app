@@ -204,6 +204,8 @@ function isActive(to: string): boolean {
 .admin-layout {
   display: flex;
   min-height: 100dvh;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .admin-layout__sidebar {
@@ -213,8 +215,8 @@ function isActive(to: string): boolean {
   bottom: 0;
   width: var(--sidebar-width);
   z-index: var(--z-modal);
-  background: var(--color-desktop-card);
-  border-right: 1px solid var(--color-desktop-border);
+  background: var(--color-desktop-card, var(--color-white));
+  border-right: 1px solid var(--color-desktop-border, var(--color-border-light));
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -241,8 +243,12 @@ function isActive(to: string): boolean {
 
 .admin-layout__main {
   flex: 1;
+  min-width: 0;
+  width: 100%;
   min-height: 100dvh;
   background: var(--color-white);
+  display: flex;
+  flex-direction: column;
 }
 
 /* ─── Topbar ─── */
@@ -310,6 +316,10 @@ function isActive(to: string): boolean {
 
 .admin-layout__body {
   padding: var(--space-6);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ─── Sidebar nav items ─── */

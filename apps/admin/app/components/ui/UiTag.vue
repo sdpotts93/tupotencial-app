@@ -33,7 +33,7 @@ withDefaults(defineProps<Props>(), {
 
 .tag--default { background: var(--color-surface-alt); color: var(--color-text-secondary); }
 .tag--primary { background: var(--color-primary); color: var(--color-primary-contrast); }
-.tag--accent { background: var(--color-accent); color: var(--color-accent-contrast); }
+.tag--accent { background: var(--color-accent-bg); color: var(--color-accent-contrast); }
 .tag--success { background: var(--color-success-light); color: var(--color-success); }
 .tag--warning { background: var(--color-warning-light); color: var(--color-warning); }
 .tag--danger { background: var(--color-danger-light); color: var(--color-danger); }

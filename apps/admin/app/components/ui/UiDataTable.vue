@@ -1,13 +1,18 @@
 <template>
-  <div class="data-table">
+  <div :class="['data-table', { 'data-table--fill': fill }]">
     <div v-if="$slots.toolbar" class="data-table__toolbar">
       <slot name="toolbar" />
     </div>
-    <div class="data-table__scroll">
+    <div class="data-table__scroll" :class="{ 'data-table__scroll--capped': scrollable, 'data-table__scroll--fill': fill }">
       <table class="data-table__table">
         <thead>
           <tr>
-            <th v-for="col in columns" :key="col.key" :style="{ width: col.width }">
+            <th
+              v-for="(col, ci) in columns"
+              :key="col.key"
+              :class="{ 'data-table__sticky-col': ci === 0 }"
+              :style="{ width: col.width }"
+            >
               {{ col.label }}
             </th>
             <th v-if="$slots.actions" style="width: 80px" />
@@ -25,7 +30,11 @@
             </td>
           </tr>
           <tr v-for="(row, i) in rows" :key="row.id || i" class="data-table__row" @click="$emit('row-click', row)">
-            <td v-for="col in columns" :key="col.key">
+            <td
+              v-for="(col, ci) in columns"
+              :key="col.key"
+              :class="{ 'data-table__sticky-col': ci === 0 }"
+            >
               <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">
                 {{ row[col.key] ?? '—' }}
               </slot>
@@ -52,11 +61,15 @@ interface Props {
   rows: Record<string, any>[]
   loading?: boolean
   emptyText?: string
+  scrollable?: boolean
+  fill?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
   loading: false,
   emptyText: 'Sin resultados',
+  scrollable: false,
+  fill: false,
 })
 
 defineEmits<{ 'row-click': [row: Record<string, any>] }>()
@@ -64,10 +77,17 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
 
 <style scoped>
 .data-table {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--color-desktop-card, var(--color-white));
+  border: 1px solid var(--color-desktop-border, var(--color-border-light));
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+.data-table--fill {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .data-table__toolbar {
@@ -80,9 +100,21 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
 
 .data-table__scroll { overflow-x: auto; }
 
+.data-table__scroll--capped {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.data-table__scroll--fill {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .data-table__table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .data-table__table th {
@@ -93,9 +125,13 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   font-weight: var(--weight-semibold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-muted);
-  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  background: var(--color-gray);
+  border-bottom: 1px solid var(--color-border-light);
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .data-table__table td {
@@ -105,11 +141,29 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   vertical-align: middle;
 }
 
+/* ─── Sticky first column ─── */
+.data-table__sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--color-desktop-card, var(--color-white));
+}
+
+/* Corner cell: sticky both directions */
+th.data-table__sticky-col {
+  z-index: 3;
+}
+
 .data-table__row {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.data-table__row:hover { background: var(--color-surface-alt); }
+.data-table__row:hover { background: var(--color-border-light); }
+
+/* Sticky cell covers the tr background, so apply hover directly */
+.data-table__row:hover .data-table__sticky-col {
+  background: var(--color-border-light);
+}
 
 .data-table__loading,
 .data-table__empty {

@@ -30,7 +30,8 @@
   --color-primary-hover: #343434;
 
   --color-accent: #FFFFFF;
-  --color-accent-contrast: #FFFFFF;
+  --color-accent-contrast: var(--color-green);
+  --color-accent-bg: rgba(56, 70, 55, 0.1);
   --color-accent-hover: #2D3A2D;
 
   --color-secondary: #A7A68E;
@@ -206,6 +207,12 @@
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --max-content-width: 32rem;  /* 512px – mobile content cap */
   --max-page-width: 48rem;     /* 768px – web content cap */
+}
+
+/* ─── SaaS shell (mobile defaults) ─── */
+:root {
+  --sidebar-width: 280px;
+  --topbar-height: 48px;
 }
 
 /* ─── Desktop SaaS layout ─── */
