@@ -46,6 +46,10 @@
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
+        <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
+          <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+          Eliminar
+        </UiButton>
       </template>
     </UiDataTable>
 
@@ -56,17 +60,6 @@
           v-model="categoryForm.name"
           label="Nombre"
           placeholder="Nombre de la categoria"
-        />
-        <UiInput
-          v-model="categoryForm.slug"
-          label="Slug"
-          placeholder="nombre-de-la-categoria"
-          hint="Identificador unico para URLs"
-        />
-        <UiInput
-          v-model="categoryForm.icon_url"
-          label="URL del icono"
-          placeholder="https://ejemplo.com/icono.svg"
         />
         <UiSelect
           v-model="categoryForm.is_active"
@@ -93,10 +86,16 @@ const search = ref('')
 
 const categoryForm = reactive({
   name: '',
-  slug: '',
-  icon_url: '',
   is_active: 'true',
 })
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
 
 const columns = [
   { key: 'sort_order', label: 'Orden', width: '80px' },
@@ -125,36 +124,47 @@ const filteredRows = computed(() => {
 function editCategory(row: Record<string, any>) {
   editingCategory.value = row
   categoryForm.name = row.name
-  categoryForm.slug = row.slug
-  categoryForm.icon_url = row.icon_url
   categoryForm.is_active = String(row.is_active)
   showCreateModal.value = true
 }
 
 function saveCategory() {
+  if (editingCategory.value) {
+    editingCategory.value.name = categoryForm.name
+    editingCategory.value.slug = slugify(categoryForm.name)
+    editingCategory.value.is_active = categoryForm.is_active === 'true'
+  }
   alert(editingCategory.value ? 'Categoria actualizada (mock)' : 'Categoria creada (mock)')
   showCreateModal.value = false
   editingCategory.value = null
   categoryForm.name = ''
-  categoryForm.slug = ''
-  categoryForm.icon_url = ''
   categoryForm.is_active = 'true'
 }
 
 function moveUp(row: Record<string, any>) {
   const idx = categories.value.findIndex(c => c.id === row.id)
-  if (idx > 0) {
-    categories.value[idx].sort_order--
-    categories.value[idx - 1].sort_order++
+  const current = categories.value[idx]
+  const prev = categories.value[idx - 1]
+  if (idx > 0 && current && prev) {
+    current.sort_order--
+    prev.sort_order++
     categories.value.sort((a, b) => a.sort_order - b.sort_order)
+  }
+}
+
+function handleDelete(row: Record<string, any>) {
+  if (confirm(`Seguro que deseas eliminar "${row.name}"?`)) {
+    categories.value = categories.value.filter(c => c.id !== row.id)
   }
 }
 
 function moveDown(row: Record<string, any>) {
   const idx = categories.value.findIndex(c => c.id === row.id)
-  if (idx < categories.value.length - 1) {
-    categories.value[idx].sort_order++
-    categories.value[idx + 1].sort_order--
+  const current = categories.value[idx]
+  const next = categories.value[idx + 1]
+  if (idx < categories.value.length - 1 && current && next) {
+    current.sort_order++
+    next.sort_order--
     categories.value.sort((a, b) => a.sort_order - b.sort_order)
   }
 }

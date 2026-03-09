@@ -71,8 +71,10 @@ const objective = computed(() => {
   }
 })
 
+interface ContentItem { id: string; title: string; meta: string; thumbnail: string }
+
 // Mock content per objective (simulates content_item_objectives join)
-const contentByObjective: Record<string, typeof items.value> = {
+const contentByObjective: Record<string, ContentItem[]> = {
   'reducir-estres': [
     { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio', thumbnail: '/images/lib-1.jpg' },
     { id: 'mock-content-002', title: 'Escaneo corporal', meta: '15 min • Audio', thumbnail: '/images/lib-2.jpg' },

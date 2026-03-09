@@ -3,8 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Editar programa</h1>
       <div class="page-header__actions">
-        <UiButton variant="ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
-        <UiButton variant="outline" size="sm" @click="handleDuplicate">Duplicar</UiButton>
+        <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
         <UiButton variant="soft" size="sm" to="/admin/programs">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>

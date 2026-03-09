@@ -55,13 +55,13 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" @click.stop="handleDuplicate(row)">
-          <template #icon><Icon name="lucide:copy" size="16" /></template>
-          Duplicar
-        </UiButton>
         <UiButton variant="soft" size="sm" :to="`/admin/content/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
+        </UiButton>
+        <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
+          <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+          Eliminar
         </UiButton>
       </template>
     </UiDataTable>
@@ -169,9 +169,10 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function handleDuplicate(row: Record<string, any>) {
-  alert(`Contenido duplicado como "Copia de ${row.title}" (mock)`)
-  navigateTo('/admin/content/new')
+function handleDelete(row: Record<string, any>) {
+  if (confirm(`Seguro que deseas eliminar "${row.title}"?`)) {
+    rows.value = rows.value.filter(r => r.id !== row.id)
+  }
 }
 
 function goToEdit(row: Record<string, any>) {

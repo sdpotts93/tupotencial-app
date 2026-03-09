@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Editar beneficio</h1>
       <div class="page-header__actions">
-        <UiButton variant="ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
         <UiButton variant="soft" size="sm" to="/admin/benefits">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>

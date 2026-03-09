@@ -210,13 +210,16 @@ function onProgressClick(e: MouseEvent) {
 }
 
 function onProgressTouchStart(e: TouchEvent) {
+  const touch = e.touches[0]
+  if (!touch) return
   isScrubbing.value = true
-  seekToRatio(calcProgressFromX(e.touches[0].clientX))
+  seekToRatio(calcProgressFromX(touch.clientX))
 }
 
 function onProgressTouchMove(e: TouchEvent) {
-  if (!isScrubbing.value) return
-  seekToRatio(calcProgressFromX(e.touches[0].clientX))
+  const touch = e.touches[0]
+  if (!isScrubbing.value || !touch) return
+  seekToRatio(calcProgressFromX(touch.clientX))
 }
 
 function onProgressTouchEnd() {
