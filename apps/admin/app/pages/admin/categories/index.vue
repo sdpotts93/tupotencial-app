@@ -7,8 +7,8 @@
       </div>
     </div>
 
-    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="editCategory">
-      <template #toolbar>
+    <div class="cat-container">
+      <div class="cat-toolbar">
         <UiInput
           v-model="search"
           placeholder="Buscar por nombre..."
@@ -16,42 +16,60 @@
         >
           <template #suffix><Icon name="lucide:search" size="18" /></template>
         </UiInput>
-      </template>
+      </div>
 
-      <template #cell-icon_url="{ value }">
-        <div class="category-icon">
-          <Icon v-if="value" name="lucide:target" size="20" />
-          <span v-else>—</span>
+      <div class="cat-list">
+        <div class="cat-header">
+          <span class="cat-header__drag" />
+          <span class="cat-header__name">Nombre</span>
+          <span class="cat-header__slug">Slug</span>
+          <span class="cat-header__status">Estado</span>
+          <span class="cat-header__count">Contenidos</span>
+          <span class="cat-header__actions" />
         </div>
-      </template>
 
-      <template #cell-sort_order="{ row }">
-        <div class="order-controls">
-          <button class="order-btn" :disabled="row.sort_order === 1" @click.stop="moveUp(row)">&#9650;</button>
-          <span>{{ row.sort_order }}</span>
-          <button class="order-btn" :disabled="row.sort_order === categories.length" @click.stop="moveDown(row)">&#9660;</button>
+        <div
+          v-for="(cat, index) in filteredRows"
+          :key="cat.id"
+          class="cat-row"
+          :class="{
+            'cat-row--dragging': dragIndex === index,
+            'cat-row--over': dragOverIndex === index && dragIndex !== index,
+          }"
+          :draggable="!search"
+          @dragstart="onDragStart(index, $event)"
+          @dragover.prevent="onDragOver(index)"
+          @dragend="onDragEnd"
+          @click="editCategory(cat)"
+        >
+          <span class="cat-row__drag" :class="{ 'cat-row__drag--disabled': !!search }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
+              <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+              <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
+            </svg>
+          </span>
+          <span class="cat-row__name">{{ cat.name }}</span>
+          <span class="cat-row__slug">{{ cat.slug }}</span>
+          <span class="cat-row__status">
+            <UiTag :variant="cat.is_active ? 'success' : 'default'">{{ cat.is_active ? 'Activa' : 'Inactiva' }}</UiTag>
+          </span>
+          <span class="cat-row__count">{{ cat.content_count }} elementos</span>
+          <span class="cat-row__actions" @click.stop>
+            <UiButton variant="soft" size="sm" @click="editCategory(cat)">
+              <template #icon><Icon name="lucide:pencil" size="16" /></template>
+              Editar
+            </UiButton>
+            <UiButton variant="danger-ghost" size="sm" @click="handleDelete(cat)">
+              <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+              Eliminar
+            </UiButton>
+          </span>
         </div>
-      </template>
 
-      <template #cell-is_active="{ value }">
-        <UiTag :variant="value ? 'success' : 'default'">{{ value ? 'Activa' : 'Inactiva' }}</UiTag>
-      </template>
-
-      <template #cell-content_count="{ value }">
-        {{ value }} elementos
-      </template>
-
-      <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" @click.stop="editCategory(row)">
-          <template #icon><Icon name="lucide:pencil" size="16" /></template>
-          Editar
-        </UiButton>
-        <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
-          <template #icon><Icon name="lucide:trash-2" size="16" /></template>
-          Eliminar
-        </UiButton>
-      </template>
-    </UiDataTable>
+        <div v-if="!filteredRows.length" class="cat-empty">Sin resultados</div>
+      </div>
+    </div>
 
     <!-- Create/Edit Modal -->
     <UiModal v-model="showCreateModal" :title="editingCategory ? 'Editar categoria' : 'Nueva categoria'" variant="center" :show-handle="false">
@@ -97,14 +115,6 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-const columns = [
-  { key: 'sort_order', label: 'Orden', width: '80px' },
-  { key: 'name', label: 'Nombre' },
-  { key: 'slug', label: 'Slug' },
-  { key: 'is_active', label: 'Estado' },
-  { key: 'content_count', label: 'Contenidos' },
-]
-
 const categories = ref([
   { id: 'cat-001', name: 'Mindfulness', slug: 'mindfulness', icon_url: '/icons/mindfulness.svg', is_active: true, sort_order: 1, content_count: 42 },
   { id: 'cat-002', name: 'Nutricion', slug: 'nutricion', icon_url: '/icons/nutricion.svg', is_active: true, sort_order: 2, content_count: 38 },
@@ -116,11 +126,55 @@ const categories = ref([
 ])
 
 const filteredRows = computed(() => {
-  if (!search.value) return categories.value
+  const sorted = [...categories.value].sort((a, b) => a.sort_order - b.sort_order)
+  if (!search.value) return sorted
   const q = search.value.toLowerCase()
-  return categories.value.filter(r => r.name.toLowerCase().includes(q) || r.slug.toLowerCase().includes(q))
+  return sorted.filter(r => r.name.toLowerCase().includes(q) || r.slug.toLowerCase().includes(q))
 })
 
+// ── Drag & drop ──
+const dragIndex = ref<number | null>(null)
+const dragOverIndex = ref<number | null>(null)
+
+function onDragStart(index: number, e: DragEvent) {
+  dragIndex.value = index
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+  }
+}
+
+function onDragOver(index: number) {
+  dragOverIndex.value = index
+}
+
+function onDragEnd() {
+  if (dragIndex.value !== null && dragOverIndex.value !== null && dragIndex.value !== dragOverIndex.value) {
+    const sorted = [...categories.value].sort((a, b) => a.sort_order - b.sort_order)
+    const fromItem = sorted[dragIndex.value]
+    const toItem = sorted[dragOverIndex.value]
+    if (fromItem && toItem) {
+      // Swap sort_order values
+      const fromOrder = fromItem.sort_order
+      const toOrder = toItem.sort_order
+
+      // Shift all items between the two positions
+      if (fromOrder < toOrder) {
+        for (const cat of categories.value) {
+          if (cat.sort_order > fromOrder && cat.sort_order <= toOrder) cat.sort_order--
+        }
+      } else {
+        for (const cat of categories.value) {
+          if (cat.sort_order >= toOrder && cat.sort_order < fromOrder) cat.sort_order++
+        }
+      }
+      fromItem.sort_order = toOrder
+    }
+  }
+  dragIndex.value = null
+  dragOverIndex.value = null
+}
+
+// ── CRUD ──
 function editCategory(row: Record<string, any>) {
   editingCategory.value = row
   categoryForm.name = row.name
@@ -141,76 +195,122 @@ function saveCategory() {
   categoryForm.is_active = 'true'
 }
 
-function moveUp(row: Record<string, any>) {
-  const idx = categories.value.findIndex(c => c.id === row.id)
-  const current = categories.value[idx]
-  const prev = categories.value[idx - 1]
-  if (idx > 0 && current && prev) {
-    current.sort_order--
-    prev.sort_order++
-    categories.value.sort((a, b) => a.sort_order - b.sort_order)
-  }
-}
-
 function handleDelete(row: Record<string, any>) {
   if (confirm(`Seguro que deseas eliminar "${row.name}"?`)) {
     categories.value = categories.value.filter(c => c.id !== row.id)
   }
 }
-
-function moveDown(row: Record<string, any>) {
-  const idx = categories.value.findIndex(c => c.id === row.id)
-  const current = categories.value[idx]
-  const next = categories.value[idx + 1]
-  if (idx < categories.value.length - 1 && current && next) {
-    current.sort_order++
-    next.sort_order--
-    categories.value.sort((a, b) => a.sort_order - b.sort_order)
-  }
-}
 </script>
 
 <style scoped>
-.category-icon {
-  width: 32px;
-  height: 32px;
+/* ─── Container ─── */
+.cat-container {
+  background: var(--color-desktop-card, var(--color-white));
+  border: 1px solid var(--color-desktop-border, var(--color-border-light));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  flex: 0 1 auto;
+  min-height: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-lg);
+  flex-direction: column;
 }
 
-.order-controls {
+/* ─── Toolbar ─── */
+.cat-toolbar {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
   display: flex;
   align-items: center;
+  gap: var(--space-3);
+}
+
+/* ─── Header ─── */
+.cat-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr 100px 120px auto;
   gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-gray);
+  border-bottom: 1px solid var(--color-border-light);
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
 }
 
-.order-btn {
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  width: 24px;
-  height: 24px;
-  display: flex;
+/* ─── Row ─── */
+.cat-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr 100px 120px auto;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
   align-items: center;
-  justify-content: center;
+  font-size: var(--text-sm);
   cursor: pointer;
-  font-size: 10px;
-  color: var(--color-muted);
   transition: background var(--transition-fast);
 }
 
-.order-btn:hover:not(:disabled) {
-  background: var(--color-surface-alt);
-  color: var(--color-text);
+.cat-row:hover {
+  background: var(--color-border-light);
 }
 
-.order-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.cat-row--dragging {
+  opacity: 0.4;
 }
 
+.cat-row--over {
+  border-top: 2px solid var(--color-tint);
+}
+
+/* ─── Drag handle ─── */
+.cat-row__drag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+  cursor: grab;
+}
+
+.cat-row__drag:active {
+  cursor: grabbing;
+}
+
+.cat-row__drag--disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+/* ─── Cells ─── */
+.cat-row__name {
+  font-weight: var(--weight-medium);
+}
+
+.cat-row__slug {
+  color: var(--color-muted);
+}
+
+.cat-row__count {
+  color: var(--color-muted);
+}
+
+.cat-row__actions {
+  display: flex;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+/* ─── Empty ─── */
+.cat-empty {
+  text-align: center;
+  padding: var(--space-10) var(--space-4);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+/* ─── Modal ─── */
 .modal-form {
   display: flex;
   flex-direction: column;
