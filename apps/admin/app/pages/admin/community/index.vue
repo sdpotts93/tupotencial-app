@@ -1,16 +1,26 @@
 <template>
-  <div>
+  <div class="page--fill">
     <div class="page-header">
       <h1 class="page-header__title">Comunidad</h1>
       <div class="page-header__actions">
-        <UiButton size="sm" to="/admin/community/new">+ Nueva publicacion</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/community/new">+ Nueva publicacion</UiButton>
       </div>
     </div>
 
     <UiTabs v-model="activeTab" :tabs="tabs" />
 
     <div class="tab-content">
-      <UiDataTable :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+      <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+        <template #toolbar>
+          <UiInput
+            v-model="search"
+            placeholder="Buscar por autor o contenido..."
+            style="min-width: 200px;"
+          >
+            <template #suffix><Icon name="lucide:search" size="18" /></template>
+          </UiInput>
+        </template>
+
         <template #cell-author_name="{ value, row }">
           <div class="author-cell">
             <div class="author-cell__avatar">{{ value?.charAt(0) ?? 'A' }}</div>
@@ -42,7 +52,10 @@
         </template>
 
         <template #actions="{ row }">
-          <UiButton variant="ghost" size="sm" :to="`/admin/community/${row.id}`">Editar</UiButton>
+          <UiButton variant="soft" size="sm" :to="`/admin/community/${row.id}`">
+            <template #icon><Icon name="lucide:pencil" size="16" /></template>
+            Editar
+          </UiButton>
         </template>
       </UiDataTable>
     </div>
@@ -53,6 +66,7 @@
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
+const search = ref('')
 const activeTab = ref('all')
 
 const tabs = [
@@ -81,11 +95,15 @@ const rows = ref([
 ])
 
 const filteredRows = computed(() => {
-  if (activeTab.value === 'all') return rows.value
-  if (activeTab.value === 'official') return rows.value.filter(r => r.is_official)
-  if (activeTab.value === 'reported') return rows.value.filter(r => r.status === 'reported')
-  if (activeTab.value === 'hidden') return rows.value.filter(r => r.status === 'hidden')
-  return rows.value
+  let result = rows.value
+  if (activeTab.value === 'official') result = result.filter(r => r.is_official)
+  else if (activeTab.value === 'reported') result = result.filter(r => r.status === 'reported')
+  else if (activeTab.value === 'hidden') result = result.filter(r => r.status === 'hidden')
+  if (search.value) {
+    const q = search.value.toLowerCase()
+    result = result.filter(r => r.author_name.toLowerCase().includes(q) || r.body.toLowerCase().includes(q))
+  }
+  return result
 })
 
 function statusVariant(status: string) {
@@ -110,6 +128,10 @@ function goToEdit(row: Record<string, any>) {
 <style scoped>
 .tab-content {
   margin-top: var(--space-6);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .author-cell {

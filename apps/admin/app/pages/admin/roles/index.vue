@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div class="page--fill">
     <div class="page-header">
       <h1 class="page-header__title">Roles de administracion</h1>
       <div class="page-header__actions">
-        <UiButton size="sm" @click="showInviteModal = true">+ Invitar administrador</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="showInviteModal = true">+ Invitar administrador</UiButton>
       </div>
     </div>
 
@@ -26,7 +26,17 @@
 
     <!-- Admin Users Table -->
     <h2 class="section-title">Administradores</h2>
-    <UiDataTable :columns="columns" :rows="adminUsers">
+    <UiDataTable fill :columns="columns" :rows="filteredAdmins">
+      <template #toolbar>
+        <UiInput
+          v-model="search"
+          placeholder="Buscar por nombre o correo..."
+          style="min-width: 200px;"
+        >
+          <template #suffix><Icon name="lucide:search" size="18" /></template>
+        </UiInput>
+      </template>
+
       <template #cell-full_name="{ value, row }">
         <div class="admin-cell">
           <div class="admin-cell__avatar">{{ value?.charAt(0) ?? 'A' }}</div>
@@ -52,7 +62,10 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton v-if="row.role !== 'super_admin'" variant="ghost" size="sm" @click="editAdmin(row)">Editar</UiButton>
+        <UiButton v-if="row.role !== 'super_admin'" variant="soft" size="sm" @click="editAdmin(row)">
+          <template #icon><Icon name="lucide:pencil" size="16" /></template>
+          Editar
+        </UiButton>
       </template>
     </UiDataTable>
 
@@ -78,8 +91,8 @@
       </div>
       <template #footer>
         <div class="modal-actions">
-          <UiButton variant="outline" size="sm" @click="showInviteModal = false">Cancelar</UiButton>
-          <UiButton size="sm" @click="sendInvite">Enviar invitacion</UiButton>
+          <UiButton variant="soft" size="sm" @click="showInviteModal = false">Cancelar</UiButton>
+          <UiButton variant="primary-outline" size="sm" @click="sendInvite">Enviar invitacion</UiButton>
         </div>
       </template>
     </UiModal>
@@ -90,6 +103,7 @@
 definePageMeta({ layout: 'default' })
 
 const showInviteModal = ref(false)
+const search = ref('')
 
 const inviteForm = reactive({
   email: '',
@@ -152,6 +166,12 @@ const adminUsers = ref([
   { id: 'adm-010', full_name: 'Eduardo Vargas', email: 'eduardo.v@tupotencial.app', role: 'viewer', status: 'active', last_login: '2026-02-24T07:30:00' },
   { id: 'adm-011', full_name: 'Camila Rios', email: 'camila.r@tupotencial.app', role: 'viewer', status: 'active', last_login: '2026-02-19T13:00:00' },
 ])
+
+const filteredAdmins = computed(() => {
+  if (!search.value) return adminUsers.value
+  const q = search.value.toLowerCase()
+  return adminUsers.value.filter(r => r.full_name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q))
+})
 
 const roleOptions = [
   { value: 'admin', label: 'Administrador' },

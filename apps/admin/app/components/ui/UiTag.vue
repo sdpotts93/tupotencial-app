@@ -31,11 +31,11 @@ withDefaults(defineProps<Props>(), {
 .tag--sm { font-size: var(--eyebrow-sm); padding: var(--space-1) var(--space-3); }
 .tag--md { font-size: var(--eyebrow-md); padding: var(--space-1) var(--space-4); }
 
-.tag--default { background: var(--color-surface-alt); color: var(--color-text-secondary); }
-.tag--primary { background: var(--color-primary); color: var(--color-primary-contrast); }
+.tag--default { background: var(--color-surface-alt); border: 1px solid var(--color-text-secondary); color: var(--color-text-secondary); }
+.tag--primary { background: #E2E8F0; color: #1A202C; }
 .tag--accent { background: var(--color-accent-bg); color: var(--color-accent-contrast); }
-.tag--success { background: var(--color-success-light); color: var(--color-success); }
-.tag--warning { background: var(--color-warning-light); color: var(--color-warning); }
+.tag--success { background: #C6F6D5; color: #22543D; }
+.tag--warning { background: #FBD38D; color: #744210; }
 .tag--danger { background: var(--color-danger-light); color: var(--color-danger); }
 .tag--info { background: var(--color-info-bg); color: var(--color-info); }
 </style>

@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Configuracion</h1>
       <div class="page-header__actions">
-        <UiButton size="sm" @click="handleSave">Guardar cambios</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
     </div>
 

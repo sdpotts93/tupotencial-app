@@ -3,8 +3,8 @@
     <div class="page-header">
       <h1 class="page-header__title">Crear contenido</h1>
       <div class="page-header__actions">
-        <UiButton variant="outline" size="sm" to="/admin/content">Cancelar</UiButton>
-        <UiButton size="sm" @click="handleSave">Guardar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/content">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
       </div>
     </div>
 
@@ -19,18 +19,61 @@
             />
 
             <UiTextarea
+              v-model="form.introduction"
+              label="Introduccion"
+              placeholder="Escribe una breve introduccion..."
+              :rows="3"
+            />
+
+            <UiTextarea
               v-model="form.body"
-              label="Cuerpo del contenido"
+              label="Texto"
               placeholder="Escribe el contenido aqui..."
               :rows="10"
             />
 
-            <UiInput
-              v-model="form.media_url"
-              label="URL del media"
-              placeholder="https://ejemplo.com/imagen.jpg"
-              hint="URL de imagen, video o audio segun el tipo de contenido"
-            />
+            <!-- File upload -->
+            <div class="upload">
+              <label class="upload__label">{{ uploadLabel }}</label>
+              <div
+                class="upload__dropzone"
+                :class="{ 'upload__dropzone--active': isDragging }"
+                @dragover.prevent="isDragging = true"
+                @dragleave="isDragging = false"
+                @drop.prevent="handleDrop"
+                @click="triggerFileInput"
+              >
+                <input
+                  ref="fileInput"
+                  type="file"
+                  :accept="acceptType"
+                  class="upload__input"
+                  @change="handleFileChange"
+                />
+                <template v-if="!uploadedFile">
+                  <div class="upload__icon">
+                    <svg v-if="form.content_type === 'video'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <svg v-else-if="form.content_type === 'audio'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                    </svg>
+                    <svg v-else width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <p class="upload__text">Arrastra tu archivo aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__hint">{{ acceptHint }}</p>
+                </template>
+                <template v-else>
+                  <div class="upload__preview">
+                    <p class="upload__filename">{{ uploadedFile.name }}</p>
+                    <p class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
+                    <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
+                  </div>
+                </template>
+              </div>
+            </div>
           </div>
         </UiCard>
       </div>
@@ -46,17 +89,30 @@
             />
 
             <UiSelect
-              v-model="form.segment"
-              label="Segmento"
-              :options="segmentOptions"
-              placeholder="Selecciona el segmento"
-            />
-
-            <UiSelect
               v-model="form.category_id"
               label="Categoria"
               :options="categoryOptions"
               placeholder="Selecciona la categoria"
+            />
+
+            <UiSelect
+              v-model="form.objective_id"
+              label="Objetivo"
+              :options="objectiveOptions"
+              placeholder="Selecciona el objetivo"
+            />
+
+            <UiInput
+              v-model="form.duration"
+              label="Duracion"
+              placeholder="Ej: 10 min"
+            />
+
+            <UiSelect
+              v-model="form.segment"
+              label="Segmento"
+              :options="segmentOptions"
+              placeholder="Selecciona el segmento"
             />
 
             <UiSelect
@@ -89,30 +145,33 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const fileInput = ref<HTMLInputElement | null>(null)
+const uploadedFile = ref<File | null>(null)
+const isDragging = ref(false)
+
 const form = reactive({
   title: '',
+  introduction: '',
   body: '',
-  media_url: '',
-  content_type: 'article',
-  segment: 'all',
+  content_type: 'video',
   category_id: '',
+  objective_id: '',
+  duration: '',
+  segment: 'free',
   status: 'draft',
   scheduled_at: '',
   unpublished_at: '',
 })
 
 const typeOptions = [
-  { value: 'article', label: 'Articulo' },
   { value: 'video', label: 'Video' },
   { value: 'audio', label: 'Audio' },
-  { value: 'infographic', label: 'Infografia' },
+  { value: 'image', label: 'Imagen' },
 ]
 
 const segmentOptions = [
-  { value: 'all', label: 'General' },
   { value: 'free', label: 'Gratuito' },
-  { value: 'premium', label: 'Premium' },
-  { value: 'enterprise', label: 'Empresarial' },
+  { value: 'core', label: 'Core' },
 ]
 
 const categoryOptions = [
@@ -122,6 +181,16 @@ const categoryOptions = [
   { value: 'cat-004', label: 'Sueno' },
   { value: 'cat-005', label: 'Productividad' },
   { value: 'cat-006', label: 'Relaciones' },
+  { value: 'cat-007', label: 'Finanzas personales' },
+]
+
+const objectiveOptions = [
+  { value: 'obj-001', label: 'Reducir estres' },
+  { value: 'obj-002', label: 'Rutina matutina' },
+  { value: 'obj-003', label: 'Crecimiento personal' },
+  { value: 'obj-004', label: 'Inteligencia emocional' },
+  { value: 'obj-005', label: 'Mindfulness' },
+  { value: 'obj-006', label: 'Habitos positivos' },
 ]
 
 const statusOptions = [
@@ -130,6 +199,68 @@ const statusOptions = [
   { value: 'published', label: 'Publicado' },
   { value: 'archived', label: 'Archivado' },
 ]
+
+const uploadLabel = computed(() => {
+  const labels: Record<string, string> = {
+    video: 'Subir video',
+    audio: 'Subir audio',
+    image: 'Subir imagen',
+  }
+  return labels[form.content_type] || 'Subir archivo'
+})
+
+const acceptType = computed(() => {
+  const types: Record<string, string> = {
+    video: 'video/*',
+    audio: 'audio/*',
+    image: 'image/*',
+  }
+  return types[form.content_type] || '*/*'
+})
+
+const acceptHint = computed(() => {
+  const hints: Record<string, string> = {
+    video: 'MP4, MOV, WebM — max 500 MB',
+    audio: 'MP3, WAV, M4A — max 100 MB',
+    image: 'JPG, PNG, WebP — max 10 MB',
+  }
+  return hints[form.content_type] || ''
+})
+
+// Reset file when content type changes
+watch(() => form.content_type, () => {
+  uploadedFile.value = null
+  if (fileInput.value) fileInput.value.value = ''
+})
+
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
+function handleFileChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  if (target.files?.[0]) {
+    uploadedFile.value = target.files[0]
+  }
+}
+
+function handleDrop(e: DragEvent) {
+  isDragging.value = false
+  if (e.dataTransfer?.files?.[0]) {
+    uploadedFile.value = e.dataTransfer.files[0]
+  }
+}
+
+function removeFile() {
+  uploadedFile.value = null
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 function handleSave() {
   alert('Contenido guardado (mock). Redirigiendo a la lista...')
@@ -157,6 +288,93 @@ function handleSave() {
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-5);
+}
+
+/* ─── Upload ─── */
+.upload__label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.upload__dropzone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.upload__dropzone:hover {
+  border-color: var(--color-muted);
+}
+
+.upload__dropzone--active {
+  border-color: var(--color-tint);
+  background: rgba(var(--tint-rgb), 0.04);
+}
+
+.upload__input {
+  display: none;
+}
+
+.upload__icon {
+  color: var(--color-muted);
+  margin-bottom: var(--space-3);
+}
+
+.upload__text {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-bottom: var(--space-1);
+}
+
+.upload__link {
+  color: var(--color-tint);
+  font-weight: var(--weight-medium);
+}
+
+.upload__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  opacity: 0.7;
+}
+
+.upload__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.upload__filename {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  word-break: break-all;
+}
+
+.upload__filesize {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.upload__remove {
+  font-size: var(--text-xs);
+  color: var(--color-danger, #dc2626);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  margin-top: var(--space-1);
+  border-radius: var(--radius-sm);
+}
+
+.upload__remove:hover {
+  background: rgba(220, 38, 38, 0.06);
 }
 
 @media (max-width: 768px) {

@@ -3,8 +3,8 @@
     <div class="page-header">
       <h1 class="page-header__title">Nueva publicacion oficial</h1>
       <div class="page-header__actions">
-        <UiButton variant="outline" size="sm" to="/admin/community">Cancelar</UiButton>
-        <UiButton size="sm" @click="handleSave">Publicar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/community">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="handleSave">Publicar</UiButton>
       </div>
     </div>
 

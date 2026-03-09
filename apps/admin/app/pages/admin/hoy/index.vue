@@ -30,7 +30,17 @@
 
     <!-- List View -->
     <div v-else class="hoy-list">
-      <UiDataTable :columns="columns" :rows="dailyPlans" @row-click="goToDateFromRow">
+      <UiDataTable fill :columns="columns" :rows="filteredPlans" @row-click="goToDateFromRow">
+        <template #toolbar>
+          <UiInput
+            v-model="search"
+            placeholder="Buscar por tema..."
+            style="min-width: 200px;"
+          >
+            <template #suffix><Icon name="lucide:search" size="18" /></template>
+          </UiInput>
+        </template>
+
         <template #cell-date="{ value }">
           <strong>{{ formatDate(value) }}</strong>
         </template>
@@ -46,7 +56,10 @@
         </template>
 
         <template #actions="{ row }">
-          <UiButton variant="ghost" size="sm" :to="`/admin/hoy/${row.date}`">Editar</UiButton>
+          <UiButton variant="soft" size="sm" :to="`/admin/hoy/${row.date}`">
+            <template #icon><Icon name="lucide:pencil" size="16" /></template>
+            Editar
+          </UiButton>
         </template>
       </UiDataTable>
     </div>
@@ -57,6 +70,7 @@
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
+const search = ref('')
 const viewMode = ref<'calendar' | 'list'>('calendar')
 const activeTab = ref('current')
 
@@ -91,6 +105,12 @@ const dailyPlans = ref([
   { id: 'dp-005', date: '2026-02-28', theme: 'Conexion social', items_count: 1, status: 'draft' },
   { id: 'dp-006', date: '2026-02-23', theme: 'Productividad y enfoque', items_count: 5, status: 'published' },
 ])
+
+const filteredPlans = computed(() => {
+  if (!search.value) return dailyPlans.value
+  const q = search.value.toLowerCase()
+  return dailyPlans.value.filter(r => r.theme.toLowerCase().includes(q))
+})
 
 function formatDate(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })

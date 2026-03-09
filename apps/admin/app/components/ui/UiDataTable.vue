@@ -15,7 +15,7 @@
             >
               {{ col.label }}
             </th>
-            <th v-if="$slots.actions" style="width: 80px" />
+            <th v-if="$slots.actions" class="data-table__actions-header" />
           </tr>
         </thead>
         <tbody>
@@ -39,7 +39,7 @@
                 {{ row[col.key] ?? '—' }}
               </slot>
             </td>
-            <td v-if="$slots.actions">
+            <td v-if="$slots.actions" class="data-table__actions">
               <slot name="actions" :row="row" />
             </td>
           </tr>
@@ -84,7 +84,7 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
 }
 
 .data-table--fill {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -106,7 +106,7 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
 }
 
 .data-table__scroll--fill {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
 }
@@ -147,6 +147,7 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   left: 0;
   z-index: 1;
   background: var(--color-desktop-card, var(--color-white));
+  transition: background var(--transition-fast);
 }
 
 /* Corner cell: sticky both directions */
@@ -163,6 +164,24 @@ th.data-table__sticky-col {
 /* Sticky cell covers the tr background, so apply hover directly */
 .data-table__row:hover .data-table__sticky-col {
   background: var(--color-border-light);
+}
+
+.data-table__actions-header {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.data-table__actions {
+  white-space: nowrap;
+}
+
+.data-table__actions :deep(> *) {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.data-table__actions :deep(> * + *) {
+  margin-left: var(--space-2);
 }
 
 .data-table__loading,

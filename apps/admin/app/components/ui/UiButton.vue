@@ -34,7 +34,7 @@
 import { computed } from 'vue'
 
 interface Props {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  variant?: 'primary' | 'primary-outline' | 'secondary' | 'outline' | 'ghost' | 'soft' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   block?: boolean
   disabled?: boolean
@@ -94,6 +94,13 @@ const classes = computed(() => [
 }
 .btn--primary:hover { background: var(--color-light); border-color: var(--color-light); }
 
+.btn--primary-outline {
+  background: var(--color-white);
+  color: var(--color-dark);
+  border-color: var(--color-dark);
+}
+.btn--primary-outline:hover { background: var(--color-light); }
+
 .btn--secondary {
   background: var(--color-sand);
   color: var(--color-white);
@@ -114,6 +121,14 @@ const classes = computed(() => [
   border-color: transparent;
 }
 .btn--ghost:hover { background: var(--color-surface-alt); }
+
+.btn--soft {
+  background: transparent;
+  color: var(--color-dark);
+  border: none;
+  box-shadow: 0px 0px 2px var(--color-input-shadow);
+}
+.btn--soft:hover { background: var(--color-surface-alt); }
 
 .btn--danger {
   background: var(--color-danger);

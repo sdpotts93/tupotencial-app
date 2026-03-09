@@ -60,7 +60,7 @@ function close() {
 }
 
 .modal {
-  background: var(--color-surface);
+  background: var(--color-white);
   color: var(--color-text);
   width: 100%;
   max-height: 90dvh;

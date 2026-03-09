@@ -1,13 +1,23 @@
 <template>
-  <div>
+  <div class="page--fill">
     <div class="page-header">
       <h1 class="page-header__title">Beneficios</h1>
       <div class="page-header__actions">
-        <UiButton size="sm" to="/admin/benefits/new">+ Nuevo beneficio</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/benefits/new">+ Nuevo beneficio</UiButton>
       </div>
     </div>
 
-    <UiDataTable :columns="columns" :rows="benefits" @row-click="goToEdit">
+    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+      <template #toolbar>
+        <UiInput
+          v-model="search"
+          placeholder="Buscar por aliado o beneficio..."
+          style="min-width: 200px;"
+        >
+          <template #suffix><Icon name="lucide:search" size="18" /></template>
+        </UiInput>
+      </template>
+
       <template #cell-sort_order="{ row }">
         <div class="order-controls">
           <button class="order-btn" :disabled="row.sort_order === 1" @click.stop="moveUp(row)">&#9650;</button>
@@ -39,7 +49,10 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="ghost" size="sm" :to="`/admin/benefits/${row.id}`">Editar</UiButton>
+        <UiButton variant="soft" size="sm" :to="`/admin/benefits/${row.id}`">
+          <template #icon><Icon name="lucide:pencil" size="16" /></template>
+          Editar
+        </UiButton>
       </template>
     </UiDataTable>
   </div>
@@ -49,6 +62,7 @@
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
+const search = ref('')
 
 const columns = [
   { key: 'sort_order', label: 'Orden', width: '80px' },
@@ -68,6 +82,12 @@ const benefits = ref([
   { id: 'ben-005', sort_order: 5, partner_name: 'GymFit', title: '2 meses gratis de membresía', discount_type: 'percentage', discount_value: 100, segment: 'premium', status: 'active', redemptions: 567 },
   { id: 'ben-006', sort_order: 6, partner_name: 'Libreria Zen', title: '30% en libros de bienestar', discount_type: 'percentage', discount_value: 30, segment: 'all', status: 'expired', redemptions: 945 },
 ])
+
+const filteredRows = computed(() => {
+  if (!search.value) return benefits.value
+  const q = search.value.toLowerCase()
+  return benefits.value.filter(r => r.partner_name.toLowerCase().includes(q) || r.title.toLowerCase().includes(q))
+})
 
 function segmentLabel(segment: string) {
   const map: Record<string, string> = { all: 'General', free: 'Gratuito', premium: 'Premium', enterprise: 'Empresarial' }

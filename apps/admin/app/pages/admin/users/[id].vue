@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Detalle de usuario</h1>
       <div class="page-header__actions">
-        <UiButton variant="outline" size="sm" to="/admin/users">Volver</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/users">Volver</UiButton>
         <UiButton v-if="user.status === 'active'" variant="ghost" size="sm" @click="suspendUser">Suspender</UiButton>
         <UiButton v-else-if="user.status === 'suspended'" variant="ghost" size="sm" @click="reactivateUser">Reactivar</UiButton>
       </div>

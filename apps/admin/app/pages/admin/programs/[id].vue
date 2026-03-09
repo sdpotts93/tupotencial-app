@@ -5,8 +5,8 @@
       <div class="page-header__actions">
         <UiButton variant="ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
         <UiButton variant="outline" size="sm" @click="handleDuplicate">Duplicar</UiButton>
-        <UiButton variant="outline" size="sm" to="/admin/programs">Cancelar</UiButton>
-        <UiButton size="sm" @click="handleSave">Guardar cambios</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/programs">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
     </div>
 

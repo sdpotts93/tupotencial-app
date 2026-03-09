@@ -1,16 +1,26 @@
 <template>
-  <div>
+  <div class="page--fill">
     <div class="page-header">
       <h1 class="page-header__title">Eventos</h1>
       <div class="page-header__actions">
-        <UiButton size="sm" to="/admin/events/new">+ Nuevo evento</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/events/new">+ Nuevo evento</UiButton>
       </div>
     </div>
 
     <UiTabs v-model="activeTab" :tabs="tabs" />
 
     <div class="tab-content">
-      <UiDataTable :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+      <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+        <template #toolbar>
+          <UiInput
+            v-model="search"
+            placeholder="Buscar por titulo..."
+            style="min-width: 200px;"
+          >
+            <template #suffix><Icon name="lucide:search" size="18" /></template>
+          </UiInput>
+        </template>
+
         <template #cell-event_type="{ value }">
           <UiTag :variant="typeVariant(value)">{{ typeLabel(value) }}</UiTag>
         </template>
@@ -32,7 +42,10 @@
         </template>
 
         <template #actions="{ row }">
-          <UiButton variant="ghost" size="sm" :to="`/admin/events/${row.id}`">Editar</UiButton>
+          <UiButton variant="soft" size="sm" :to="`/admin/events/${row.id}`">
+            <template #icon><Icon name="lucide:pencil" size="16" /></template>
+            Editar
+          </UiButton>
         </template>
       </UiDataTable>
     </div>
@@ -43,6 +56,7 @@
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
+const search = ref('')
 const activeTab = ref('upcoming')
 
 const tabs = [
@@ -70,10 +84,15 @@ const rows = ref([
 ])
 
 const filteredRows = computed(() => {
-  if (activeTab.value === 'upcoming') return rows.value.filter(r => r.is_upcoming && r.status !== 'draft')
-  if (activeTab.value === 'past') return rows.value.filter(r => !r.is_upcoming)
-  if (activeTab.value === 'draft') return rows.value.filter(r => r.status === 'draft')
-  return rows.value
+  let result = rows.value
+  if (activeTab.value === 'upcoming') result = result.filter(r => r.is_upcoming && r.status !== 'draft')
+  else if (activeTab.value === 'past') result = result.filter(r => !r.is_upcoming)
+  else if (activeTab.value === 'draft') result = result.filter(r => r.status === 'draft')
+  if (search.value) {
+    const q = search.value.toLowerCase()
+    result = result.filter(r => r.title.toLowerCase().includes(q))
+  }
+  return result
 })
 
 function typeVariant(type: string) {
@@ -113,5 +132,9 @@ function goToEdit(row: Record<string, any>) {
 <style scoped>
 .tab-content {
   margin-top: var(--space-6);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 </style>

@@ -2,11 +2,11 @@
   <div>
     <div class="page-header">
       <h1 class="page-header__title">Dashboard</h1>
-      <div class="page-header__actions">
+      <!-- <div class="page-header__actions">
         <UiButton variant="outline" size="sm" to="/admin/content/new">
           + Nuevo contenido
         </UiButton>
-      </div>
+      </div> -->
     </div>
 
     <!-- KPI Cards -->
@@ -148,6 +148,11 @@ function formatDate(iso: string) {
 
 .dashboard__kpi-change--down {
   color: var(--color-danger);
+}
+
+.dashboard__kpi-label {
+  max-width: 10ch;
+  line-height: 1.3;
 }
 
 /* ─── Section title (matches hoy__section-title) ─── */

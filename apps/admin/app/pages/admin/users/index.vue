@@ -1,19 +1,21 @@
 <template>
-  <div>
+  <div class="page--fill">
     <div class="page-header">
       <h1 class="page-header__title">Usuarios</h1>
       <div class="page-header__actions">
-        <UiButton variant="outline" size="sm" @click="exportUsers">Exportar CSV</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="exportUsers">Exportar CSV</UiButton>
       </div>
     </div>
 
-    <UiDataTable :columns="columns" :rows="filteredRows" @row-click="goToDetail">
+    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToDetail">
       <template #toolbar>
         <UiInput
           v-model="search"
           placeholder="Buscar por nombre o correo..."
           style="min-width: 250px;"
-        />
+        >
+          <template #suffix><Icon name="lucide:search" size="18" /></template>
+        </UiInput>
         <UiSelect
           v-model="filterPlan"
           :options="planOptions"
@@ -64,7 +66,10 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="ghost" size="sm" :to="`/admin/users/${row.id}`">Ver</UiButton>
+        <UiButton variant="soft" size="sm" :to="`/admin/users/${row.id}`">
+          <template #icon><Icon name="lucide:eye" size="16" /></template>
+          Ver
+        </UiButton>
       </template>
     </UiDataTable>
   </div>

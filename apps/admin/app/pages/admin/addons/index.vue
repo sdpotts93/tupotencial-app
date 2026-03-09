@@ -1,13 +1,23 @@
 <template>
-  <div>
+  <div class="page--fill">
     <div class="page-header">
       <h1 class="page-header__title">Add-ons</h1>
       <div class="page-header__actions">
-        <UiButton size="sm" to="/admin/addons/new">+ Nuevo add-on</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/addons/new">+ Nuevo add-on</UiButton>
       </div>
     </div>
 
-    <UiDataTable :columns="columns" :rows="addons" @row-click="goToEdit">
+    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+      <template #toolbar>
+        <UiInput
+          v-model="search"
+          placeholder="Buscar por nombre..."
+          style="min-width: 200px;"
+        >
+          <template #suffix><Icon name="lucide:search" size="18" /></template>
+        </UiInput>
+      </template>
+
       <template #cell-addon_type="{ value }">
         <UiTag :variant="typeVariant(value)">{{ typeLabel(value) }}</UiTag>
       </template>
@@ -31,7 +41,10 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="ghost" size="sm" :to="`/admin/addons/${row.id}`">Editar</UiButton>
+        <UiButton variant="soft" size="sm" :to="`/admin/addons/${row.id}`">
+          <template #icon><Icon name="lucide:pencil" size="16" /></template>
+          Editar
+        </UiButton>
       </template>
     </UiDataTable>
   </div>
@@ -41,6 +54,7 @@
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
+const search = ref('')
 
 const columns = [
   { key: 'name', label: 'Nombre', width: '25%' },
@@ -59,6 +73,12 @@ const addons = ref([
   { id: 'addon-005', name: 'Plan familiar (hasta 4)', addon_type: 'plan_upgrade', price: 299, billing_period: 'monthly', status: 'active', subscribers: 867 },
   { id: 'addon-006', name: 'Kit de bienestar corporativo', addon_type: 'module', price: 0, billing_period: 'one_time', status: 'draft', subscribers: 0 },
 ])
+
+const filteredRows = computed(() => {
+  if (!search.value) return addons.value
+  const q = search.value.toLowerCase()
+  return addons.value.filter(r => r.name.toLowerCase().includes(q))
+})
 
 function typeVariant(type: string) {
   const map: Record<string, string> = { module: 'info', service: 'accent', content_pack: 'warning', plan_upgrade: 'success' }

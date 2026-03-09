@@ -1,14 +1,21 @@
 <template>
-  <div>
+  <div class="page--fill">
     <div class="page-header">
       <h1 class="page-header__title">Programas</h1>
       <div class="page-header__actions">
-        <UiButton size="sm" to="/admin/programs/new">+ Nuevo programa</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/programs/new">+ Nuevo programa</UiButton>
       </div>
     </div>
 
-    <UiDataTable :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
       <template #toolbar>
+        <UiInput
+          v-model="search"
+          placeholder="Buscar por titulo..."
+          style="min-width: 200px;"
+        >
+          <template #suffix><Icon name="lucide:search" size="18" /></template>
+        </UiInput>
         <UiSelect
           v-model="filterType"
           :options="typeOptions"
@@ -43,8 +50,14 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="ghost" size="sm" @click.stop="handleDuplicate(row)">Duplicar</UiButton>
-        <UiButton variant="ghost" size="sm" :to="`/admin/programs/${row.id}`">Editar</UiButton>
+        <UiButton variant="soft" size="sm" @click.stop="handleDuplicate(row)">
+          <template #icon><Icon name="lucide:copy" size="16" /></template>
+          Duplicar
+        </UiButton>
+        <UiButton variant="soft" size="sm" :to="`/admin/programs/${row.id}`">
+          <template #icon><Icon name="lucide:pencil" size="16" /></template>
+          Editar
+        </UiButton>
       </template>
     </UiDataTable>
   </div>
@@ -55,6 +68,7 @@ definePageMeta({ layout: 'default' })
 
 const router = useRouter()
 
+const search = ref('')
 const filterType = ref('')
 const filterStatus = ref('')
 const filterSegment = ref('')
@@ -103,6 +117,10 @@ const rows = ref([
 
 const filteredRows = computed(() => {
   return rows.value.filter(row => {
+    if (search.value) {
+      const q = search.value.toLowerCase()
+      if (!row.title.toLowerCase().includes(q)) return false
+    }
     if (filterType.value && row.program_type !== filterType.value) return false
     if (filterStatus.value && row.status !== filterStatus.value) return false
     if (filterSegment.value && row.segment !== filterSegment.value) return false

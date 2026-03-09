@@ -20,3 +20,11 @@
   display: flex;
   gap: var(--space-3);
 }
+
+/* ---- Page fill layout (table pages that shouldn't scroll the body) ---- */
+.page--fill {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--topbar-height) - var(--space-6) * 2);
+  overflow: hidden;
+}

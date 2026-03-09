@@ -4,8 +4,8 @@
       <h1 class="page-header__title">Editar evento</h1>
       <div class="page-header__actions">
         <UiButton variant="ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
-        <UiButton variant="outline" size="sm" to="/admin/events">Cancelar</UiButton>
-        <UiButton size="sm" @click="handleSave">Guardar cambios</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/events">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
     </div>
 

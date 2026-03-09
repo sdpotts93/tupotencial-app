@@ -245,10 +245,11 @@ function isActive(to: string): boolean {
   flex: 1;
   min-width: 0;
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
   background: var(--color-white);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* ─── Topbar ─── */
@@ -318,8 +319,7 @@ function isActive(to: string): boolean {
   padding: var(--space-6);
   flex: 1;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
 }
 
 /* ─── Sidebar nav items ─── */

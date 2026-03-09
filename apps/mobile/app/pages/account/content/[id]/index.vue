@@ -64,7 +64,7 @@ const coverMap: Record<string, string> = {
 const content = ref({
   title: 'Respiración consciente',
   subtitle: 'Encuentra calma en cada inhalación',
-  typeLabel: 'MEDITACIÓN GUIADA',
+  typeLabel: 'MEDITACIÓN',
   type: 'audio',
   description: 'Esta meditación te guiará a través de una práctica de respiración consciente de 10 minutos. Ideal para momentos de estrés o para empezar tu día con claridad. Cierra los ojos, encuentra una posición cómoda y permite que tu atención se centre en el flujo natural de tu respiración.',
   duration: '10 min',

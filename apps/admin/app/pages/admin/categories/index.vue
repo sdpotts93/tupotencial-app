@@ -1,13 +1,23 @@
 <template>
-  <div>
+  <div class="page--fill">
     <div class="page-header">
       <h1 class="page-header__title">Categorias</h1>
       <div class="page-header__actions">
-        <UiButton size="sm" @click="showCreateModal = true">+ Nueva categoria</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="showCreateModal = true">+ Nueva categoria</UiButton>
       </div>
     </div>
 
-    <UiDataTable :columns="columns" :rows="categories" @row-click="editCategory">
+    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="editCategory">
+      <template #toolbar>
+        <UiInput
+          v-model="search"
+          placeholder="Buscar por nombre..."
+          style="min-width: 200px;"
+        >
+          <template #suffix><Icon name="lucide:search" size="18" /></template>
+        </UiInput>
+      </template>
+
       <template #cell-icon_url="{ value }">
         <div class="category-icon">
           <Icon v-if="value" name="lucide:target" size="20" />
@@ -32,7 +42,10 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="ghost" size="sm" @click.stop="editCategory(row)">Editar</UiButton>
+        <UiButton variant="soft" size="sm" @click.stop="editCategory(row)">
+          <template #icon><Icon name="lucide:pencil" size="16" /></template>
+          Editar
+        </UiButton>
       </template>
     </UiDataTable>
 
@@ -63,8 +76,8 @@
       </div>
       <template #footer>
         <div class="modal-actions">
-          <UiButton variant="outline" size="sm" @click="showCreateModal = false">Cancelar</UiButton>
-          <UiButton size="sm" @click="saveCategory">{{ editingCategory ? 'Guardar cambios' : 'Crear categoria' }}</UiButton>
+          <UiButton variant="soft" size="sm" @click="showCreateModal = false">Cancelar</UiButton>
+          <UiButton variant="primary-outline" size="sm" @click="saveCategory">{{ editingCategory ? 'Guardar cambios' : 'Crear categoria' }}</UiButton>
         </div>
       </template>
     </UiModal>
@@ -76,6 +89,7 @@ definePageMeta({ layout: 'default' })
 
 const showCreateModal = ref(false)
 const editingCategory = ref<Record<string, any> | null>(null)
+const search = ref('')
 
 const categoryForm = reactive({
   name: '',
@@ -101,6 +115,12 @@ const categories = ref([
   { id: 'cat-006', name: 'Relaciones', slug: 'relaciones', icon_url: '/icons/relaciones.svg', is_active: true, sort_order: 6, content_count: 15 },
   { id: 'cat-007', name: 'Finanzas personales', slug: 'finanzas-personales', icon_url: '', is_active: false, sort_order: 7, content_count: 8 },
 ])
+
+const filteredRows = computed(() => {
+  if (!search.value) return categories.value
+  const q = search.value.toLowerCase()
+  return categories.value.filter(r => r.name.toLowerCase().includes(q) || r.slug.toLowerCase().includes(q))
+})
 
 function editCategory(row: Record<string, any>) {
   editingCategory.value = row
