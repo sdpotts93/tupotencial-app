@@ -224,14 +224,27 @@ function handleDelete(row: Record<string, any>) {
   gap: var(--space-3);
 }
 
+/* ─── List (shared grid) ─── */
+.cat-list {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr 1fr 1fr auto;
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 /* ─── Header ─── */
 .cat-header {
   display: grid;
-  grid-template-columns: 40px 1fr 1fr 100px 120px auto;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   background: var(--color-gray);
   border-bottom: 1px solid var(--color-border-light);
+  position: sticky;
+  top: 0;
+  z-index: 2;
   font-family: var(--font-eyebrow);
   font-size: var(--eyebrow-sm);
   font-weight: var(--weight-semibold);
@@ -243,7 +256,8 @@ function handleDelete(row: Record<string, any>) {
 /* ─── Row ─── */
 .cat-row {
   display: grid;
-  grid-template-columns: 40px 1fr 1fr 100px 120px auto;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-border-light);
@@ -304,6 +318,7 @@ function handleDelete(row: Record<string, any>) {
 
 /* ─── Empty ─── */
 .cat-empty {
+  grid-column: 1 / -1;
   text-align: center;
   padding: var(--space-10) var(--space-4);
   color: var(--color-muted);

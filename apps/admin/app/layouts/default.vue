@@ -90,7 +90,7 @@ const initials = computed(() => {
 const pageTitle = computed(() => {
   const path = route.path
   if (path === '/admin' || path === '/admin/') return 'Dashboard'
-  if (path.startsWith('/admin/content')) return 'Contenido'
+  if (path.startsWith('/admin/content')) return 'Biblioteca'
   if (path.startsWith('/admin/categories')) return 'Categorías'
   if (path.startsWith('/admin/programs')) return 'Programas'
   if (path.startsWith('/admin/hoy')) return 'Hoy'
@@ -122,7 +122,7 @@ const navItems: NavItem[] = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
   },
   {
-    label: 'Contenido',
+    label: 'Biblioteca',
     to: '/admin/content',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 4v16"/><path d="M4 8h16"/></svg>',
   },

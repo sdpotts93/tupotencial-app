@@ -7,8 +7,8 @@
       </div>
     </div>
 
-    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
-      <template #toolbar>
+    <div class="ben-container">
+      <div class="ben-toolbar">
         <UiInput
           v-model="search"
           placeholder="Buscar por aliado o beneficio..."
@@ -16,45 +16,64 @@
         >
           <template #suffix><Icon name="lucide:search" size="18" /></template>
         </UiInput>
-      </template>
+      </div>
 
-      <template #cell-sort_order="{ row }">
-        <div class="order-controls">
-          <button class="order-btn" :disabled="row.sort_order === 1" @click.stop="moveUp(row)">&#9650;</button>
-          <span>{{ row.sort_order }}</span>
-          <button class="order-btn" :disabled="row.sort_order === benefits.length" @click.stop="moveDown(row)">&#9660;</button>
+      <div class="ben-list">
+        <div class="ben-header">
+          <span class="ben-header__drag" />
+          <span>Aliado</span>
+          <span>Beneficio</span>
+          <span>Descuento</span>
+          <span>Segmento</span>
+          <span>Estado</span>
+          <span class="ben-header__actions" />
         </div>
-      </template>
 
-      <template #cell-partner_name="{ value }">
-        <strong>{{ value }}</strong>
-      </template>
+        <div
+          v-for="(row, index) in filteredRows"
+          :key="row.id"
+          class="ben-row"
+          :class="{
+            'ben-row--dragging': dragIndex === index,
+            'ben-row--over': dragOverIndex === index && dragIndex !== index,
+          }"
+          :draggable="!search"
+          @dragstart="onDragStart(index, $event)"
+          @dragover.prevent="onDragOver(index)"
+          @dragend="onDragEnd"
+          @click="goToEdit(row)"
+        >
+          <span class="ben-row__drag" :class="{ 'ben-row__drag--disabled': !!search }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
+              <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+              <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
+            </svg>
+          </span>
+          <span class="ben-row__partner">{{ row.partner_name }}</span>
+          <span class="ben-row__title">{{ row.title }}</span>
+          <span class="ben-row__discount">{{ row.discount_type === 'percentage' ? `${row.discount_value}%` : `$${row.discount_value} MXN` }}</span>
+          <span class="ben-row__segment">{{ segmentLabel(row.segment) }}</span>
+          <span class="ben-row__status">
+            <UiTag :variant="row.status === 'active' ? 'success' : row.status === 'expired' ? 'danger' : 'warning'">
+              {{ statusLabel(row.status) }}
+            </UiTag>
+          </span>
+          <span class="ben-row__actions" @click.stop>
+            <UiButton variant="soft" size="sm" :to="`/admin/benefits/${row.id}`">
+              <template #icon><Icon name="lucide:pencil" size="16" /></template>
+              Editar
+            </UiButton>
+            <UiButton variant="danger-ghost" size="sm" @click="handleDelete(row)">
+              <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+              Eliminar
+            </UiButton>
+          </span>
+        </div>
 
-      <template #cell-discount_value="{ value, row }">
-        {{ row.discount_type === 'percentage' ? `${value}%` : `$${value} MXN` }}
-      </template>
-
-      <template #cell-segment="{ value }">
-        {{ segmentLabel(value) }}
-      </template>
-
-      <template #cell-status="{ value }">
-        <UiTag :variant="value === 'active' ? 'success' : value === 'expired' ? 'danger' : 'warning'">
-          {{ statusLabel(value) }}
-        </UiTag>
-      </template>
-
-      <template #cell-redemptions="{ value }">
-        {{ value?.toLocaleString('es-MX') ?? 0 }}
-      </template>
-
-      <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" :to="`/admin/benefits/${row.id}`">
-          <template #icon><Icon name="lucide:pencil" size="16" /></template>
-          Editar
-        </UiButton>
-      </template>
-    </UiDataTable>
+        <div v-if="!filteredRows.length" class="ben-empty">Sin resultados</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -63,16 +82,6 @@ definePageMeta({ layout: 'default' })
 
 const router = useRouter()
 const search = ref('')
-
-const columns = [
-  { key: 'sort_order', label: 'Orden', width: '80px' },
-  { key: 'partner_name', label: 'Aliado' },
-  { key: 'title', label: 'Beneficio', width: '25%' },
-  { key: 'discount_value', label: 'Descuento' },
-  { key: 'segment', label: 'Segmento' },
-  { key: 'status', label: 'Estado' },
-  { key: 'redemptions', label: 'Canjes' },
-]
 
 const benefits = ref([
   { id: 'ben-001', sort_order: 1, partner_name: 'NutriVida', title: '20% en suplementos', discount_type: 'percentage', discount_value: 20, segment: 'premium', status: 'active', redemptions: 1234 },
@@ -84,11 +93,53 @@ const benefits = ref([
 ])
 
 const filteredRows = computed(() => {
-  if (!search.value) return benefits.value
+  const sorted = [...benefits.value].sort((a, b) => a.sort_order - b.sort_order)
+  if (!search.value) return sorted
   const q = search.value.toLowerCase()
-  return benefits.value.filter(r => r.partner_name.toLowerCase().includes(q) || r.title.toLowerCase().includes(q))
+  return sorted.filter(r => r.partner_name.toLowerCase().includes(q) || r.title.toLowerCase().includes(q))
 })
 
+// ── Drag & drop ──
+const dragIndex = ref<number | null>(null)
+const dragOverIndex = ref<number | null>(null)
+
+function onDragStart(index: number, e: DragEvent) {
+  dragIndex.value = index
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+  }
+}
+
+function onDragOver(index: number) {
+  dragOverIndex.value = index
+}
+
+function onDragEnd() {
+  if (dragIndex.value !== null && dragOverIndex.value !== null && dragIndex.value !== dragOverIndex.value) {
+    const sorted = [...benefits.value].sort((a, b) => a.sort_order - b.sort_order)
+    const fromItem = sorted[dragIndex.value]
+    const toItem = sorted[dragOverIndex.value]
+    if (fromItem && toItem) {
+      const fromOrder = fromItem.sort_order
+      const toOrder = toItem.sort_order
+
+      if (fromOrder < toOrder) {
+        for (const b of benefits.value) {
+          if (b.sort_order > fromOrder && b.sort_order <= toOrder) b.sort_order--
+        }
+      } else {
+        for (const b of benefits.value) {
+          if (b.sort_order >= toOrder && b.sort_order < fromOrder) b.sort_order++
+        }
+      }
+      fromItem.sort_order = toOrder
+    }
+  }
+  dragIndex.value = null
+  dragOverIndex.value = null
+}
+
+// ── Helpers ──
 function segmentLabel(segment: string) {
   const map: Record<string, string> = { all: 'General', free: 'Gratuito', premium: 'Premium', enterprise: 'Empresarial' }
   return map[segment] ?? segment
@@ -99,21 +150,9 @@ function statusLabel(status: string) {
   return map[status] ?? status
 }
 
-function moveUp(row: Record<string, any>) {
-  const idx = benefits.value.findIndex(b => b.id === row.id)
-  if (idx > 0) {
-    benefits.value[idx].sort_order--
-    benefits.value[idx - 1].sort_order++
-    benefits.value.sort((a, b) => a.sort_order - b.sort_order)
-  }
-}
-
-function moveDown(row: Record<string, any>) {
-  const idx = benefits.value.findIndex(b => b.id === row.id)
-  if (idx < benefits.value.length - 1) {
-    benefits.value[idx].sort_order++
-    benefits.value[idx + 1].sort_order--
-    benefits.value.sort((a, b) => a.sort_order - b.sort_order)
+function handleDelete(row: Record<string, any>) {
+  if (confirm(`Seguro que deseas eliminar "${row.title}"?`)) {
+    benefits.value = benefits.value.filter(b => b.id !== row.id)
   }
 }
 
@@ -123,34 +162,122 @@ function goToEdit(row: Record<string, any>) {
 </script>
 
 <style scoped>
-.order-controls {
+/* ─── Container ─── */
+.ben-container {
+  background: var(--color-desktop-card, var(--color-white));
+  border: 1px solid var(--color-desktop-border, var(--color-border-light));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  flex: 0 1 auto;
+  min-height: 0;
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  flex-direction: column;
 }
 
-.order-btn {
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  width: 24px;
-  height: 24px;
+/* ─── Toolbar ─── */
+.ben-toolbar {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: var(--space-3);
+}
+
+/* ─── List (shared grid) ─── */
+.ben-list {
+  display: grid;
+  grid-template-columns: 40px minmax(140px, 1fr) minmax(140px, 1fr) 1fr 1fr 1fr auto;
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ─── Header ─── */
+.ben-header {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-gray);
+  border-bottom: 1px solid var(--color-border-light);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* ─── Row ─── */
+.ben-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
+  align-items: center;
+  font-size: var(--text-sm);
   cursor: pointer;
-  font-size: 10px;
-  color: var(--color-muted);
   transition: background var(--transition-fast);
 }
 
-.order-btn:hover:not(:disabled) {
-  background: var(--color-surface-alt);
-  color: var(--color-text);
+.ben-row:hover {
+  background: var(--color-border-light);
 }
 
-.order-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.ben-row--dragging {
+  opacity: 0.4;
+}
+
+.ben-row--over {
+  border-top: 2px solid var(--color-tint);
+}
+
+/* ─── Drag handle ─── */
+.ben-row__drag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+  cursor: grab;
+}
+
+.ben-row__drag:active {
+  cursor: grabbing;
+}
+
+.ben-row__drag--disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+/* ─── Cells ─── */
+.ben-row__partner {
+  font-weight: var(--weight-medium);
+}
+
+.ben-row__discount,
+.ben-row__segment {
+  color: var(--color-muted);
+}
+
+.ben-row__actions {
+  display: flex;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+/* ─── Empty ─── */
+.ben-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-10) var(--space-4);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
 }
 </style>
