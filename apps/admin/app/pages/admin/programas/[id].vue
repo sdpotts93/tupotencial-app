@@ -309,7 +309,7 @@ function removeDay(index: number) {
 }
 
 function addActivity(dayIndex: number) {
-  programDays.value[dayIndex].activities.push({
+  programDays.value[dayIndex]?.activities.push({
     type: 'contenido',
     content_id: '',
     form_id: '',
@@ -317,7 +317,7 @@ function addActivity(dayIndex: number) {
 }
 
 function removeActivity(dayIndex: number, actIndex: number) {
-  programDays.value[dayIndex].activities.splice(actIndex, 1)
+  programDays.value[dayIndex]?.activities.splice(actIndex, 1)
 }
 
 // ── Upload functions ──
