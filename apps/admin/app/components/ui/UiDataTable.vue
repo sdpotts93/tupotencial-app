@@ -96,6 +96,11 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  overflow-x: auto;
+}
+
+.data-table__toolbar > :deep(*) {
+  flex-shrink: 0;
 }
 
 .data-table__scroll { overflow-x: auto; }
@@ -113,7 +118,6 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
 
 .data-table__table {
   width: 100%;
-  min-width: max-content;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -133,7 +137,6 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   position: sticky;
   top: 0;
   z-index: 2;
-  min-width: 120px;
 }
 
 .data-table__table td {
@@ -141,7 +144,6 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   font-size: var(--text-sm);
   border-bottom: 1px solid var(--color-border-light);
   vertical-align: middle;
-  min-width: 120px;
 }
 
 /* ─── Sticky first column ─── */
