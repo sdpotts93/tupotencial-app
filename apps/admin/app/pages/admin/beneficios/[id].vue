@@ -9,24 +9,62 @@
         <UiCard variant="outlined">
           <div class="form-section">
             <UiInput v-model="form.title" label="Titulo del beneficio" />
-            <UiInput v-model="form.partner_name" label="Nombre del aliado" />
             <UiTextarea v-model="form.description" label="Descripcion" :rows="4" />
-            <UiInput v-model="form.cover_url" label="URL de imagen" />
-            <UiInput v-model="form.redemption_url" label="URL de canje" />
+
+            <!-- Image upload -->
+            <div class="upload">
+              <label class="upload__label">Imagen de portada</label>
+              <div
+                class="upload__dropzone"
+                :class="{ 'upload__dropzone--active': isDragging }"
+                @dragover.prevent="isDragging = true"
+                @dragleave="isDragging = false"
+                @drop.prevent="handleDrop"
+                @click="triggerFileInput"
+              >
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/*"
+                  class="upload__input"
+                  @change="handleFileChange"
+                />
+                <template v-if="!coverFile && !form.cover_url">
+                  <div class="upload__icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <p class="upload__text">Arrastra tu imagen aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
+                </template>
+                <template v-else-if="coverFile">
+                  <div class="upload__preview">
+                    <p class="upload__filename">{{ coverFile.name }}</p>
+                    <p class="upload__filesize">{{ formatFileSize(coverFile.size) }}</p>
+                    <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="upload__preview">
+                    <p class="upload__filename">Imagen actual</p>
+                    <p class="upload__filesize">{{ form.cover_url }}</p>
+                    <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <UiInput v-model="form.url" label="URL" />
 
             <UiInput
               v-model="form.utm_template"
               label="Plantilla UTM"
               placeholder="?utm_source=tupotencial&utm_medium=benefit&utm_campaign=..."
-              hint="Parametros UTM que se agregan a la URL de canje"
+              hint="Parametros UTM que se agregan a la URL"
             />
 
-            <UiInput v-model="form.promo_code" label="Codigo promocional" />
-
-            <div class="form-row">
-              <UiInput v-model="form.valid_from" label="Valido desde" type="date" />
-              <UiInput v-model="form.valid_until" label="Valido hasta" type="date" />
-            </div>
+            <UiInput v-model="form.code" label="Codigo promocional" />
           </div>
         </UiCard>
       </div>
@@ -34,20 +72,8 @@
       <div class="form-layout__sidebar">
         <UiCard variant="outlined">
           <div class="form-section">
-            <UiSelect v-model="form.discount_type" label="Tipo de descuento" :options="discountTypeOptions" />
-            <UiInput v-model="form.discount_value" label="Valor del descuento" type="number" />
-            <UiSelect v-model="form.segment" label="Segmento" :options="segmentOptions" />
-            <UiInput v-model="form.max_redemptions" label="Maximo de canjes" type="number" />
+            <UiSelect v-model="form.plan" label="Plan" :options="planOptions" />
             <UiSelect v-model="form.status" label="Estado" :options="statusOptions" />
-          </div>
-        </UiCard>
-
-        <UiCard variant="filled">
-          <div class="form-section">
-            <p class="meta-label">ID: {{ route.params.id }}</p>
-            <p class="meta-label">Canjes totales: 1,234</p>
-            <p class="meta-label">Canjes este mes: 187</p>
-            <p class="meta-label">Creado: 15 ene 2026</p>
           </div>
         </UiCard>
       </div>
@@ -66,39 +92,57 @@ definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 
+// ── Image upload ──
+const fileInput = ref<HTMLInputElement | null>(null)
+const coverFile = ref<File | null>(null)
+const isDragging = ref(false)
+
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
+function handleFileChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  if (target.files?.[0]) coverFile.value = target.files[0]
+}
+
+function handleDrop(e: DragEvent) {
+  isDragging.value = false
+  if (e.dataTransfer?.files?.[0]) coverFile.value = e.dataTransfer.files[0]
+}
+
+function removeCover() {
+  coverFile.value = null
+  form.cover_url = ''
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+// ── Form state ──
 const form = reactive({
   title: '20% en suplementos',
-  partner_name: 'NutriVida',
   description: 'Obtén un 20% de descuento en toda la línea de suplementos NutriVida. Incluye vitaminas, minerales, proteínas y más. Válido en compras en línea y tiendas físicas.',
   cover_url: 'https://images.tupotencial.app/benefits/nutrivida.jpg',
-  redemption_url: 'https://nutrivida.com/tupotencial',
+  url: 'https://nutrivida.com/tupotencial',
   utm_template: '?utm_source=tupotencial&utm_medium=benefit&utm_campaign=nutrivida',
-  promo_code: 'TUPOTENCIAL20',
-  valid_from: '2026-01-01',
-  valid_until: '2026-06-30',
-  discount_type: 'percentage',
-  discount_value: '20',
-  segment: 'premium',
-  max_redemptions: '5000',
+  code: 'TUPOTENCIAL20',
+  plan: 'core',
   status: 'active',
 })
 
-const discountTypeOptions = [
-  { value: 'percentage', label: 'Porcentaje (%)' },
-  { value: 'fixed', label: 'Monto fijo ($)' },
-]
-
-const segmentOptions = [
-  { value: 'all', label: 'General' },
+const planOptions = [
   { value: 'free', label: 'Gratuito' },
-  { value: 'premium', label: 'Premium' },
-  { value: 'enterprise', label: 'Empresarial' },
+  { value: 'core', label: 'Core' },
 ]
 
 const statusOptions = [
-  { value: 'draft', label: 'Borrador' },
   { value: 'active', label: 'Activo' },
-  { value: 'expired', label: 'Expirado' },
+  { value: 'inactive', label: 'Inactivo' },
 ]
 
 function handleSave() {
@@ -142,19 +186,99 @@ function handleDelete() {
   padding: var(--space-5);
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-}
-
 .meta-label {
   font-size: var(--text-xs);
   color: var(--color-muted);
 }
 
+/* ─── Upload ─── */
+.upload__label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.upload__dropzone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.upload__dropzone:hover {
+  border-color: var(--color-muted);
+}
+
+.upload__dropzone--active {
+  border-color: var(--color-tint);
+  background: rgba(var(--tint-rgb), 0.04);
+}
+
+.upload__input {
+  display: none;
+}
+
+.upload__icon {
+  color: var(--color-muted);
+  margin-bottom: var(--space-3);
+}
+
+.upload__text {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-bottom: var(--space-1);
+}
+
+.upload__link {
+  color: var(--color-tint);
+  font-weight: var(--weight-medium);
+}
+
+.upload__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  opacity: 0.7;
+}
+
+.upload__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.upload__filename {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  word-break: break-all;
+}
+
+.upload__filesize {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.upload__remove {
+  font-size: var(--text-xs);
+  color: var(--color-danger, #dc2626);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  margin-top: var(--space-1);
+  border-radius: var(--radius-sm);
+}
+
+.upload__remove:hover {
+  background: rgba(220, 38, 38, 0.06);
+}
+
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
-  .form-row { grid-template-columns: 1fr; }
 }
 </style>

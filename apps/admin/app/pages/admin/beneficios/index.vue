@@ -11,7 +11,7 @@
       <div class="ben-toolbar">
         <UiInput
           v-model="search"
-          placeholder="Buscar por aliado o beneficio..."
+          placeholder="Buscar beneficio..."
           style="min-width: 200px;"
         >
           <template #suffix><Icon name="lucide:search" size="18" /></template>
@@ -21,10 +21,8 @@
       <div class="ben-list">
         <div class="ben-header">
           <span class="ben-header__drag" />
-          <span>Aliado</span>
           <span>Beneficio</span>
-          <span>Descuento</span>
-          <span>Segmento</span>
+          <span>Plan</span>
           <span>Estado</span>
           <span class="ben-header__actions" />
         </div>
@@ -50,12 +48,12 @@
               <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
             </svg>
           </span>
-          <span class="ben-row__partner">{{ row.partner_name }}</span>
           <span class="ben-row__title">{{ row.title }}</span>
-          <span class="ben-row__discount">{{ row.discount_type === 'percentage' ? `${row.discount_value}%` : `$${row.discount_value} MXN` }}</span>
-          <span class="ben-row__segment">{{ segmentLabel(row.segment) }}</span>
+          <span class="ben-row__plan">
+            <UiTag :variant="row.plan === 'core' ? 'gold' : 'default'">{{ planLabel(row.plan) }}</UiTag>
+          </span>
           <span class="ben-row__status">
-            <UiTag :variant="row.status === 'active' ? 'success' : row.status === 'expired' ? 'danger' : 'warning'">
+            <UiTag :variant="row.status === 'active' ? 'success' : 'warning'">
               {{ statusLabel(row.status) }}
             </UiTag>
           </span>
@@ -84,19 +82,19 @@ const router = useRouter()
 const search = ref('')
 
 const benefits = ref([
-  { id: 'ben-001', sort_order: 1, partner_name: 'NutriVida', title: '20% en suplementos', discount_type: 'percentage', discount_value: 20, segment: 'premium', status: 'active', redemptions: 1234 },
-  { id: 'ben-002', sort_order: 2, partner_name: 'YogaFlow Studio', title: 'Clase gratis de yoga', discount_type: 'percentage', discount_value: 100, segment: 'all', status: 'active', redemptions: 856 },
-  { id: 'ben-003', sort_order: 3, partner_name: 'Cafe Mindful', title: '$50 de descuento en pedido', discount_type: 'fixed', discount_value: 50, segment: 'premium', status: 'active', redemptions: 2103 },
-  { id: 'ben-004', sort_order: 4, partner_name: 'SleepWell', title: '15% en colchones y almohadas', discount_type: 'percentage', discount_value: 15, segment: 'enterprise', status: 'active', redemptions: 312 },
-  { id: 'ben-005', sort_order: 5, partner_name: 'GymFit', title: '2 meses gratis de membresía', discount_type: 'percentage', discount_value: 100, segment: 'premium', status: 'active', redemptions: 567 },
-  { id: 'ben-006', sort_order: 6, partner_name: 'Libreria Zen', title: '30% en libros de bienestar', discount_type: 'percentage', discount_value: 30, segment: 'all', status: 'expired', redemptions: 945 },
+  { id: 'ben-001', sort_order: 1, title: '20% en suplementos', plan: 'core', status: 'active' },
+  { id: 'ben-002', sort_order: 2, title: 'Clase gratis de yoga', plan: 'free', status: 'active' },
+  { id: 'ben-003', sort_order: 3, title: '$50 de descuento en pedido', plan: 'core', status: 'active' },
+  { id: 'ben-004', sort_order: 4, title: '15% en colchones y almohadas', plan: 'core', status: 'active' },
+  { id: 'ben-005', sort_order: 5, title: '2 meses gratis de membresia', plan: 'free', status: 'active' },
+  { id: 'ben-006', sort_order: 6, title: '30% en libros de bienestar', plan: 'free', status: 'inactive' },
 ])
 
 const filteredRows = computed(() => {
   const sorted = [...benefits.value].sort((a, b) => a.sort_order - b.sort_order)
   if (!search.value) return sorted
   const q = search.value.toLowerCase()
-  return sorted.filter(r => r.partner_name.toLowerCase().includes(q) || r.title.toLowerCase().includes(q))
+  return sorted.filter(r => r.title.toLowerCase().includes(q))
 })
 
 // ── Drag & drop ──
@@ -140,13 +138,13 @@ function onDragEnd() {
 }
 
 // ── Helpers ──
-function segmentLabel(segment: string) {
-  const map: Record<string, string> = { all: 'General', free: 'Gratuito', premium: 'Premium', enterprise: 'Empresarial' }
-  return map[segment] ?? segment
+function planLabel(plan: string) {
+  const map: Record<string, string> = { free: 'Gratuito', core: 'Core' }
+  return map[plan] ?? plan
 }
 
 function statusLabel(status: string) {
-  const map: Record<string, string> = { active: 'Activo', expired: 'Expirado', draft: 'Borrador' }
+  const map: Record<string, string> = { active: 'Activo', inactive: 'Inactivo' }
   return map[status] ?? status
 }
 
@@ -186,7 +184,7 @@ function goToEdit(row: Record<string, any>) {
 /* ─── List (shared grid) ─── */
 .ben-list {
   display: grid;
-  grid-template-columns: 40px minmax(140px, 1fr) minmax(140px, 1fr) 1fr 1fr 1fr auto;
+  grid-template-columns: 40px minmax(200px, 1fr) 1fr 1fr auto;
   overflow: auto;
   flex: 1 1 auto;
   min-height: 0;
@@ -257,12 +255,11 @@ function goToEdit(row: Record<string, any>) {
 }
 
 /* ─── Cells ─── */
-.ben-row__partner {
+.ben-row__title {
   font-weight: var(--weight-medium);
 }
 
-.ben-row__discount,
-.ben-row__segment {
+.ben-row__plan {
   color: var(--color-muted);
 }
 

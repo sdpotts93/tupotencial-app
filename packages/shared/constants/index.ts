@@ -121,9 +121,8 @@ export const EVENT_STATUSES: readonly EventStatus[] = [
 // ── Benefits ────────────────────────────────────
 
 export const BENEFIT_STATUSES: readonly BenefitStatus[] = [
-  'draft',
-  'published',
-  'hidden',
+  'active',
+  'inactive',
 ] as const;
 
 // ── Addons / Entitlements ───────────────────────

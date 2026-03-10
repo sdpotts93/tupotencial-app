@@ -33,7 +33,7 @@ export type EventStatus = 'draft' | 'published' | 'hidden';
 
 export type EventPlan = 'free' | 'core';
 
-export type BenefitStatus = 'draft' | 'published' | 'hidden';
+export type BenefitStatus = 'active' | 'inactive';
 
 export type AddonStatus = 'active' | 'inactive';
 
@@ -237,9 +237,11 @@ export interface Benefit {
   id: string;
   title: string;
   description: string | null;
+  cover_url: string | null;
   url: string | null;
   utm_template: string | null;
   code: string | null;
+  plan: EventPlan;
   status: BenefitStatus;
   position: number;
   created_at: string;
