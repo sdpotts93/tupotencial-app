@@ -113,6 +113,7 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
 
 .data-table__table {
   width: 100%;
+  min-width: max-content;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -132,6 +133,7 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   position: sticky;
   top: 0;
   z-index: 2;
+  min-width: 120px;
 }
 
 .data-table__table td {
@@ -139,6 +141,7 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   font-size: var(--text-sm);
   border-bottom: 1px solid var(--color-border-light);
   vertical-align: middle;
+  min-width: 120px;
 }
 
 /* ─── Sticky first column ─── */

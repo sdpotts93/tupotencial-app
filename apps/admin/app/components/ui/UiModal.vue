@@ -76,7 +76,13 @@ function close() {
 .modal--center {
   border-radius: var(--radius-2xl);
   max-width: 400px;
-  margin: auto;
+  margin: auto var(--space-6);
+}
+
+@media (min-width: 1024px) {
+  .modal--center {
+    margin: auto;
+  }
 }
 
 .modal__handle {
