@@ -111,7 +111,7 @@
     <div class="page-actions">
       <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/comunidad">Volver</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
+      <UiButton variant="primary-outline" size="sm" @click="handleSave">{{ form.status === 'draft' ? 'Guardar' : 'Publicar' }}</UiButton>
     </div>
   </div>
 </template>
