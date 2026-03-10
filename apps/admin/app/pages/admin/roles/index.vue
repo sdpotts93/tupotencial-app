@@ -15,12 +15,6 @@
           <UiTag size="sm" :variant="role.variant as any">{{ role.count }} miembros</UiTag>
         </div>
         <p class="role-card__description">{{ role.description }}</p>
-        <div class="role-card__permissions">
-          <span class="eyebrow">Permisos:</span>
-          <ul class="role-card__list">
-            <li v-for="perm in role.permissions" :key="perm">{{ perm }}</li>
-          </ul>
-        </div>
       </div>
     </div>
 
@@ -62,12 +56,43 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton v-if="row.role !== 'super_admin'" variant="soft" size="sm" @click="editAdmin(row)">
+        <UiButton variant="soft" size="sm" @click="editAdmin(row)">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
+        <UiButton variant="danger-ghost" size="sm" @click="deleteAdmin(row)">
+          <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+          Eliminar
+        </UiButton>
       </template>
     </UiDataTable>
+
+    <!-- Edit Modal -->
+    <UiModal v-model="showEditModal" title="Editar administrador" variant="center" :show-handle="false">
+      <div class="modal-form">
+        <UiInput
+          :model-value="editForm.full_name"
+          label="Nombre completo"
+          disabled
+        />
+        <UiInput
+          :model-value="editForm.email"
+          label="Correo electronico"
+          disabled
+        />
+        <UiSelect
+          v-model="editForm.role"
+          label="Rol"
+          :options="roleOptions"
+        />
+      </div>
+      <template #footer>
+        <div class="modal-actions">
+          <UiButton variant="soft" size="sm" @click="showEditModal = false">Cancelar</UiButton>
+          <UiButton variant="primary-outline" size="sm" @click="saveEdit">Guardar</UiButton>
+        </div>
+      </template>
+    </UiModal>
 
     <!-- Invite Modal -->
     <UiModal v-model="showInviteModal" title="Invitar administrador" variant="center" :show-handle="false">
@@ -103,7 +128,15 @@
 definePageMeta({ layout: 'default' })
 
 const showInviteModal = ref(false)
+const showEditModal = ref(false)
 const search = ref('')
+const editingId = ref<string | null>(null)
+
+const editForm = reactive({
+  full_name: '',
+  email: '',
+  role: 'editor',
+})
 
 const inviteForm = reactive({
   email: '',
@@ -113,36 +146,25 @@ const inviteForm = reactive({
 
 const roles = [
   {
-    key: 'super_admin',
-    name: 'Super Administrador',
-    description: 'Control total del sistema. Puede gestionar roles, configuraciones y todos los recursos.',
-    count: 1,
-    variant: 'primary',
-    permissions: ['Gestion completa del sistema', 'Administracion de roles', 'Configuraciones globales', 'Eliminar datos'],
-  },
-  {
     key: 'admin',
     name: 'Administrador',
-    description: 'Puede gestionar contenido, usuarios y la mayoria de los recursos del sistema.',
-    count: 3,
-    variant: 'accent',
-    permissions: ['Gestionar contenido', 'Gestionar usuarios', 'Gestionar programas', 'Gestionar eventos y beneficios'],
+    description: 'Acceso completo al sistema incluyendo gestion de usuarios.',
+    count: 4,
+    variant: 'primary',
   },
   {
     key: 'editor',
     name: 'Editor',
-    description: 'Puede crear y editar contenido, programas y publicaciones de la comunidad.',
+    description: 'Puede crear y editar todo el contenido del sistema.',
     count: 5,
-    variant: 'info',
-    permissions: ['Crear y editar contenido', 'Gestionar programas', 'Publicar en comunidad', 'Ver estadisticas basicas'],
+    variant: 'accent',
   },
   {
-    key: 'viewer',
+    key: 'read_only',
     name: 'Solo lectura',
-    description: 'Acceso de solo lectura al panel de administracion para monitoreo y reportes.',
+    description: 'Acceso de solo lectura al panel de administracion.',
     count: 2,
     variant: 'default',
-    permissions: ['Ver dashboard', 'Ver contenido', 'Ver usuarios', 'Descargar reportes'],
   },
 ]
 
@@ -154,7 +176,7 @@ const columns = [
 ]
 
 const adminUsers = ref([
-  { id: 'adm-001', full_name: 'Ana Garcia', email: 'ana.garcia@tupotencial.app', role: 'super_admin', status: 'active', last_login: '2026-02-24T10:30:00' },
+  { id: 'adm-001', full_name: 'Ana Garcia', email: 'ana.garcia@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-24T10:30:00' },
   { id: 'adm-002', full_name: 'Carlos Lopez', email: 'carlos.lopez@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-24T09:15:00' },
   { id: 'adm-003', full_name: 'Maria Torres', email: 'maria.torres@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-23T16:00:00' },
   { id: 'adm-004', full_name: 'Luis Mendoza', email: 'luis.mendoza@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-22T14:30:00' },
@@ -163,8 +185,8 @@ const adminUsers = ref([
   { id: 'adm-007', full_name: 'Diana Salazar', email: 'diana.s@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-21T15:00:00' },
   { id: 'adm-008', full_name: 'Ricardo Perez', email: 'ricardo.p@tupotencial.app', role: 'editor', status: 'pending', last_login: null },
   { id: 'adm-009', full_name: 'Isabel Contreras', email: 'isabel.c@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-20T09:00:00' },
-  { id: 'adm-010', full_name: 'Eduardo Vargas', email: 'eduardo.v@tupotencial.app', role: 'viewer', status: 'active', last_login: '2026-02-24T07:30:00' },
-  { id: 'adm-011', full_name: 'Camila Rios', email: 'camila.r@tupotencial.app', role: 'viewer', status: 'active', last_login: '2026-02-19T13:00:00' },
+  { id: 'adm-010', full_name: 'Eduardo Vargas', email: 'eduardo.v@tupotencial.app', role: 'read_only', status: 'active', last_login: '2026-02-24T07:30:00' },
+  { id: 'adm-011', full_name: 'Camila Rios', email: 'camila.r@tupotencial.app', role: 'read_only', status: 'active', last_login: '2026-02-19T13:00:00' },
 ])
 
 const filteredAdmins = computed(() => {
@@ -176,16 +198,16 @@ const filteredAdmins = computed(() => {
 const roleOptions = [
   { value: 'admin', label: 'Administrador' },
   { value: 'editor', label: 'Editor' },
-  { value: 'viewer', label: 'Solo lectura' },
+  { value: 'read_only', label: 'Solo lectura' },
 ]
 
 function roleVariant(role: string) {
-  const map: Record<string, string> = { super_admin: 'primary', admin: 'accent', editor: 'info', viewer: 'default' }
+  const map: Record<string, string> = { admin: 'primary', editor: 'accent', read_only: 'default' }
   return (map[role] ?? 'default') as any
 }
 
 function roleLabel(role: string) {
-  const map: Record<string, string> = { super_admin: 'Super Admin', admin: 'Administrador', editor: 'Editor', viewer: 'Solo lectura' }
+  const map: Record<string, string> = { admin: 'Administrador', editor: 'Editor', read_only: 'Solo lectura' }
   return map[role] ?? role
 }
 
@@ -194,7 +216,17 @@ function formatDate(iso: string) {
 }
 
 function editAdmin(row: Record<string, any>) {
-  alert(`Editar rol de ${row.full_name} (mock)`)
+  editingId.value = row.id
+  editForm.full_name = row.full_name
+  editForm.email = row.email
+  editForm.role = row.role
+  showEditModal.value = true
+}
+
+function saveEdit() {
+  const user = adminUsers.value.find(u => u.id === editingId.value)
+  if (user) user.role = editForm.role
+  showEditModal.value = false
 }
 
 function sendInvite() {
@@ -215,7 +247,7 @@ function sendInvite() {
 }
 
 .role-card {
-  background: var(--color-surface);
+  background: var(--color-white);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
@@ -238,39 +270,6 @@ function sendInvite() {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   margin-bottom: var(--space-3);
-}
-
-.role-card__permissions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.role-card__list {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.role-card__list li {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  padding-left: var(--space-4);
-  position: relative;
-}
-
-.role-card__list li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: var(--color-success);
 }
 
 .section-title {

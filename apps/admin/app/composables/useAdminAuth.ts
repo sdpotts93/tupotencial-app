@@ -2,7 +2,7 @@ interface AdminUser {
   id: string
   email: string
   full_name: string
-  role: 'super_admin' | 'admin' | 'editor' | 'viewer'
+  role: 'admin' | 'editor' | 'read_only'
   avatar_url?: string
 }
 
@@ -23,7 +23,7 @@ export function useAdminAuth() {
           id: 'adm-001',
           email: 'admin@tupotencial.app',
           full_name: 'Ana Garcia',
-          role: 'super_admin',
+          role: 'admin',
           avatar_url: undefined,
         }
         isAuthenticated.value = true

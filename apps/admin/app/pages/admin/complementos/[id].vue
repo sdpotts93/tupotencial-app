@@ -99,13 +99,13 @@
           </div>
         </UiCard>
 
-        <UiCard variant="filled">
+        <!-- <UiCard variant="filled">
           <div class="form-section">
             <p class="meta-label">ID: {{ route.params.id }}</p>
             <p class="meta-label">Compras: {{ purchases }}</p>
             <p class="meta-label">Ingresos: ${{ (revenue / 100).toLocaleString('es-MX') }} MXN</p>
           </div>
-        </UiCard>
+        </UiCard> -->
       </div>
     </div>
 
