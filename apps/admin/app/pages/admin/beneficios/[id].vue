@@ -121,11 +121,18 @@ function handleDelete() {
   align-items: start;
 }
 
-.form-layout__main,
+.form-layout__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .form-layout__sidebar {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  position: sticky;
+  top: 0;
 }
 
 .form-section {
