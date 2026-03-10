@@ -21,13 +21,10 @@
           </UiInput>
         </template>
 
-        <template #cell-author_name="{ value, row }">
+        <template #cell-author="{ value }">
           <div class="author-cell">
-            <div class="author-cell__avatar">{{ value?.charAt(0) ?? 'A' }}</div>
-            <div>
-              <span class="author-cell__name">{{ value }}</span>
-              <span v-if="row.is_official" class="author-cell__badge eyebrow">Oficial</span>
-            </div>
+            <img :src="authorAvatar(value)" :alt="value" class="author-cell__avatar" />
+            <span class="author-cell__name">{{ value }}</span>
           </div>
         </template>
 
@@ -52,10 +49,16 @@
         </template>
 
         <template #actions="{ row }">
-          <UiButton variant="soft" size="sm" :to="`/admin/comunidad/${row.id}`">
-            <template #icon><Icon name="lucide:pencil" size="16" /></template>
-            Editar
-          </UiButton>
+          <div class="row-actions">
+            <UiButton variant="soft" size="sm" :to="`/admin/comunidad/${row.id}`">
+              <template #icon><Icon name="lucide:pencil" size="16" /></template>
+              Editar
+            </UiButton>
+            <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
+              <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+              Eliminar
+            </UiButton>
+          </div>
         </template>
       </UiDataTable>
     </div>
@@ -71,13 +74,12 @@ const activeTab = ref('all')
 
 const tabs = [
   { value: 'all', label: 'Todos' },
-  { value: 'official', label: 'Oficiales' },
-  { value: 'reported', label: 'Reportados' },
-  { value: 'hidden', label: 'Ocultos' },
+  { value: 'gabriel', label: 'Gabriel' },
+  { value: 'carlotta', label: 'Carlotta' },
 ]
 
 const columns = [
-  { key: 'author_name', label: 'Autor' },
+  { key: 'author', label: 'Autor' },
   { key: 'body', label: 'Contenido', width: '30%' },
   { key: 'likes_count', label: 'Likes' },
   { key: 'comments_count', label: 'Comentarios' },
@@ -86,33 +88,32 @@ const columns = [
 ]
 
 const rows = ref([
-  { id: 'post-001', author_name: 'Tu Potencial', is_official: true, body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar habitos saludables.', likes_count: 245, comments_count: 32, status: 'published', created_at: '2026-02-24T08:00:00' },
-  { id: 'post-002', author_name: 'Maria Lopez', is_official: false, body: 'Hoy complete el dia 15 del reto de meditacion! Me siento increible.', likes_count: 89, comments_count: 12, status: 'published', created_at: '2026-02-24T07:30:00' },
-  { id: 'post-003', author_name: 'Tu Potencial', is_official: true, body: 'Nuevo articulo disponible: "5 pasos para el bienestar emocional". Descubrelo en la seccion de contenido.', likes_count: 156, comments_count: 18, status: 'published', created_at: '2026-02-23T10:00:00' },
-  { id: 'post-004', author_name: 'Carlos Ramirez', is_official: false, body: 'Alguien tiene tips para dormir mejor? He estado batallando con el insomnio.', likes_count: 34, comments_count: 28, status: 'published', created_at: '2026-02-23T22:15:00' },
-  { id: 'post-005', author_name: 'Ana Gutierrez', is_official: false, body: 'Contenido que incumple los lineamientos de la comunidad...', likes_count: 2, comments_count: 0, status: 'reported', created_at: '2026-02-22T14:00:00' },
-  { id: 'post-006', author_name: 'Roberto Diaz', is_official: false, body: 'Publicacion oculta por moderacion.', likes_count: 0, comments_count: 0, status: 'hidden', created_at: '2026-02-21T11:00:00' },
+  { id: 'post-001', author: 'Gabriel', body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar habitos saludables.', likes_count: 245, comments_count: 32, status: 'published', created_at: '2026-02-24T08:00:00' },
+  { id: 'post-002', author: 'Carlotta', body: 'Nuevo reto: 7 dias de gratitud. Inscribete desde la seccion de Retos!', likes_count: 156, comments_count: 18, status: 'published', created_at: '2026-02-23T10:00:00' },
+  { id: 'post-003', author: 'Gabriel', body: 'Nuevo articulo disponible: "5 pasos para el bienestar emocional". Descubrelo en la seccion de contenido.', likes_count: 89, comments_count: 12, status: 'published', created_at: '2026-02-22T14:00:00' },
+  { id: 'post-004', author: 'Carlotta', body: 'Esta semana les compartimos una meditacion guiada especial para la gratitud. Disponible en la biblioteca.', likes_count: 134, comments_count: 21, status: 'published', created_at: '2026-02-21T09:00:00' },
+  { id: 'post-005', author: 'Gabriel', body: 'Tip de la semana: Intenta hacer 3 respiraciones profundas antes de cada comida. Notaras la diferencia.', likes_count: 67, comments_count: 8, status: 'draft', created_at: '2026-02-20T16:00:00' },
+  { id: 'post-006', author: 'Carlotta', body: 'Publicacion oculta por revision.', likes_count: 0, comments_count: 0, status: 'hidden', created_at: '2026-02-19T11:00:00' },
 ])
 
 const filteredRows = computed(() => {
   let result = rows.value
-  if (activeTab.value === 'official') result = result.filter(r => r.is_official)
-  else if (activeTab.value === 'reported') result = result.filter(r => r.status === 'reported')
-  else if (activeTab.value === 'hidden') result = result.filter(r => r.status === 'hidden')
+  if (activeTab.value === 'gabriel') result = result.filter(r => r.author === 'Gabriel')
+  else if (activeTab.value === 'carlotta') result = result.filter(r => r.author === 'Carlotta')
   if (search.value) {
     const q = search.value.toLowerCase()
-    result = result.filter(r => r.author_name.toLowerCase().includes(q) || r.body.toLowerCase().includes(q))
+    result = result.filter(r => r.author.toLowerCase().includes(q) || r.body.toLowerCase().includes(q))
   }
   return result
 })
 
 function statusVariant(status: string) {
-  const map: Record<string, string> = { published: 'success', reported: 'danger', hidden: 'default', draft: 'warning' }
+  const map: Record<string, string> = { published: 'success', hidden: 'default', draft: 'warning' }
   return (map[status] ?? 'default') as any
 }
 
 function statusLabel(status: string) {
-  const map: Record<string, string> = { published: 'Publicado', reported: 'Reportado', hidden: 'Oculto', draft: 'Borrador' }
+  const map: Record<string, string> = { published: 'Publicado', hidden: 'Oculto', draft: 'Borrador' }
   return map[status] ?? status
 }
 
@@ -122,6 +123,16 @@ function formatDate(iso: string) {
 
 function goToEdit(row: Record<string, any>) {
   router.push(`/admin/comunidad/${row.id}`)
+}
+
+function authorAvatar(name: string) {
+  return name === 'Carlotta' ? '/images/carlotta.png' : '/images/gabriel.png'
+}
+
+function handleDelete(row: Record<string, any>) {
+  if (confirm(`Seguro que deseas eliminar esta publicacion de ${row.author}?`)) {
+    rows.value = rows.value.filter(r => r.id !== row.id)
+  }
 }
 </script>
 
@@ -134,6 +145,11 @@ function goToEdit(row: Record<string, any>) {
   flex-direction: column;
 }
 
+.row-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
 .author-cell {
   display: flex;
   align-items: center;
@@ -144,24 +160,12 @@ function goToEdit(row: Record<string, any>) {
   width: 32px;
   height: 32px;
   border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-primary-contrast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+  object-fit: cover;
   flex-shrink: 0;
 }
 
 .author-cell__name {
   font-weight: var(--weight-medium);
-  display: block;
   font-size: var(--text-sm);
-}
-
-.author-cell__badge {
-  font-size: var(--eyebrow-sm);
-  color: var(--color-primary);
 }
 </style>
