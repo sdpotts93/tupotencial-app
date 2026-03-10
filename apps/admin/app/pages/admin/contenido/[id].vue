@@ -113,9 +113,9 @@
 
             <UiSelect
               v-model="form.segment"
-              label="Segmento"
+              label="Plan"
               :options="segmentOptions"
-              placeholder="Selecciona el segmento"
+              placeholder="Selecciona el plan"
             />
 
             <UiSelect
@@ -183,7 +183,7 @@ const typeOptions = [
 
 const segmentOptions = [
   { value: 'free', label: 'Gratuito' },
-  { value: 'core', label: 'Core' },
+  { value: 'core', label: 'CORE' },
 ]
 
 const categoryOptions = [

@@ -43,6 +43,11 @@
     margin: var(--space-6) calc(var(--space-8) * -1) calc(var(--space-6) * -1);
     background: var(--color-white);
   }
+
+  .page-actions .btn.btn--sm {
+    font-size: var(--btn-font-size);
+    padding: var(--btn-py) var(--btn-px);
+  }
 }
 
 /* ---- Page fill layout (table pages that shouldn't scroll the body) ---- */
