@@ -91,13 +91,13 @@
               />
             </div>
           </UiCard>
-          <UiCard variant="filled">
+          <!-- <UiCard variant="filled">
             <div class="form-section">
               <p class="meta-label">Inscritos: 3,420</p>
               <p class="meta-label">Completados: 1,847</p>
               <p class="meta-label">Tasa de finalizacion: 54%</p>
             </div>
-          </UiCard>
+          </UiCard> -->
         </div>
       </div>
     </div>

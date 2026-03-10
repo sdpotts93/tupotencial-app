@@ -93,6 +93,7 @@ const pageTitle = computed(() => {
   if (path.startsWith('/admin/contenido')) return 'Biblioteca'
   if (path.startsWith('/admin/categorias')) return 'Categorías'
   if (path.startsWith('/admin/programas')) return 'Programas'
+  if (path.startsWith('/admin/formularios')) return 'Formularios'
   if (path.startsWith('/admin/hoy')) return 'Hoy'
   if (path.startsWith('/admin/comunidad')) return 'Comunidad'
   if (path.startsWith('/admin/eventos')) return 'Eventos'
@@ -135,6 +136,11 @@ const navItems: NavItem[] = [
     label: 'Programas',
     to: '/admin/programas',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+  },
+  {
+    label: 'Formularios',
+    to: '/admin/formularios',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
   },
   {
     label: 'Hoy',
