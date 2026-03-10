@@ -172,7 +172,7 @@ const typeOptions = [
 
 const segmentOptions = [
   { value: 'free', label: 'Gratuito' },
-  { value: 'core', label: 'CORE' },
+  { value: 'core', label: 'Core' },
 ]
 
 const categoryOptions = [

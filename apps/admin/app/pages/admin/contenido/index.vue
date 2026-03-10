@@ -96,7 +96,7 @@ const typeOptions = [
 const segmentOptions = [
   { value: '', label: 'Todos los planes' },
   { value: 'free', label: 'Gratuito' },
-  { value: 'core', label: 'CORE' },
+  { value: 'core', label: 'Core' },
 ]
 
 const categoryFilterOptions = [
@@ -158,7 +158,7 @@ function typeLabel(type: string) {
 }
 
 function segmentLabel(segment: string) {
-  const map: Record<string, string> = { free: 'Gratuito', core: 'CORE' }
+  const map: Record<string, string> = { free: 'Gratuito', core: 'Core' }
   return map[segment] ?? segment
 }
 
