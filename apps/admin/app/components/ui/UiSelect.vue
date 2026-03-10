@@ -70,6 +70,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   padding: var(--space-3) var(--space-9) var(--space-3) var(--space-4);
   font-family: var(--font-body);
   font-size: var(--text-md);
+  height: 43px;
   color: var(--color-text);
   cursor: pointer;
   transition: border-color var(--transition-fast);

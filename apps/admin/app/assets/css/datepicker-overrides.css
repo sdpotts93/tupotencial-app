@@ -15,8 +15,7 @@
   padding-left: 2.5rem;
   box-shadow: 0px 0px 2px var(--color-input-shadow);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  height: auto;
-  line-height: var(--leading-normal);
+  height: 43px;
 }
 
 .dp__input_wrap .dp__input::placeholder {

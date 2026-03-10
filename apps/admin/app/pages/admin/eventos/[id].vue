@@ -99,15 +99,6 @@
           </div>
         </UiCard>
 
-        <UiCard variant="filled">
-          <div class="form-section">
-            <p class="meta-label">ID: {{ route.params.id }}</p>
-            <p class="meta-label">Registrados: 234</p>
-            <p class="meta-label">Asistentes: 198</p>
-            <p class="meta-label">Tasa de asistencia: 84.6%</p>
-          </div>
-        </UiCard>
-
         <UiCard v-if="isPastEvent" variant="outlined">
           <div class="form-section">
             <p class="eyebrow">Grabacion</p>
