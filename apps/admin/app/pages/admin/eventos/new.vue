@@ -21,50 +21,67 @@
               :rows="5"
             />
 
-            <UiInput
-              v-model="form.cover_url"
-              label="URL de portada"
-              placeholder="https://ejemplo.com/portada.jpg"
-            />
-
-            <UiInput
-              v-model="form.location"
-              label="Ubicacion / URL de sesion"
-              placeholder="Zoom link o direccion fisica"
-            />
+            <!-- Image upload -->
+            <div class="upload">
+              <label class="upload__label">Imagen de portada</label>
+              <div
+                class="upload__dropzone"
+                :class="{ 'upload__dropzone--active': isDragging }"
+                @dragover.prevent="isDragging = true"
+                @dragleave="isDragging = false"
+                @drop.prevent="handleDrop"
+                @click="triggerFileInput"
+              >
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/*"
+                  class="upload__input"
+                  @change="handleFileChange"
+                />
+                <template v-if="!coverFile">
+                  <div class="upload__icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <p class="upload__text">Arrastra tu imagen aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
+                </template>
+                <template v-else>
+                  <div class="upload__preview">
+                    <p class="upload__filename">{{ coverFile.name }}</p>
+                    <p class="upload__filesize">{{ formatFileSize(coverFile.size) }}</p>
+                    <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
+                  </div>
+                </template>
+              </div>
+            </div>
 
             <div class="form-row">
-              <UiInput
+              <UiDatePicker
                 v-model="form.starts_at"
-                label="Fecha y hora de inicio"
-                type="datetime-local"
+                label="Fecha y hora"
+                :enable-time="true"
+                placeholder="Selecciona fecha y hora"
               />
-              <UiInput
-                v-model="form.ends_at"
-                label="Fecha y hora de fin"
-                type="datetime-local"
+              <UiSelect
+                v-model="form.duration"
+                label="Duracion"
+                :options="durationOptions"
+                placeholder="Selecciona duracion"
               />
             </div>
 
-            <UiInput
-              v-model="form.host_name"
-              label="Nombre del anfitrion"
-              placeholder="Nombre del facilitador o ponente"
-            />
+            <div class="form-divider" />
+
+            <p class="eyebrow">Vimeo</p>
 
             <UiInput
-              v-model="form.max_capacity"
-              label="Capacidad maxima"
-              type="number"
-              placeholder="100"
-              hint="Dejar vacio para sin limite"
-            />
-
-            <UiInput
-              v-model="form.vimeo_url"
-              label="URL de Vimeo (grabacion)"
-              placeholder="https://vimeo.com/..."
-              hint="URL del video en Vimeo para la grabacion del evento"
+              v-model="form.vimeo_live_event_id"
+              label="Vimeo Live Event ID"
+              placeholder="1234567"
+              hint="ID del evento en vivo. Ir a Vimeo > Crear > Evento en vivo. Copiar ID de la URL (ej: vimeo.com/event/1234567). Requiere Vimeo Premium."
             />
           </div>
         </UiCard>
@@ -74,27 +91,16 @@
         <UiCard variant="outlined">
           <div class="form-section">
             <UiSelect
-              v-model="form.event_type"
-              label="Tipo de evento"
-              :options="typeOptions"
+              v-model="form.plan"
+              label="Plan"
+              :options="planOptions"
             />
 
             <UiSelect
-              v-model="form.modality"
-              label="Modalidad"
-              :options="modalityOptions"
-            />
-
-            <UiSelect
-              v-model="form.segment"
-              label="Segmento de comunidad"
-              :options="segmentOptions"
-            />
-
-            <UiSelect
-              v-model="form.requires_subscription"
-              label="Requiere suscripcion"
-              :options="gatingOptions"
+              v-model="form.entitlement_key"
+              label="Complemento requerido"
+              :options="entitlementOptions"
+              placeholder="Sin restriccion"
             />
 
             <UiSelect
@@ -102,6 +108,19 @@
               label="Estado"
               :options="statusOptions"
             />
+          </div>
+        </UiCard>
+
+        <UiCard variant="filled">
+          <div class="form-section">
+            <p class="eyebrow">Configuracion de Vimeo</p>
+            <p class="meta-text">
+              Para eventos en vivo necesitas <strong>Vimeo Premium</strong>. Crea un evento en vivo en Vimeo con privacidad "No listado" — la app controla el acceso mediante complementos.
+            </p>
+            <p v-if="form.vimeo_live_event_id" class="meta-text">
+              URL de embed en vivo:<br>
+              <code class="embed-url">https://vimeo.com/event/{{ form.vimeo_live_event_id }}/embed</code>
+            </p>
           </div>
         </UiCard>
       </div>
@@ -117,45 +136,75 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+// ── Image upload ──
+const fileInput = ref<HTMLInputElement | null>(null)
+const coverFile = ref<File | null>(null)
+const isDragging = ref(false)
+
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
+function handleFileChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  if (target.files?.[0]) coverFile.value = target.files[0]
+}
+
+function handleDrop(e: DragEvent) {
+  isDragging.value = false
+  if (e.dataTransfer?.files?.[0]) coverFile.value = e.dataTransfer.files[0]
+}
+
+function removeCover() {
+  coverFile.value = null
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+// ── Form state ──
 const form = reactive({
   title: '',
   description: '',
-  cover_url: '',
-  location: '',
-  starts_at: '',
-  ends_at: '',
-  host_name: '',
-  max_capacity: '',
-  vimeo_url: '',
-  event_type: 'workshop',
-  modality: 'online',
-  segment: 'conjunta',
-  requires_subscription: 'no',
+  starts_at: null as Date | null,
+  duration: '',
+  vimeo_live_event_id: '',
+  plan: 'free',
+  entitlement_key: '',
   status: 'draft',
 })
 
-const typeOptions = [
-  { value: 'workshop', label: 'Taller' },
-  { value: 'class', label: 'Clase' },
-  { value: 'conference', label: 'Conferencia' },
-  { value: 'retreat', label: 'Retiro' },
+const durationOptions = [
+  { value: '15', label: '15 min' },
+  { value: '30', label: '30 min' },
+  { value: '45', label: '45 min' },
+  { value: '60', label: '1 hora' },
+  { value: '75', label: '1 hora 15 min' },
+  { value: '90', label: '1 hora 30 min' },
+  { value: '105', label: '1 hora 45 min' },
+  { value: '120', label: '2 horas' },
+  { value: '135', label: '2 horas 15 min' },
+  { value: '150', label: '2 horas 30 min' },
+  { value: '165', label: '2 horas 45 min' },
+  { value: '180', label: '3 horas' },
 ]
 
-const modalityOptions = [
-  { value: 'online', label: 'En linea' },
-  { value: 'presential', label: 'Presencial' },
-  { value: 'hybrid', label: 'Hibrido' },
+const planOptions = [
+  { value: 'free', label: 'Gratuito' },
+  { value: 'core', label: 'Core' },
 ]
 
-const segmentOptions = [
-  { value: 'conjunta', label: 'Todos (Conjunta)' },
-  { value: 'gabriel', label: 'Gabriel' },
-  { value: 'carlotta', label: 'Carlotta' },
-]
-
-const gatingOptions = [
-  { value: 'no', label: 'No (acceso libre)' },
-  { value: 'yes', label: 'Si (solo suscriptores)' },
+const entitlementOptions = [
+  { value: '', label: 'Sin restriccion (abierto)' },
+  { value: 'vip', label: 'VIP' },
+  { value: 'mentoria_grupal', label: 'Mentoria grupal' },
+  { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
+  { value: 'coaching_1on1', label: 'Coaching 1:1' },
+  { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
 ]
 
 const statusOptions = [
@@ -202,6 +251,122 @@ function handleSave() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
+}
+
+.form-divider {
+  border-top: 1px solid var(--color-border-light);
+  margin: var(--space-2) 0;
+}
+
+.eyebrow {
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.meta-text {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: var(--leading-relaxed);
+}
+
+.embed-url {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  background: rgba(var(--tint-rgb), 0.04);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+}
+
+/* ─── Upload ─── */
+.upload__label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.upload__dropzone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.upload__dropzone:hover {
+  border-color: var(--color-muted);
+}
+
+.upload__dropzone--active {
+  border-color: var(--color-tint);
+  background: rgba(var(--tint-rgb), 0.04);
+}
+
+.upload__input {
+  display: none;
+}
+
+.upload__icon {
+  color: var(--color-muted);
+  margin-bottom: var(--space-3);
+}
+
+.upload__text {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-bottom: var(--space-1);
+}
+
+.upload__link {
+  color: var(--color-tint);
+  font-weight: var(--weight-medium);
+}
+
+.upload__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  opacity: 0.7;
+}
+
+.upload__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.upload__filename {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  word-break: break-all;
+}
+
+.upload__filesize {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.upload__remove {
+  font-size: var(--text-xs);
+  color: var(--color-danger, #dc2626);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  margin-top: var(--space-1);
+  border-radius: var(--radius-sm);
+}
+
+.upload__remove:hover {
+  background: rgba(220, 38, 38, 0.06);
 }
 
 @media (max-width: 768px) {

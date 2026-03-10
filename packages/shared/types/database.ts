@@ -31,6 +31,8 @@ export type CommentStatus = 'published' | 'hidden';
 
 export type EventStatus = 'draft' | 'published' | 'hidden';
 
+export type EventPlan = 'free' | 'core';
+
 export type BenefitStatus = 'draft' | 'published' | 'hidden';
 
 export type AddonStatus = 'active' | 'inactive';
@@ -217,12 +219,19 @@ export interface Event {
   description: string | null;
   start_at: string;
   end_at: string | null;
+  duration: string | null;
   community_segment: CommunitySegment | null;
   requires_subscription: boolean;
+  entitlement_key: string | null;
+  plan: EventPlan;
+  cover_url: string | null;
   vimeo_url: string | null;
   vimeo_id: string | null;
+  vimeo_live_event_id: string | null;
+  recording_content_item_id: string | null;
   status: EventStatus;
   created_at: string;
+  updated_at: string | null;
 }
 
 export interface Benefit {

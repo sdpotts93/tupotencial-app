@@ -31,6 +31,7 @@ export default defineNuxtConfig({
     '~/assets/css/global.css',
     '~/assets/css/transitions.css',
     '~/assets/css/admin.css',
+    '~/assets/css/datepicker-overrides.css',
   ],
 
   modules: ['@nuxt/icon'],

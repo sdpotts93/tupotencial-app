@@ -21,16 +21,17 @@
           </UiInput>
         </template>
 
-        <template #cell-event_type="{ value }">
-          <UiTag :variant="typeVariant(value)">{{ typeLabel(value) }}</UiTag>
-        </template>
-
         <template #cell-starts_at="{ value }">
           {{ formatDateTime(value) }}
         </template>
 
-        <template #cell-modality="{ value }">
-          {{ modalityLabel(value) }}
+        <template #cell-plan="{ value }">
+          <UiTag :variant="value === 'core' ? 'gold' : 'default'">{{ value === 'core' ? 'Core' : 'Gratuito' }}</UiTag>
+        </template>
+
+        <template #cell-entitlement_key="{ value }">
+          <UiTag v-if="value" variant="accent">{{ entitlementLabels[value] ?? value }}</UiTag>
+          <span v-else style="color: var(--color-muted);">—</span>
         </template>
 
         <template #cell-registered_count="{ value }">
@@ -39,6 +40,11 @@
 
         <template #cell-status="{ value }">
           <UiTag :variant="statusVariant(value)">{{ statusLabel(value) }}</UiTag>
+        </template>
+
+        <template #cell-recording_content_item_id="{ value }">
+          <UiTag v-if="value" variant="success">Grabacion</UiTag>
+          <span v-else style="color: var(--color-muted);">—</span>
         </template>
 
         <template #actions="{ row }">
@@ -66,22 +72,31 @@ const tabs = [
 ]
 
 const columns = [
-  { key: 'title', label: 'Evento', width: '28%' },
-  { key: 'event_type', label: 'Tipo' },
+  { key: 'title', label: 'Evento', width: '24%' },
   { key: 'starts_at', label: 'Fecha y hora' },
-  { key: 'modality', label: 'Modalidad' },
+  { key: 'plan', label: 'Plan' },
+  { key: 'entitlement_key', label: 'Complemento' },
   { key: 'registered_count', label: 'Registrados' },
   { key: 'status', label: 'Estado' },
 ]
 
 const rows = ref([
-  { id: 'evt-001', title: 'Taller de mindfulness para principiantes', event_type: 'workshop', starts_at: '2026-03-05T18:00:00', modality: 'online', registered_count: 234, status: 'published', is_upcoming: true },
-  { id: 'evt-002', title: 'Clase de yoga restaurativa', event_type: 'class', starts_at: '2026-03-08T10:00:00', modality: 'online', registered_count: 156, status: 'published', is_upcoming: true },
-  { id: 'evt-003', title: 'Conferencia: Nutricion y bienestar', event_type: 'conference', starts_at: '2026-03-15T17:00:00', modality: 'hybrid', registered_count: 89, status: 'published', is_upcoming: true },
-  { id: 'evt-004', title: 'Retiro de fin de semana', event_type: 'retreat', starts_at: '2026-03-22T09:00:00', modality: 'presential', registered_count: 42, status: 'published', is_upcoming: true },
-  { id: 'evt-005', title: 'Mesa redonda: Salud mental en el trabajo', event_type: 'conference', starts_at: '2026-02-20T16:00:00', modality: 'online', registered_count: 312, status: 'published', is_upcoming: false },
-  { id: 'evt-006', title: 'Taller de cocina saludable', event_type: 'workshop', starts_at: '2026-04-01T11:00:00', modality: 'online', registered_count: 0, status: 'draft', is_upcoming: true },
+  { id: 'evt-001', title: 'Taller de mindfulness para principiantes', starts_at: '2026-03-05T18:00:00', plan: 'core', registered_count: 234, status: 'published', is_upcoming: true, entitlement_key: null as string | null, recording_content_item_id: null as string | null },
+  { id: 'evt-002', title: 'Clase de yoga restaurativa', starts_at: '2026-03-08T10:00:00', plan: 'core', registered_count: 156, status: 'published', is_upcoming: true, entitlement_key: 'vip' as string | null, recording_content_item_id: null as string | null },
+  { id: 'evt-003', title: 'Conferencia: Nutricion y bienestar', starts_at: '2026-03-15T17:00:00', plan: 'free', registered_count: 89, status: 'published', is_upcoming: true, entitlement_key: null as string | null, recording_content_item_id: null as string | null },
+  { id: 'evt-004', title: 'Retiro de fin de semana', starts_at: '2026-03-22T09:00:00', plan: 'core', registered_count: 42, status: 'published', is_upcoming: true, entitlement_key: 'retiro_marzo_2026' as string | null, recording_content_item_id: null as string | null },
+  { id: 'evt-005', title: 'Mesa redonda: Salud mental en el trabajo', starts_at: '2026-02-20T16:00:00', plan: 'free', registered_count: 312, status: 'published', is_upcoming: false, entitlement_key: null as string | null, recording_content_item_id: 'cnt-010' as string | null },
+  { id: 'evt-006', title: 'Taller de cocina saludable', starts_at: '2026-04-01T11:00:00', plan: 'free', registered_count: 0, status: 'draft', is_upcoming: true, entitlement_key: null as string | null, recording_content_item_id: null as string | null },
+  { id: 'evt-007', title: 'Masterclass de liderazgo consciente', starts_at: '2026-02-10T17:00:00', plan: 'core', registered_count: 189, status: 'published', is_upcoming: false, entitlement_key: 'bootcamp_liderazgo' as string | null, recording_content_item_id: null as string | null },
 ])
+
+const entitlementLabels: Record<string, string> = {
+  vip: 'VIP',
+  mentoria_grupal: 'Mentoria grupal',
+  bootcamp_liderazgo: 'Bootcamp: Liderazgo',
+  coaching_1on1: 'Coaching 1:1',
+  retiro_marzo_2026: 'Retiro marzo 2026',
+}
 
 const filteredRows = computed(() => {
   let result = rows.value
@@ -94,21 +109,6 @@ const filteredRows = computed(() => {
   }
   return result
 })
-
-function typeVariant(type: string) {
-  const map: Record<string, string> = { workshop: 'warning', class: 'info', conference: 'accent', retreat: 'success' }
-  return (map[type] ?? 'default') as any
-}
-
-function typeLabel(type: string) {
-  const map: Record<string, string> = { workshop: 'Taller', class: 'Clase', conference: 'Conferencia', retreat: 'Retiro' }
-  return map[type] ?? type
-}
-
-function modalityLabel(modality: string) {
-  const map: Record<string, string> = { online: 'En linea', presential: 'Presencial', hybrid: 'Hibrido' }
-  return map[modality] ?? modality
-}
 
 function statusVariant(status: string) {
   const map: Record<string, string> = { published: 'success', draft: 'warning', cancelled: 'danger' }
