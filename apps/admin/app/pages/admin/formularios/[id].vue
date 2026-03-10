@@ -99,14 +99,13 @@ const route = useRoute()
 const form = reactive({
   title: 'Evaluacion inicial de bienestar',
   description: 'Formulario para evaluar el estado de bienestar del usuario al iniciar un programa. Incluye preguntas sobre habitos, estado emocional y objetivos.',
-  status: 'published',
+  status: 'active',
 })
 
 // ── Options ──
 const statusOptions = [
-  { value: 'draft', label: 'Borrador' },
-  { value: 'published', label: 'Publicado' },
-  { value: 'archived', label: 'Archivado' },
+  { value: 'active', label: 'Activo' },
+  { value: 'inactive', label: 'Inactivo' },
 ]
 
 const fieldTypeOptions = [

@@ -92,14 +92,13 @@ definePageMeta({ layout: 'default' })
 const form = reactive({
   title: '',
   description: '',
-  status: 'draft',
+  status: 'active',
 })
 
 // ── Options ──
 const statusOptions = [
-  { value: 'draft', label: 'Borrador' },
-  { value: 'published', label: 'Publicado' },
-  { value: 'archived', label: 'Archivado' },
+  { value: 'active', label: 'Activo' },
+  { value: 'inactive', label: 'Inactivo' },
 ]
 
 const fieldTypeOptions = [

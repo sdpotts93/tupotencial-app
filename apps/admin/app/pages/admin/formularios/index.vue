@@ -59,9 +59,8 @@ const filterStatus = ref('')
 
 const statusOptions = [
   { value: '', label: 'Todos los estados' },
-  { value: 'draft', label: 'Borrador' },
-  { value: 'published', label: 'Publicado' },
-  { value: 'archived', label: 'Archivado' },
+  { value: 'active', label: 'Activo' },
+  { value: 'inactive', label: 'Inactivo' },
 ]
 
 const columns = [
@@ -72,11 +71,11 @@ const columns = [
 ]
 
 const rows = ref([
-  { id: 'frm-001', title: 'Evaluacion inicial de bienestar', fields_count: 5, status: 'published', created_at: '2026-02-20T08:00:00' },
-  { id: 'frm-002', title: 'Check-in semanal', fields_count: 3, status: 'published', created_at: '2026-02-15T10:00:00' },
-  { id: 'frm-003', title: 'Encuesta de satisfaccion del programa', fields_count: 4, status: 'draft', created_at: '2026-03-01T12:00:00' },
-  { id: 'frm-004', title: 'Registro de habitos diarios', fields_count: 6, status: 'published', created_at: '2026-01-28T09:00:00' },
-  { id: 'frm-005', title: 'Evaluacion de progreso mensual', fields_count: 4, status: 'archived', created_at: '2026-01-10T08:00:00' },
+  { id: 'frm-001', title: 'Evaluacion inicial de bienestar', fields_count: 5, status: 'active', created_at: '2026-02-20T08:00:00' },
+  { id: 'frm-002', title: 'Check-in semanal', fields_count: 3, status: 'active', created_at: '2026-02-15T10:00:00' },
+  { id: 'frm-003', title: 'Encuesta de satisfaccion del programa', fields_count: 4, status: 'inactive', created_at: '2026-03-01T12:00:00' },
+  { id: 'frm-004', title: 'Registro de habitos diarios', fields_count: 6, status: 'active', created_at: '2026-01-28T09:00:00' },
+  { id: 'frm-005', title: 'Evaluacion de progreso mensual', fields_count: 4, status: 'inactive', created_at: '2026-01-10T08:00:00' },
 ])
 
 const filteredRows = computed(() => {
@@ -91,12 +90,12 @@ const filteredRows = computed(() => {
 })
 
 function statusVariant(status: string) {
-  const map: Record<string, string> = { published: 'success', draft: 'warning', archived: 'default' }
+  const map: Record<string, string> = { active: 'success', inactive: 'default' }
   return (map[status] ?? 'default') as any
 }
 
 function statusLabel(status: string) {
-  const map: Record<string, string> = { published: 'Publicado', draft: 'Borrador', archived: 'Archivado' }
+  const map: Record<string, string> = { active: 'Activo', inactive: 'Inactivo' }
   return map[status] ?? status
 }
 
