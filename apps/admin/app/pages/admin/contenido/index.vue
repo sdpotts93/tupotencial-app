@@ -47,7 +47,7 @@
       </template>
 
       <template #cell-segment="{ value }">
-        {{ segmentLabel(value) }}
+        <UiTag :variant="value === 'core' ? 'gold' : 'default'">{{ value === 'core' ? 'Core' : 'Gratuito' }}</UiTag>
       </template>
 
       <template #cell-published_at="{ value }">
@@ -155,11 +155,6 @@ function statusLabel(status: string) {
 function typeLabel(type: string) {
   const map: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Articulo' }
   return map[type] ?? type
-}
-
-function segmentLabel(segment: string) {
-  const map: Record<string, string> = { free: 'Gratuito', core: 'Core' }
-  return map[segment] ?? segment
 }
 
 function formatDate(iso: string) {

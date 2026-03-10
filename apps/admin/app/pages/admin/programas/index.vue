@@ -37,6 +37,10 @@
         <UiTag :variant="typeVariant(value)">{{ typeLabel(value) }}</UiTag>
       </template>
 
+      <template #cell-plan="{ value }">
+        <UiTag :variant="value === 'core' ? 'gold' : 'default'">{{ value === 'core' ? 'Core' : 'Gratuito' }}</UiTag>
+      </template>
+
       <template #cell-status="{ value }">
         <UiTag :variant="statusVariant(value)">{{ statusLabel(value) }}</UiTag>
       </template>
@@ -49,6 +53,10 @@
         <UiButton variant="soft" size="sm" :to="`/admin/programas/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
+        </UiButton>
+        <UiButton variant="soft" size="sm" @click.stop="handleDuplicate(row as typeof rows[number])">
+          <template #icon><Icon name="lucide:copy" size="16" /></template>
+          Duplicar
         </UiButton>
         <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
           <template #icon><Icon name="lucide:trash-2" size="16" /></template>
@@ -92,6 +100,7 @@ const planFilterOptions = [
 const columns = [
   { key: 'title', label: 'Titulo', width: '30%' },
   { key: 'program_type', label: 'Tipo' },
+  { key: 'plan', label: 'Plan' },
   { key: 'status', label: 'Estado' },
   { key: 'enrolled_count', label: 'Inscritos' },
 ]
@@ -137,6 +146,16 @@ function statusVariant(status: string) {
 function statusLabel(status: string) {
   const map: Record<string, string> = { published: 'Publicado', draft: 'Borrador', archived: 'Archivado' }
   return map[status] ?? status
+}
+
+function handleDuplicate(row: typeof rows.value[number]) {
+  rows.value.push({
+    ...row,
+    id: `prg-${Date.now()}`,
+    title: `${row.title} (copia)`,
+    status: 'draft',
+    enrolled_count: 0,
+  })
 }
 
 function handleDelete(row: Record<string, any>) {

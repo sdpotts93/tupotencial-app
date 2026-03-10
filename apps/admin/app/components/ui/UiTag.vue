@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 interface Props {
-  variant?: 'default' | 'primary' | 'accent' | 'success' | 'warning' | 'danger' | 'info'
+  variant?: 'default' | 'primary' | 'accent' | 'gold' | 'success' | 'warning' | 'danger' | 'info'
   size?: 'sm' | 'md'
 }
 
@@ -34,6 +34,7 @@ withDefaults(defineProps<Props>(), {
 .tag--default { background: var(--color-surface-alt); border: 1px solid var(--color-text-secondary); color: var(--color-text-secondary); }
 .tag--primary { background: #E2E8F0; color: #1A202C; }
 .tag--accent { background: var(--color-accent-bg); color: var(--color-accent-contrast); }
+.tag--gold { background: rgba(212, 175, 55, 0.15); color: #9c8742; }
 .tag--success { background: #C6F6D5; color: #22543D; }
 .tag--warning { background: #FBD38D; color: #744210; }
 .tag--danger { background: var(--color-danger-light); color: var(--color-danger); }
