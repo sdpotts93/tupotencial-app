@@ -21,7 +21,14 @@
               :rows="3"
             />
 
+            <UiEditor
+              v-if="form.content_type === 'article'"
+              v-model="form.body"
+              label="Contenido del articulo"
+              placeholder="Escribe el contenido del articulo aqui..."
+            />
             <UiTextarea
+              v-else
               v-model="form.body"
               label="Texto"
               placeholder="Escribe el contenido aqui..."
@@ -167,7 +174,7 @@ const form = reactive({
 const typeOptions = [
   { value: 'video', label: 'Video' },
   { value: 'audio', label: 'Audio' },
-  { value: 'image', label: 'Imagen' },
+  { value: 'article', label: 'Articulo' },
 ]
 
 const segmentOptions = [
@@ -205,7 +212,7 @@ const uploadLabel = computed(() => {
   const labels: Record<string, string> = {
     video: 'Subir video',
     audio: 'Subir audio',
-    image: 'Subir imagen',
+    article: 'Imagen del articulo',
   }
   return labels[form.content_type] || 'Subir archivo'
 })
@@ -214,7 +221,7 @@ const acceptType = computed(() => {
   const types: Record<string, string> = {
     video: 'video/*',
     audio: 'audio/*',
-    image: 'image/*',
+    article: 'image/*',
   }
   return types[form.content_type] || '*/*'
 })
@@ -223,7 +230,7 @@ const acceptHint = computed(() => {
   const hints: Record<string, string> = {
     video: 'MP4, MOV, WebM — max 500 MB',
     audio: 'MP3, WAV, M4A — max 100 MB',
-    image: 'JPG, PNG, WebP — max 10 MB',
+    article: 'JPG, PNG, WebP — max 10 MB',
   }
   return hints[form.content_type] || ''
 })

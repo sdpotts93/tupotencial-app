@@ -90,7 +90,7 @@ const typeOptions = [
   { value: '', label: 'Todos los tipos' },
   { value: 'video', label: 'Video' },
   { value: 'audio', label: 'Audio' },
-  { value: 'image', label: 'Imagen' },
+  { value: 'article', label: 'Articulo' },
 ]
 
 const segmentOptions = [
@@ -120,12 +120,12 @@ const columns = [
 const rows = ref([
   { id: 'cnt-001', title: '5 pasos para el bienestar emocional', content_type: 'video', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-20T08:00:00' },
   { id: 'cnt-002', title: 'Meditacion guiada para la manana', content_type: 'audio', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-18T06:00:00' },
-  { id: 'cnt-003', title: 'Nutricion consciente: guia basica', content_type: 'image', segment: 'free', category: 'cat-002', status: 'published', published_at: '2026-02-15T10:00:00' },
+  { id: 'cnt-003', title: 'Nutricion consciente: guia basica', content_type: 'article', segment: 'free', category: 'cat-002', status: 'published', published_at: '2026-02-15T10:00:00' },
   { id: 'cnt-004', title: 'Rutina de yoga para principiantes', content_type: 'video', segment: 'core', category: 'cat-003', status: 'published', published_at: '2026-02-12T07:00:00' },
-  { id: 'cnt-005', title: 'Higiene del sueno: consejos practicos', content_type: 'image', segment: 'free', category: 'cat-004', status: 'draft', published_at: null },
+  { id: 'cnt-005', title: 'Higiene del sueno: consejos practicos', content_type: 'article', segment: 'free', category: 'cat-004', status: 'draft', published_at: null },
   { id: 'cnt-006', title: 'Como manejar el estres laboral', content_type: 'audio', segment: 'free', category: 'cat-005', status: 'draft', published_at: null },
   { id: 'cnt-007', title: 'Ejercicios de respiracion 4-7-8', content_type: 'video', segment: 'free', category: 'cat-001', status: 'published', published_at: '2026-02-10T09:00:00' },
-  { id: 'cnt-008', title: 'Alimentacion para la energia diaria', content_type: 'image', segment: 'core', category: 'cat-002', status: 'archived', published_at: '2026-01-28T08:00:00' },
+  { id: 'cnt-008', title: 'Alimentacion para la energia diaria', content_type: 'article', segment: 'core', category: 'cat-002', status: 'archived', published_at: '2026-01-28T08:00:00' },
 ])
 
 const filteredRows = computed(() => {
@@ -153,7 +153,7 @@ function statusLabel(status: string) {
 }
 
 function typeLabel(type: string) {
-  const map: Record<string, string> = { video: 'Video', audio: 'Audio', image: 'Imagen' }
+  const map: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Articulo' }
   return map[type] ?? type
 }
 
