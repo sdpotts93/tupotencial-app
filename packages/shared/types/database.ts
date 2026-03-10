@@ -37,6 +37,8 @@ export type BenefitStatus = 'active' | 'inactive';
 
 export type AddonStatus = 'active' | 'inactive';
 
+export type AddonPlan = 'todos' | 'core';
+
 export type EntitlementSource = 'subscription' | 'addon' | 'admin';
 
 export type SubscriptionStatus =
@@ -259,8 +261,22 @@ export interface Addon {
   id: string;
   title: string;
   description: string | null;
+  cover_url: string | null;
+  price: number;
+  plan: AddonPlan;
+  grants_core_months: number | null;
   stripe_price_id: string | null;
   status: AddonStatus;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface AddonPurchase {
+  id: string;
+  addon_id: string;
+  user_id: string;
+  stripe_session_id: string | null;
+  amount: number;
   created_at: string;
 }
 

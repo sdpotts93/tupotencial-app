@@ -74,16 +74,14 @@ export {
 } from './benefits';
 export type { MockBenefit, MockBenefitClick } from './benefits';
 
-// ---- Add-ons & Entitlements ------------------------------------------------
+// ---- Add-ons & Purchases ---------------------------------------------------
 export {
   mockAddons,
-  mockAddonEntitlements,
-  mockUserEntitlements,
+  mockAddonPurchases,
 } from './addons';
 export type {
   MockAddon,
-  MockAddonEntitlement,
-  MockUserEntitlement,
+  MockAddonPurchase,
 } from './addons';
 
 // ---- AI Coach --------------------------------------------------------------

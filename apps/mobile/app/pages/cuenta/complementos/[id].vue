@@ -22,7 +22,6 @@
           </svg>
         </button>
 
-        <p class="eyebrow">{{ addon.typeLabel }}</p>
         <h1 class="title title--lg addon__title">{{ addon.title }}</h1>
 
         <p class="addon__desc">{{ addon.description }}</p>
@@ -42,24 +41,30 @@
           </div>
         </div>
 
-        <div class="addon__meta">
-          <span v-if="addon.owned" class="addon__tag addon__tag--unlocked">Desbloqueado</span>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { mockAddons, mockAddonPurchases, MOCK_CURRENT_USER_ID } from '@tupotencial/shared/mock'
+
 definePageMeta({ layout: 'blank' })
 
+const route = useRoute()
+
+function formatPrice(cents: number) {
+  return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
+}
+
+const raw = mockAddons.find(a => a.id === route.params.id) ?? mockAddons[0]
+
 const addon = ref({
-  title: 'Mentoría 1:1 con Gabriel',
-  typeLabel: 'EXPERIENCIA',
-  description: 'Cuatro sesiones individuales de coaching de 45 minutos cada una. Trabaja directamente con Gabriel en tus metas de crecimiento personal y liderazgo.',
-  priceLabel: '$2,499 MXN',
-  img: '/images/lib-4.jpg',
-  owned: false,
+  title: raw.title,
+  description: raw.description ?? '',
+  priceLabel: formatPrice(raw.price),
+  img: raw.cover_url ?? '/images/lib-4.jpg',
+  owned: mockAddonPurchases.some(p => p.addon_id === raw.id && p.user_id === MOCK_CURRENT_USER_ID),
 })
 </script>
 
@@ -270,10 +275,6 @@ const addon = ref({
 
   .addon__desc {
     font-size: var(--text-lg);
-  }
-
-  .addon__info > .eyebrow {
-    font-size: var(--eyebrow-lg);
   }
 
   .addon__price-value {

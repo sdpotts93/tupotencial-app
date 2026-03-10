@@ -18,26 +18,24 @@
         </UiInput>
       </template>
 
-      <template #cell-addon_type="{ value }">
-        <UiTag :variant="typeVariant(value)">{{ typeLabel(value) }}</UiTag>
-      </template>
-
       <template #cell-price="{ value }">
-        {{ value > 0 ? `$${value.toLocaleString('es-MX')} MXN` : 'Gratis' }}
+        {{ value > 0 ? `$${(value / 100).toLocaleString('es-MX')} MXN` : 'Gratis' }}
       </template>
 
-      <template #cell-billing_period="{ value }">
-        {{ periodLabel(value) }}
+      <template #cell-plan="{ value }">
+        <UiTag :variant="value === 'core' ? 'accent' : 'default'">
+          {{ value === 'core' ? 'Core' : 'Todos' }}
+        </UiTag>
       </template>
 
       <template #cell-status="{ value }">
         <UiTag :variant="value === 'active' ? 'success' : 'warning'">
-          {{ value === 'active' ? 'Activo' : 'Borrador' }}
+          {{ value === 'active' ? 'Activo' : 'Inactivo' }}
         </UiTag>
       </template>
 
-      <template #cell-subscribers="{ value }">
-        {{ value?.toLocaleString('es-MX') ?? 0 }}
+      <template #cell-compras="{ row }">
+        {{ purchaseCount(row.id) }}
       </template>
 
       <template #actions="{ row }">
@@ -51,48 +49,29 @@
 </template>
 
 <script setup lang="ts">
+import { mockAddons, mockAddonPurchases } from '@tupotencial/shared/mock'
+
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
 const search = ref('')
 
 const columns = [
-  { key: 'name', label: 'Nombre', width: '25%' },
-  { key: 'addon_type', label: 'Tipo' },
+  { key: 'title', label: 'Nombre', width: '30%' },
   { key: 'price', label: 'Precio' },
-  { key: 'billing_period', label: 'Periodo' },
+  { key: 'plan', label: 'Disponible para' },
   { key: 'status', label: 'Estado' },
-  { key: 'subscribers', label: 'Suscriptores' },
+  { key: 'compras', label: 'Compras' },
 ]
 
-const addons = ref([
-  { id: 'addon-001', name: 'Nutricion personalizada', addon_type: 'module', price: 149, billing_period: 'monthly', status: 'active', subscribers: 2340 },
-  { id: 'addon-002', name: 'Coach personal', addon_type: 'service', price: 499, billing_period: 'monthly', status: 'active', subscribers: 456 },
-  { id: 'addon-003', name: 'Meditaciones premium', addon_type: 'content_pack', price: 79, billing_period: 'monthly', status: 'active', subscribers: 3890 },
-  { id: 'addon-004', name: 'Laboratorio de sueno', addon_type: 'module', price: 199, billing_period: 'monthly', status: 'active', subscribers: 1234 },
-  { id: 'addon-005', name: 'Plan familiar (hasta 4)', addon_type: 'plan_upgrade', price: 299, billing_period: 'monthly', status: 'active', subscribers: 867 },
-  { id: 'addon-006', name: 'Kit de bienestar corporativo', addon_type: 'module', price: 0, billing_period: 'one_time', status: 'draft', subscribers: 0 },
-])
-
 const filteredRows = computed(() => {
-  if (!search.value) return addons.value
+  if (!search.value) return mockAddons
   const q = search.value.toLowerCase()
-  return addons.value.filter(r => r.name.toLowerCase().includes(q))
+  return mockAddons.filter(r => r.title.toLowerCase().includes(q))
 })
 
-function typeVariant(type: string) {
-  const map: Record<string, string> = { module: 'info', service: 'accent', content_pack: 'warning', plan_upgrade: 'success' }
-  return (map[type] ?? 'default') as any
-}
-
-function typeLabel(type: string) {
-  const map: Record<string, string> = { module: 'Modulo', service: 'Servicio', content_pack: 'Pack de contenido', plan_upgrade: 'Upgrade de plan' }
-  return map[type] ?? type
-}
-
-function periodLabel(period: string) {
-  const map: Record<string, string> = { monthly: 'Mensual', yearly: 'Anual', one_time: 'Pago unico' }
-  return map[period] ?? period
+function purchaseCount(addonId: string) {
+  return mockAddonPurchases.filter(p => p.addon_id === addonId).length
 }
 
 function goToEdit(row: Record<string, any>) {

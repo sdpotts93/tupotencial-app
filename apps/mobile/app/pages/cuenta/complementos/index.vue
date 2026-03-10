@@ -25,7 +25,6 @@
             <span class="addons__card-price">{{ addon.priceLabel }}</span>
           </div>
           <div class="addons__card-info">
-            <span class="addons__card-eyebrow">{{ addon.typeLabel }}</span>
             <h3 class="addons__card-name">{{ addon.title }}</h3>
             <p class="addons__card-desc">{{ addon.description }}</p>
             <div v-if="addon.owned" class="addons__card-footer">
@@ -39,25 +38,26 @@
 </template>
 
 <script setup lang="ts">
+import { mockAddons, mockAddonPurchases, MOCK_CURRENT_USER_ID } from '@tupotencial/shared/mock'
+
 definePageMeta({ layout: 'default' })
 
-const addons = ref([
-  {
-    id: 'mock-addon-001', title: 'Mentoría 1:1 con Gabriel', typeLabel: 'EXPERIENCIA',
-    description: '4 sesiones de coaching personalizado de 45 minutos.',
-    priceLabel: '$2,499 MXN', bg: 'linear-gradient(135deg, var(--color-navy), var(--color-dark))', img: '/images/lib-4.jpg', owned: false,
-  },
-  {
-    id: 'mock-addon-002', title: 'Módulo VIP: Liderazgo avanzado', typeLabel: 'CONTENIDO PREMIUM',
-    description: '12 lecciones exclusivas + material descargable.',
-    priceLabel: '$799 MXN', bg: 'linear-gradient(135deg, var(--color-green), var(--color-sand))', img: '/images/lib-8.jpg', owned: true,
-  },
-  {
-    id: 'mock-addon-003', title: 'Retiro presencial — Marzo 2026', typeLabel: 'EXPERIENCIA',
-    description: 'Fin de semana de inmersión en Valle de Bravo.',
-    priceLabel: '$8,999 MXN', bg: 'linear-gradient(135deg, var(--color-sand), var(--color-navy))', img: '/images/lib-6.jpg', owned: false,
-  },
-])
+function formatPrice(cents: number) {
+  return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
+}
+
+const addons = computed(() =>
+  mockAddons
+    .filter(a => a.status === 'active')
+    .map(a => ({
+      id: a.id,
+      title: a.title,
+      description: a.description,
+      priceLabel: formatPrice(a.price),
+      img: a.cover_url,
+      owned: mockAddonPurchases.some(p => p.addon_id === a.id && p.user_id === MOCK_CURRENT_USER_ID),
+    }))
+)
 </script>
 
 <style scoped>
