@@ -109,7 +109,9 @@ const activePrograms = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.progress__back:hover { background: rgba(var(--tint-rgb), 0.05); }
+@media (hover: hover) {
+  .progress__back:hover { background: rgba(var(--tint-rgb), 0.05); }
+}
 
 /* ─── Hero ─── */
 .progress__hero {
@@ -224,7 +226,9 @@ const activePrograms = ref([
   background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.progress__card:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .progress__card:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 
 .progress__card-img {
   width: 56px;
@@ -292,9 +296,11 @@ const activePrograms = ref([
     border-radius: var(--radius-lg);
   }
 
-  .progress__card:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .progress__card:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 }
 </style>

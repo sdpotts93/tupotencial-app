@@ -579,11 +579,6 @@ function goToDateFromRow(row: Record<string, any>) {
   min-height: 120px;
 }
 
-.hoy-calendar__day:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-1);
-}
-
 .hoy-calendar__day--today {
   border-color: var(--color-primary);
   background: rgba(40, 55, 74, 0.03);
@@ -678,11 +673,6 @@ function goToDateFromRow(row: Record<string, any>) {
   cursor: pointer;
   min-height: 44px;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.hoy-year__day:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-1);
 }
 
 .hoy-year__day--today {
@@ -785,10 +775,6 @@ function goToDateFromRow(row: Record<string, any>) {
   text-align: left;
 }
 
-.manual-content__result-item:hover {
-  background: var(--color-surface);
-}
-
 .manual-content__result-duration {
   margin-left: auto;
   font-size: var(--text-xs);
@@ -886,6 +872,22 @@ function goToDateFromRow(row: Record<string, any>) {
 
 .explore-add__row > :first-child {
   flex: 1;
+}
+
+@media (hover: hover) {
+  .hoy-calendar__day:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-1);
+  }
+
+  .hoy-year__day:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-1);
+  }
+
+  .manual-content__result-item:hover {
+    background: var(--color-surface);
+  }
 }
 
 /* ── Responsive ── */

@@ -373,8 +373,10 @@ function handleDelete() {
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.upload__dropzone:hover {
-  border-color: var(--color-muted);
+@media (hover: hover) {
+  .upload__dropzone:hover {
+    border-color: var(--color-muted);
+  }
 }
 
 .upload__dropzone--active {
@@ -438,8 +440,10 @@ function handleDelete() {
   border-radius: var(--radius-sm);
 }
 
-.upload__remove:hover {
-  background: rgba(220, 38, 38, 0.06);
+@media (hover: hover) {
+  .upload__remove:hover {
+    background: rgba(220, 38, 38, 0.06);
+  }
 }
 
 @media (max-width: 768px) {

@@ -123,7 +123,9 @@ const content = ref({
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.detail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
+@media (hover: hover) {
+  .detail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
+}
 
 /* ─── Play button ─── */
 .detail__play-btn {
@@ -144,7 +146,9 @@ const content = ref({
   z-index: 1;
   transition: background var(--transition-fast);
 }
-.detail__play-btn:hover { background: rgba(var(--tint-rgb), 0.65); }
+@media (hover: hover) {
+  .detail__play-btn:hover { background: rgba(var(--tint-rgb), 0.65); }
+}
 
 /* ─── Back link (desktop only) ─── */
 .detail__back-link {
@@ -239,7 +243,9 @@ const content = ref({
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .detail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  @media (hover: hover) {
+    .detail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  }
 
   .detail__info {
     order: 1;

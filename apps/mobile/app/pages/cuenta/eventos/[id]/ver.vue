@@ -79,7 +79,9 @@ const event = ref({
   color: var(--color-white);
   -webkit-tap-highlight-color: transparent;
 }
-.watch__back:hover { background: rgba(var(--tint-rgb), 0.6); }
+@media (hover: hover) {
+  .watch__back:hover { background: rgba(var(--tint-rgb), 0.6); }
+}
 
 .watch__badge {
   font-size: 10px;

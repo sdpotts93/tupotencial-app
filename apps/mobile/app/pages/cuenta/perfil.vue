@@ -151,7 +151,9 @@ function handleManageSub() {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.profile__back:hover { background: rgba(var(--tint-rgb), 0.05); }
+@media (hover: hover) {
+  .profile__back:hover { background: rgba(var(--tint-rgb), 0.05); }
+}
 
 /* ─── Avatar with camera overlay (profile-setup style) ─── */
 .profile__avatar-area {
@@ -193,7 +195,9 @@ function handleManageSub() {
   color: var(--color-text);
   transition: background var(--transition-fast);
 }
-.profile__camera:hover { background: var(--color-surface-alt); }
+@media (hover: hover) {
+  .profile__camera:hover { background: var(--color-surface-alt); }
+}
 
 /* ─── Form (profile-setup style) ─── */
 .profile__form {
@@ -325,7 +329,9 @@ function handleManageSub() {
   background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.profile__acceso:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .profile__acceso:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 
 .profile__acceso-img {
   width: 56px;
@@ -429,8 +435,10 @@ function handleManageSub() {
     border-bottom: 1px solid var(--color-desktop-border);
   }
 
-  .profile__acceso:hover {
-    background: none;
+  @media (hover: hover) {
+    .profile__acceso:hover {
+      background: none;
+    }
   }
 
   .profile__acceso:last-child {

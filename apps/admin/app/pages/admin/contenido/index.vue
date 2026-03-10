@@ -218,8 +218,10 @@ function goToEdit(row: Record<string, any>) {
   flex-shrink: 0;
 }
 
-.featured-star:hover {
-  color: var(--color-warning, #e0a500);
+@media (hover: hover) {
+  .featured-star:hover {
+    color: var(--color-warning, #e0a500);
+  }
 }
 
 .featured-star--active {

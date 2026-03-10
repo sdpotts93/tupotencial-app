@@ -173,9 +173,11 @@ function formatDate(iso: string) {
   cursor: pointer;
 }
 
-.dashboard__action:hover {
-  background: rgba(var(--tint-rgb), 0.08);
-  text-decoration: none;
+@media (hover: hover) {
+  .dashboard__action:hover {
+    background: rgba(var(--tint-rgb), 0.08);
+    text-decoration: none;
+  }
 }
 
 .dashboard__action-thumb {
@@ -235,9 +237,11 @@ function formatDate(iso: string) {
     border-radius: var(--radius-lg);
   }
 
-  .dashboard__action:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .dashboard__action:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 }
 </style>

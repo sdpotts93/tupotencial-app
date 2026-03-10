@@ -267,8 +267,10 @@ function handleDelete(row: Record<string, any>) {
   transition: background var(--transition-fast);
 }
 
-.cat-row:hover {
-  background: var(--color-border-light);
+@media (hover: hover) {
+  .cat-row:hover {
+    background: var(--color-border-light);
+  }
 }
 
 .cat-row--dragging {

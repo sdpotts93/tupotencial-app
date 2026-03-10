@@ -106,7 +106,9 @@ const pastEvents = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.events__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+@media (hover: hover) {
+  .events__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+}
 
 /* ─── Sections ─── */
 .events__section { margin-bottom: var(--space-8); }
@@ -228,7 +230,9 @@ const pastEvents = ref([
   background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.events__past-card:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .events__past-card:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 .events__past-card:active { background: rgba(var(--tint-rgb), 0.08); }
 
 .events__past-img {
@@ -302,8 +306,10 @@ const pastEvents = ref([
     transition: border-color var(--transition-fast);
   }
 
-  .events__card:hover {
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .events__card:hover {
+      border-color: var(--color-border);
+    }
   }
 
   .events__card + .events__card {
@@ -332,9 +338,11 @@ const pastEvents = ref([
     border-radius: var(--radius-lg);
   }
 
-  .events__past-card:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .events__past-card:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 }
 </style>

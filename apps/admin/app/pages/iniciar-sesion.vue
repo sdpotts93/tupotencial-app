@@ -260,8 +260,10 @@ async function handleLogin() {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.login__close:hover {
-  background: var(--color-border-light);
+@media (hover: hover) {
+  .login__close:hover {
+    background: var(--color-border-light);
+  }
 }
 
 .login__sheet-title {

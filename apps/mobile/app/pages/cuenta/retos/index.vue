@@ -280,8 +280,10 @@ function handleCardClick(item: typeof programs.value[number]) {
     transition: border-color var(--transition-fast);
   }
 
-  .retos__card:hover {
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .retos__card:hover {
+      border-color: var(--color-border);
+    }
   }
 
   .retos__card + .retos__card {

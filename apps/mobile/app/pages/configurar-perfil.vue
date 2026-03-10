@@ -187,8 +187,10 @@ async function handleSave() {
   color: var(--color-text);
   transition: background var(--transition-fast);
 }
-.profile-setup__camera:hover {
-  background: var(--color-surface-alt);
+@media (hover: hover) {
+  .profile-setup__camera:hover {
+    background: var(--color-surface-alt);
+  }
 }
 
 /* ─── Title + subtitle ─── */

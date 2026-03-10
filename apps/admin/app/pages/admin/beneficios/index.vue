@@ -224,8 +224,10 @@ function goToEdit(row: Record<string, any>) {
   transition: background var(--transition-fast);
 }
 
-.ben-row:hover {
-  background: var(--color-border-light);
+@media (hover: hover) {
+  .ben-row:hover {
+    background: var(--color-border-light);
+  }
 }
 
 .ben-row--dragging {

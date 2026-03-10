@@ -1269,8 +1269,10 @@ function closeAccionSheet() {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.hoy__sheet-close:hover {
-  background: var(--color-border-light);
+@media (hover: hover) {
+  .hoy__sheet-close:hover {
+    background: var(--color-border-light);
+  }
 }
 
 .hoy__sheet-title {
@@ -1313,8 +1315,10 @@ function closeAccionSheet() {
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.hoy__checkin-mood:hover {
-  border-color: var(--color-text-secondary);
+@media (hover: hover) {
+  .hoy__checkin-mood:hover {
+    border-color: var(--color-text-secondary);
+  }
 }
 
 .hoy__checkin-mood--selected {
@@ -1532,9 +1536,11 @@ function closeAccionSheet() {
     border-radius: var(--radius-lg);
   }
 
-  .hoy__reto-item:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .hoy__reto-item:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 
   .hoy__celebration {
@@ -1647,9 +1653,11 @@ function closeAccionSheet() {
     border-radius: var(--radius-lg);
   }
 
-  .hoy__continue-card:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .hoy__continue-card:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 
   /* Latest from biblioteca - grid */
@@ -1685,9 +1693,11 @@ function closeAccionSheet() {
     border-radius: var(--radius-lg);
   }
 
-  .hoy__activity:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .hoy__activity:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 
   .hoy__activity--wide {

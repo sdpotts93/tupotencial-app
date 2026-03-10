@@ -110,7 +110,9 @@ const event = ref({
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.edetail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
+@media (hover: hover) {
+  .edetail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
+}
 
 /* ─── Back link (desktop only) ─── */
 .edetail__back-link {
@@ -216,7 +218,9 @@ const event = ref({
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .edetail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  @media (hover: hover) {
+    .edetail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  }
 
   .edetail__info {
     order: 1;

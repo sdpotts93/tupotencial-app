@@ -188,7 +188,9 @@ function enroll() {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.detail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
+@media (hover: hover) {
+  .detail__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
+}
 
 /* ─── Back link (desktop only) ─── */
 .detail__back-link {
@@ -332,7 +334,9 @@ function enroll() {
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .detail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  @media (hover: hover) {
+    .detail__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  }
 
   .detail__info {
     order: 1;
@@ -396,8 +400,10 @@ function enroll() {
     transition: border-color var(--transition-fast), background var(--transition-fast);
   }
 
-  .detail__days :deep(.list-item:hover) {
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .detail__days :deep(.list-item:hover) {
+      border-color: var(--color-border);
+    }
   }
 
   .detail__days :deep(.list-item__content) {

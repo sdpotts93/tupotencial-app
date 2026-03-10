@@ -296,7 +296,9 @@ function closeFormSheet() {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.day__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+@media (hover: hover) {
+  .day__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+}
 
 .day__counter {
   position: absolute;
@@ -338,7 +340,9 @@ function closeFormSheet() {
   background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.day__card:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .day__card:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 .day__card:active { background: rgba(var(--tint-rgb), 0.08); }
 
 .day__card-img {
@@ -455,9 +459,11 @@ function closeFormSheet() {
     transition: border-color var(--transition-fast), background var(--transition-fast);
   }
 
-  .day__card:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .day__card:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 
   .day__card:active {

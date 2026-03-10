@@ -101,7 +101,9 @@ async function handleSubmit() {
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.checkin__mood:hover { border-color: rgba(var(--tint-rgb), 0.2); }
+@media (hover: hover) {
+  .checkin__mood:hover { border-color: rgba(var(--tint-rgb), 0.2); }
+}
 
 .checkin__mood--selected {
   border-color: var(--color-accent);

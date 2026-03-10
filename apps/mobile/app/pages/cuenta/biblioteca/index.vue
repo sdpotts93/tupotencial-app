@@ -409,7 +409,9 @@ const objectives = ref([
   -webkit-tap-highlight-color: transparent;
 }
 .library__search-btn-label { display: none; }
-.library__search-btn:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .library__search-btn:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 
 /* ─── Inline search ─── */
 .library__search-input { margin-bottom: var(--space-6); }
@@ -721,8 +723,10 @@ const objectives = ref([
   -webkit-tap-highlight-color: transparent;
 }
 
-.library__objective-card:hover {
-  background: var(--color-surface);
+@media (hover: hover) {
+  .library__objective-card:hover {
+    background: var(--color-surface);
+  }
 }
 
 .library__objective-icon-wrap {
@@ -796,9 +800,11 @@ const objectives = ref([
     color: var(--color-muted);
   }
 
-  .library__search-btn:hover {
-    border-color: var(--color-border);
-    color: var(--color-text);
+  @media (hover: hover) {
+    .library__search-btn:hover {
+      border-color: var(--color-border);
+      color: var(--color-text);
+    }
   }
 
   .library__search-btn-label {
@@ -875,8 +881,10 @@ const objectives = ref([
     transition: border-color var(--transition-fast);
   }
 
-  .library__search-item:hover {
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .library__search-item:hover {
+      border-color: var(--color-border);
+    }
   }
 
   /* Objectives: 3 columns on desktop */
@@ -891,9 +899,11 @@ const objectives = ref([
     transition: border-color var(--transition-fast), background var(--transition-fast);
   }
 
-  .library__objective-card:hover {
-    border-color: var(--color-border);
-    background: var(--color-desktop-card);
+  @media (hover: hover) {
+    .library__objective-card:hover {
+      border-color: var(--color-border);
+      background: var(--color-desktop-card);
+    }
   }
 }
 </style>

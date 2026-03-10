@@ -74,7 +74,9 @@ definePageMeta({ layout: 'default' })
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.settings__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+@media (hover: hover) {
+  .settings__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+}
 
 .settings__version {
   text-align: center;

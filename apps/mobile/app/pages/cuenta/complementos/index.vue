@@ -91,7 +91,9 @@ const addons = computed(() =>
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.addons__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+@media (hover: hover) {
+  .addons__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+}
 
 /* ─── Intro ─── */
 .addons__intro {
@@ -235,8 +237,10 @@ const addons = computed(() =>
     transition: border-color var(--transition-fast);
   }
 
-  .addons__card:hover {
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .addons__card:hover {
+      border-color: var(--color-border);
+    }
   }
 
   .addons__card + .addons__card {

@@ -120,7 +120,9 @@ const addon = ref({
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.addon__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
+@media (hover: hover) {
+  .addon__back:hover { background: rgba(var(--tint-inverse-rgb), 1); }
+}
 
 /* ─── Back link (desktop only) ─── */
 .addon__back-link {
@@ -257,7 +259,9 @@ const addon = ref({
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .addon__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  @media (hover: hover) {
+    .addon__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  }
 
   .addon__info {
     order: 1;
