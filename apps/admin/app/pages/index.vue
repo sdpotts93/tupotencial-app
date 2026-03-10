@@ -9,7 +9,7 @@ const { isAuthenticated } = useAdminAuth()
 
 onMounted(() => {
   if (!isAuthenticated.value) {
-    navigateTo('/login')
+    navigateTo('/iniciar-sesion')
   } else {
     navigateTo('/admin')
   }

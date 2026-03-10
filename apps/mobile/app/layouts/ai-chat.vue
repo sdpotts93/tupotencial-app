@@ -3,11 +3,11 @@
     <!-- Desktop sidebar: chat history -->
     <aside class="ai-sidebar">
       <div class="ai-sidebar__top">
-        <NuxtLink to="/account/hoy" class="ai-sidebar__logo">
+        <NuxtLink to="/cuenta/hoy" class="ai-sidebar__logo">
           <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" />
         </NuxtLink>
 
-        <button class="ai-sidebar__new" @click="navigateTo('/account/ai/chat/mock-ai-session-new')">
+        <button class="ai-sidebar__new" @click="navigateTo('/cuenta/ia/chat/mock-ai-session-new')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nueva conversación
         </button>
@@ -18,7 +18,7 @@
         <NuxtLink
           v-for="session in sessions"
           :key="session.id"
-          :to="`/account/ai/chat/${session.id}`"
+          :to="`/cuenta/ia/chat/${session.id}`"
           :class="['ai-sidebar__session', { 'ai-sidebar__session--active': isActiveSession(session.id) }]"
         >
           <span class="ai-sidebar__session-preview">{{ session.preview }}</span>
@@ -30,7 +30,7 @@
       </div>
 
       <div class="ai-sidebar__bottom">
-        <NuxtLink to="/account/ai" class="ai-sidebar__back-link">
+        <NuxtLink to="/cuenta/ia" class="ai-sidebar__back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           Coach IA
         </NuxtLink>
@@ -43,11 +43,11 @@
         <h1 class="ai-layout__topbar-title">Coach IA</h1>
       </div>
       <div class="ai-layout__topbar-right">
-        <NuxtLink to="/account/hoy/progress" class="ai-layout__streak">
+        <NuxtLink to="/cuenta/hoy/progreso" class="ai-layout__streak">
           <Icon name="lucide:flame" size="14" class="ai-layout__streak-icon" />
           <span>{{ streak }}</span>
         </NuxtLink>
-        <div class="ai-layout__avatar" @click="navigateTo('/account/profile')">
+        <div class="ai-layout__avatar" @click="navigateTo('/cuenta/perfil')">
           {{ initials }}
         </div>
       </div>

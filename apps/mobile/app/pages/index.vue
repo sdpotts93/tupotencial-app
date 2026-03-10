@@ -10,11 +10,11 @@ const { isLoggedIn, isOnboarded } = useAuth()
 
 onMounted(() => {
   if (!isLoggedIn.value) {
-    navigateTo('/login')
+    navigateTo('/iniciar-sesion')
   } else if (!isOnboarded.value) {
-    navigateTo('/account/onboarding/segment')
+    navigateTo('/cuenta/bienvenida/segmento')
   } else {
-    navigateTo('/account/hoy')
+    navigateTo('/cuenta/hoy')
   }
 })
 </script>
