@@ -64,7 +64,11 @@ withDefaults(defineProps<Props>(), {
 
 .card--default { }
 .card--elevated { box-shadow: var(--shadow-2); }
-.card--outlined { background: var(--color-desktop-card); box-shadow: none; border: 1px solid var(--color-desktop-border); }
+.card--outlined { }
+
+@media (min-width: 1024px) {
+  .card--outlined { background: var(--color-desktop-card); box-shadow: none; border: 1px solid var(--color-desktop-border); }
+}
 .card--filled { background: var(--color-surface-alt); }
 .card--dark { background: var(--color-surface); color: var(--color-text); }
 

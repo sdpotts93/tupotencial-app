@@ -269,7 +269,10 @@ definePageMeta({ layout: 'default' })
 
 const router = useRouter()
 const search = ref('')
-const viewMode = ref<'calendar' | 'list'>('calendar')
+const viewMode = ref<'calendar' | 'list'>(
+  (typeof localStorage !== 'undefined' && localStorage.getItem('hoy-view-mode') as 'calendar' | 'list') || 'calendar',
+)
+watch(viewMode, (v) => localStorage.setItem('hoy-view-mode', v))
 const activeTab = ref('current')
 
 const weekTabs = [
@@ -733,7 +736,6 @@ function goToDateFromRow(row: Record<string, any>) {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-5);
 }
 
 .meta-hint {
@@ -905,6 +907,11 @@ function goToDateFromRow(row: Record<string, any>) {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-2);
+  }
+
+  .toggle-row__controls {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 </style>

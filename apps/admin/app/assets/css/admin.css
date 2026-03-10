@@ -7,13 +7,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  column-gap: var(--space-4);
   margin-bottom: var(--space-6);
 }
 
 .page-header__title {
   font-family: var(--font-title);
-  font-size: var(--title-md);
+  font-size: var(--title-sm);
   color: var(--color-text);
+}
+
+@media (min-width: 1024px) {
+  .page-header__title {
+    font-size: var(--title-md);
+  }
 }
 
 .page-header__actions {

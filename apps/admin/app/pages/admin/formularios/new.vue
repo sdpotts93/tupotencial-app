@@ -165,7 +165,6 @@ function handleSave() {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-5);
 }
 
 /* ─── Fields ─── */

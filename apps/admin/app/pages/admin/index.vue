@@ -14,9 +14,7 @@
       <div v-for="kpi in kpis" :key="kpi.label" class="dashboard__kpi-card" :style="{ '--kpi-bg': kpi.bg, '--kpi-accent': kpi.accent }">
         <span class="eyebrow dashboard__kpi-label">{{ kpi.label }}</span>
         <span class="dashboard__kpi-value">{{ kpi.value }}</span>
-        <span :class="['dashboard__kpi-change', kpi.positive ? 'dashboard__kpi-change--up' : 'dashboard__kpi-change--down']">
-          {{ kpi.change }}
-        </span>
+        <span class="dashboard__kpi-change">{{ kpi.change }}</span>
       </div>
     </div>
 
@@ -59,10 +57,10 @@ definePageMeta({
 })
 
 const kpis = ref([
-  { label: 'Usuarios totales', value: '12,847', change: '+324 este mes', positive: true, bg: 'var(--color-ai-cool-bg)', accent: 'var(--color-ai-cool)' },
-  { label: 'Suscriptores activos', value: '8,203', change: '+12.4%', positive: true, bg: 'var(--color-complete-bg)', accent: 'var(--color-complete)' },
-  { label: 'Check-ins hoy', value: '1,456', change: '+8.2%', positive: true, bg: 'var(--color-ai-warm-bg)', accent: 'var(--color-ai-warm)' },
-  { label: 'Programas activos', value: '24', change: '3 nuevos', positive: true, bg: 'var(--color-pro-bg)', accent: 'var(--color-pro)' },
+  { label: 'Usuarios totales', value: '12,847', change: '+324 este mes', bg: 'var(--color-ai-cool-bg)', accent: 'var(--color-ai-cool)' },
+  { label: 'Suscriptores activos', value: '8,203', change: '+12.4%', bg: 'var(--color-complete-bg)', accent: 'var(--color-complete)' },
+  { label: 'Check-ins hoy', value: '1,456', change: '+8.2%', bg: 'var(--color-ai-warm-bg)', accent: 'var(--color-ai-warm)' },
+  { label: 'Programas activos', value: '24', change: '3 nuevos', bg: 'var(--color-pro-bg)', accent: 'var(--color-pro)' },
 ])
 
 const quickActions = [
@@ -140,14 +138,7 @@ function formatDate(iso: string) {
 .dashboard__kpi-change {
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
-}
-
-.dashboard__kpi-change--up {
-  color: var(--color-success);
-}
-
-.dashboard__kpi-change--down {
-  color: var(--color-danger);
+  color: var(--color-muted);
 }
 
 .dashboard__kpi-label {

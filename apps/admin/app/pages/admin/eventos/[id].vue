@@ -240,7 +240,6 @@ function handleDelete() {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-5);
 }
 
 .form-row {
