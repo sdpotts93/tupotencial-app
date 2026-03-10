@@ -45,20 +45,22 @@ withDefaults(defineProps<Props>(), {
   background: var(--color-surface-alt);
   color: var(--color-text);
 }
-.icon-btn--default:hover { background: var(--color-border); }
+@media (hover: hover) {
+  .icon-btn--default:hover { background: var(--color-border); }
+  .icon-btn--ghost:hover { background: var(--color-surface-alt); }
+  .icon-btn--outline:hover { background: var(--color-surface-alt); }
+}
 
 .icon-btn--ghost {
   background: transparent;
   color: var(--color-text);
 }
-.icon-btn--ghost:hover { background: var(--color-surface-alt); }
 
 .icon-btn--outline {
   background: transparent;
   color: var(--color-text);
   border: 1px solid var(--color-border);
 }
-.icon-btn--outline:hover { background: var(--color-surface-alt); }
 
 .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

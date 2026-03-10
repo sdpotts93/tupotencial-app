@@ -135,7 +135,9 @@ const newComment = ref('')
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.pdetail__back:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .pdetail__back:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 
 .post-detail {
   background: rgba(var(--tint-rgb), 0.04);
@@ -199,7 +201,9 @@ const newComment = ref('')
   font-family: var(--font-body);
   -webkit-tap-highlight-color: transparent;
 }
-.post-detail__like:hover { color: var(--color-text-secondary); }
+@media (hover: hover) {
+  .post-detail__like:hover { color: var(--color-text-secondary); }
+}
 
 .post-detail__comments > .eyebrow { margin-bottom: var(--space-4); }
 
@@ -299,8 +303,10 @@ const newComment = ref('')
   opacity: 0.15;
   cursor: default;
 }
-.post-detail__send:not(:disabled):hover {
-  opacity: 0.85;
+@media (hover: hover) {
+  .post-detail__send:not(:disabled):hover {
+    opacity: 0.85;
+  }
 }
 
 /* ─── Desktop SaaS ─── */
@@ -322,8 +328,10 @@ const newComment = ref('')
     padding-bottom: 120px;
   }
 
-  .screen__content:hover {
-    scrollbar-color: rgba(var(--tint-rgb), 0.15) transparent;
+  @media (hover: hover) {
+    .screen__content:hover {
+      scrollbar-color: rgba(var(--tint-rgb), 0.15) transparent;
+    }
   }
 
   /* Hide mobile header on desktop */

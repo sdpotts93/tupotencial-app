@@ -255,8 +255,10 @@ async function handleRegister() {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.register__close:hover {
-  background: var(--color-border-light);
+@media (hover: hover) {
+  .register__close:hover {
+    background: var(--color-border-light);
+  }
 }
 
 .register__sheet-title {
@@ -366,8 +368,10 @@ async function handleRegister() {
     font-weight: var(--weight-medium);
     text-decoration: none;
   }
-  .register__login-link a:hover {
-    text-decoration: underline;
+  @media (hover: hover) {
+    .register__login-link a:hover {
+      text-decoration: underline;
+    }
   }
 }
 

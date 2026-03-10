@@ -126,7 +126,9 @@ function startChat(prompt?: string) {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.ai__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+@media (hover: hover) {
+  .ai__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+}
 
 /* ─── Top row wrapper (transparent on mobile) ─── */
 .ai-home__top-row { display: contents; }
@@ -222,7 +224,9 @@ function startChat(prompt?: string) {
   background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.ai-home__session:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .ai-home__session:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 
 .ai-home__session-body {
   flex: 1;
@@ -363,9 +367,11 @@ function startChat(prompt?: string) {
     border-radius: var(--radius-lg);
   }
 
-  .ai-home__session:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .ai-home__session:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 
   .ai-home__actions :deep(.btn) {

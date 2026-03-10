@@ -564,9 +564,11 @@ function closeAccionSheet() {
   transition: background var(--transition-fast);
 }
 
-.hoy__streak-badge:hover {
-  background: var(--color-text);
-  text-decoration: none;
+@media (hover: hover) {
+  .hoy__streak-badge:hover {
+    background: var(--color-text);
+    text-decoration: none;
+  }
 }
 
 .hoy__streak-icon {
@@ -697,8 +699,10 @@ function closeAccionSheet() {
     transition: background var(--transition-fast);
 }
 
-.hoy__reto-item:hover {
-  background: rgba(var(--tint-rgb), 0.08);
+@media (hover: hover) {
+  .hoy__reto-item:hover {
+    background: rgba(var(--tint-rgb), 0.08);
+  }
 }
 
 .hoy__reto-item--done {
@@ -954,9 +958,11 @@ function closeAccionSheet() {
   transition: background var(--transition-fast);
 }
 
-.hoy__continue-card:hover {
-  background: rgba(var(--tint-rgb), 0.08);
-  text-decoration: none;
+@media (hover: hover) {
+  .hoy__continue-card:hover {
+    background: rgba(var(--tint-rgb), 0.08);
+    text-decoration: none;
+  }
 }
 
 .hoy__continue-progress {
@@ -1161,9 +1167,11 @@ function closeAccionSheet() {
   color: var(--color-light);
 } */
 
-.hoy__activity:hover {
-  background: rgba(var(--tint-rgb), 0.1);
-  text-decoration: none;
+@media (hover: hover) {
+  .hoy__activity:hover {
+    background: rgba(var(--tint-rgb), 0.1);
+    text-decoration: none;
+  }
 }
 
 .hoy__activity-thumb {

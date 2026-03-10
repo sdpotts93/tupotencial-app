@@ -158,9 +158,11 @@ const sessions = ref([
     transition: background var(--transition-fast), border-color var(--transition-fast);
   }
 
-  .ai-sidebar__new:hover {
-    background: rgba(var(--tint-rgb), 0.04);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .ai-sidebar__new:hover {
+      background: rgba(var(--tint-rgb), 0.04);
+      border-color: var(--color-border);
+    }
   }
 
   /* ─── Sessions list ─── */
@@ -193,10 +195,12 @@ const sessions = ref([
     margin-bottom: 1px;
   }
 
-  .ai-sidebar__session:hover {
-    background: rgba(var(--tint-rgb), 0.04);
-    color: var(--color-text);
-    text-decoration: none;
+  @media (hover: hover) {
+    .ai-sidebar__session:hover {
+      background: rgba(var(--tint-rgb), 0.04);
+      color: var(--color-text);
+      text-decoration: none;
+    }
   }
 
   .ai-sidebar__session--active {
@@ -269,10 +273,12 @@ const sessions = ref([
     transition: background var(--transition-fast), color var(--transition-fast);
   }
 
-  .ai-sidebar__back-link:hover {
-    background: rgba(var(--tint-rgb), 0.04);
-    color: var(--color-text-secondary);
-    text-decoration: none;
+  @media (hover: hover) {
+    .ai-sidebar__back-link:hover {
+      background: rgba(var(--tint-rgb), 0.04);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+    }
   }
 
   /* ─── Top bar ─── */
@@ -328,9 +334,11 @@ const sessions = ref([
     color: var(--color-pro);
   }
 
-  .ai-layout__streak:hover {
-    background: var(--color-pro-bg-strong);
-    text-decoration: none;
+  @media (hover: hover) {
+    .ai-layout__streak:hover {
+      background: var(--color-pro-bg-strong);
+      text-decoration: none;
+    }
   }
 
   .ai-layout__avatar {
@@ -349,8 +357,10 @@ const sessions = ref([
     transition: box-shadow var(--transition-fast);
   }
 
-  .ai-layout__avatar:hover {
-    box-shadow: 0 0 0 2px var(--color-desktop-border);
+  @media (hover: hover) {
+    .ai-layout__avatar:hover {
+      box-shadow: 0 0 0 2px var(--color-desktop-border);
+    }
   }
 }
 </style>

@@ -74,7 +74,9 @@ const items = ref([
   position: absolute;
   left: 0;
 }
-.cat__back:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .cat__back:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 
 /* ─── Item list ─── */
 .cat__list {
@@ -90,7 +92,9 @@ const items = ref([
   text-decoration: none;
   color: var(--color-text);
 }
-.cat__item:hover { text-decoration: none; }
+@media (hover: hover) {
+  .cat__item:hover { text-decoration: none; }
+}
 
 .cat__item-thumb {
   width: 72px;
@@ -158,8 +162,10 @@ const items = ref([
     transition: border-color var(--transition-fast);
   }
 
-  .cat__item:hover {
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .cat__item:hover {
+      border-color: var(--color-border);
+    }
   }
 }
 </style>

@@ -165,11 +165,12 @@ th.data-table__sticky-col {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.data-table__row:hover { background: var(--color-border-light); }
-
-/* Sticky cell covers the tr background, so apply hover directly */
-.data-table__row:hover .data-table__sticky-col {
-  background: var(--color-border-light);
+@media (hover: hover) {
+  .data-table__row:hover { background: var(--color-border-light); }
+  /* Sticky cell covers the tr background, so apply hover directly */
+  .data-table__row:hover .data-table__sticky-col {
+    background: var(--color-border-light);
+  }
 }
 
 .data-table__actions-header {

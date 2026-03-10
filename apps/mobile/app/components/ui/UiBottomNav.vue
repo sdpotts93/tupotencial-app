@@ -200,8 +200,10 @@ onBeforeUnmount(() => ro?.disconnect())
   color: var(--color-text);
 }
 
-.bottom-nav__item:hover {
-  text-decoration: none;
+@media (hover: hover) {
+  .bottom-nav__item:hover {
+    text-decoration: none;
+  }
 }
 
 .bottom-nav__icon {
@@ -291,10 +293,12 @@ onBeforeUnmount(() => ro?.disconnect())
     transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   }
 
-  .bottom-nav__item:hover {
-    background: rgba(var(--tint-rgb), 0.04);
-    color: var(--color-text);
-    text-decoration: none;
+  @media (hover: hover) {
+    .bottom-nav__item:hover {
+      background: rgba(var(--tint-rgb), 0.04);
+      color: var(--color-text);
+      text-decoration: none;
+    }
   }
 
   .bottom-nav__item--active {
@@ -374,8 +378,10 @@ onBeforeUnmount(() => ro?.disconnect())
     font-size: var(--text-xs);
   }
 
-  .bottom-nav__item--bottom:hover {
-    color: var(--color-text-secondary);
+  @media (hover: hover) {
+    .bottom-nav__item--bottom:hover {
+      color: var(--color-text-secondary);
+    }
   }
 }
 </style>

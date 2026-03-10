@@ -201,9 +201,11 @@ const desktopBottomItems = [
     color: var(--color-pro);
   }
 
-  .blank-layout__streak:hover {
-    background: var(--color-pro-bg-strong);
-    text-decoration: none;
+  @media (hover: hover) {
+    .blank-layout__streak:hover {
+      background: var(--color-pro-bg-strong);
+      text-decoration: none;
+    }
   }
 
   .blank-layout__avatar {
@@ -222,8 +224,10 @@ const desktopBottomItems = [
     transition: box-shadow var(--transition-fast);
   }
 
-  .blank-layout__avatar:hover {
-    box-shadow: 0 0 0 2px var(--color-desktop-border);
+  @media (hover: hover) {
+    .blank-layout__avatar:hover {
+      box-shadow: 0 0 0 2px var(--color-desktop-border);
+    }
   }
 }
 </style>

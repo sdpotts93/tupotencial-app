@@ -83,5 +83,7 @@ defineExpose({ show })
   opacity: 0.7;
   cursor: pointer;
 }
-.toast__dismiss:hover { opacity: 1; }
+@media (hover: hover) {
+  .toast__dismiss:hover { opacity: 1; }
+}
 </style>

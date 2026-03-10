@@ -324,8 +324,10 @@ function handleShare() {
   transition: background var(--transition-fast);
 }
 
-.share-overlay__close:hover {
-  background: rgba(0, 0, 0, 0.5);
+@media (hover: hover) {
+  .share-overlay__close:hover {
+    background: rgba(0, 0, 0, 0.5);
+  }
 }
 
 .share-overlay__actions {
@@ -361,9 +363,14 @@ function handleShare() {
   -webkit-tap-highlight-color: transparent;
 }
 
-.share-overlay__btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.35);
+@media (hover: hover) {
+  .share-overlay__btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+  .share-overlay__btn--primary:hover {
+    background: rgba(255, 255, 255, 0.85);
+  }
 }
 
 .share-overlay__btn:active {
@@ -381,10 +388,6 @@ function handleShare() {
   border-color: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-}
-
-.share-overlay__btn--primary:hover {
-  background: rgba(255, 255, 255, 0.85);
 }
 
 /* ═══════════════════════════════════════════════════════

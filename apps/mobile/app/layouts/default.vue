@@ -194,9 +194,11 @@ const desktopBottomItems = [
     color: var(--color-pro);
   }
 
-  .app-topbar__streak:hover {
-    background: var(--color-pro-bg-strong);
-    text-decoration: none;
+  @media (hover: hover) {
+    .app-topbar__streak:hover {
+      background: var(--color-pro-bg-strong);
+      text-decoration: none;
+    }
   }
 
   .app-topbar__avatar {
@@ -215,8 +217,10 @@ const desktopBottomItems = [
     transition: box-shadow var(--transition-fast);
   }
 
-  .app-topbar__avatar:hover {
-    box-shadow: 0 0 0 2px var(--color-desktop-border);
+  @media (hover: hover) {
+    .app-topbar__avatar:hover {
+      box-shadow: 0 0 0 2px var(--color-desktop-border);
+    }
   }
 }
 </style>

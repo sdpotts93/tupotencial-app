@@ -134,8 +134,10 @@ function goToAddon() {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.ent__sheet-close:hover {
-  background: var(--color-border-light);
+@media (hover: hover) {
+  .ent__sheet-close:hover {
+    background: var(--color-border-light);
+  }
 }
 
 /* ─── Body ─── */

@@ -62,7 +62,9 @@ a {
   color: var(--color-primary);
   text-decoration: none;
 }
-a:hover { text-decoration: underline; }
+@media (hover: hover) {
+  a:hover { text-decoration: underline; }
+}
 
 /* ---- Scrollbar minimal ---- */
 ::-webkit-scrollbar { width: 4px; height: 4px; }

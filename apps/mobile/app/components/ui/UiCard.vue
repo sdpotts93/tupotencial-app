@@ -72,9 +72,11 @@ withDefaults(defineProps<Props>(), {
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
-.card--clickable:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-2);
+@media (hover: hover) {
+  .card--clickable:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-2);
+  }
 }
 .card--clickable:active { transform: scale(0.99); }
 

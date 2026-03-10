@@ -185,9 +185,11 @@ const toolbarButtons = computed(() => {
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.editor-toolbar__btn:hover {
-  background: var(--color-hover);
-  color: var(--color-text);
+@media (hover: hover) {
+  .editor-toolbar__btn:hover {
+    background: var(--color-hover);
+    color: var(--color-text);
+  }
 }
 
 .editor-toolbar__btn--active {

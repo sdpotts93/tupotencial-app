@@ -107,7 +107,9 @@ function handleOpen() {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.benefit__back:hover { background: rgba(var(--tint-rgb), 0.5); }
+@media (hover: hover) {
+  .benefit__back:hover { background: rgba(var(--tint-rgb), 0.5); }
+}
 
 /* ─── Back link (desktop only) ─── */
 .benefit__back-link {
@@ -215,7 +217,9 @@ function handleOpen() {
     padding: 0;
     margin-bottom: var(--space-6);
   }
-  .benefit__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  @media (hover: hover) {
+    .benefit__back-link:hover { background: rgba(var(--tint-rgb), 0.06); }
+  }
 
   .benefit__info {
     order: 1;

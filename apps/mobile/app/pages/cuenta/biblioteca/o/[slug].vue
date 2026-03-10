@@ -147,7 +147,9 @@ const items = ref(contentByObjective[slug] ?? [
   position: absolute;
   left: 0;
 }
-.obj__back:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .obj__back:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 
 /* ─── Description ─── */
 .obj__description {
@@ -171,7 +173,9 @@ const items = ref(contentByObjective[slug] ?? [
   text-decoration: none;
   color: var(--color-text);
 }
-.obj__item:hover { text-decoration: none; }
+@media (hover: hover) {
+  .obj__item:hover { text-decoration: none; }
+}
 
 .obj__item-thumb {
   width: 72px;
@@ -239,8 +243,10 @@ const items = ref(contentByObjective[slug] ?? [
     transition: border-color var(--transition-fast);
   }
 
-  .obj__item:hover {
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .obj__item:hover {
+      border-color: var(--color-border);
+    }
   }
 }
 </style>

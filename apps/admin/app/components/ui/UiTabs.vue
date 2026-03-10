@@ -55,7 +55,9 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   white-space: nowrap;
 }
 
-.tabs__tab:hover { color: var(--color-text); }
+@media (hover: hover) {
+  .tabs__tab:hover { color: var(--color-text); }
+}
 
 .tabs__tab--active {
   color: var(--color-text);

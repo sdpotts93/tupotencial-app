@@ -182,7 +182,9 @@ function getResponse(input: string): string {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.chat__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+@media (hover: hover) {
+  .chat__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+}
 
 /* ─── Disclaimer ─── */
 .chat__disclaimer {
@@ -352,8 +354,10 @@ function getResponse(input: string): string {
   opacity: 0.15;
   cursor: default;
 }
-.chat__send:not(:disabled):hover {
-  opacity: 0.85;
+@media (hover: hover) {
+  .chat__send:not(:disabled):hover {
+    opacity: 0.85;
+  }
 }
 
 /* ─── Desktop SaaS (ChatGPT-style) ─── */

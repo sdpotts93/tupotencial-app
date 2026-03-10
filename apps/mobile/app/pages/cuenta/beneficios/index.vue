@@ -78,7 +78,9 @@ const benefits = ref([
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.benefits__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+@media (hover: hover) {
+  .benefits__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+}
 
 /* ─── Intro ─── */
 .benefits__intro {
@@ -109,7 +111,9 @@ const benefits = ref([
   background: rgba(var(--tint-rgb), 0.04);
   transition: background var(--transition-fast);
 }
-.benefits__card:hover { background: rgba(var(--tint-rgb), 0.06); }
+@media (hover: hover) {
+  .benefits__card:hover { background: rgba(var(--tint-rgb), 0.06); }
+}
 .benefits__card:active { background: rgba(var(--tint-rgb), 0.08); }
 
 /* ─── Colorful icon ─── */
@@ -179,9 +183,11 @@ const benefits = ref([
     transition: border-color var(--transition-fast);
   }
 
-  .benefits__card:hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .benefits__card:hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 }
 </style>

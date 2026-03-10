@@ -92,35 +92,37 @@ const classes = computed(() => [
   color: var(--color-dark);
   border-color: var(--color-white);
 }
-.btn--primary:hover { background: var(--color-light); border-color: var(--color-light); }
+@media (hover: hover) {
+  .btn--primary:hover { background: var(--color-light); border-color: var(--color-light); }
+  .btn--secondary:hover { opacity: 0.9; }
+  .btn--outline:hover { background: rgba(var(--tint-rgb), 0.05); }
+  .btn--ghost:hover { background: var(--color-surface-alt); }
+  .btn--danger:hover { opacity: 0.9; }
+}
 
 .btn--secondary {
   background: var(--color-sand);
   color: var(--color-white);
   border-color: var(--color-sand);
 }
-.btn--secondary:hover { opacity: 0.9; }
 
 .btn--outline {
   background: transparent;
   color: var(--color-dark);
   border-color: var(--color-dark);
 }
-.btn--outline:hover { background: rgba(var(--tint-rgb), 0.05); }
 
 .btn--ghost {
   background: transparent;
   color: var(--color-text);
   border-color: transparent;
 }
-.btn--ghost:hover { background: var(--color-surface-alt); }
 
 .btn--danger {
   background: var(--color-danger);
   color: var(--color-white);
   border-color: var(--color-danger);
 }
-.btn--danger:hover { opacity: 0.9; }
 
 /* Sizes */
 .btn--sm {

@@ -321,8 +321,10 @@ function isActive(to: string): boolean {
   transition: box-shadow var(--transition-fast);
 }
 
-.admin-layout__avatar:hover {
-  box-shadow: 0 0 0 2px var(--color-desktop-border);
+@media (hover: hover) {
+  .admin-layout__avatar:hover {
+    box-shadow: 0 0 0 2px var(--color-desktop-border);
+  }
 }
 
 .admin-layout__body {
@@ -365,10 +367,12 @@ function isActive(to: string): boolean {
   transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.sidebar-nav__item:hover {
-  background: rgba(var(--tint-rgb), 0.04);
-  color: var(--color-text);
-  text-decoration: none;
+@media (hover: hover) {
+  .sidebar-nav__item:hover {
+    background: rgba(var(--tint-rgb), 0.04);
+    color: var(--color-text);
+    text-decoration: none;
+  }
 }
 
 .sidebar-nav__item--active {
@@ -435,8 +439,10 @@ function isActive(to: string): boolean {
   color: var(--color-muted);
 }
 
-.sidebar-nav__bottom .sidebar-nav__item:hover {
-  color: var(--color-text-secondary);
+@media (hover: hover) {
+  .sidebar-nav__bottom .sidebar-nav__item:hover {
+    color: var(--color-text-secondary);
+  }
 }
 
 /* ─── Desktop ─── */

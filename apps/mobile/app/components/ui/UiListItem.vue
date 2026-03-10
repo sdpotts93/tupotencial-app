@@ -69,7 +69,9 @@ withDefaults(defineProps<Props>(), {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.list-item--clickable:hover { background: rgba(var(--tint-rgb), 0.04); }
+@media (hover: hover) {
+  .list-item--clickable:hover { background: rgba(var(--tint-rgb), 0.04); }
+}
 .list-item--clickable:active { background: rgba(var(--tint-rgb), 0.08); }
 
 .list-item__icon {

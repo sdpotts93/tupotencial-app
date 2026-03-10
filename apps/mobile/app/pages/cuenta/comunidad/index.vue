@@ -257,7 +257,9 @@ function toggleReaction(id: string) {
   -webkit-tap-highlight-color: transparent;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
-.community__pill:not(.community__pill--active):hover { background: rgba(var(--tint-rgb), 0.08); }
+@media (hover: hover) {
+  .community__pill:not(.community__pill--active):hover { background: rgba(var(--tint-rgb), 0.08); }
+}
 
 .community__pill--active {
   background: var(--color-dark);
@@ -346,7 +348,9 @@ function toggleReaction(id: string) {
   color: var(--color-muted);
   text-decoration: none;
 }
-.post__action:hover { color: var(--color-text-secondary); }
+@media (hover: hover) {
+  .post__action:hover { color: var(--color-text-secondary); }
+}
 
 /* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {
@@ -384,8 +388,10 @@ function toggleReaction(id: string) {
     transition: border-color var(--transition-fast);
   }
 
-  .post:hover {
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .post:hover {
+      border-color: var(--color-border);
+    }
   }
 
   .community__pill {
@@ -399,9 +405,11 @@ function toggleReaction(id: string) {
     color: var(--color-white);
   }
 
-  .community__pill:not(.community__pill--active):hover {
-    background: var(--color-desktop-card);
-    border-color: var(--color-border);
+  @media (hover: hover) {
+    .community__pill:not(.community__pill--active):hover {
+      background: var(--color-desktop-card);
+      border-color: var(--color-border);
+    }
   }
 
   /* ─── Right sidebar ─── */
@@ -447,9 +455,11 @@ function toggleReaction(id: string) {
     transition: background var(--transition-fast);
   }
 
-  .shortcut-card:hover {
-    background: rgba(var(--tint-rgb), 0.03);
-    text-decoration: none;
+  @media (hover: hover) {
+    .shortcut-card:hover {
+      background: rgba(var(--tint-rgb), 0.03);
+      text-decoration: none;
+    }
   }
 
   .shortcut-card__icon {
@@ -506,9 +516,11 @@ function toggleReaction(id: string) {
     transition: background var(--transition-fast);
   }
 
-  .recent-post:hover {
-    background: rgba(var(--tint-rgb), 0.03);
-    text-decoration: none;
+  @media (hover: hover) {
+    .recent-post:hover {
+      background: rgba(var(--tint-rgb), 0.03);
+      text-decoration: none;
+    }
   }
 
   .recent-post__reactions {

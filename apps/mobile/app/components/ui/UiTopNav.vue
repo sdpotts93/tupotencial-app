@@ -86,5 +86,7 @@ function goBack() {
   border-radius: var(--radius-md);
   -webkit-tap-highlight-color: transparent;
 }
-.top-nav__back:hover { background: var(--color-surface-alt); }
+@media (hover: hover) {
+  .top-nav__back:hover { background: var(--color-surface-alt); }
+}
 </style>

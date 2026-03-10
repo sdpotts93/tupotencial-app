@@ -382,8 +382,10 @@ async function handleRegister() {
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.login__close:hover {
-  background: var(--color-border-light);
+@media (hover: hover) {
+  .login__close:hover {
+    background: var(--color-border-light);
+  }
 }
 
 .login__sheet-title {
@@ -434,8 +436,10 @@ async function handleRegister() {
   text-decoration: none;
   padding: 0;
 }
-.login__sheet-switch-btn:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .login__sheet-switch-btn:hover {
+    text-decoration: underline;
+  }
 }
 
 /* Desktop-only links (hidden on mobile) */
@@ -524,8 +528,10 @@ async function handleRegister() {
     font-weight: var(--weight-medium);
     text-decoration: none;
   }
-  .login__register-link a:hover {
-    text-decoration: underline;
+  @media (hover: hover) {
+    .login__register-link a:hover {
+      text-decoration: underline;
+    }
   }
 
   .login__desktop-legal {
