@@ -144,6 +144,9 @@
                     :options="contentOptions"
                     placeholder="Selecciona contenido"
                   />
+                  <p v-if="activity.type === 'contenido' && contentConflictLabel(activity.content_id)" class="activity-item__warning">
+                    Este contenido requiere el complemento "{{ contentConflictLabel(activity.content_id) }}" pero el programa no tiene restriccion.
+                  </p>
                   <UiSelect
                     v-if="activity.type === 'formulario'"
                     v-model="activity.form_id"
@@ -249,6 +252,27 @@ const contentOptions = [
   { value: 'cnt-008', label: 'Alimentacion para la energia diaria' },
 ]
 
+// Content entitlement map (mirrors content_items.entitlement_key)
+const contentEntitlementMap: Record<string, string> = {
+  'cnt-005': 'vip',
+  'cnt-008': 'bootcamp_liderazgo',
+}
+
+const entitlementLabels: Record<string, string> = {
+  vip: 'VIP',
+  mentoria_grupal: 'Mentoria grupal',
+  bootcamp_liderazgo: 'Bootcamp: Liderazgo',
+  coaching_1on1: 'Coaching 1:1',
+  retiro_marzo_2026: 'Retiro marzo 2026',
+}
+
+function contentConflictLabel(contentId: string): string | null {
+  if (form.entitlement_key) return null
+  const key = contentEntitlementMap[contentId]
+  if (!key) return null
+  return entitlementLabels[key] ?? key
+}
+
 // ── Day + Activity management ──
 interface Activity {
   type: string
@@ -319,6 +343,15 @@ function formatFileSize(bytes: number): string {
 }
 
 function handleSave() {
+  if (!form.entitlement_key) {
+    const hasConflict = programDays.value.some(day =>
+      day.activities.some(a => a.type === 'contenido' && contentEntitlementMap[a.content_id]),
+    )
+    if (hasConflict) {
+      alert('No se puede guardar: hay contenido que requiere un complemento pero el programa no tiene restriccion. Asigna un complemento al programa o cambia el contenido.')
+      return
+    }
+  }
   alert('Programa creado (mock). Redirigiendo...')
   navigateTo('/admin/programas')
 }
@@ -539,6 +572,13 @@ function handleSave() {
   color: var(--color-muted);
   font-style: italic;
   padding: var(--space-2) 0;
+}
+
+.activity-item__warning {
+  font-size: var(--text-xs);
+  color: var(--color-danger, #dc2626);
+  margin-top: var(--space-2);
+  line-height: var(--leading-normal);
 }
 
 @media (max-width: 768px) {
