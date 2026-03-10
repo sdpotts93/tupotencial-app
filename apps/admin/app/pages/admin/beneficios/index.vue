@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Beneficios</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/benefits/new">+ Nuevo beneficio</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/beneficios/new">+ Nuevo beneficio</UiButton>
       </div>
     </div>
 
@@ -60,7 +60,7 @@
             </UiTag>
           </span>
           <span class="ben-row__actions" @click.stop>
-            <UiButton variant="soft" size="sm" :to="`/admin/benefits/${row.id}`">
+            <UiButton variant="soft" size="sm" :to="`/admin/beneficios/${row.id}`">
               <template #icon><Icon name="lucide:pencil" size="16" /></template>
               Editar
             </UiButton>
@@ -157,7 +157,7 @@ function handleDelete(row: Record<string, any>) {
 }
 
 function goToEdit(row: Record<string, any>) {
-  router.push(`/admin/benefits/${row.id}`)
+  router.push(`/admin/beneficios/${row.id}`)
 }
 </script>
 

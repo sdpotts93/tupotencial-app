@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Crear contenido</h1>
       <div class="page-header__actions">
-        <UiButton variant="soft" size="sm" to="/admin/content">Cancelar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/contenido">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
       </div>
     </div>
@@ -264,7 +264,7 @@ function formatFileSize(bytes: number): string {
 
 function handleSave() {
   alert('Contenido guardado (mock). Redirigiendo a la lista...')
-  navigateTo('/admin/content')
+  navigateTo('/admin/contenido')
 }
 </script>
 

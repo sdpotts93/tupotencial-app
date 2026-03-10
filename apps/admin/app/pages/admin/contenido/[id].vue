@@ -4,7 +4,7 @@
       <h1 class="page-header__title">Editar contenido</h1>
       <div class="page-header__actions">
         <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
-        <UiButton variant="soft" size="sm" to="/admin/content">Cancelar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/contenido">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
     </div>
@@ -286,13 +286,13 @@ function handleSave() {
 
 function handleDuplicate() {
   alert(`Contenido duplicado como "Copia de ${form.title}" (mock)`)
-  navigateTo('/admin/content/new')
+  navigateTo('/admin/contenido/new')
 }
 
 function handleDelete() {
   if (confirm('Seguro que deseas eliminar este contenido?')) {
     alert('Contenido eliminado (mock)')
-    navigateTo('/admin/content')
+    navigateTo('/admin/contenido')
   }
 }
 </script>

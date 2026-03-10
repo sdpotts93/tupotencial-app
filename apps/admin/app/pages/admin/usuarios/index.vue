@@ -66,7 +66,7 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" :to="`/admin/users/${row.id}`">
+        <UiButton variant="soft" size="sm" :to="`/admin/usuarios/${row.id}`">
           <template #icon><Icon name="lucide:eye" size="16" /></template>
           Ver
         </UiButton>
@@ -164,7 +164,7 @@ function formatDate(iso: string) {
 }
 
 function goToDetail(row: Record<string, any>) {
-  router.push(`/admin/users/${row.id}`)
+  router.push(`/admin/usuarios/${row.id}`)
 }
 
 function exportUsers() {

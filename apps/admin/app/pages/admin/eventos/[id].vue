@@ -4,7 +4,7 @@
       <h1 class="page-header__title">Editar evento</h1>
       <div class="page-header__actions">
         <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
-        <UiButton variant="soft" size="sm" to="/admin/events">Cancelar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
     </div>
@@ -121,7 +121,7 @@ function handleSave() {
 function handleDelete() {
   if (confirm('Seguro que deseas eliminar este evento?')) {
     alert('Evento eliminado (mock)')
-    navigateTo('/admin/events')
+    navigateTo('/admin/eventos')
   }
 }
 </script>

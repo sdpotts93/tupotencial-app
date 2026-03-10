@@ -1,9 +1,9 @@
 <template>
   <div class="page--fill">
     <div class="page-header">
-      <h1 class="page-header__title">Add-ons</h1>
+      <h1 class="page-header__title">Complementos</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/addons/new">+ Nuevo add-on</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/complementos/new">+ Nuevo add-on</UiButton>
       </div>
     </div>
 
@@ -41,7 +41,7 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" :to="`/admin/addons/${row.id}`">
+        <UiButton variant="soft" size="sm" :to="`/admin/complementos/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
@@ -96,6 +96,6 @@ function periodLabel(period: string) {
 }
 
 function goToEdit(row: Record<string, any>) {
-  router.push(`/admin/addons/${row.id}`)
+  router.push(`/admin/complementos/${row.id}`)
 }
 </script>

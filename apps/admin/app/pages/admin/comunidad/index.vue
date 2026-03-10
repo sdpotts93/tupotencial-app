@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Comunidad</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/community/new">+ Nueva publicacion</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/comunidad/new">+ Nueva publicacion</UiButton>
       </div>
     </div>
 
@@ -52,7 +52,7 @@
         </template>
 
         <template #actions="{ row }">
-          <UiButton variant="soft" size="sm" :to="`/admin/community/${row.id}`">
+          <UiButton variant="soft" size="sm" :to="`/admin/comunidad/${row.id}`">
             <template #icon><Icon name="lucide:pencil" size="16" /></template>
             Editar
           </UiButton>
@@ -121,7 +121,7 @@ function formatDate(iso: string) {
 }
 
 function goToEdit(row: Record<string, any>) {
-  router.push(`/admin/community/${row.id}`)
+  router.push(`/admin/comunidad/${row.id}`)
 }
 </script>
 

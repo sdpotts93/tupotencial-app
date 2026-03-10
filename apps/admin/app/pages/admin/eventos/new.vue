@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Nuevo evento</h1>
       <div class="page-header__actions">
-        <UiButton variant="soft" size="sm" to="/admin/events">Cancelar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
       </div>
     </div>
@@ -164,7 +164,7 @@ const statusOptions = [
 
 function handleSave() {
   alert('Evento creado (mock)')
-  navigateTo('/admin/events')
+  navigateTo('/admin/eventos')
 }
 </script>
 

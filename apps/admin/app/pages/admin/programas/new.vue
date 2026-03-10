@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Nuevo programa</h1>
       <div class="page-header__actions">
-        <UiButton variant="soft" size="sm" to="/admin/programs">Cancelar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/programas">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
       </div>
     </div>
@@ -127,7 +127,7 @@ const statusOptions = [
 
 function handleSave() {
   alert('Programa creado (mock). Redirigiendo...')
-  navigateTo('/admin/programs')
+  navigateTo('/admin/programas')
 }
 </script>
 

@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Contenido</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/content/new">+ Crear contenido</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/contenido/new">+ Crear contenido</UiButton>
       </div>
     </div>
 
@@ -55,7 +55,7 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" :to="`/admin/content/${row.id}`">
+        <UiButton variant="soft" size="sm" :to="`/admin/contenido/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
@@ -176,6 +176,6 @@ function handleDelete(row: Record<string, any>) {
 }
 
 function goToEdit(row: Record<string, any>) {
-  router.push(`/admin/content/${row.id}`)
+  router.push(`/admin/contenido/${row.id}`)
 }
 </script>

@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-header__title">Dashboard</h1>
+      <h1 class="page-header__title">Inicio</h1>
       <!-- <div class="page-header__actions">
-        <UiButton variant="outline" size="sm" to="/admin/content/new">
+        <UiButton variant="outline" size="sm" to="/admin/contenido/new">
           + Nuevo contenido
         </UiButton>
       </div> -->
@@ -66,11 +66,11 @@ const kpis = ref([
 ])
 
 const quickActions = [
-  { title: 'Crear contenido', description: 'Articulo, video o audio nuevo', icon: 'lucide:file-plus', to: '/admin/content/new' },
-  { title: 'Nuevo programa', description: 'Disenar un programa de bienestar', icon: 'lucide:layers', to: '/admin/programs/new' },
-  { title: 'Publicar evento', description: 'Agendar un evento o taller', icon: 'lucide:calendar-plus', to: '/admin/events/new' },
-  { title: 'Agregar beneficio', description: 'Nuevo beneficio para miembros', icon: 'lucide:gift', to: '/admin/benefits/new' },
-  { title: 'Post comunidad', description: 'Publicacion oficial en la comunidad', icon: 'lucide:message-square-plus', to: '/admin/community/new' },
+  { title: 'Crear contenido', description: 'Articulo, video o audio nuevo', icon: 'lucide:file-plus', to: '/admin/contenido/new' },
+  { title: 'Nuevo programa', description: 'Disenar un programa de bienestar', icon: 'lucide:layers', to: '/admin/programas/new' },
+  { title: 'Publicar evento', description: 'Agendar un evento o taller', icon: 'lucide:calendar-plus', to: '/admin/eventos/new' },
+  { title: 'Agregar beneficio', description: 'Nuevo beneficio para miembros', icon: 'lucide:gift', to: '/admin/beneficios/new' },
+  { title: 'Post comunidad', description: 'Publicacion oficial en la comunidad', icon: 'lucide:message-square-plus', to: '/admin/comunidad/new' },
   { title: 'Planificar hoy', description: 'Configurar el plan del dia', icon: 'lucide:sun', to: '/admin/hoy' },
 ]
 

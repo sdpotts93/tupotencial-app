@@ -4,7 +4,7 @@
       <h1 class="page-header__title">Editar programa</h1>
       <div class="page-header__actions">
         <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
-        <UiButton variant="soft" size="sm" to="/admin/programs">Cancelar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/programas">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
     </div>
@@ -150,13 +150,13 @@ function handleSave() {
 
 function handleDuplicate() {
   alert(`Programa duplicado como "Copia de ${form.title}" (mock)`)
-  navigateTo('/admin/programs/new')
+  navigateTo('/admin/programas/new')
 }
 
 function handleDelete() {
   if (confirm('Seguro que deseas eliminar este programa?')) {
     alert('Programa eliminado (mock)')
-    navigateTo('/admin/programs')
+    navigateTo('/admin/programas')
   }
 }
 </script>

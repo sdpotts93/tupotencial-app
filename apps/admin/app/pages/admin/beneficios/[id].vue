@@ -4,7 +4,7 @@
       <h1 class="page-header__title">Editar beneficio</h1>
       <div class="page-header__actions">
         <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
-        <UiButton variant="soft" size="sm" to="/admin/benefits">Cancelar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/beneficios">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
       </div>
     </div>
@@ -107,7 +107,7 @@ function handleSave() {
 function handleDelete() {
   if (confirm('Seguro que deseas eliminar este beneficio?')) {
     alert('Beneficio eliminado (mock)')
-    navigateTo('/admin/benefits')
+    navigateTo('/admin/beneficios')
   }
 }
 </script>

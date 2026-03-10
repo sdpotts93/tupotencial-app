@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Nueva publicacion oficial</h1>
       <div class="page-header__actions">
-        <UiButton variant="soft" size="sm" to="/admin/community">Cancelar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/comunidad">Cancelar</UiButton>
         <UiButton variant="primary-outline" size="sm" @click="handleSave">Publicar</UiButton>
       </div>
     </div>
@@ -92,7 +92,7 @@ const statusOptions = [
 
 function handleSave() {
   alert('Publicacion creada (mock)')
-  navigateTo('/admin/community')
+  navigateTo('/admin/comunidad')
 }
 </script>
 

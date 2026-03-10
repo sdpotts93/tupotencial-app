@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Programas</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/programs/new">+ Nuevo programa</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/programas/new">+ Nuevo programa</UiButton>
       </div>
     </div>
 
@@ -54,7 +54,7 @@
           <template #icon><Icon name="lucide:copy" size="16" /></template>
           Duplicar
         </UiButton>
-        <UiButton variant="soft" size="sm" :to="`/admin/programs/${row.id}`">
+        <UiButton variant="soft" size="sm" :to="`/admin/programas/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
@@ -150,10 +150,10 @@ function statusLabel(status: string) {
 
 function handleDuplicate(row: Record<string, any>) {
   alert(`Programa duplicado como "Copia de ${row.title}" (mock)`)
-  navigateTo('/admin/programs/new')
+  navigateTo('/admin/programas/new')
 }
 
 function goToEdit(row: Record<string, any>) {
-  router.push(`/admin/programs/${row.id}`)
+  router.push(`/admin/programas/${row.id}`)
 }
 </script>
