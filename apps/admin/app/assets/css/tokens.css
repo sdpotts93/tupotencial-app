@@ -213,6 +213,7 @@
 :root {
   --sidebar-width: 280px;
   --topbar-height: 48px;
+  --color-desktop-border: #E8E6E2;
 }
 
 /* ─── Desktop SaaS layout ─── */
