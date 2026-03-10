@@ -28,6 +28,7 @@ export interface MockContentItem {
   available_from: string | null;
   available_to: string | null;
   community_segment: 'gabriel' | 'carlotta' | 'conjunta' | null;
+  entitlement_key: string | null;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;
@@ -112,6 +113,7 @@ export const mockContentItems: MockContentItem[] = [
     available_from: null,
     available_to: null,
     community_segment: null,
+    entitlement_key: null,
     created_by: 'mock-uuid-user-001',
     updated_by: null,
     created_at: '2026-01-14T20:00:00.000Z',
@@ -133,6 +135,7 @@ export const mockContentItems: MockContentItem[] = [
     available_from: null,
     available_to: null,
     community_segment: 'carlotta',
+    entitlement_key: null,
     created_by: 'mock-uuid-user-001',
     updated_by: null,
     created_at: '2026-01-19T18:00:00.000Z',
@@ -154,6 +157,7 @@ export const mockContentItems: MockContentItem[] = [
     available_from: null,
     available_to: null,
     community_segment: 'gabriel',
+    entitlement_key: null,
     created_by: 'mock-uuid-user-002',
     updated_by: null,
     created_at: '2026-01-31T22:00:00.000Z',
@@ -177,6 +181,7 @@ export const mockContentItems: MockContentItem[] = [
     available_from: null,
     available_to: null,
     community_segment: null,
+    entitlement_key: null,
     created_by: 'mock-uuid-user-001',
     updated_by: null,
     created_at: '2026-02-04T15:00:00.000Z',
@@ -198,6 +203,7 @@ export const mockContentItems: MockContentItem[] = [
     available_from: null,
     available_to: null,
     community_segment: 'conjunta',
+    entitlement_key: 'vip',
     created_by: 'mock-uuid-user-002',
     updated_by: null,
     created_at: '2026-02-09T20:00:00.000Z',
@@ -242,6 +248,7 @@ Visualiza ese momento. Deja que esa imagen guíe tus decisiones.
     available_from: null,
     available_to: null,
     community_segment: null,
+    entitlement_key: null,
     created_by: 'mock-uuid-user-001',
     updated_by: 'mock-uuid-user-002',
     created_at: '2026-02-11T16:00:00.000Z',
@@ -282,6 +289,7 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     available_from: null,
     available_to: null,
     community_segment: 'carlotta',
+    entitlement_key: null,
     created_by: 'mock-uuid-user-001',
     updated_by: null,
     created_at: '2026-02-13T12:00:00.000Z',
@@ -305,6 +313,7 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     available_from: null,
     available_to: null,
     community_segment: 'gabriel',
+    entitlement_key: 'bootcamp_liderazgo',
     created_by: 'mock-uuid-user-002',
     updated_by: null,
     created_at: '2026-02-20T10:00:00.000Z',
@@ -326,6 +335,7 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     available_from: '2026-03-01T06:00:00.000Z',
     available_to: null,
     community_segment: null,
+    entitlement_key: null,
     created_by: 'mock-uuid-user-001',
     updated_by: null,
     created_at: '2026-02-22T09:00:00.000Z',
@@ -347,6 +357,7 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     available_from: null,
     available_to: null,
     community_segment: null,
+    entitlement_key: null,
     created_by: 'mock-uuid-user-002',
     updated_by: null,
     created_at: '2026-02-17T14:00:00.000Z',

@@ -11,6 +11,7 @@ export interface MockProgram {
   description: string | null;
   status: 'draft' | 'published' | 'archived';
   community_segment: 'gabriel' | 'carlotta' | 'conjunta' | null;
+  entitlement_key: string | null;
   is_active: boolean;
   start_date: string | null;
   end_date: string | null;
@@ -60,6 +61,7 @@ export const mockPrograms: MockProgram[] = [
       'Durante 7 días consecutivos, cultivarás el hábito de la gratitud con ejercicios prácticos que transformarán tu perspectiva y tu energía.',
     status: 'published',
     community_segment: null,
+    entitlement_key: null,
     is_active: true,
     start_date: null,
     end_date: null,
@@ -74,6 +76,7 @@ export const mockPrograms: MockProgram[] = [
       'Un viaje de 30 días para construir una rutina matutina poderosa. Cada día incluye meditación, movimiento y reflexión guiada.',
     status: 'published',
     community_segment: 'carlotta',
+    entitlement_key: null,
     is_active: true,
     start_date: '2026-02-01',
     end_date: '2026-03-02',
@@ -88,6 +91,7 @@ export const mockPrograms: MockProgram[] = [
       'Un bootcamp intensivo de 14 días para desarrollar tu liderazgo desde adentro. Incluye sesiones en vivo, ejercicios prácticos y comunidad de apoyo.',
     status: 'published',
     community_segment: 'gabriel',
+    entitlement_key: 'bootcamp_liderazgo',
     is_active: true,
     start_date: '2026-03-01',
     end_date: '2026-03-14',
@@ -102,6 +106,7 @@ export const mockPrograms: MockProgram[] = [
       'Recupera tu atención y tu tiempo. Durante 15 días te guiaremos para crear una relación más sana con la tecnología.',
     status: 'published',
     community_segment: 'conjunta',
+    entitlement_key: null,
     is_active: true,
     start_date: null,
     end_date: null,
@@ -116,6 +121,7 @@ export const mockPrograms: MockProgram[] = [
       'Aprende técnicas comprobadas para gestionar el estrés y convertirlo en tu aliado. Meditaciones, respiraciones y micro-hábitos.',
     status: 'draft',
     community_segment: null,
+    entitlement_key: null,
     is_active: false,
     start_date: null,
     end_date: null,

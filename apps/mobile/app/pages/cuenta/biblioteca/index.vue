@@ -84,20 +84,23 @@
               <NuxtLink :to="`/cuenta/biblioteca/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
             </div>
             <div class="library__scroll">
-              <NuxtLink
+              <div
                 v-for="item in cat.items"
                 :key="item.id"
-                :to="`/cuenta/contenido/${item.id}`"
-                class="library__scroll-card"
+                :class="['library__scroll-card', { 'library__scroll-card--locked': isLocked(item.entitlement_key) }]"
+                @click="handleContentClick(item)"
               >
-                <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
+                <div class="library__scroll-img-wrap">
+                  <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
+                  <EntitlementLockBadge :locked="isLocked(item.entitlement_key)" />
+                </div>
                 <div class="library__scroll-info">
                   <span class="library__scroll-title">{{ item.title }}</span>
                   <span v-if="item.duration" class="library__scroll-duration">
                     <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
                   </span>
                 </div>
-              </NuxtLink>
+              </div>
             </div>
           </section>
 
@@ -185,15 +188,22 @@
           </div>
         </template>
       </template>
+
+      <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const router = useRouter()
+const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+
 const searching = ref(false)
 const query = ref('')
 const searchInputRef = ref()
 const activeTab = useState('library-tab', () => 'categorias')
+const showPurchaseModal = ref(false)
+const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 
 const tabs = [
   { value: 'categorias', label: 'Categorías' },
@@ -245,28 +255,37 @@ const categories = ref([
     title: 'Meditaciones',
     slug: 'meditaciones',
     items: [
-      { id: 'mock-content-001', title: 'Respiración consciente', typeLabel: 'Audio', duration: '10 min', thumbnail: '/images/lib-1.jpg' },
-      { id: 'mock-content-002', title: 'Escaneo corporal', typeLabel: 'Audio', duration: '15 min', thumbnail: '/images/lib-2.jpg' },
-      { id: 'mock-content-003', title: 'Atención plena', typeLabel: 'Video', duration: '8 min', thumbnail: '/images/lib-3.jpg' },
+      { id: 'mock-content-001', title: 'Respiración consciente', typeLabel: 'Audio', duration: '10 min', thumbnail: '/images/lib-1.jpg', entitlement_key: null as string | null },
+      { id: 'mock-content-002', title: 'Escaneo corporal', typeLabel: 'Audio', duration: '15 min', thumbnail: '/images/lib-2.jpg', entitlement_key: null as string | null },
+      { id: 'mock-content-003', title: 'Atención plena', typeLabel: 'Video', duration: '8 min', thumbnail: '/images/lib-3.jpg', entitlement_key: null as string | null },
     ],
   },
   {
     title: 'Rutinas de mañana',
     slug: 'rutinas-manana',
     items: [
-      { id: 'mock-content-004', title: 'Despertar con energía', typeLabel: 'Video', duration: '12 min', thumbnail: '/images/lib-5.jpg' },
-      { id: 'mock-content-005', title: 'Diario de gratitud', typeLabel: 'Texto', duration: '5 min', thumbnail: '/images/lib-6.jpg' },
+      { id: 'mock-content-004', title: 'Despertar con energía', typeLabel: 'Video', duration: '12 min', thumbnail: '/images/lib-5.jpg', entitlement_key: null as string | null },
+      { id: 'mock-content-005', title: 'Diario de gratitud', typeLabel: 'Texto', duration: '5 min', thumbnail: '/images/lib-6.jpg', entitlement_key: 'vip' as string | null },
     ],
   },
   {
     title: 'Crecimiento personal',
     slug: 'crecimiento-personal',
     items: [
-      { id: 'mock-content-006', title: 'Mentalidad de crecimiento', typeLabel: 'Video', duration: '20 min', thumbnail: '/images/lib-7.jpg' },
-      { id: 'mock-content-007', title: 'Hábitos atómicos', typeLabel: 'Texto', duration: '8 min', thumbnail: '/images/lib-2.jpg' },
+      { id: 'mock-content-006', title: 'Mentalidad de crecimiento', typeLabel: 'Video', duration: '20 min', thumbnail: '/images/lib-7.jpg', entitlement_key: null as string | null },
+      { id: 'mock-content-007', title: 'Hábitos atómicos', typeLabel: 'Texto', duration: '8 min', thumbnail: '/images/lib-2.jpg', entitlement_key: null as string | null },
     ],
   },
 ])
+
+function handleContentClick(item: { id: string; entitlement_key: string | null }) {
+  if (isLocked(item.entitlement_key)) {
+    selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  router.push(`/cuenta/contenido/${item.id}`)
+}
 
 // ─── Tab: Programas ───
 // Mock: content grouped by program (simulates program → days → day_items → content join)
@@ -582,12 +601,21 @@ const objectives = ref([
   overflow: hidden;
 }
 
+.library__scroll-img-wrap {
+  position: relative;
+}
+
 .library__scroll-img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
   display: block;
   border-radius: var(--radius-xl);
+}
+
+.library__scroll-card--locked .library__scroll-img {
+  opacity: 0.65;
+  filter: grayscale(20%);
 }
 
 .library__scroll-info {

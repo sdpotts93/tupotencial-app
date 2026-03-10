@@ -26,16 +26,34 @@
         <h1 class="title title--lg detail__title">{{ program.title }}</h1>
 
         <div class="detail__actions">
-          <UiButton v-if="!program.enrolled" block @click="enroll">Inscribirme</UiButton>
-          <UiButton variant="outline" v-else block :to="`/cuenta/retos/${id}/dia/${program.currentDay}`">
-            Continuar — Día {{ program.currentDay }}
-          </UiButton>
+          <template v-if="locked">
+            <UiButton block @click="showPurchaseModal = true">
+              <template #icon>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+              </template>
+              Desbloquear
+            </UiButton>
+          </template>
+          <template v-else>
+            <UiButton v-if="!program.enrolled" block @click="enroll">Inscribirme</UiButton>
+            <UiButton variant="outline" v-else block :to="`/cuenta/retos/${id}/dia/${program.currentDay}`">
+              Continuar — Día {{ program.currentDay }}
+            </UiButton>
+          </template>
         </div>
 
         <p class="detail__description">{{ program.description }}</p>
 
         <div class="detail__meta">
-          <span :class="['detail__tag', program.enrolled ? 'detail__tag--inscrito' : (program.free ? 'detail__tag--gratis' : 'detail__tag--core')]">
+          <span v-if="locked" class="detail__tag detail__tag--locked">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
+            Complemento
+          </span>
+          <span v-else :class="['detail__tag', program.enrolled ? 'detail__tag--inscrito' : (program.free ? 'detail__tag--gratis' : 'detail__tag--core')]">
             {{ program.enrolled ? 'Inscrito' : (program.free ? 'Gratis' : 'Core') }}
           </span>
           <UiTag>{{ program.totalDays }} días</UiTag>
@@ -52,14 +70,16 @@
           :key="day.index"
           :label="`Día ${day.index}`"
           :description="day.title"
-          :to="`/cuenta/retos/${id}/dia/${day.index}`"
+          :to="locked ? undefined : `/cuenta/retos/${id}/dia/${day.index}`"
         >
-          <template v-if="day.done" #suffix>
+          <template v-if="day.done && !locked" #suffix>
             <span class="detail__done">Completado ✓</span>
           </template>
         </UiListItem>
       </UiList>
     </section>
+
+    <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="addonInfo" />
   </div>
 </template>
 
@@ -68,6 +88,9 @@ definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
 const id = route.params.id as string
+const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+
+const showPurchaseModal = ref(false)
 
 const coverMap: Record<string, string> = {
   'mock-prog-001': '/images/lib-3.jpg',
@@ -75,6 +98,11 @@ const coverMap: Record<string, string> = {
   'mock-prog-003': '/images/lib-7.jpg',
   'mock-prog-004': '/images/lib-2.jpg',
   'mock-prog-005': '/images/lib-8.jpg',
+}
+
+// Mock: map program ids to entitlement keys
+const entitlementMap: Record<string, string | null> = {
+  'mock-prog-004': 'bootcamp_liderazgo',
 }
 
 const program = ref({
@@ -85,6 +113,7 @@ const program = ref({
   enrolled: true,
   free: true,
   currentDay: 5,
+  entitlement_key: (entitlementMap[id] ?? null) as string | null,
   description: 'Cada día te invitamos a reflexionar sobre lo que agradeces. Este reto transformará tu perspectiva y te ayudará a encontrar alegría en las pequeñas cosas. Dedica solo 5 minutos diarios a esta práctica.',
   thumbnail: coverMap[id] || '/images/lib-1.jpg',
   days: [
@@ -97,6 +126,11 @@ const program = ref({
     { index: 7, title: 'Tu camino', done: false },
   ],
 })
+
+const locked = computed(() => isLocked(program.value.entitlement_key))
+const addonInfo = computed(() =>
+  program.value.entitlement_key ? getAddonForEntitlement(program.value.entitlement_key) : null,
+)
 
 function enroll() {
   program.value.enrolled = true
@@ -220,6 +254,11 @@ function enroll() {
 .detail__tag--inscrito {
   background: var(--color-complete-bg);
   color: var(--color-complete);
+}
+
+.detail__tag--locked {
+  background: var(--color-surface-alt);
+  color: var(--color-muted);
 }
 
 .detail__meta :deep(.tag) {

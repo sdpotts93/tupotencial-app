@@ -50,6 +50,11 @@
         <UiTag :variant="value === 'core' ? 'gold' : 'default'">{{ value === 'core' ? 'Core' : 'Gratuito' }}</UiTag>
       </template>
 
+      <template #cell-entitlement_key="{ value }">
+        <UiTag v-if="value" variant="accent">{{ entitlementLabels[value] ?? value }}</UiTag>
+        <span v-else style="color: var(--color-muted);">—</span>
+      </template>
+
       <template #cell-published_at="{ value }">
         {{ value ? formatDate(value) : 'Sin publicar' }}
       </template>
@@ -109,23 +114,32 @@ const categoryFilterOptions = [
   { value: 'cat-006', label: 'Relaciones' },
 ]
 
+const entitlementLabels: Record<string, string> = {
+  vip: 'VIP',
+  mentoria_grupal: 'Mentoria grupal',
+  bootcamp_liderazgo: 'Bootcamp: Liderazgo',
+  coaching_1on1: 'Coaching 1:1',
+  retiro_marzo_2026: 'Retiro marzo 2026',
+}
+
 const columns = [
-  { key: 'title', label: 'Titulo', width: '30%' },
+  { key: 'title', label: 'Titulo', width: '25%' },
   { key: 'content_type', label: 'Tipo' },
   { key: 'segment', label: 'Plan' },
+  { key: 'entitlement_key', label: 'Complemento' },
   { key: 'status', label: 'Estado' },
   { key: 'published_at', label: 'Publicacion' },
 ]
 
 const rows = ref([
-  { id: 'cnt-001', title: '5 pasos para el bienestar emocional', content_type: 'video', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-20T08:00:00' },
-  { id: 'cnt-002', title: 'Meditacion guiada para la manana', content_type: 'audio', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-18T06:00:00' },
-  { id: 'cnt-003', title: 'Nutricion consciente: guia basica', content_type: 'article', segment: 'free', category: 'cat-002', status: 'published', published_at: '2026-02-15T10:00:00' },
-  { id: 'cnt-004', title: 'Rutina de yoga para principiantes', content_type: 'video', segment: 'core', category: 'cat-003', status: 'published', published_at: '2026-02-12T07:00:00' },
-  { id: 'cnt-005', title: 'Higiene del sueno: consejos practicos', content_type: 'article', segment: 'free', category: 'cat-004', status: 'draft', published_at: null },
-  { id: 'cnt-006', title: 'Como manejar el estres laboral', content_type: 'audio', segment: 'free', category: 'cat-005', status: 'draft', published_at: null },
-  { id: 'cnt-007', title: 'Ejercicios de respiracion 4-7-8', content_type: 'video', segment: 'free', category: 'cat-001', status: 'published', published_at: '2026-02-10T09:00:00' },
-  { id: 'cnt-008', title: 'Alimentacion para la energia diaria', content_type: 'article', segment: 'core', category: 'cat-002', status: 'archived', published_at: '2026-01-28T08:00:00' },
+  { id: 'cnt-001', title: '5 pasos para el bienestar emocional', content_type: 'video', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-20T08:00:00', entitlement_key: null as string | null },
+  { id: 'cnt-002', title: 'Meditacion guiada para la manana', content_type: 'audio', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-18T06:00:00', entitlement_key: null as string | null },
+  { id: 'cnt-003', title: 'Nutricion consciente: guia basica', content_type: 'article', segment: 'free', category: 'cat-002', status: 'published', published_at: '2026-02-15T10:00:00', entitlement_key: null as string | null },
+  { id: 'cnt-004', title: 'Rutina de yoga para principiantes', content_type: 'video', segment: 'core', category: 'cat-003', status: 'published', published_at: '2026-02-12T07:00:00', entitlement_key: null as string | null },
+  { id: 'cnt-005', title: 'Higiene del sueno: consejos practicos', content_type: 'article', segment: 'free', category: 'cat-004', status: 'draft', published_at: null, entitlement_key: 'vip' as string | null },
+  { id: 'cnt-006', title: 'Como manejar el estres laboral', content_type: 'audio', segment: 'free', category: 'cat-005', status: 'draft', published_at: null, entitlement_key: null as string | null },
+  { id: 'cnt-007', title: 'Ejercicios de respiracion 4-7-8', content_type: 'video', segment: 'free', category: 'cat-001', status: 'published', published_at: '2026-02-10T09:00:00', entitlement_key: null as string | null },
+  { id: 'cnt-008', title: 'Alimentacion para la energia diaria', content_type: 'article', segment: 'core', category: 'cat-002', status: 'archived', published_at: '2026-01-28T08:00:00', entitlement_key: 'bootcamp_liderazgo' as string | null },
 ])
 
 const filteredRows = computed(() => {

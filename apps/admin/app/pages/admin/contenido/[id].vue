@@ -126,6 +126,13 @@
             />
 
             <UiSelect
+              v-model="form.entitlement_key"
+              label="Complemento requerido"
+              :options="entitlementOptions"
+              placeholder="Sin restriccion"
+            />
+
+            <UiSelect
               v-model="form.status"
               label="Estado"
               :options="statusOptions"
@@ -176,6 +183,7 @@ const form = reactive({
   objective_id: 'obj-003',
   duration: '15 min',
   segment: 'free',
+  entitlement_key: '',
   status: 'published',
   scheduled_at: '',
   unpublished_at: '',
@@ -191,6 +199,15 @@ const typeOptions = [
 const segmentOptions = [
   { value: 'free', label: 'Gratuito' },
   { value: 'core', label: 'Core' },
+]
+
+const entitlementOptions = [
+  { value: '', label: 'Sin restriccion (abierto)' },
+  { value: 'vip', label: 'VIP' },
+  { value: 'mentoria_grupal', label: 'Mentoria grupal' },
+  { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
+  { value: 'coaching_1on1', label: 'Coaching 1:1' },
+  { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
 ]
 
 const categoryOptions = [

@@ -41,6 +41,11 @@
         <UiTag :variant="value === 'core' ? 'gold' : 'default'">{{ value === 'core' ? 'Core' : 'Gratuito' }}</UiTag>
       </template>
 
+      <template #cell-entitlement_key="{ value }">
+        <UiTag v-if="value" variant="accent">{{ entitlementLabels[value] ?? value }}</UiTag>
+        <span v-else style="color: var(--color-muted);">—</span>
+      </template>
+
       <template #cell-status="{ value }">
         <UiTag :variant="statusVariant(value)">{{ statusLabel(value) }}</UiTag>
       </template>
@@ -97,22 +102,31 @@ const planFilterOptions = [
   { value: 'core', label: 'Core' },
 ]
 
+const entitlementLabels: Record<string, string> = {
+  vip: 'VIP',
+  mentoria_grupal: 'Mentoria grupal',
+  bootcamp_liderazgo: 'Bootcamp: Liderazgo',
+  coaching_1on1: 'Coaching 1:1',
+  retiro_marzo_2026: 'Retiro marzo 2026',
+}
+
 const columns = [
-  { key: 'title', label: 'Titulo', width: '30%' },
+  { key: 'title', label: 'Titulo', width: '25%' },
   { key: 'program_type', label: 'Tipo' },
   { key: 'plan', label: 'Plan' },
+  { key: 'entitlement_key', label: 'Complemento' },
   { key: 'status', label: 'Estado' },
   { key: 'enrolled_count', label: 'Inscritos' },
 ]
 
 const rows = ref([
-  { id: 'prg-001', title: 'Reto 21 dias de meditacion', program_type: 'reto', status: 'published', enrolled_count: 3420, plan: 'core' },
-  { id: 'prg-002', title: 'Programa de nutricion consciente', program_type: 'program', status: 'published', enrolled_count: 1856, plan: 'core' },
-  { id: 'prg-003', title: 'Bootcamp de bienestar integral', program_type: 'bootcamp', status: 'published', enrolled_count: 978, plan: 'core' },
-  { id: 'prg-004', title: 'Reto 7 dias de gratitud', program_type: 'reto', status: 'published', enrolled_count: 4512, plan: 'free' },
-  { id: 'prg-005', title: 'Programa de yoga para principiantes', program_type: 'program', status: 'draft', enrolled_count: 0, plan: 'core' },
-  { id: 'prg-006', title: 'Bootcamp productividad personal', program_type: 'bootcamp', status: 'draft', enrolled_count: 0, plan: 'free' },
-  { id: 'prg-007', title: 'Reto detox digital', program_type: 'reto', status: 'archived', enrolled_count: 1230, plan: 'free' },
+  { id: 'prg-001', title: 'Reto 21 dias de meditacion', program_type: 'reto', status: 'published', enrolled_count: 3420, plan: 'core', entitlement_key: null as string | null },
+  { id: 'prg-002', title: 'Programa de nutricion consciente', program_type: 'program', status: 'published', enrolled_count: 1856, plan: 'core', entitlement_key: null as string | null },
+  { id: 'prg-003', title: 'Bootcamp de bienestar integral', program_type: 'bootcamp', status: 'published', enrolled_count: 978, plan: 'core', entitlement_key: 'bootcamp_liderazgo' as string | null },
+  { id: 'prg-004', title: 'Reto 7 dias de gratitud', program_type: 'reto', status: 'published', enrolled_count: 4512, plan: 'free', entitlement_key: null as string | null },
+  { id: 'prg-005', title: 'Programa de yoga para principiantes', program_type: 'program', status: 'draft', enrolled_count: 0, plan: 'core', entitlement_key: null as string | null },
+  { id: 'prg-006', title: 'Bootcamp productividad personal', program_type: 'bootcamp', status: 'draft', enrolled_count: 0, plan: 'free', entitlement_key: null as string | null },
+  { id: 'prg-007', title: 'Reto detox digital', program_type: 'reto', status: 'archived', enrolled_count: 1230, plan: 'free', entitlement_key: null as string | null },
 ])
 
 const filteredRows = computed(() => {

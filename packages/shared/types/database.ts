@@ -92,6 +92,7 @@ export interface ContentItem {
   available_from: string | null;
   available_to: string | null;
   community_segment: CommunitySegment | null;
+  entitlement_key: string | null;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;
@@ -111,6 +112,7 @@ export interface Program {
   description: string | null;
   status: ProgramStatus;
   community_segment: CommunitySegment | null;
+  entitlement_key: string | null;
   is_active: boolean;
   start_date: string | null;
   end_date: string | null;
