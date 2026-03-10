@@ -10,89 +10,77 @@
 
     <div class="form-layout">
       <div class="form-layout__main">
+
+        <!-- 1. Frase del dia -->
         <UiCard variant="outlined">
           <div class="form-section">
-            <UiInput
-              v-model="form.theme"
-              label="Tema del dia"
-              placeholder="Tema que guia el contenido del dia"
-            />
-
+            <h3 class="section-title">Frase del dia</h3>
             <UiTextarea
-              v-model="form.motivational_quote"
-              label="Frase motivacional"
-              placeholder="Una frase inspiradora para iniciar el dia..."
-              :rows="2"
+              v-model="form.phrase_text"
+              label="Frase"
+              placeholder="Escribe la frase motivacional del dia..."
+              :rows="3"
             />
-
-            <UiTextarea
-              v-model="form.badge_share_text"
-              label="Texto para badge compartible"
-              placeholder="Texto que aparecera en la imagen compartible cuando el usuario completa la accion del dia..."
-              :rows="2"
-              hint="Si se deja vacio, se usara un texto predeterminado."
+            <UiSelect
+              v-model="form.phrase_author"
+              label="Quien dice la frase"
+              :options="authorOptions"
             />
           </div>
         </UiCard>
 
-        <h2 class="section-title">Elementos del dia</h2>
-
-        <div v-for="(item, index) in dayItems" :key="index" class="day-item">
-          <div class="day-item__header">
-            <span class="eyebrow">Elemento {{ index + 1 }}</span>
-            <UiButton variant="ghost" size="sm" @click="removeItem(index)">Quitar</UiButton>
-          </div>
-          <div class="day-item__fields">
+        <!-- 2. Accion del dia -->
+        <UiCard variant="outlined">
+          <div class="form-section">
+            <h3 class="section-title">Accion del dia</h3>
+            <p class="section-hint">Vincula este dia a un programa y su dia correspondiente. El usuario vera esta accion como su reto principal del dia.</p>
             <UiSelect
-              v-model="item.type"
-              label="Tipo"
-              :options="itemTypeOptions"
+              v-model="form.program_id"
+              label="Programa"
+              :options="programOptions"
+              placeholder="Selecciona un programa"
+            />
+            <UiSelect
+              v-if="form.program_id"
+              v-model="form.program_day_id"
+              label="Dia del programa"
+              :options="programDayOptions"
+              placeholder="Selecciona el dia"
+            />
+            <div v-if="form.program_id && form.program_day_id" class="action-preview">
+              <Icon name="lucide:check-circle" size="16" />
+              <span>{{ selectedProgramLabel }} &mdash; {{ selectedDayLabel }}</span>
+            </div>
+          </div>
+        </UiCard>
+
+        <!-- 3. Badge -->
+        <UiCard variant="outlined">
+          <div class="form-section">
+            <h3 class="section-title">Badge</h3>
+            <p class="section-hint">El badge aparece despues de que el usuario completa la accion del dia.</p>
+            <UiInput
+              v-model="form.badge_title"
+              label="Titulo del badge"
+              placeholder="Ej: Dia completado"
             />
             <UiInput
-              v-model="item.title"
-              label="Titulo"
-              placeholder="Titulo del elemento"
-            />
-            <UiInput
-              v-model="item.content_id"
-              label="ID de contenido (referencia)"
-              placeholder="cnt-001"
-              hint="ID del contenido vinculado"
-            />
-            <UiInput
-              v-model="item.sort_order"
-              label="Orden"
-              type="number"
-              placeholder="1"
+              v-model="form.badge_subtitle"
+              label="Subtitulo del badge"
+              placeholder="Ej: Sigue asi, vas genial"
             />
           </div>
-        </div>
+        </UiCard>
 
-        <UiButton variant="outline" size="sm" @click="addItem">+ Agregar elemento</UiButton>
       </div>
 
       <div class="form-layout__sidebar">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiSelect
-              v-model="form.status"
-              label="Estado"
-              :options="statusOptions"
-            />
-
-            <UiInput
-              v-model="form.publish_time"
-              label="Hora de publicacion"
-              type="time"
-              hint="Hora a la que se mostrara el plan"
-            />
-          </div>
-        </UiCard>
-
         <UiCard variant="filled">
           <div class="form-section">
-            <p class="meta-label">Fecha: {{ dateParam }}</p>
-            <p class="meta-label">Elementos: {{ dayItems.length }}</p>
+            <p class="meta-label">Fecha</p>
+            <p class="meta-value">{{ formatDate(dateParam) }}</p>
+            <p class="meta-label" style="margin-top: var(--space-3);">Comunidad</p>
+            <p class="meta-value">{{ form.phrase_author === 'gabriel' ? 'Gabriel' : 'Carlotta' }}</p>
           </div>
         </UiCard>
       </div>
@@ -107,50 +95,73 @@ const route = useRoute()
 const dateParam = computed(() => route.params.date as string)
 
 const form = reactive({
-  theme: 'Bienestar emocional',
-  motivational_quote: 'Cada dia es una nueva oportunidad para cuidar de ti.',
-  badge_share_text: '',
-  status: 'published',
-  publish_time: '06:00',
+  phrase_text: 'Cada dia es una nueva oportunidad para cuidar de ti.',
+  phrase_author: 'gabriel' as 'gabriel' | 'carlotta',
+  program_id: 'prg-001',
+  program_day_id: 'pd-001',
+  badge_title: 'Dia completado',
+  badge_subtitle: 'Sigue asi, vas genial',
 })
 
-const statusOptions = [
-  { value: 'draft', label: 'Borrador' },
-  { value: 'scheduled', label: 'Programado' },
-  { value: 'published', label: 'Publicado' },
+const authorOptions = [
+  { value: 'gabriel', label: 'Gabriel' },
+  { value: 'carlotta', label: 'Carlotta' },
 ]
 
-const itemTypeOptions = [
-  { value: 'article', label: 'Articulo' },
-  { value: 'video', label: 'Video' },
-  { value: 'audio', label: 'Audio' },
-  { value: 'checkin', label: 'Check-in' },
-  { value: 'challenge', label: 'Mini reto' },
-  { value: 'tip', label: 'Tip del dia' },
+const programOptions = [
+  { value: 'prg-001', label: 'Reto 21 dias de meditacion' },
+  { value: 'prg-002', label: 'Programa de nutricion consciente' },
+  { value: 'prg-003', label: 'Bootcamp de bienestar integral' },
+  { value: 'prg-004', label: 'Reto 7 dias de gratitud' },
 ]
 
-const dayItems = ref([
-  { type: 'tip', title: 'Tip: 3 respiraciones profundas al despertar', content_id: '', sort_order: '1' },
-  { type: 'article', title: '5 pasos para el bienestar emocional', content_id: 'cnt-001', sort_order: '2' },
-  { type: 'audio', title: 'Meditacion guiada para la manana', content_id: 'cnt-002', sort_order: '3' },
-  { type: 'checkin', title: 'Como te sientes hoy?', content_id: '', sort_order: '4' },
-])
-
-function addItem() {
-  dayItems.value.push({
-    type: 'article',
-    title: '',
-    content_id: '',
-    sort_order: String(dayItems.value.length + 1),
-  })
+const programDaysMap: Record<string, { value: string; label: string }[]> = {
+  'prg-001': [
+    { value: 'pd-001', label: 'Dia 1: Introduccion a la meditacion' },
+    { value: 'pd-002', label: 'Dia 2: Respiracion consciente' },
+    { value: 'pd-003', label: 'Dia 3: El escaneo corporal' },
+    { value: 'pd-004', label: 'Dia 4: Meditacion caminando' },
+    { value: 'pd-005', label: 'Dia 5: Manejo de pensamientos' },
+  ],
+  'prg-002': [
+    { value: 'pd-010', label: 'Dia 1: Fundamentos de nutricion' },
+    { value: 'pd-011', label: 'Dia 2: Planificacion de comidas' },
+    { value: 'pd-012', label: 'Dia 3: Hidratacion consciente' },
+  ],
+  'prg-003': [
+    { value: 'pd-020', label: 'Dia 1: Evaluacion integral' },
+    { value: 'pd-021', label: 'Dia 2: Plan de accion' },
+  ],
+  'prg-004': [
+    { value: 'pd-030', label: 'Dia 1: Gratitud matutina' },
+    { value: 'pd-031', label: 'Dia 2: Carta de agradecimiento' },
+    { value: 'pd-032', label: 'Dia 3: Meditacion de gratitud' },
+  ],
 }
 
-function removeItem(index: number) {
-  dayItems.value.splice(index, 1)
-}
+const programDayOptions = computed(() => {
+  return programDaysMap[form.program_id] ?? []
+})
+
+watch(() => form.program_id, () => {
+  form.program_day_id = ''
+})
+
+const selectedProgramLabel = computed(() => {
+  return programOptions.find(p => p.value === form.program_id)?.label ?? ''
+})
+
+const selectedDayLabel = computed(() => {
+  return programDayOptions.value.find(d => d.value === form.program_day_id)?.label ?? ''
+})
 
 function formatDate(iso: string) {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return new Date(iso + 'T12:00:00').toLocaleDateString('es-MX', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 
 function handleSave() {
@@ -191,37 +202,40 @@ function handleSave() {
   font-family: var(--font-body);
   font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
-  margin-top: var(--space-2);
 }
 
-.day-item {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  margin-bottom: var(--space-3);
-}
-
-.day-item__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-3);
-}
-
-.day-item__fields {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: var(--space-3);
+.section-hint {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: var(--leading-normal);
 }
 
 .meta-label {
   font-size: var(--text-xs);
   color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta-value {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  margin-top: var(--space-1);
+}
+
+.action-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(40, 55, 74, 0.04);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-success);
 }
 
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
-  .day-item__fields { grid-template-columns: 1fr; }
 }
 </style>
