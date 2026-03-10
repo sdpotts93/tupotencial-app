@@ -151,9 +151,8 @@
                     v-if="activity.type === 'formulario'"
                     v-model="activity.form_id"
                     label="Formulario"
-                    :options="[]"
-                    placeholder="Proximamente..."
-                    disabled
+                    :options="formOptions"
+                    placeholder="Selecciona formulario"
                   />
                 </div>
               </div>
@@ -225,6 +224,14 @@ const activityTypeOptions = [
   { value: 'talk_to_ai', label: 'Habla con tu Coach IA' },
   { value: 'contenido', label: 'Contenido' },
   { value: 'formulario', label: 'Formulario' },
+]
+
+const formOptions = [
+  { value: 'frm-001', label: 'Evaluacion inicial de bienestar' },
+  { value: 'frm-002', label: 'Check-in semanal' },
+  { value: 'frm-003', label: 'Encuesta de satisfaccion del programa' },
+  { value: 'frm-004', label: 'Registro de habitos diarios' },
+  { value: 'frm-005', label: 'Evaluacion de progreso mensual' },
 ]
 
 const contentOptions = [
