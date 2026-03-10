@@ -246,10 +246,16 @@ function sendInvite() {
 
 <style scoped>
 .roles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: none;
   gap: var(--space-4);
   margin-bottom: var(--space-8);
+}
+
+@media (min-width: 1024px) {
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
 }
 
 .role-card {

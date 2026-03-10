@@ -97,6 +97,7 @@ defineEmits<{ 'row-click': [row: Record<string, any>] }>()
   align-items: center;
   gap: var(--space-3);
   overflow-x: auto;
+  flex-shrink: 0;
 }
 
 .data-table__toolbar > :deep(*) {
