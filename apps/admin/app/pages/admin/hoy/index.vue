@@ -89,6 +89,73 @@
       </div>
     </div>
 
+    <!-- Defaults (shown when a day has no specific plan) -->
+    <section class="hoy-config-section">
+      <h2 class="section-title">Valores predeterminados</h2>
+      <p class="section-description">Valores que se muestran en la app cuando un dia no tiene plan configurado. La frase, accion y badge por defecto.</p>
+
+      <UiCard variant="outlined">
+        <div class="form-section">
+          <span class="eyebrow">Frase del dia</span>
+          <UiTextarea
+            v-model="defaults.phrase_text"
+            label="Frase"
+            placeholder="Frase motivacional por defecto..."
+            :rows="2"
+          />
+          <UiSelect
+            v-model="defaults.phrase_author"
+            label="Quien dice la frase"
+            :options="defaultAuthorOptions"
+          />
+        </div>
+      </UiCard>
+
+      <UiCard variant="outlined" style="margin-top: var(--space-4);">
+        <div class="form-section">
+          <span class="eyebrow">Accion del dia</span>
+          <UiSelect
+            v-model="defaults.action_type"
+            label="Tipo"
+            :options="defaultActionTypeOptions"
+          />
+
+          <UiSelect
+            v-if="defaults.action_type === 'contenido'"
+            v-model="defaults.content_id"
+            label="Contenido"
+            :options="defaultContentOptions"
+            placeholder="Selecciona contenido"
+          />
+
+          <UiSelect
+            v-if="defaults.action_type === 'formulario'"
+            v-model="defaults.form_id"
+            label="Formulario"
+            :options="defaultFormOptions"
+            placeholder="Selecciona formulario"
+          />
+
+        </div>
+      </UiCard>
+
+      <UiCard variant="outlined" style="margin-top: var(--space-4);">
+        <div class="form-section">
+          <span class="eyebrow">Badge</span>
+          <UiInput
+            v-model="defaults.badge_title"
+            label="Titulo del badge"
+            placeholder="Ej: Dia completado"
+          />
+          <UiInput
+            v-model="defaults.badge_subtitle"
+            label="Subtitulo del badge"
+            placeholder="Ej: Sigue asi, vas genial"
+          />
+        </div>
+      </UiCard>
+    </section>
+
     <!-- Contenido Reciente Configuration -->
     <section class="hoy-config-section">
       <h2 class="section-title">Contenido reciente</h2>
@@ -303,6 +370,52 @@ const yearMonths = computed(() => {
     }
     return { key: `${year}-${monthIndex}`, name: `${name} ${year}`, startOffset: startDow, days }
   })
+})
+
+// ── Defaults config ──
+const defaults = reactive({
+  phrase_text: 'Cada dia es una nueva oportunidad para cuidar de ti.',
+  phrase_author: 'gabriel',
+  action_type: 'talk_to_ai',
+  content_id: '',
+  form_id: '',
+  badge_title: 'Dia completado',
+  badge_subtitle: 'Sigue asi, vas genial',
+})
+
+const defaultAuthorOptions = [
+  { value: 'gabriel', label: 'Gabriel' },
+  { value: 'carlotta', label: 'Carlotta' },
+]
+
+const defaultActionTypeOptions = [
+  { value: 'talk_to_ai', label: 'Habla con tu Coach IA' },
+  { value: 'contenido', label: 'Contenido' },
+  { value: 'formulario', label: 'Formulario' },
+]
+
+const defaultContentOptions = [
+  { value: 'cnt-001', label: '5 pasos para el bienestar emocional' },
+  { value: 'cnt-002', label: 'Meditacion guiada para la manana' },
+  { value: 'cnt-003', label: 'Nutricion consciente: guia basica' },
+  { value: 'cnt-004', label: 'Rutina de yoga para principiantes' },
+  { value: 'cnt-005', label: 'Higiene del sueno: consejos practicos' },
+  { value: 'cnt-006', label: 'Como manejar el estres laboral' },
+  { value: 'cnt-007', label: 'Ejercicios de respiracion 4-7-8' },
+  { value: 'cnt-008', label: 'Alimentacion para la energia diaria' },
+]
+
+const defaultFormOptions = [
+  { value: 'frm-001', label: 'Evaluacion inicial de bienestar' },
+  { value: 'frm-002', label: 'Check-in semanal' },
+  { value: 'frm-003', label: 'Encuesta de satisfaccion del programa' },
+  { value: 'frm-004', label: 'Registro de habitos diarios' },
+  { value: 'frm-005', label: 'Evaluacion de progreso mensual' },
+]
+
+watch(() => defaults.action_type, () => {
+  defaults.content_id = ''
+  defaults.form_id = ''
 })
 
 // ── Contenido Reciente config ──
