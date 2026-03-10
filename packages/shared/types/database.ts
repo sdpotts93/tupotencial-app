@@ -228,7 +228,6 @@ export interface Event {
   vimeo_url: string | null;
   vimeo_id: string | null;
   vimeo_live_event_id: string | null;
-  recording_content_item_id: string | null;
   status: EventStatus;
   created_at: string;
   updated_at: string | null;

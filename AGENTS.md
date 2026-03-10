@@ -1217,3 +1217,11 @@ Must implement:
 
 ### Direct Instagram Stories sharing
 The ShareBadge currently uses the Web Share API (`navigator.share`) which opens the OS share sheet — the user picks Instagram from there. For a **direct-to-Instagram-Stories** flow, Instagram provides a URL scheme (`instagram-stories://share`) that accepts a background image via the pasteboard (iOS) or Intent (Android). This requires a native bridge (Capacitor plugin), not just the browser. Implement when the app ships with Capacitor.
+
+### Auto-convert Vimeo Live recordings to content items
+When a Vimeo Live event ends, Vimeo automatically saves the recording. Currently the admin must manually create a `content_items` entry from it. Automate this with a **Vimeo webhook**:
+1. Register a Vimeo webhook (`video.transcoding.complete` or `live_event.ended`) pointing to a Supabase Edge Function (e.g. `POST /functions/v1/vimeo-webhook`).
+2. The Edge Function receives the payload, matches `vimeo_live_event_id` to an `events` row, and auto-creates a `content_items` record (title, description, entitlement_key copied from the event; `media_url` = Vimeo recording URL).
+3. Set `events.recording_content_item_id` to the new content item's ID.
+4. Remove the manual "Convertir en contenido" button from `/admin/eventos/[id]` once this is live.
+Requires: Vimeo Premium API access + webhook secret stored in Supabase secrets.

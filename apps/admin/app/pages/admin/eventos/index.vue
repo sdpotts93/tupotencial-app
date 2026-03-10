@@ -42,11 +42,6 @@
           <UiTag :variant="statusVariant(value)">{{ statusLabel(value) }}</UiTag>
         </template>
 
-        <template #cell-recording_content_item_id="{ value }">
-          <UiTag v-if="value" variant="success">Grabacion</UiTag>
-          <span v-else style="color: var(--color-muted);">—</span>
-        </template>
-
         <template #actions="{ row }">
           <UiButton variant="soft" size="sm" :to="`/admin/eventos/${row.id}`">
             <template #icon><Icon name="lucide:pencil" size="16" /></template>
@@ -81,13 +76,13 @@ const columns = [
 ]
 
 const rows = ref([
-  { id: 'evt-001', title: 'Taller de mindfulness para principiantes', starts_at: '2026-03-05T18:00:00', plan: 'core', registered_count: 234, status: 'published', is_upcoming: true, entitlement_key: null as string | null, recording_content_item_id: null as string | null },
-  { id: 'evt-002', title: 'Clase de yoga restaurativa', starts_at: '2026-03-08T10:00:00', plan: 'core', registered_count: 156, status: 'published', is_upcoming: true, entitlement_key: 'vip' as string | null, recording_content_item_id: null as string | null },
-  { id: 'evt-003', title: 'Conferencia: Nutricion y bienestar', starts_at: '2026-03-15T17:00:00', plan: 'free', registered_count: 89, status: 'published', is_upcoming: true, entitlement_key: null as string | null, recording_content_item_id: null as string | null },
-  { id: 'evt-004', title: 'Retiro de fin de semana', starts_at: '2026-03-22T09:00:00', plan: 'core', registered_count: 42, status: 'published', is_upcoming: true, entitlement_key: 'retiro_marzo_2026' as string | null, recording_content_item_id: null as string | null },
-  { id: 'evt-005', title: 'Mesa redonda: Salud mental en el trabajo', starts_at: '2026-02-20T16:00:00', plan: 'free', registered_count: 312, status: 'published', is_upcoming: false, entitlement_key: null as string | null, recording_content_item_id: 'cnt-010' as string | null },
-  { id: 'evt-006', title: 'Taller de cocina saludable', starts_at: '2026-04-01T11:00:00', plan: 'free', registered_count: 0, status: 'draft', is_upcoming: true, entitlement_key: null as string | null, recording_content_item_id: null as string | null },
-  { id: 'evt-007', title: 'Masterclass de liderazgo consciente', starts_at: '2026-02-10T17:00:00', plan: 'core', registered_count: 189, status: 'published', is_upcoming: false, entitlement_key: 'bootcamp_liderazgo' as string | null, recording_content_item_id: null as string | null },
+  { id: 'evt-001', title: 'Taller de mindfulness para principiantes', starts_at: '2026-03-05T18:00:00', plan: 'core', registered_count: 234, status: 'published', is_upcoming: true, entitlement_key: null as string | null },
+  { id: 'evt-002', title: 'Clase de yoga restaurativa', starts_at: '2026-03-08T10:00:00', plan: 'core', registered_count: 156, status: 'published', is_upcoming: true, entitlement_key: 'vip' as string | null },
+  { id: 'evt-003', title: 'Conferencia: Nutricion y bienestar', starts_at: '2026-03-15T17:00:00', plan: 'free', registered_count: 89, status: 'published', is_upcoming: true, entitlement_key: null as string | null },
+  { id: 'evt-004', title: 'Retiro de fin de semana', starts_at: '2026-03-22T09:00:00', plan: 'core', registered_count: 42, status: 'published', is_upcoming: true, entitlement_key: 'retiro_marzo_2026' as string | null },
+  { id: 'evt-005', title: 'Mesa redonda: Salud mental en el trabajo', starts_at: '2026-02-20T16:00:00', plan: 'free', registered_count: 312, status: 'published', is_upcoming: false, entitlement_key: null as string | null },
+  { id: 'evt-006', title: 'Taller de cocina saludable', starts_at: '2026-04-01T11:00:00', plan: 'free', registered_count: 0, status: 'draft', is_upcoming: true, entitlement_key: null as string | null },
+  { id: 'evt-007', title: 'Masterclass de liderazgo consciente', starts_at: '2026-02-10T17:00:00', plan: 'core', registered_count: 189, status: 'published', is_upcoming: false, entitlement_key: 'bootcamp_liderazgo' as string | null },
 ])
 
 const entitlementLabels: Record<string, string> = {

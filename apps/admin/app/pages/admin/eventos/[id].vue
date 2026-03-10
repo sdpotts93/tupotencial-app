@@ -99,36 +99,6 @@
           </div>
         </UiCard>
 
-        <UiCard v-if="isPastEvent" variant="outlined">
-          <div class="form-section">
-            <p class="eyebrow">Grabacion</p>
-            <template v-if="form.recording_content_item_id">
-              <p class="meta-label">
-                Grabacion vinculada al contenido.
-              </p>
-              <UiButton
-                variant="soft"
-                size="sm"
-                :to="`/admin/contenido/${form.recording_content_item_id}`"
-              >
-                Ver contenido
-              </UiButton>
-            </template>
-            <template v-else>
-              <p class="meta-text">
-                Este evento ya paso. Puedes convertir la grabacion en un contenido de la biblioteca.
-              </p>
-              <UiButton
-                variant="primary-outline"
-                size="sm"
-                @click="handleConvertToContent"
-              >
-                Convertir en contenido
-              </UiButton>
-            </template>
-          </div>
-        </UiCard>
-
         <UiCard v-if="form.vimeo_live_event_id" variant="filled">
           <div class="form-section">
             <p class="eyebrow">Embed en vivo</p>
@@ -151,8 +121,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
-
-const route = useRoute()
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -196,12 +164,6 @@ const form = reactive({
   plan: 'core',
   entitlement_key: '',
   status: 'published',
-  recording_content_item_id: '' as string,
-})
-
-const isPastEvent = computed(() => {
-  if (!form.starts_at) return false
-  return new Date(form.starts_at) < new Date()
 })
 
 const durationOptions = [
@@ -250,19 +212,6 @@ function handleDelete() {
   }
 }
 
-function handleConvertToContent() {
-  const params = new URLSearchParams({
-    from_event: route.params.id as string,
-    title: form.title,
-    description: form.description,
-    content_type: 'video',
-    entitlement_key: form.entitlement_key,
-  })
-  if (form.vimeo_live_event_id) {
-    params.set('media_url', `https://vimeo.com/event/${form.vimeo_live_event_id}`)
-  }
-  navigateTo(`/admin/contenido/new?${params.toString()}`)
-}
 </script>
 
 <style scoped>

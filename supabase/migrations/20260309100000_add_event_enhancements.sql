@@ -17,8 +17,4 @@ CREATE INDEX idx_events_entitlement ON public.events (entitlement_key)
 -- Vimeo Live support
 ALTER TABLE public.events ADD COLUMN vimeo_live_event_id text;
 
--- Link to content_items when recording is saved as library content
-ALTER TABLE public.events ADD COLUMN recording_content_item_id uuid
-  REFERENCES public.content_items(id) ON DELETE SET NULL;
-
 COMMIT;
