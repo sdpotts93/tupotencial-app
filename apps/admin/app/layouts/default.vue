@@ -5,34 +5,34 @@
         <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" />
       </div>
 
-      <NuxtLink
-        v-for="item in navItems"
-        :key="item.to"
-        :to="item.to"
-        :class="['sidebar-nav__item', { 'sidebar-nav__item--active': isActive(item.to) }]"
-        @click="sidebarOpen = false"
-      >
-        <span class="sidebar-nav__icon" v-html="item.icon" />
-        <span class="sidebar-nav__label">{{ item.label }}</span>
-      </NuxtLink>
+      <div class="sidebar-nav__scroll">
+        <NuxtLink
+          v-for="item in navItems"
+          :key="item.to"
+          :to="item.to"
+          :class="['sidebar-nav__item', { 'sidebar-nav__item--active': isActive(item.to) }]"
+          @click="sidebarOpen = false"
+        >
+          <span class="sidebar-nav__icon" v-html="item.icon" />
+          <span class="sidebar-nav__label">{{ item.label }}</span>
+        </NuxtLink>
 
-      <template v-for="section in sections" :key="section.title">
-        <div class="sidebar-nav__section">
-          <span class="sidebar-nav__section-title">{{ section.title }}</span>
-          <NuxtLink
-            v-for="item in section.items"
-            :key="item.to"
-            :to="item.to"
-            :class="['sidebar-nav__item', { 'sidebar-nav__item--active': isActive(item.to) }]"
-            @click="sidebarOpen = false"
-          >
-            <span class="sidebar-nav__icon" v-html="item.icon" />
-            <span class="sidebar-nav__label">{{ item.label }}</span>
-          </NuxtLink>
-        </div>
-      </template>
-
-      <div class="sidebar-nav__spacer" />
+        <template v-for="section in sections" :key="section.title">
+          <div class="sidebar-nav__section">
+            <span class="sidebar-nav__section-title">{{ section.title }}</span>
+            <NuxtLink
+              v-for="item in section.items"
+              :key="item.to"
+              :to="item.to"
+              :class="['sidebar-nav__item', { 'sidebar-nav__item--active': isActive(item.to) }]"
+              @click="sidebarOpen = false"
+            >
+              <span class="sidebar-nav__icon" v-html="item.icon" />
+              <span class="sidebar-nav__label">{{ item.label }}</span>
+            </NuxtLink>
+          </div>
+        </template>
+      </div>
 
       <div class="sidebar-nav__bottom">
         <button class="sidebar-nav__item" @click="logout">
@@ -98,7 +98,7 @@ const pageTitle = computed(() => {
   if (path.startsWith('/admin/comunidad')) return 'Comunidad'
   if (path.startsWith('/admin/eventos')) return 'Eventos'
   if (path.startsWith('/admin/beneficios')) return 'Beneficios'
-  if (path.startsWith('/admin/complementos')) return 'Complementos'
+  if (path.startsWith('/admin/complementos')) return 'VIP'
   if (path.startsWith('/admin/usuarios')) return 'Usuarios'
   if (path.startsWith('/admin/roles')) return 'Roles'
   if (path.startsWith('/admin/configuracion')) return 'Configuración'
@@ -128,19 +128,9 @@ const navItems: NavItem[] = [
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
   },
   {
-    label: 'Categorías',
-    to: '/admin/categorias',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="6.5" x2="21" y2="6.5"/><line x1="14" y1="17.5" x2="21" y2="17.5"/></svg>',
-  },
-  {
     label: 'Programas',
     to: '/admin/programas',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
-  },
-  {
-    label: 'Formularios',
-    to: '/admin/formularios',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
   },
   {
     label: 'Hoy',
@@ -156,6 +146,21 @@ const navItems: NavItem[] = [
 
 const sections: NavSection[] = [
   {
+    title: 'Catálogos',
+    items: [
+      {
+        label: 'Categorías',
+        to: '/admin/categorias',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="6.5" x2="21" y2="6.5"/><line x1="14" y1="17.5" x2="21" y2="17.5"/></svg>',
+      },
+      {
+        label: 'Formularios',
+        to: '/admin/formularios',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+      },
+    ],
+  },
+  {
     title: 'Mercado',
     items: [
       {
@@ -169,7 +174,7 @@ const sections: NavSection[] = [
         icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
       },
       {
-        label: 'Complementos',
+        label: 'VIP',
         to: '/admin/complementos',
         icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
       },
@@ -225,14 +230,19 @@ function isActive(to: string): boolean {
   border-right: 1px solid var(--color-desktop-border, var(--color-border-light));
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
+  overflow: hidden;
   transform: translateX(-100%);
   transition: transform var(--transition-base);
 }
 
-.admin-layout__sidebar::-webkit-scrollbar {
+.sidebar-nav__scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.sidebar-nav__scroll::-webkit-scrollbar {
   display: none;
 }
 
@@ -417,17 +427,12 @@ function isActive(to: string): boolean {
   padding: 0 var(--space-6) var(--space-2);
 }
 
-/* ─── Spacer + bottom items ─── */
-.sidebar-nav__spacer {
-  flex: 1;
-}
-
+/* ─── Bottom items ─── */
 .sidebar-nav__bottom {
   display: flex;
   flex-direction: column;
   padding-top: var(--space-3);
   padding-bottom: var(--space-4);
-  margin-top: var(--space-2);
   border-top: 1px solid var(--color-desktop-border);
   flex-shrink: 0;
 }

@@ -372,9 +372,9 @@ function removeManualContent(index: number) {
 interface AppSection { id: string; title: string; meta: string; icon: string; route: string }
 
 const allAppSections: AppSection[] = [
-  { id: 'ai-coach', title: 'Mi Coach IA', meta: 'Conversaciones guiadas para tu crecimiento', icon: 'lucide:brain', route: '/cuenta/ia' },
+  { id: 'ai-coach', title: 'Mi Coach IA', meta: 'Conversaciones guiadas para tu crecimiento', icon: 'lucide:bot', route: '/cuenta/ia' },
   { id: 'eventos', title: 'Eventos', meta: 'Talleres en vivo y grabaciones', icon: 'lucide:calendar', route: '/cuenta/eventos' },
-  { id: 'vip', title: 'VIP', meta: 'Contenido exclusivo y beneficios', icon: 'lucide:crown', route: '/cuenta/complementos' },
+  { id: 'vip', title: 'VIP', meta: 'Contenido exclusivo y beneficios', icon: 'lucide:star', route: '/cuenta/complementos' },
   { id: 'biblioteca', title: 'Biblioteca', meta: 'Todo el contenido disponible', icon: 'lucide:book', route: '/cuenta/biblioteca' },
   { id: 'comunidad', title: 'Comunidad', meta: 'Comparte con otros miembros', icon: 'lucide:users', route: '/cuenta/comunidad' },
   { id: 'beneficios', title: 'Beneficios', meta: 'Descuentos y alianzas exclusivas', icon: 'lucide:tag', route: '/cuenta/beneficios' },

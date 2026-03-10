@@ -13,7 +13,7 @@
       <!-- Intro + Tone (side-by-side on desktop) -->
       <div class="ai-home__top-row">
         <div class="ai-home__hero">
-          <div class="ai-home__icon"><Icon name="lucide:brain" size="48" /></div>
+          <div class="ai-home__icon"><Icon name="lucide:bot" size="48" /></div>
           <h1 class="title title--lg">Tu acompañamiento diario</h1>
           <p class="ai-home__desc">
             Orientación personalizada según tu energía y ánimo.

@@ -1,7 +1,7 @@
 <template>
   <div class="page--fill">
     <div class="page-header">
-      <h1 class="page-header__title">Complementos</h1>
+      <h1 class="page-header__title">VIP</h1>
       <div class="page-header__actions">
         <UiButton variant="primary-outline" size="sm" to="/admin/complementos/new">+ Nuevo add-on</UiButton>
       </div>
