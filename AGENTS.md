@@ -413,15 +413,47 @@ Optional streak materialization (MVP can compute on the fly):
 
 ---
 
-### 6.8 Add-ons / VIP (entitlements)
+### 6.8 Add-ons / VIP (one-time Stripe purchases)
 #### `addons`
 - `id uuid pk`
 - `title text not null`
 - `description text`
-- `stripe_price_id text not null`
+- `cover_url text` (image uploaded via admin)
+- `price int not null default 0` (cents MXN, e.g. 249900 = $2,499)
+- `plan text not null default 'todos'` (`todos|core`) — who can see/buy
+- `grants_core_months int null` — if set, buying grants N months of Core plan
+- `stripe_price_id text null` (set after creating Stripe Price; needed for checkout)
 - `status text not null default 'active'` (`active|inactive`)
 - `created_at timestamptz default now()`
+- `updated_at timestamptz`
 
+#### `addon_purchases`
+- `id uuid pk`
+- `addon_id uuid not null references addons(id) on delete cascade`
+- `user_id uuid not null references auth.users(id) on delete cascade`
+- `stripe_session_id text` (Stripe Checkout Session ID)
+- `amount int not null default 0` (cents at time of purchase)
+- `created_at timestamptz default now()`
+- unique (`user_id`, `addon_id`)
+
+#### One-time purchase flow
+1. **Admin** creates addon in `/admin/complementos` (title, description, image, price, plan, etc.)
+2. **Admin** creates a Price in the Stripe dashboard for the same amount
+3. **Admin** pastes the `price_xxx` ID into the addon's `stripe_price_id` field
+4. **User** clicks "Comprar" on `/cuenta/complementos/[id]` (web only, not native app)
+5. **Backend** creates a Stripe Checkout Session:
+   ```
+   mode: 'payment'
+   line_items: [{ price: addon.stripe_price_id, quantity: 1 }]
+   metadata: { addon_id: addon.id, user_id: user.id }
+   ```
+6. **User** completes payment on Stripe-hosted checkout page
+7. **Webhook** receives `checkout.session.completed`, reads `metadata.addon_id` + `metadata.user_id`
+8. **Webhook** inserts row into `addon_purchases` (user_id, addon_id, stripe_session_id, amount)
+9. **Webhook** checks `addon.grants_core_months` — if > 0, creates/extends user's Core subscription
+10. **App** checks `addon_purchases` to determine if user owns an addon (simple exists query)
+
+#### Legacy tables (still used by subscription system)
 #### `addon_entitlements`
 - `id uuid pk`
 - `addon_id uuid not null references addons(id) on delete cascade`
