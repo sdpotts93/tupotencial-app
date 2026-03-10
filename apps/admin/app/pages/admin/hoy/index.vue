@@ -382,9 +382,9 @@ const allAppSections: AppSection[] = [
 ]
 
 const exploreSections = ref<(AppSection & { featured: boolean })[]>([
-  { ...allAppSections[0], featured: true },
-  { ...allAppSections[1], featured: false },
-  { ...allAppSections[2], featured: false },
+  { ...allAppSections[0]!, featured: true },
+  { ...allAppSections[1]!, featured: false },
+  { ...allAppSections[2]!, featured: false },
 ])
 
 const sectionToAdd = ref('')
@@ -401,9 +401,9 @@ function setFeaturedSection(id: string) {
 }
 
 function removeExploreSection(index: number) {
-  const wasFeatured = exploreSections.value[index].featured
+  const wasFeatured = exploreSections.value[index]?.featured
   exploreSections.value.splice(index, 1)
-  if (wasFeatured && exploreSections.value.length) {
+  if (wasFeatured && exploreSections.value[0]) {
     exploreSections.value[0].featured = true
   }
 }

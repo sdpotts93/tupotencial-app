@@ -59,6 +59,15 @@
         {{ value ? formatDate(value) : 'Sin publicar' }}
       </template>
 
+      <template #cell-title="{ row, value }">
+        <div class="title-cell">
+          <button class="featured-star" :class="{ 'featured-star--active': row.id === featuredId }" @click.stop="toggleFeatured(row.id)">
+            <Icon :name="row.id === featuredId ? 'lucide:star' : 'lucide:star'" size="16" />
+          </button>
+          <span>{{ value }}</span>
+        </div>
+      </template>
+
       <template #actions="{ row }">
         <UiButton variant="soft" size="sm" :to="`/admin/contenido/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
@@ -123,7 +132,7 @@ const entitlementLabels: Record<string, string> = {
 }
 
 const columns = [
-  { key: 'title', label: 'Titulo', width: '25%' },
+  { key: 'title', label: 'Titulo', width: '210px' },
   { key: 'content_type', label: 'Tipo' },
   { key: 'segment', label: 'Plan' },
   { key: 'entitlement_key', label: 'Complemento' },
@@ -181,7 +190,39 @@ function handleDelete(row: Record<string, any>) {
   }
 }
 
+const featuredId = ref<string | null>('cnt-001')
+
+function toggleFeatured(id: string) {
+  featuredId.value = featuredId.value === id ? null : id
+}
+
 function goToEdit(row: Record<string, any>) {
   router.push(`/admin/contenido/${row.id}`)
 }
 </script>
+
+<style scoped>
+.title-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.featured-star {
+  all: unset;
+  cursor: pointer;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.featured-star:hover {
+  color: var(--color-warning, #e0a500);
+}
+
+.featured-star--active {
+  color: var(--color-warning, #e0a500);
+}
+</style>
