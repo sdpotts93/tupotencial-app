@@ -36,6 +36,11 @@
               <h3 v-if="post.title" class="post__title">{{ post.title }}</h3>
               <p class="post__body">{{ post.body }}</p>
 
+              <template v-if="post.media_url">
+                <video v-if="isVideo(post.media_url)" :src="post.media_url" controls class="post__media" @click.stop />
+                <img v-else :src="post.media_url" alt="" class="post__media" />
+              </template>
+
               <div class="post__actions">
                 <button class="post__action" @click.stop="toggleReaction(post.id)">
                   <svg width="18" height="18" viewBox="0 0 24 24" :fill="post.liked ? 'var(--color-danger)' : 'none'" :stroke="post.liked ? 'var(--color-danger)' : 'currentColor'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
@@ -146,30 +151,35 @@ const posts = ref([
     id: 'mock-post-001', author: 'Gabriel', avatar: '/images/gabriel.png',
     title: 'Bienvenidos a la comunidad',
     body: 'Este es un espacio seguro para compartir tu camino de crecimiento. Cuéntanos: ¿qué te motivó a empezar?',
+    media_url: null,
     reactions: 24, comments: 8, liked: false, timeAgo: 'Hace 2 horas',
   },
   {
     id: 'mock-post-002', author: 'Carlotta', avatar: '/images/carlotta.png',
     title: null,
     body: 'Hoy quiero compartir una técnica de respiración que me ha ayudado mucho en momentos de estrés. Inhala 4 segundos, retén 4, exhala 6. Repite 5 veces.',
+    media_url: 'https://picsum.photos/seed/breathing/800/400',
     reactions: 31, comments: 12, liked: true, timeAgo: 'Hace 4 horas',
   },
   {
     id: 'mock-post-003', author: 'Ambos', avatar: '/images/gabriel.png',
     title: '¿Qué tema quieren para el próximo live?',
     body: 'Estamos planeando el siguiente evento en vivo. ¿Qué les gustaría explorar? Déjenos sus ideas en los comentarios.',
+    media_url: null,
     reactions: 18, comments: 15, liked: false, timeAgo: 'Hace 6 horas',
   },
   {
     id: 'mock-post-004', author: 'Gabriel', avatar: '/images/gabriel.png',
     title: 'Reflexión del día',
     body: 'El crecimiento no es lineal. Algunos días sentirás que retrocedes, pero cada paso cuenta. Confía en el proceso.',
+    media_url: '/videos/helmet-short-coded.mp4',
     reactions: 42, comments: 7, liked: false, timeAgo: 'Hace 1 día',
   },
   {
     id: 'mock-post-005', author: 'Carlotta', avatar: '/images/carlotta.png',
     title: null,
-    body: 'Nuevo contenido en la biblioteca: "Escaneo corporal para dormir mejor". Ideal para quienes luchan con el insomnio. 🌙',
+    body: 'Nuevo contenido en la biblioteca: "Escaneo corporal para dormir mejor". Ideal para quienes luchan con el insomnio.',
+    media_url: null,
     reactions: 27, comments: 4, liked: false, timeAgo: 'Hace 2 días',
   },
 ])
@@ -180,6 +190,10 @@ const filteredPosts = computed(() => {
 })
 
 const recentPosts = computed(() => posts.value.slice(0, 4))
+
+function isVideo(url: string) {
+  return /\.(mp4|mov|webm)(\?|$)/i.test(url)
+}
 
 function toggleReaction(id: string) {
   const post = posts.value.find(p => p.id === id)
@@ -303,6 +317,14 @@ function toggleReaction(id: string) {
   font-size: var(--text-base);
   color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
+}
+
+.post__media {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-3);
+  object-fit: cover;
+  max-height: 360px;
 }
 
 .post__actions {

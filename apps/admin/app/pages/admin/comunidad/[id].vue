@@ -8,6 +8,12 @@
       <div class="form-layout__main">
         <UiCard variant="outlined">
           <div class="form-section">
+            <UiInput
+              v-model="form.title"
+              label="Titulo (opcional)"
+              placeholder="Ej: Reflexion del dia"
+            />
+
             <UiTextarea
               v-model="form.body"
               label="Contenido de la publicacion"
@@ -114,6 +120,7 @@
 definePageMeta({ layout: 'default' })
 
 const form = reactive({
+  title: 'Bienvenidos a la comunidad',
   body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar habitos saludables. Que van a hacer hoy para cuidarse?',
   media_url: '',
   status: 'published',

@@ -8,6 +8,12 @@
       <div class="form-layout__main">
         <UiCard variant="outlined">
           <div class="form-section">
+            <UiInput
+              v-model="form.title"
+              label="Titulo (opcional)"
+              placeholder="Ej: Reflexion del dia"
+            />
+
             <UiTextarea
               v-model="form.body"
               label="Contenido de la publicacion"
@@ -94,6 +100,7 @@
 definePageMeta({ layout: 'default' })
 
 const form = reactive({
+  title: '',
   body: '',
   author: 'Gabriel',
   status: 'published',

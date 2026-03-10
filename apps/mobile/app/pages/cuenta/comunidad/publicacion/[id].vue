@@ -21,6 +21,11 @@
         </div>
         <h1 v-if="post.title" class="post-detail__title">{{ post.title }}</h1>
         <p class="post-detail__body">{{ post.body }}</p>
+
+        <template v-if="post.media_url">
+          <video v-if="isVideo(post.media_url)" :src="post.media_url" controls class="post-detail__media" />
+          <img v-else :src="post.media_url" alt="" class="post-detail__media" />
+        </template>
         <div class="post-detail__stats">
           <button class="post-detail__like" @click="toggleLike">
             <svg class="icon-t" width="16" height="16" viewBox="0 0 24 24" :fill="post.liked ? 'var(--color-danger)' : 'none'" :stroke="post.liked ? 'var(--color-danger)' : 'currentColor'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
@@ -73,9 +78,14 @@ const post = ref({
   timeAgo: 'Hace 2 horas',
   title: 'Bienvenidos a la comunidad',
   body: 'Este es un espacio seguro para compartir tu camino de crecimiento. Cuéntanos: ¿qué te motivó a empezar?',
+  media_url: '/videos/helmet-short-coded.mp4',
   reactions: 24,
   liked: false,
 })
+
+function isVideo(url: string) {
+  return /\.(mp4|mov|webm)(\?|$)/i.test(url)
+}
 
 function toggleLike() {
   post.value.liked = !post.value.liked
@@ -159,6 +169,14 @@ const newComment = ref('')
   font-size: var(--text-base);
   color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
+}
+
+.post-detail__media {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-4);
+  object-fit: cover;
+  max-height: 400px;
 }
 
 .post-detail__stats {
