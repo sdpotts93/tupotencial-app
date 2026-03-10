@@ -2,10 +2,6 @@
   <div>
     <div class="page-header">
       <h1 class="page-header__title">Nuevo evento</h1>
-      <div class="page-header__actions">
-        <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
-        <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
-      </div>
     </div>
 
     <div class="form-layout">
@@ -109,6 +105,11 @@
           </div>
         </UiCard>
       </div>
+    </div>
+
+    <div class="page-actions">
+      <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
+      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
     </div>
   </div>
 </template>

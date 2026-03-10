@@ -2,11 +2,6 @@
   <div>
     <div class="page-header">
       <h1 class="page-header__title">Editar add-on</h1>
-      <div class="page-header__actions">
-        <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
-        <UiButton variant="soft" size="sm" to="/admin/complementos">Cancelar</UiButton>
-        <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
-      </div>
     </div>
 
     <div class="form-layout">
@@ -55,6 +50,12 @@
           </div>
         </UiCard>
       </div>
+    </div>
+
+    <div class="page-actions">
+      <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+      <UiButton variant="soft" size="sm" to="/admin/complementos">Cancelar</UiButton>
+      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
     </div>
   </div>
 </template>
