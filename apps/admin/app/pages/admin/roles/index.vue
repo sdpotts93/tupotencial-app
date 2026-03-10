@@ -229,6 +229,12 @@ function saveEdit() {
   showEditModal.value = false
 }
 
+function deleteAdmin(row: Record<string, any>) {
+  if (confirm(`Seguro que deseas eliminar a ${row.full_name}?`)) {
+    adminUsers.value = adminUsers.value.filter(u => u.id !== row.id)
+  }
+}
+
 function sendInvite() {
   alert(`Invitacion enviada a ${inviteForm.email} (mock)`)
   showInviteModal.value = false
