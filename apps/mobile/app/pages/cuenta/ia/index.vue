@@ -67,7 +67,7 @@
 
       <!-- Actions -->
       <div class="ai-home__actions">
-        <UiButton variant="outline" block @click="startChat()">Nueva conversación</UiButton>
+        <UiButton variant="outline" block :disabled="limitReached" @click="startChat()">Nueva conversación</UiButton>
       </div>
 
       <!-- Limit state -->
@@ -93,6 +93,17 @@ const { data: rawSessions } = await useAsyncData('mobile-ai-sessions', async () 
   return data ?? []
 })
 
+// Check daily quota
+const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
+const { data: quota } = await useAsyncData('ai-quota-check', async () => {
+  const { data } = await client.from('ai_quotas').select('messages_used')
+    .eq('user_id', user.value?.id ?? '').eq('day', today).maybeSingle()
+  return data
+})
+watchEffect(() => {
+  limitReached.value = (quota.value?.messages_used ?? 0) >= 20
+})
+
 const sessions = computed(() =>
   (rawSessions.value ?? []).map(s => {
     const firstMsg = Array.isArray(s.ai_messages) ? s.ai_messages[0]?.content ?? '' : ''
@@ -105,8 +116,8 @@ const sessions = computed(() =>
   }),
 )
 
-function startChat(prompt?: string) {
-  navigateTo('/cuenta/ia/chat/new')
+function startChat() {
+  navigateTo(`/cuenta/ia/chat/new?tone=${selectedTone.value}`)
 }
 </script>
 

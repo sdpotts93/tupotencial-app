@@ -51,6 +51,17 @@
         </div>
       </div>
 
+      <!-- Error / retry -->
+      <div v-if="error" class="chat__error">
+        <p>No se pudo generar la respuesta.</p>
+        <button class="chat__retry-btn" @click="retry">Reintentar</button>
+      </div>
+
+      <!-- Limit reached -->
+      <div v-if="limitReached" class="chat__limit">
+        <p>Has alcanzado tu límite de mensajes por hoy. Vuelve mañana para continuar.</p>
+      </div>
+
       <!-- Quick prompts -->
       <div v-if="messages.length <= 1" class="chat__prompts">
         <button v-for="p in quickPrompts" :key="p" class="chat__prompt-btn" @click="sendMessage(p)">
@@ -85,12 +96,22 @@
 definePageMeta({ layout: 'ai-chat', pageTransition: false })
 
 const route = useRoute()
+const client = useSupabaseClient()
+const { user } = useAuth()
 
-const toneName = ref('Carlotta')
+const currentSessionId = ref(route.params.sessionId as string)
+const isNewSession = computed(() => currentSessionId.value === 'new')
+
+// Tone — resolve from query param (new session) or from DB (existing)
+const toneParam = (route.query.tone as string) ?? 'carlotta'
+const toneName = ref(toneParam === 'gabriel' ? 'Gabriel' : 'Carlotta')
 const toneIcon = computed(() => toneName.value === 'Carlotta' ? 'lucide:flower' : 'lucide:waves')
+
 const generating = ref(false)
 const limitReached = ref(false)
 const inputText = ref('')
+const error = ref(false)
+const lastFailedMessage = ref('')
 
 const quickPrompts = ['¿Qué hago hoy?', 'Ayúdame a reflexionar', 'Plan de 5 minutos']
 
@@ -101,45 +122,145 @@ interface ChatMessage {
   time: string
 }
 
-const messages = ref<ChatMessage[]>([
-  {
-    id: 'msg-001', role: 'assistant',
-    content: '¡Hola! Soy tu coach Carlotta. Estoy aquí para ayudarte a reflexionar y encontrar claridad. ¿Qué te gustaría explorar hoy?',
-    time: '8:30',
-  },
-])
+const messages = ref<ChatMessage[]>([])
+
+function formatTime(date?: string) {
+  const d = date ? new Date(date) : new Date()
+  return d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+}
+
+// Load existing session messages (or show welcome for new)
+if (!isNewSession.value) {
+  const { data: session } = await useAsyncData(`ai-session-${currentSessionId.value}`, async () => {
+    const { data } = await client.from('ai_sessions').select('tone').eq('id', currentSessionId.value).single()
+    return data
+  })
+  if (session.value) {
+    toneName.value = session.value.tone === 'gabriel' ? 'Gabriel' : 'Carlotta'
+  }
+
+  const { data: dbMessages } = await useAsyncData(`ai-messages-${currentSessionId.value}`, async () => {
+    const { data } = await client.from('ai_messages')
+      .select('id, role, content, created_at')
+      .eq('session_id', currentSessionId.value)
+      .order('created_at', { ascending: true })
+    return data ?? []
+  })
+
+  if (dbMessages.value?.length) {
+    messages.value = dbMessages.value
+      .filter(m => m.role === 'user' || m.role === 'assistant')
+      .map(m => ({
+        id: m.id,
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+        time: formatTime(m.created_at),
+      }))
+  }
+}
+
+// Show welcome message if no messages yet
+if (!messages.value.length) {
+  const welcome = toneName.value === 'Carlotta'
+    ? '¡Hola! Soy tu coach Carlotta. Estoy aquí para ayudarte a reflexionar y encontrar claridad. ¿Qué te gustaría explorar hoy?'
+    : '¡Hey! Soy Gabriel, tu coach. Estoy aquí para ayudarte a tomar acción y crecer. ¿Qué quieres lograr hoy?'
+  messages.value.push({ id: 'welcome', role: 'assistant', content: welcome, time: formatTime() })
+}
 
 async function sendMessage(text?: string) {
   const content = text || inputText.value.trim()
   if (!content || generating.value) return
 
+  error.value = false
+  lastFailedMessage.value = ''
+
+  // Add user message to UI immediately
   messages.value.push({
-    id: `msg-${Date.now()}`,
+    id: `temp-${Date.now()}`,
     role: 'user',
     content,
-    time: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+    time: formatTime(),
   })
   inputText.value = ''
   generating.value = true
 
-  await new Promise(r => setTimeout(r, 1500))
+  // Placeholder for streaming assistant response
+  const assistantMsg: ChatMessage = { id: '', role: 'assistant', content: '', time: formatTime() }
 
-  messages.value.push({
-    id: `msg-${Date.now()}-resp`,
-    role: 'assistant',
-    content: getResponse(content),
-    time: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-  })
-  generating.value = false
+  try {
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: currentSessionId.value,
+        message: content,
+        tone: toneName.value.toLowerCase(),
+      }),
+    })
+
+    if (response.status === 429) {
+      limitReached.value = true
+      generating.value = false
+      return
+    }
+
+    if (!response.ok || !response.body) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    // Show the assistant message container once streaming starts
+    messages.value.push(assistantMsg)
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? '' // keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        try {
+          const data = JSON.parse(line.slice(6))
+          if (data.type === 'chunk') {
+            assistantMsg.content += data.content
+          } else if (data.type === 'done') {
+            assistantMsg.id = data.messageId ?? assistantMsg.id
+            if (data.sessionId && isNewSession.value) {
+              currentSessionId.value = data.sessionId
+              window.history.replaceState(null, '', `/cuenta/ia/chat/${data.sessionId}`)
+            }
+          }
+        } catch {
+          // skip malformed SSE lines
+        }
+      }
+    }
+  } catch {
+    error.value = true
+    lastFailedMessage.value = content
+    // Remove empty assistant placeholder if streaming never started
+    if (!assistantMsg.content) {
+      const idx = messages.value.indexOf(assistantMsg)
+      if (idx !== -1) messages.value.splice(idx, 1)
+    }
+  } finally {
+    generating.value = false
+  }
 }
 
-function getResponse(input: string): string {
-  const responses: Record<string, string> = {
-    '¿Qué hago hoy?': 'Hoy te invito a dedicar 5 minutos a una respiración consciente. Siéntate cómodamente, cierra los ojos y enfoca tu atención en cada inhalación y exhalación. Después, escribe 3 cosas por las que estás agradecida. ¿Te parece un buen comienzo?',
-    'Ayúdame a reflexionar': 'Claro. Piensa en un momento de esta semana que te haya hecho sentir orgullosa de ti misma. ¿Qué hiciste diferente? ¿Qué fortaleza usaste? Cuéntame, estoy aquí para escucharte.',
-    'Plan de 5 minutos': 'Aquí tienes tu plan de 5 minutos:\n\n1. Respira profundo 3 veces (30s)\n2. Escribe tu intención del día (1 min)\n3. Estira tu cuerpo suavemente (1 min)\n4. Visualiza tu día ideal (1 min)\n5. Sonríe y agradece (30s)\n\n¿Listo para empezar?',
+async function retry() {
+  if (lastFailedMessage.value) {
+    // Remove the last user message (it will be re-added by sendMessage)
+    const lastUserIdx = messages.value.findLastIndex(m => m.role === 'user')
+    if (lastUserIdx !== -1) messages.value.splice(lastUserIdx, 1)
+    await sendMessage(lastFailedMessage.value)
   }
-  return responses[input] || '¡Qué interesante lo que compartes! Me gustaría profundizar en eso. ¿Podrías contarme más sobre cómo te hace sentir? Recuerda que cada reflexión es un paso adelante en tu crecimiento.'
 }
 </script>
 
@@ -268,6 +389,27 @@ function getResponse(input: string): string {
 @keyframes typingDot {
   0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
   30% { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Error / limit states ─── */
+.chat__error,
+.chat__limit {
+  text-align: center;
+  padding: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.chat__retry-btn {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid rgba(var(--tint-rgb), 0.1);
+  border-radius: var(--radius-full);
+  background: rgba(var(--tint-rgb), 0.04);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  cursor: pointer;
 }
 
 /* ─── Quick prompts ─── */
