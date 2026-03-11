@@ -11,7 +11,7 @@ export type AdminRole = 'admin' | 'editor' | 'read_only';
 
 export type CategoryStatus = 'active' | 'hidden';
 
-export type ContentType = 'video' | 'text' | 'link' | 'audio';
+export type ContentType = 'video' | 'audio' | 'article' | 'link';
 
 export type ContentStatus = 'draft' | 'scheduled' | 'published' | 'archived';
 
@@ -21,7 +21,7 @@ export type ProgramStatus = 'draft' | 'published' | 'archived';
 
 export type EnrollmentStatus = 'active' | 'completed' | 'cancelled';
 
-export type DailyPlanActionType = 'content' | 'program_day' | 'custom' | 'ai_prompt';
+export type DailyPlanActionType = 'content' | 'program_day' | 'custom' | 'ai_prompt' | 'form';
 
 export type DailyPlanStatus = 'scheduled' | 'published' | 'archived';
 
@@ -29,7 +29,7 @@ export type PostStatus = 'draft' | 'published' | 'hidden';
 
 export type CommentStatus = 'published' | 'hidden';
 
-export type EventStatus = 'draft' | 'published' | 'hidden';
+export type EventStatus = 'draft' | 'published' | 'hidden' | 'cancelled';
 
 export type EventPlan = 'free' | 'core';
 
@@ -38,6 +38,14 @@ export type BenefitStatus = 'active' | 'inactive';
 export type AddonStatus = 'active' | 'inactive';
 
 export type AddonPlan = 'todos' | 'core';
+
+export type ContentPlan = 'free' | 'core';
+
+export type FormStatus = 'active' | 'inactive';
+
+export type EventRegistrationStatus = 'registered' | 'cancelled' | 'attended';
+
+export type ProgramDayItemType = 'content' | 'form' | 'ai_prompt';
 
 export type EntitlementSource = 'subscription' | 'addon' | 'admin';
 
@@ -62,6 +70,7 @@ export interface Profile {
   avatar_url: string | null;
   community_segment: CommunitySegment;
   created_at: string;
+  updated_at: string | null;
 }
 
 export interface AdminUser {
@@ -71,13 +80,24 @@ export interface AdminUser {
   created_at: string;
 }
 
+export interface ContentObjective {
+  id: string;
+  title: string;
+  slug: string;
+  position: number;
+}
+
 export interface ContentCategory {
   id: string;
   title: string;
   slug: string;
   description: string | null;
+  icon_url: string | null;
+  is_active: boolean;
   status: CategoryStatus;
-  position: number;
+  sort_order: number;
+  created_at: string;
+  updated_at: string | null;
 }
 
 export interface ContentItem {
@@ -97,9 +117,12 @@ export interface ContentItem {
   available_to: string | null;
   community_segment: CommunitySegment | null;
   entitlement_key: string | null;
+  plan: ContentPlan;
+  objective_id: string | null;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;
+  updated_at: string | null;
 }
 
 export interface ContentItemCategory {
@@ -107,6 +130,16 @@ export interface ContentItemCategory {
   content_item_id: string;
   category_id: string;
   position: number;
+}
+
+export interface Form {
+  id: string;
+  title: string;
+  description: string | null;
+  fields: Record<string, unknown>[];
+  status: FormStatus;
+  created_at: string;
+  updated_at: string | null;
 }
 
 export interface Program {
@@ -117,11 +150,14 @@ export interface Program {
   status: ProgramStatus;
   community_segment: CommunitySegment | null;
   entitlement_key: string | null;
+  plan: ContentPlan;
+  cover_url: string | null;
   is_active: boolean;
   start_date: string | null;
   end_date: string | null;
   created_by: string | null;
   created_at: string;
+  updated_at: string | null;
 }
 
 export interface ProgramDay {
@@ -135,7 +171,9 @@ export interface ProgramDay {
 export interface ProgramDayItem {
   id: string;
   program_day_id: string;
-  content_item_id: string;
+  type: ProgramDayItemType;
+  content_item_id: string | null;
+  form_id: string | null;
   position: number;
 }
 
@@ -166,6 +204,8 @@ export interface DailyPlan {
   primary_action_ref: string | null;
   primary_action_payload: Record<string, unknown> | null;
   badge_share_text: string | null;
+  badge_title: string | null;
+  badge_subtitle: string | null;
   status: DailyPlanStatus;
   created_by: string | null;
 }
@@ -342,4 +382,26 @@ export interface AiQuota {
   day: string;
   messages_used: number;
   tokens_used: number;
+}
+
+export interface EventRegistration {
+  id: string;
+  event_id: string;
+  user_id: string;
+  status: EventRegistrationStatus;
+  created_at: string;
+}
+
+export interface FormSubmission {
+  id: string;
+  form_id: string;
+  user_id: string;
+  answers: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface AppSetting {
+  key: string;
+  value: Record<string, unknown>;
+  updated_at: string;
 }

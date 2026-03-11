@@ -217,6 +217,7 @@ For every DB change:
 - `avatar_url text`
 - `community_segment text not null` (`gabriel|carlotta|conjunta`) (note: `conjunta` = combined)
 - `created_at timestamptz default now()`
+- `updated_at timestamptz`
 
 #### `admin_users`
 - `id uuid pk` (own id)
@@ -229,21 +230,32 @@ RLS: profiles self-access; admin_users readable only to admins.
 ---
 
 ### 6.2 Content library (on-demand)
+
+#### `content_objectives`
+- `id uuid pk`
+- `title text not null`
+- `slug text unique not null`
+- `position int not null default 0`
+
 #### `content_categories`
 - `id uuid pk`
 - `title text not null`
 - `slug text unique not null`
 - `description text`
+- `icon_url text`
+- `is_active bool not null default true`
 - `status text not null default 'active'` (`active|hidden`)
-- `position int not null default 0`
+- `sort_order int not null default 0`
+- `created_at timestamptz default now()`
+- `updated_at timestamptz`
 
 #### `content_items`
 - `id uuid pk`
-- `type text not null` (`video|text|link|audio`)
+- `type text not null` (`video|audio|article|link`)
 - `title text not null`
 - `subtitle text`
 - `description text`
-- `body text` (for text content)
+- `body text` (for article content)
 - `media_url text` (video/audio)
 - `external_url text` (link)
 - `thumbnail_url text`
@@ -253,9 +265,13 @@ RLS: profiles self-access; admin_users readable only to admins.
 - `available_from timestamptz`
 - `available_to timestamptz`
 - `community_segment text null`
+- `entitlement_key text null`
+- `plan text not null default 'free'` (`free|core`)
+- `objective_id uuid null references content_objectives(id)`
 - `created_by uuid null references auth.users(id)`
 - `updated_by uuid null references auth.users(id)`
 - `created_at timestamptz default now()`
+- `updated_at timestamptz`
 
 #### `content_item_categories` (m2m + ordering)
 - `id uuid pk`
@@ -274,11 +290,15 @@ RLS: profiles self-access; admin_users readable only to admins.
 - `description text`
 - `status text not null default 'draft'` (`draft|published|archived`)
 - `community_segment text null`
+- `entitlement_key text null`
+- `plan text not null default 'free'` (`free|core`)
+- `cover_url text`
 - `is_active bool not null default true` (for simple cohort toggles)
 - `start_date date null`
 - `end_date date null`
 - `created_by uuid null`
 - `created_at timestamptz default now()`
+- `updated_at timestamptz`
 
 #### `program_days`
 - `id uuid pk`
@@ -291,7 +311,9 @@ RLS: profiles self-access; admin_users readable only to admins.
 #### `program_day_items`
 - `id uuid pk`
 - `program_day_id uuid not null references program_days(id) on delete cascade`
-- `content_item_id uuid not null references content_items(id)`
+- `type text not null default 'content'` (`content|form|ai_prompt`)
+- `content_item_id uuid null references content_items(id)` (nullable — only for type 'content')
+- `form_id uuid null references forms(id)` (only for type 'form')
 - `position int not null default 0`
 
 #### `program_enrollments`
@@ -321,11 +343,16 @@ Indexes: `(program_id,user_id)`, `(user_id,created_at)`.
 - `community_segment text null`
 - `title text`
 - `message text`
-- `primary_action_type text not null` (`content|program_day|custom|ai_prompt`)
-- `primary_action_ref uuid null` (e.g., content_items.id or program_days.id)
+- `primary_action_type text not null` (`content|program_day|custom|ai_prompt|form`)
+- `primary_action_ref uuid null` (e.g., content_items.id, program_days.id, or forms.id)
 - `primary_action_payload jsonb not null default '{}'::jsonb` (custom action config)
+- `badge_share_text text null`
+- `badge_title text null`
+- `badge_subtitle text null`
 - `status text not null default 'scheduled'` (`scheduled|published|archived`)
 - `created_by uuid null`
+- `created_at timestamptz default now()`
+- `updated_at timestamptz`
 - unique (`date`, `community_segment`)
 
 #### `daily_checkins`
@@ -383,12 +410,28 @@ Optional streak materialization (MVP can compute on the fly):
 - `description text`
 - `start_at timestamptz not null`
 - `end_at timestamptz null`
+- `duration text null`
 - `community_segment text null`
 - `requires_subscription bool not null default true`
+- `entitlement_key text null`
+- `plan text default 'free'` (`free|core`)
+- `cover_url text null`
 - `vimeo_url text null`
 - `vimeo_id text null`
-- `status text not null default 'draft'` (`draft|published|hidden`)
+- `vimeo_live_event_id text null`
+- `status text not null default 'draft'` (`draft|published|hidden|cancelled`)
 - `created_at timestamptz default now()`
+- `updated_at timestamptz`
+
+#### `event_registrations`
+- `id uuid pk`
+- `event_id uuid not null references events(id) on delete cascade`
+- `user_id uuid not null references auth.users(id) on delete cascade`
+- `status text not null default 'registered'` (`registered|cancelled|attended`)
+- `created_at timestamptz default now()`
+- unique (`event_id`, `user_id`)
+
+Note: `registered_count` displayed on admin events index is computed via `COUNT(*)` from `event_registrations`, not a stored column.
 
 ---
 
@@ -397,10 +440,12 @@ Optional streak materialization (MVP can compute on the fly):
 - `id uuid pk`
 - `title text not null`
 - `description text`
-- `url text not null`
+- `cover_url text` (image uploaded via admin)
+- `url text`
 - `utm_template text null`
 - `code text null`
-- `status text not null default 'published'` (`draft|published|hidden`)
+- `plan text not null default 'free'` (`free|core`) — who can see
+- `status text not null default 'active'` (`active|inactive`)
 - `position int not null default 0`
 - `created_at timestamptz default now()`
 
@@ -471,7 +516,36 @@ Optional streak materialization (MVP can compute on the fly):
 
 ---
 
-### 6.9 Subscriptions / Payments (Stripe)
+### 6.9 Forms & Submissions
+#### `forms`
+- `id uuid pk`
+- `title text not null`
+- `description text`
+- `fields jsonb not null default '[]'::jsonb` (array of field definitions)
+- `status text not null default 'active'` (`active|inactive`)
+- `created_at timestamptz default now()`
+- `updated_at timestamptz` (trigger: `set_updated_at`)
+
+#### `form_submissions`
+- `id uuid pk`
+- `form_id uuid not null references forms(id)`
+- `user_id uuid not null references auth.users(id)`
+- `answers jsonb not null default '{}'::jsonb`
+- `created_at timestamptz default now()`
+
+---
+
+### 6.10 App Settings (key-value config)
+#### `app_settings`
+- `key text pk`
+- `value jsonb not null default '{}'::jsonb`
+- `updated_at timestamptz` (trigger: `set_updated_at`)
+
+Used for persistent admin configuration (e.g. Hoy page defaults, explore section ordering).
+
+---
+
+### 6.11 Subscriptions / Payments (Stripe)
 #### `subscriptions`
 - `id uuid pk`
 - `user_id uuid not null references auth.users(id) on delete cascade`
@@ -495,7 +569,7 @@ Optional streak materialization (MVP can compute on the fly):
 
 ---
 
-### 6.10 AI Coach (approved feature)
+### 6.12 AI Coach (approved feature)
 #### `ai_sessions`
 - `id uuid pk`
 - `user_id uuid not null references auth.users(id) on delete cascade`

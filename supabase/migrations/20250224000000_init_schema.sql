@@ -61,7 +61,8 @@ CREATE TABLE public.profiles (
   avatar_url  text,
   community_segment text NOT NULL
     CHECK (community_segment IN ('gabriel', 'carlotta', 'conjunta')),
-  created_at  timestamptz NOT NULL DEFAULT now()
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz
 );
 
 -- admin_users --------------------------------------------------------------
@@ -76,15 +77,25 @@ CREATE TABLE public.admin_users (
 -- 6.2 Content library (on-demand)
 -- ---------------------------------------------------------------------------
 
+-- content_objectives -------------------------------------------------------
+CREATE TABLE public.content_objectives (
+  id       uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title    text NOT NULL,
+  slug     text UNIQUE NOT NULL,
+  position int NOT NULL DEFAULT 0
+);
+
 -- content_categories -------------------------------------------------------
 CREATE TABLE public.content_categories (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title       text NOT NULL,
   slug        text UNIQUE NOT NULL,
   description text,
+  icon_url    text,
+  is_active   boolean NOT NULL DEFAULT true,
   status      text NOT NULL DEFAULT 'active'
     CHECK (status IN ('active', 'hidden')),
-  position    int NOT NULL DEFAULT 0,
+  sort_order  int NOT NULL DEFAULT 0,
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz
 );
@@ -92,7 +103,7 @@ CREATE TABLE public.content_categories (
 -- content_items ------------------------------------------------------------
 CREATE TABLE public.content_items (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  type              text NOT NULL CHECK (type IN ('video', 'text', 'link', 'audio')),
+  type              text NOT NULL CHECK (type IN ('video', 'audio', 'article', 'link')),
   title             text NOT NULL,
   subtitle          text,
   description       text,
@@ -101,6 +112,9 @@ CREATE TABLE public.content_items (
   external_url      text,
   thumbnail_url     text,
   duration_seconds  int,
+  entitlement_key   text,
+  plan              text NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'core')),
+  objective_id      uuid REFERENCES public.content_objectives(id),
   status            text NOT NULL DEFAULT 'draft'
     CHECK (status IN ('draft', 'scheduled', 'published', 'archived')),
   published_at      timestamptz,
@@ -124,6 +138,22 @@ CREATE TABLE public.content_item_categories (
 );
 
 -- ---------------------------------------------------------------------------
+-- 6.2b Forms
+-- ---------------------------------------------------------------------------
+
+-- forms --------------------------------------------------------------------
+CREATE TABLE public.forms (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title       text NOT NULL,
+  description text,
+  fields      jsonb NOT NULL DEFAULT '[]'::jsonb,
+  status      text NOT NULL DEFAULT 'active'
+    CHECK (status IN ('active', 'inactive')),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz
+);
+
+-- ---------------------------------------------------------------------------
 -- 6.3 Programs / Challenges / Bootcamps
 -- ---------------------------------------------------------------------------
 
@@ -133,6 +163,9 @@ CREATE TABLE public.programs (
   type              text NOT NULL CHECK (type IN ('program', 'reto', 'bootcamp')),
   title             text NOT NULL,
   description       text,
+  entitlement_key   text,
+  plan              text NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'core')),
+  cover_url         text,
   status            text NOT NULL DEFAULT 'draft'
     CHECK (status IN ('draft', 'published', 'archived')),
   community_segment text
@@ -159,7 +192,9 @@ CREATE TABLE public.program_days (
 CREATE TABLE public.program_day_items (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   program_day_id  uuid NOT NULL REFERENCES public.program_days(id) ON DELETE CASCADE,
-  content_item_id uuid NOT NULL REFERENCES public.content_items(id),
+  content_item_id uuid REFERENCES public.content_items(id),
+  type            text NOT NULL DEFAULT 'content' CHECK (type IN ('content', 'form', 'ai_prompt')),
+  form_id         uuid REFERENCES public.forms(id),
   position        int NOT NULL DEFAULT 0
 );
 
@@ -196,8 +231,11 @@ CREATE TABLE public.daily_plans (
     CHECK (community_segment IS NULL OR community_segment IN ('gabriel', 'carlotta', 'conjunta')),
   title                    text,
   message                  text,
+  badge_share_text         text,
+  badge_title              text,
+  badge_subtitle           text,
   primary_action_type      text NOT NULL
-    CHECK (primary_action_type IN ('content', 'program_day', 'custom', 'ai_prompt')),
+    CHECK (primary_action_type IN ('content', 'program_day', 'custom', 'ai_prompt', 'form')),
   primary_action_ref       uuid,
   primary_action_payload   jsonb NOT NULL DEFAULT '{}'::jsonb,
   status                   text NOT NULL DEFAULT 'scheduled'
@@ -282,12 +320,28 @@ CREATE TABLE public.events (
   community_segment     text
     CHECK (community_segment IS NULL OR community_segment IN ('gabriel', 'carlotta', 'conjunta')),
   requires_subscription boolean NOT NULL DEFAULT true,
+  plan                  text DEFAULT 'free' CHECK (plan IN ('free', 'core')),
+  duration              text,
+  cover_url             text,
+  entitlement_key       text,
   vimeo_url             text,
   vimeo_id              text,
+  vimeo_live_event_id   text,
   status                text NOT NULL DEFAULT 'draft'
-    CHECK (status IN ('draft', 'published', 'hidden')),
+    CHECK (status IN ('draft', 'published', 'hidden', 'cancelled')),
   created_at            timestamptz NOT NULL DEFAULT now(),
   updated_at            timestamptz
+);
+
+-- event_registrations ------------------------------------------------------
+CREATE TABLE public.event_registrations (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id   uuid NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
+  user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  status     text NOT NULL DEFAULT 'registered'
+    CHECK (status IN ('registered', 'cancelled', 'attended')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (event_id, user_id)
 );
 
 -- ---------------------------------------------------------------------------
@@ -302,8 +356,10 @@ CREATE TABLE public.benefits (
   url          text NOT NULL,
   utm_template text,
   code         text,
-  status       text NOT NULL DEFAULT 'published'
-    CHECK (status IN ('draft', 'published', 'hidden')),
+  cover_url    text,
+  plan         text NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'core')),
+  status       text NOT NULL DEFAULT 'active'
+    CHECK (status IN ('active', 'inactive')),
   position     int NOT NULL DEFAULT 0,
   created_at   timestamptz NOT NULL DEFAULT now(),
   updated_at   timestamptz
@@ -324,14 +380,18 @@ CREATE TABLE public.benefit_clicks (
 
 -- addons -------------------------------------------------------------------
 CREATE TABLE public.addons (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  title           text NOT NULL,
-  description     text,
-  stripe_price_id text NOT NULL,
-  status          text NOT NULL DEFAULT 'active'
+  id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title            text NOT NULL,
+  description      text,
+  stripe_price_id  text,
+  cover_url        text,
+  price            int NOT NULL DEFAULT 0,
+  plan             text NOT NULL DEFAULT 'todos' CHECK (plan IN ('todos', 'core')),
+  grants_core_months int,
+  status           text NOT NULL DEFAULT 'active'
     CHECK (status IN ('active', 'inactive')),
-  created_at      timestamptz NOT NULL DEFAULT now(),
-  updated_at      timestamptz
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  updated_at       timestamptz
 );
 
 -- addon_entitlements -------------------------------------------------------
@@ -340,6 +400,16 @@ CREATE TABLE public.addon_entitlements (
   addon_id        uuid NOT NULL REFERENCES public.addons(id) ON DELETE CASCADE,
   entitlement_key text NOT NULL,
   UNIQUE (addon_id, entitlement_key)
+);
+
+-- addon_purchases ----------------------------------------------------------
+CREATE TABLE public.addon_purchases (
+  id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  addon_id          uuid NOT NULL REFERENCES public.addons(id) ON DELETE CASCADE,
+  user_id           uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  stripe_session_id text,
+  amount            int NOT NULL DEFAULT 0,
+  created_at        timestamptz NOT NULL DEFAULT now()
 );
 
 -- user_entitlements --------------------------------------------------------
@@ -427,6 +497,30 @@ CREATE TABLE public.ai_global_usage (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 
+-- ---------------------------------------------------------------------------
+-- 6.11 App Settings
+-- ---------------------------------------------------------------------------
+
+-- app_settings -------------------------------------------------------------
+CREATE TABLE public.app_settings (
+  key        text PRIMARY KEY,
+  value      jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- ---------------------------------------------------------------------------
+-- 6.12 Form Submissions
+-- ---------------------------------------------------------------------------
+
+-- form_submissions ---------------------------------------------------------
+CREATE TABLE public.form_submissions (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  form_id    uuid NOT NULL REFERENCES public.forms(id),
+  user_id    uuid NOT NULL REFERENCES auth.users(id),
+  answers    jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 -- ===========================================================================
 --  INDEXES
 -- ===========================================================================
@@ -446,9 +540,33 @@ CREATE INDEX idx_content_items_segment
   ON public.content_items (community_segment)
   WHERE community_segment IS NOT NULL;
 
+CREATE INDEX idx_content_items_entitlement
+  ON public.content_items (entitlement_key)
+  WHERE entitlement_key IS NOT NULL;
+
+CREATE INDEX idx_content_items_plan
+  ON public.content_items (plan);
+
+CREATE INDEX idx_content_items_objective
+  ON public.content_items (objective_id)
+  WHERE objective_id IS NOT NULL;
+
+CREATE INDEX idx_content_items_type
+  ON public.content_items (type);
+
 -- programs: status for listing queries
 CREATE INDEX idx_programs_status
   ON public.programs (status);
+
+CREATE INDEX idx_programs_entitlement
+  ON public.programs (entitlement_key)
+  WHERE entitlement_key IS NOT NULL;
+
+CREATE INDEX idx_programs_plan
+  ON public.programs (plan);
+
+CREATE INDEX idx_programs_type
+  ON public.programs (type);
 
 -- daily_plans: date + segment for today lookup
 CREATE INDEX idx_daily_plans_date_segment
@@ -462,9 +580,23 @@ CREATE INDEX idx_daily_checkins_user_date
 CREATE INDEX idx_posts_status_segment
   ON public.posts (status, community_segment);
 
+CREATE INDEX idx_posts_author
+  ON public.posts (author_user_id);
+
 -- events: status + start_at for upcoming queries
 CREATE INDEX idx_events_status_start
   ON public.events (status, start_at);
+
+CREATE INDEX idx_events_entitlement
+  ON public.events (entitlement_key)
+  WHERE entitlement_key IS NOT NULL;
+
+-- event_registrations
+CREATE INDEX idx_event_registrations_event
+  ON public.event_registrations (event_id);
+
+CREATE INDEX idx_event_registrations_user
+  ON public.event_registrations (user_id);
 
 -- ai_sessions: user lookup
 CREATE INDEX idx_ai_sessions_user
@@ -488,6 +620,10 @@ CREATE INDEX idx_payments_stripe_object
 CREATE INDEX idx_benefit_clicks_benefit
   ON public.benefit_clicks (benefit_id);
 
+-- benefits
+CREATE INDEX idx_benefits_plan
+  ON public.benefits (plan);
+
 -- program_enrollments: user lookup
 CREATE INDEX idx_program_enrollments_user
   ON public.program_enrollments (user_id);
@@ -496,14 +632,43 @@ CREATE INDEX idx_program_enrollments_user
 CREATE INDEX idx_admin_users_user_id
   ON public.admin_users (user_id);
 
+-- forms
+CREATE INDEX idx_forms_status
+  ON public.forms (status);
+
+-- form_submissions
+CREATE INDEX idx_form_submissions_form
+  ON public.form_submissions (form_id);
+
+CREATE INDEX idx_form_submissions_user
+  ON public.form_submissions (user_id);
+
+-- addon_purchases
+CREATE UNIQUE INDEX idx_addon_purchases_user_addon
+  ON public.addon_purchases (user_id, addon_id);
+
+CREATE INDEX idx_addon_purchases_addon
+  ON public.addon_purchases (addon_id);
+
+-- program_day_items: form lookup
+CREATE INDEX idx_program_day_items_form
+  ON public.program_day_items (form_id)
+  WHERE form_id IS NOT NULL;
+
 -- ===========================================================================
 --  TRIGGERS: updated_at
 -- ===========================================================================
+
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.content_categories
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.content_items
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.forms
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.programs
@@ -533,15 +698,20 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.user_streaks
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.ai_global_usage
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.app_settings
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
 -- ===========================================================================
 --  ROW LEVEL SECURITY — Enable on ALL tables
 -- ===========================================================================
 
 ALTER TABLE public.profiles             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_users          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.content_objectives   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.content_categories   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.content_items        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.content_item_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.forms                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.programs             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.program_days         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.program_day_items    ENABLE ROW LEVEL SECURITY;
@@ -554,10 +724,12 @@ ALTER TABLE public.posts                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_comments        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_reactions       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.event_registrations  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.benefits             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.benefit_clicks       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.addons               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.addon_entitlements   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.addon_purchases      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_entitlements    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.subscriptions        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments             ENABLE ROW LEVEL SECURITY;
@@ -565,6 +737,8 @@ ALTER TABLE public.ai_sessions          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_messages          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_quotas            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_global_usage      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_settings         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.form_submissions     ENABLE ROW LEVEL SECURITY;
 
 -- ===========================================================================
 --  RLS POLICIES
@@ -597,6 +771,25 @@ CREATE POLICY "profiles_insert_own" ON public.profiles
 DROP POLICY IF EXISTS "admin_users_select_admin" ON public.admin_users;
 CREATE POLICY "admin_users_select_admin" ON public.admin_users
   FOR SELECT USING (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- content_objectives
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "content_objectives_select_authed" ON public.content_objectives;
+CREATE POLICY "content_objectives_select_authed" ON public.content_objectives
+  FOR SELECT USING ((select auth.uid()) IS NOT NULL);
+
+DROP POLICY IF EXISTS "content_objectives_insert_admin" ON public.content_objectives;
+CREATE POLICY "content_objectives_insert_admin" ON public.content_objectives
+  FOR INSERT WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "content_objectives_update_admin" ON public.content_objectives;
+CREATE POLICY "content_objectives_update_admin" ON public.content_objectives
+  FOR UPDATE USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "content_objectives_delete_admin" ON public.content_objectives;
+CREATE POLICY "content_objectives_delete_admin" ON public.content_objectives
+  FOR DELETE USING (public.is_admin());
 
 -- ---------------------------------------------------------------------------
 -- content_categories
@@ -676,6 +869,31 @@ CREATE POLICY "content_item_categories_update_admin" ON public.content_item_cate
 
 DROP POLICY IF EXISTS "content_item_categories_delete_admin" ON public.content_item_categories;
 CREATE POLICY "content_item_categories_delete_admin" ON public.content_item_categories
+  FOR DELETE USING (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- forms
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "forms_select_active" ON public.forms;
+CREATE POLICY "forms_select_active" ON public.forms
+  FOR SELECT USING (
+    (
+      status = 'active'
+      AND (select auth.uid()) IS NOT NULL
+    )
+    OR public.is_admin()
+  );
+
+DROP POLICY IF EXISTS "forms_insert_admin" ON public.forms;
+CREATE POLICY "forms_insert_admin" ON public.forms
+  FOR INSERT WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "forms_update_admin" ON public.forms;
+CREATE POLICY "forms_update_admin" ON public.forms
+  FOR UPDATE USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "forms_delete_admin" ON public.forms;
+CREATE POLICY "forms_delete_admin" ON public.forms
   FOR DELETE USING (public.is_admin());
 
 -- ---------------------------------------------------------------------------
@@ -970,13 +1188,34 @@ CREATE POLICY "events_delete_admin" ON public.events
   FOR DELETE USING (public.is_admin());
 
 -- ---------------------------------------------------------------------------
+-- event_registrations
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "event_registrations_select" ON public.event_registrations;
+CREATE POLICY "event_registrations_select" ON public.event_registrations
+  FOR SELECT USING (
+    user_id = (select auth.uid())
+    OR public.is_admin()
+  );
+
+DROP POLICY IF EXISTS "event_registrations_insert_own" ON public.event_registrations;
+CREATE POLICY "event_registrations_insert_own" ON public.event_registrations
+  FOR INSERT WITH CHECK (
+    user_id = (select auth.uid())
+  );
+
+DROP POLICY IF EXISTS "event_registrations_update_own" ON public.event_registrations;
+CREATE POLICY "event_registrations_update_own" ON public.event_registrations
+  FOR UPDATE USING (user_id = (select auth.uid()))
+  WITH CHECK (user_id = (select auth.uid()));
+
+-- ---------------------------------------------------------------------------
 -- benefits
 -- ---------------------------------------------------------------------------
 DROP POLICY IF EXISTS "benefits_select_published" ON public.benefits;
 CREATE POLICY "benefits_select_published" ON public.benefits
   FOR SELECT USING (
     (
-      status = 'published'
+      status = 'active'
       AND (select auth.uid()) IS NOT NULL
     )
     OR public.is_admin()
@@ -1051,6 +1290,24 @@ CREATE POLICY "addon_entitlements_update_admin" ON public.addon_entitlements
 
 DROP POLICY IF EXISTS "addon_entitlements_delete_admin" ON public.addon_entitlements;
 CREATE POLICY "addon_entitlements_delete_admin" ON public.addon_entitlements
+  FOR DELETE USING (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- addon_purchases
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "addon_purchases_select" ON public.addon_purchases;
+CREATE POLICY "addon_purchases_select" ON public.addon_purchases
+  FOR SELECT USING (
+    user_id = (select auth.uid())
+    OR public.is_admin()
+  );
+
+DROP POLICY IF EXISTS "addon_purchases_insert_admin" ON public.addon_purchases;
+CREATE POLICY "addon_purchases_insert_admin" ON public.addon_purchases
+  FOR INSERT WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "addon_purchases_delete_admin" ON public.addon_purchases;
+CREATE POLICY "addon_purchases_delete_admin" ON public.addon_purchases
   FOR DELETE USING (public.is_admin());
 
 -- ---------------------------------------------------------------------------
@@ -1168,5 +1425,194 @@ CREATE POLICY "ai_global_usage_insert_admin" ON public.ai_global_usage
 DROP POLICY IF EXISTS "ai_global_usage_update_admin" ON public.ai_global_usage;
 CREATE POLICY "ai_global_usage_update_admin" ON public.ai_global_usage
   FOR UPDATE USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- app_settings
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "app_settings_select_authed" ON public.app_settings;
+CREATE POLICY "app_settings_select_authed" ON public.app_settings
+  FOR SELECT USING ((select auth.uid()) IS NOT NULL);
+
+DROP POLICY IF EXISTS "app_settings_insert_admin" ON public.app_settings;
+CREATE POLICY "app_settings_insert_admin" ON public.app_settings
+  FOR INSERT WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "app_settings_update_admin" ON public.app_settings;
+CREATE POLICY "app_settings_update_admin" ON public.app_settings
+  FOR UPDATE USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "app_settings_delete_admin" ON public.app_settings;
+CREATE POLICY "app_settings_delete_admin" ON public.app_settings
+  FOR DELETE USING (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- form_submissions
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "form_submissions_select" ON public.form_submissions;
+CREATE POLICY "form_submissions_select" ON public.form_submissions
+  FOR SELECT USING (
+    user_id = (select auth.uid())
+    OR public.is_admin()
+  );
+
+DROP POLICY IF EXISTS "form_submissions_insert_own" ON public.form_submissions;
+CREATE POLICY "form_submissions_insert_own" ON public.form_submissions
+  FOR INSERT WITH CHECK (
+    user_id = (select auth.uid())
+  );
+
+-- ===========================================================================
+--  STORAGE BUCKETS
+-- ===========================================================================
+
+INSERT INTO storage.buckets (id, name, public) VALUES
+  ('avatars', 'avatars', true),
+  ('content-media', 'content-media', false),
+  ('program-covers', 'program-covers', true),
+  ('event-covers', 'event-covers', true),
+  ('addon-covers', 'addon-covers', true),
+  ('community-media', 'community-media', false);
+
+-- ---------------------------------------------------------------------------
+-- Storage policies: avatars (public)
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "avatars_select_public" ON storage.objects;
+CREATE POLICY "avatars_select_public" ON storage.objects
+  FOR SELECT USING (bucket_id = 'avatars');
+
+DROP POLICY IF EXISTS "avatars_insert_authed" ON storage.objects;
+CREATE POLICY "avatars_insert_authed" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'avatars'
+    AND (select auth.uid()) IS NOT NULL
+  );
+
+DROP POLICY IF EXISTS "avatars_delete_admin" ON storage.objects;
+CREATE POLICY "avatars_delete_admin" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'avatars'
+    AND public.is_admin()
+  );
+
+-- ---------------------------------------------------------------------------
+-- Storage policies: program-covers (public)
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "program_covers_select_public" ON storage.objects;
+CREATE POLICY "program_covers_select_public" ON storage.objects
+  FOR SELECT USING (bucket_id = 'program-covers');
+
+DROP POLICY IF EXISTS "program_covers_insert_authed" ON storage.objects;
+CREATE POLICY "program_covers_insert_authed" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'program-covers'
+    AND (select auth.uid()) IS NOT NULL
+  );
+
+DROP POLICY IF EXISTS "program_covers_delete_admin" ON storage.objects;
+CREATE POLICY "program_covers_delete_admin" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'program-covers'
+    AND public.is_admin()
+  );
+
+-- ---------------------------------------------------------------------------
+-- Storage policies: event-covers (public)
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "event_covers_select_public" ON storage.objects;
+CREATE POLICY "event_covers_select_public" ON storage.objects
+  FOR SELECT USING (bucket_id = 'event-covers');
+
+DROP POLICY IF EXISTS "event_covers_insert_authed" ON storage.objects;
+CREATE POLICY "event_covers_insert_authed" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'event-covers'
+    AND (select auth.uid()) IS NOT NULL
+  );
+
+DROP POLICY IF EXISTS "event_covers_delete_admin" ON storage.objects;
+CREATE POLICY "event_covers_delete_admin" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'event-covers'
+    AND public.is_admin()
+  );
+
+-- ---------------------------------------------------------------------------
+-- Storage policies: addon-covers (public)
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "addon_covers_select_public" ON storage.objects;
+CREATE POLICY "addon_covers_select_public" ON storage.objects
+  FOR SELECT USING (bucket_id = 'addon-covers');
+
+DROP POLICY IF EXISTS "addon_covers_insert_authed" ON storage.objects;
+CREATE POLICY "addon_covers_insert_authed" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'addon-covers'
+    AND (select auth.uid()) IS NOT NULL
+  );
+
+DROP POLICY IF EXISTS "addon_covers_delete_admin" ON storage.objects;
+CREATE POLICY "addon_covers_delete_admin" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'addon-covers'
+    AND public.is_admin()
+  );
+
+-- ---------------------------------------------------------------------------
+-- Storage policies: content-media (private)
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "content_media_select_authed" ON storage.objects;
+CREATE POLICY "content_media_select_authed" ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'content-media'
+    AND (select auth.uid()) IS NOT NULL
+  );
+
+DROP POLICY IF EXISTS "content_media_insert_authed" ON storage.objects;
+CREATE POLICY "content_media_insert_authed" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'content-media'
+    AND (select auth.uid()) IS NOT NULL
+  );
+
+DROP POLICY IF EXISTS "content_media_delete_admin" ON storage.objects;
+CREATE POLICY "content_media_delete_admin" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'content-media'
+    AND public.is_admin()
+  );
+
+-- ---------------------------------------------------------------------------
+-- Storage policies: community-media (private)
+-- ---------------------------------------------------------------------------
+DROP POLICY IF EXISTS "community_media_select_authed" ON storage.objects;
+CREATE POLICY "community_media_select_authed" ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'community-media'
+    AND (select auth.uid()) IS NOT NULL
+  );
+
+DROP POLICY IF EXISTS "community_media_insert_authed" ON storage.objects;
+CREATE POLICY "community_media_insert_authed" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'community-media'
+    AND (select auth.uid()) IS NOT NULL
+  );
+
+DROP POLICY IF EXISTS "community_media_delete_admin" ON storage.objects;
+CREATE POLICY "community_media_delete_admin" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'community-media'
+    AND public.is_admin()
+  );
+
+-- ===========================================================================
+--  REALTIME
+-- ===========================================================================
+
+ALTER PUBLICATION supabase_realtime ADD TABLE public.posts;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.post_comments;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.post_reactions;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.ai_messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.daily_plans;
 
 COMMIT;

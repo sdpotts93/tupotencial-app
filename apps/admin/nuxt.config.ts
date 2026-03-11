@@ -34,12 +34,18 @@ export default defineNuxtConfig({
     '~/assets/css/datepicker-overrides.css',
   ],
 
-  modules: ['@nuxt/icon'],
+  modules: ['@nuxt/icon', '@nuxtjs/supabase'],
+
+  supabase: {
+    redirectOptions: {
+      login: '/iniciar-sesion',
+      callback: '/confirm',
+      exclude: ['/', '/iniciar-sesion'],
+    },
+  },
 
   runtimeConfig: {
     public: {
-      supabaseUrl: '',
-      supabaseKey: '',
       devMode: true,
     },
   },

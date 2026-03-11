@@ -33,12 +33,18 @@ export default defineNuxtConfig({
     '~/assets/css/transitions.css',
   ],
 
-  modules: ['@nuxt/icon'],
+  modules: ['@nuxt/icon', '@nuxtjs/supabase'],
+
+  supabase: {
+    redirectOptions: {
+      login: '/iniciar-sesion',
+      callback: '/confirm',
+      exclude: ['/', '/iniciar-sesion', '/registro', '/precios'],
+    },
+  },
 
   runtimeConfig: {
     public: {
-      supabaseUrl: '',
-      supabaseKey: '',
       isNative: false,
       devMode: true,
     },
