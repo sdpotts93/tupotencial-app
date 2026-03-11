@@ -139,7 +139,7 @@ function getResponse(input: string): string {
     'Ayúdame a reflexionar': 'Claro. Piensa en un momento de esta semana que te haya hecho sentir orgullosa de ti misma. ¿Qué hiciste diferente? ¿Qué fortaleza usaste? Cuéntame, estoy aquí para escucharte.',
     'Plan de 5 minutos': 'Aquí tienes tu plan de 5 minutos:\n\n1. Respira profundo 3 veces (30s)\n2. Escribe tu intención del día (1 min)\n3. Estira tu cuerpo suavemente (1 min)\n4. Visualiza tu día ideal (1 min)\n5. Sonríe y agradece (30s)\n\n¿Listo para empezar?',
   }
-  return responses[input] || 'Qué interesante lo que compartes. Me gustaría profundizar en eso. ¿Podrías contarme más sobre cómo te hace sentir? Recuerda que cada reflexión es un paso adelante en tu crecimiento.'
+  return responses[input] || '¡Qué interesante lo que compartes! Me gustaría profundizar en eso. ¿Podrías contarme más sobre cómo te hace sentir? Recuerda que cada reflexión es un paso adelante en tu crecimiento.'
 }
 </script>
 

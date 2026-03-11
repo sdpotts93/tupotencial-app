@@ -37,8 +37,8 @@
               <Icon name="lucide:party-popper" size="32" />
             </div>
             <div class="hoy__celebration-text">
-              <p class="hoy__celebration-title">Dia completado</p>
-              <p class="hoy__celebration-sub">Racha de {{ streak + 1 }} dias</p>
+              <p class="hoy__celebration-title">Día completado</p>
+              <p class="hoy__celebration-sub">Racha de {{ streak + 1 }} días</p>
             </div>
             <span class="hoy__celebration-cta">Ver progreso <Icon name="lucide:chevron-right" size="14" /></span>
           </NuxtLink>
@@ -93,7 +93,7 @@
 
       <!-- Continue active programs -->
       <section v-if="activePrograms.length" class="hoy__continue">
-        <h2 class="hoy__section-title">Continua con tus programas</h2>
+        <h2 class="hoy__section-title">Continúa con tus programas</h2>
         <div class="hoy__continue-scroll">
           <NuxtLink
             v-for="prog in activePrograms"
@@ -117,7 +117,7 @@
             </div>
             <div class="hoy__continue-info">
               <span class="hoy__continue-name">{{ prog.title }}</span>
-              <span class="hoy__continue-meta">Dia {{ prog.currentDay }} de {{ prog.totalDays }}</span>
+              <span class="hoy__continue-meta">Día {{ prog.currentDay }} de {{ prog.totalDays }}</span>
             </div>
             <Icon name="lucide:chevron-right" size="16" class="hoy__continue-arrow" />
           </NuxtLink>
@@ -193,15 +193,15 @@
           <!-- Success state -->
           <div v-if="checkinSuccess" key="success" class="hoy__checkin-success">
             <div class="hoy__checkin-success-badge"><Icon name="lucide:trophy" size="48" /></div>
-            <p class="hoy__checkin-success-streak">{{ streak + 1 }} dias</p>
+            <p class="hoy__checkin-success-streak">{{ streak + 1 }} días</p>
             <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
             <UiButton block variant="secondary" @click="closeCheckinSheet">Listo</UiButton>
           </div>
 
           <!-- Form state -->
           <div v-else key="form">
-            <h1 class="hoy__sheet-title">Como te sientes hoy?</h1>
-            <p class="hoy__sheet-subtitle">Tomate un momento para reflexionar sobre tu estado actual.</p>
+            <h1 class="hoy__sheet-title">¿Cómo te sientes hoy?</h1>
+            <p class="hoy__sheet-subtitle">Tómate un momento para reflexionar sobre tu estado actual.</p>
 
             <!-- Mood selector -->
             <div class="hoy__checkin-moods">
@@ -220,8 +220,8 @@
             <!-- Reflection -->
             <UiTextarea
               v-model="checkinReflection"
-              label="Reflexion (opcional)"
-              placeholder="Que quieres lograr hoy?"
+              label="Reflexión (opcional)"
+              placeholder="¿Qué quieres lograr hoy?"
               :rows="3"
             />
 
@@ -233,7 +233,7 @@
       </div>
     </div>
 
-    <!-- Accion del dia slideover -->
+    <!-- Acción del día slideover -->
     <div
       class="hoy__overlay"
       :class="{ 'hoy__overlay--active': activeSheet === 'accion' }"
@@ -253,8 +253,8 @@
           <!-- Success state -->
           <div v-if="accionSuccess" key="success" class="hoy__checkin-success">
             <div class="hoy__checkin-success-badge"><Icon name="lucide:check-circle" size="48" /></div>
-            <p class="hoy__checkin-success-streak">{{ accionChoice === 'done' ? 'Accion completada' : 'Listo para manana' }}</p>
-            <p class="hoy__checkin-success-msg">{{ accionChoice === 'done' ? 'Excelente trabajo hoy. Cada accion cuenta.' : 'No pasa nada. Manana es una nueva oportunidad.' }}</p>
+            <p class="hoy__checkin-success-streak">{{ accionChoice === 'done' ? 'Acción completada' : 'Listo para mañana' }}</p>
+            <p class="hoy__checkin-success-msg">{{ accionChoice === 'done' ? 'Excelente trabajo hoy. Cada acción cuenta.' : 'No pasa nada. Mañana es una nueva oportunidad.' }}</p>
 
             <UiButton block variant="outline" @click="showShareBadge = true">
               <template #icon><Icon name="lucide:share-2" size="18" /></template>
@@ -282,7 +282,7 @@
                 @click="accionChoice = 'done'"
               >
                 <span class="hoy__accion-option-icon"><Icon name="lucide:check-circle" size="24" /></span>
-                <span class="hoy__accion-option-text">Hoy cumpli con la accion del dia</span>
+                <span class="hoy__accion-option-text">Hoy cumplí con la acción del día</span>
               </button>
 
               <button
@@ -290,7 +290,7 @@
                 @click="accionChoice = 'skip'"
               >
                 <span class="hoy__accion-option-icon"><Icon name="lucide:arrow-right-circle" size="24" /></span>
-                <span class="hoy__accion-option-text">Hoy no cumpli, estoy listo para manana</span>
+                <span class="hoy__accion-option-text">Hoy no cumplí, estoy listo para mañana</span>
               </button>
             </div>
 
@@ -311,7 +311,7 @@ const { user } = useAuth()
 const greeting = computed(() => {
   const name = user.value?.display_name?.split(' ')[0] ?? ''
   const hour = new Date().getHours()
-  let saludo = 'Buenos dias'
+  let saludo = 'Buenos días'
   if (hour >= 12 && hour < 18) saludo = 'Buenas tardes'
   else if (hour >= 18) saludo = 'Buenas noches'
   return name ? `${saludo}, ${name}` : saludo
@@ -322,17 +322,17 @@ const streak = ref(7)
 
 const streakMessage = computed(() => {
   const next = streak.value + 1
-  if (next >= 30) return 'Increible disciplina! Un mes completo.'
-  if (next >= 14) return 'Dos semanas seguidas! Vas imparable.'
-  if (next >= 7) return 'Una semana completa! Sigue asi.'
-  if (next >= 3) return 'Buen comienzo! Ya llevas 3 dias.'
-  return 'Sigue asi!'
+  if (next >= 30) return '¡Increíble disciplina! Un mes completo.'
+  if (next >= 14) return '¡Dos semanas seguidas! Vas imparable.'
+  if (next >= 7) return '¡Una semana completa! Sigue así.'
+  if (next >= 3) return '¡Buen comienzo! Ya llevas 3 días.'
+  return '¡Sigue así!'
 })
 
 // ─── Daily retos queue (2 items: check-in + admin-configurable action) ───
 const dailyRetos = ref([
   { id: 'checkin', type: 'checkin' as const, title: 'Completa tu check-in', completed: false },
-  { id: 'accion', type: 'accion' as const, title: 'Accion del dia', completed: false },
+  { id: 'accion', type: 'accion' as const, title: 'Acción del día', completed: false },
 ])
 
 const retosCompleted = computed(() => dailyRetos.value.filter(r => r.completed).length)
@@ -373,23 +373,23 @@ function handleRetoTap(type: 'checkin' | 'accion') {
   else activeSheet.value = 'accion'
 }
 
-// ─── Mensaje del dia (admin-configurable) ───
+// ─── Mensaje del día (admin-configurable) ───
 const mensajeDelDia = ref({
-  text: 'El exito no es la clave de la felicidad. La felicidad es la clave del exito.',
+  text: 'El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.',
   author: 'gabriel' as 'gabriel' | 'carlotta',
 })
 
 // ─── Mock daily plan ───
 const dailyPlan = ref({
-  eyebrow: 'Accion del dia',
+  eyebrow: 'Acción del día',
   title: 'Prioriza una sola cosa',
-  message: 'Enfoca tu energia en una accion clave. Hazla con intencion.',
-  badgeShareText: 'Hoy priorice lo importante. Una sola cosa, con intencion. #TuPotencial' as string | null,
+  message: 'Enfoca tu energía en una acción clave. Hazla con intención.',
+  badgeShareText: 'Hoy prioricé lo importante. Una sola cosa, con intención. #TuPotencial' as string | null,
 })
 
 // ─── Active programs (mock) ───
 const activePrograms = ref([
-  { id: 'mock-uuid-prog-001', title: 'Reto 7 dias de gratitud', currentDay: 4, totalDays: 7, progressPct: 4 / 7 },
+  { id: 'mock-uuid-prog-001', title: 'Reto 7 días de gratitud', currentDay: 4, totalDays: 7, progressPct: 4 / 7 },
   { id: 'mock-uuid-prog-002', title: 'Despertar consciente', currentDay: 12, totalDays: 30, progressPct: 12 / 30 },
 ])
 
@@ -399,7 +399,7 @@ const latestContent = ref([
     id: 'mock-uuid-ci-001',
     type: 'video' as const,
     typeLabel: 'Video',
-    title: 'Meditacion matutina: Gratitud y presencia',
+    title: 'Meditación matutina: Gratitud y presencia',
     thumbnail: '/images/lib-1.jpg',
     duration: '10 min',
     to: '/cuenta/biblioteca/mock-uuid-ci-001',
@@ -417,7 +417,7 @@ const latestContent = ref([
     id: 'mock-uuid-ci-003',
     type: 'video' as const,
     typeLabel: 'Video',
-    title: 'Respiracion 4-7-8 para calmar la ansiedad',
+    title: 'Respiración 4-7-8 para calmar la ansiedad',
     thumbnail: '/images/lib-3.jpg',
     duration: '8 min',
     to: '/cuenta/biblioteca/mock-uuid-ci-003',
@@ -475,11 +475,11 @@ const checkinLoading = ref(false)
 const checkinSuccess = ref(false)
 
 const moods = [
-  { value: 'great', emoji: 'lucide:laugh', label: 'Increible', color: 'var(--color-mood-great)' },
+  { value: 'great', emoji: 'lucide:laugh', label: 'Increíble', color: 'var(--color-mood-great)' },
   { value: 'good', emoji: 'lucide:smile', label: 'Bien', color: 'var(--color-mood-good)' },
   { value: 'ok', emoji: 'lucide:meh', label: 'Regular', color: 'var(--color-mood-ok)' },
   { value: 'low', emoji: 'lucide:frown', label: 'Bajo', color: 'var(--color-mood-low)' },
-  { value: 'tough', emoji: 'lucide:annoyed', label: 'Dificil', color: 'var(--color-mood-tough)' },
+  { value: 'tough', emoji: 'lucide:annoyed', label: 'Difícil', color: 'var(--color-mood-tough)' },
 ]
 
 async function handleCheckin() {
@@ -501,7 +501,7 @@ function closeCheckinSheet() {
   }, 400)
 }
 
-// ─── Accion del dia state ───
+// ─── Acción del día state ───
 const accionChoice = ref<'done' | 'skip' | null>(null)
 const accionLoading = ref(false)
 const accionSuccess = ref(false)
@@ -802,7 +802,7 @@ function closeAccionSheet() {
   color: var(--color-complete);
 }
 
-/* ─── Mensaje del dia ─── */
+/* ─── Mensaje del día ─── */
 .hoy__mensaje {
   margin-bottom: var(--space-6);
   position: relative;
@@ -1373,7 +1373,7 @@ function closeAccionSheet() {
   margin-bottom: var(--space-5);
 }
 
-/* ─── Accion del dia sheet content ─── */
+/* ─── Acción del día sheet content ─── */
 .hoy__accion-options {
   display: flex;
   flex-direction: column;

@@ -59,7 +59,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  eyebrow: 'ACCION DEL DIA',
+  eyebrow: 'ACCIÓN DEL DÍA',
 
 })
 
@@ -104,8 +104,8 @@ const formattedDate = computed(() => {
 const resolvedShareText = computed(() => {
   if (props.shareText) return props.shareText
   return props.outcome === 'done'
-    ? 'Hoy cumpli con mi accion del dia.'
-    : 'Manana es una nueva oportunidad.'
+    ? 'Hoy cumplí con mi acción del día.'
+    : 'Mañana es una nueva oportunidad.'
 })
 
 function close() {
