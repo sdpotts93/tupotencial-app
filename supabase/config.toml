@@ -4,7 +4,7 @@
 # Docs: https://supabase.com/docs/guides/cli/config
 
 [project]
-id = "your-project-ref"  # Replace with your Supabase project reference ID
+id = "geeasiskunssknfwqoko"  # Replace with your Supabase project reference ID
 
 [api]
 enabled = true
