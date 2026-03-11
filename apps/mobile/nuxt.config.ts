@@ -46,7 +46,6 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       isNative: false,
-      devMode: true,
     },
   },
 

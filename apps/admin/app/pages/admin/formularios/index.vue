@@ -70,16 +70,14 @@ const columns = [
   { key: 'created_at', label: 'Creado' },
 ]
 
-const rows = ref([
-  { id: 'frm-001', title: 'Evaluación inicial de bienestar', fields_count: 5, status: 'active', created_at: '2026-02-20T08:00:00' },
-  { id: 'frm-002', title: 'Check-in semanal', fields_count: 3, status: 'active', created_at: '2026-02-15T10:00:00' },
-  { id: 'frm-003', title: 'Encuesta de satisfacción del programa', fields_count: 4, status: 'inactive', created_at: '2026-03-01T12:00:00' },
-  { id: 'frm-004', title: 'Registro de hábitos diarios', fields_count: 6, status: 'active', created_at: '2026-01-28T09:00:00' },
-  { id: 'frm-005', title: 'Evaluación de progreso mensual', fields_count: 4, status: 'inactive', created_at: '2026-01-10T08:00:00' },
-])
+const client = useSupabaseClient()
+const { data: rows, refresh } = await useAsyncData('admin-forms', async () => {
+  const { data } = await client.from('forms').select('*').order('created_at', { ascending: false })
+  return data ?? []
+})
 
 const filteredRows = computed(() => {
-  return rows.value.filter(row => {
+  return (rows.value ?? []).filter(row => {
     if (search.value) {
       const q = search.value.toLowerCase()
       if (!row.title.toLowerCase().includes(q)) return false
@@ -103,9 +101,10 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function handleDelete(row: Record<string, any>) {
+async function handleDelete(row: Record<string, any>) {
   if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
-    rows.value = rows.value.filter(r => r.id !== row.id)
+    await client.from('forms').delete().eq('id', row.id)
+    await refresh()
   }
 }
 

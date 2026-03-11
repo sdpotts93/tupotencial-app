@@ -50,25 +50,40 @@ definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
 const id = route.params.id as string
+const client = useSupabaseClient()
 
-const coverMap: Record<string, string> = {
-  'mock-content-001': '/images/lib-1.jpg',
-  'mock-content-002': '/images/lib-2.jpg',
-  'mock-content-003': '/images/lib-3.jpg',
-  'mock-content-004': '/images/lib-4.jpg',
-  'mock-content-005': '/images/lib-5.jpg',
-  'mock-content-006': '/images/lib-6.jpg',
-  'mock-content-007': '/images/lib-7.jpg',
+function formatDuration(seconds: number | null) {
+  if (!seconds) return null
+  const m = Math.round(seconds / 60)
+  return `${m} min`
 }
 
-const content = ref({
-  title: 'Respiración consciente',
-  subtitle: 'Encuentra calma en cada inhalación',
-  typeLabel: 'MEDITACIÓN',
-  type: 'audio',
-  description: 'Esta meditación te guiará a través de una práctica de respiración consciente de 10 minutos. Ideal para momentos de estrés o para empezar tu día con claridad. Cierra los ojos, encuentra una posición cómoda y permite que tu atención se centre en el flujo natural de tu respiración.',
-  duration: '10 min',
-  thumbnail: coverMap[id] || '/images/lib-1.jpg',
+const { data: contentData } = await useAsyncData(`content-detail-${id}`, async () => {
+  const { data } = await client
+    .from('content_items')
+    .select('id, title, subtitle, type, description, duration_seconds, thumbnail_url')
+    .eq('id', id)
+    .single()
+  if (!data) return null
+  return {
+    title: data.title,
+    subtitle: data.subtitle ?? '',
+    typeLabel: data.type ? data.type.toUpperCase() : '',
+    type: data.type,
+    description: data.description ?? '',
+    duration: formatDuration(data.duration_seconds),
+    thumbnail: data.thumbnail_url ?? '/images/lib-1.jpg',
+  }
+})
+
+const content = computed(() => contentData.value ?? {
+  title: '',
+  subtitle: '',
+  typeLabel: '',
+  type: 'video',
+  description: '',
+  duration: null,
+  thumbnail: '/images/lib-1.jpg',
 })
 </script>
 

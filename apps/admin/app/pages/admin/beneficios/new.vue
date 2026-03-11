@@ -109,6 +109,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
@@ -160,8 +162,18 @@ const statusOptions = [
   { value: 'inactive', label: 'Inactivo' },
 ]
 
-function handleSave() {
-  alert('Beneficio creado (mock)')
+async function handleSave() {
+  const payload = {
+    title: form.title,
+    description: form.description || null,
+    url: form.url,
+    utm_template: form.utm_template || null,
+    code: form.code || null,
+    plan: form.plan,
+    status: form.status,
+  }
+
+  await client.from('benefits').insert(payload)
   navigateTo('/admin/beneficios')
 }
 </script>

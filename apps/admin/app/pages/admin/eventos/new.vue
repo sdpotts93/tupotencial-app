@@ -136,6 +136,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
@@ -212,8 +214,19 @@ const statusOptions = [
   { value: 'published', label: 'Publicado' },
 ]
 
-function handleSave() {
-  alert('Evento creado (mock)')
+async function handleSave() {
+  const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
+
+  await client.from('events').insert({
+    title: form.title,
+    description: form.description,
+    start_at: startAt,
+    duration: form.duration || null,
+    vimeo_live_event_id: form.vimeo_live_event_id || null,
+    plan: form.plan,
+    entitlement_key: form.entitlement_key || null,
+    status: form.status,
+  })
   navigateTo('/admin/eventos')
 }
 </script>

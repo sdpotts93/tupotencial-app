@@ -119,15 +119,52 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
-const form = reactive({
-  title: 'Bienvenidos a la comunidad',
-  body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar hábitos saludables. ¿Qué van a hacer hoy para cuidarse?',
-  media_url: '',
-  status: 'published',
-  author: 'Gabriel',
-  likes_count: 245,
-  created_at: '2026-02-24T08:00:00',
+const route = useRoute()
+const client = useSupabaseClient()
+const id = route.params.id as string
+const isNew = id === 'new'
+
+// ── Fetch existing post ──
+const { data: post } = await useAsyncData(`post-${id}`, async () => {
+  if (isNew) return null
+  const { data } = await client.from('posts').select('*').eq('id', id).single()
+  return data
 })
+
+// ── Fetch comments with author profile ──
+const { data: rawComments } = await useAsyncData(`post-comments-${id}`, async () => {
+  if (isNew) return []
+  const { data } = await client
+    .from('post_comments')
+    .select('id, body, status, created_at, user_id, profiles:user_id ( display_name )')
+    .eq('post_id', id)
+    .order('created_at')
+  return (data ?? []).map((c: any) => ({
+    id: c.id,
+    author_name: c.profiles?.display_name ?? 'Usuario',
+    body: c.body,
+    created_at: c.created_at,
+    is_hidden: c.status === 'hidden',
+  }))
+})
+
+const form = reactive({
+  title: post.value?.title ?? '',
+  body: post.value?.body ?? '',
+  media_url: post.value?.media_url ?? '',
+  status: post.value?.status ?? 'draft',
+  author: post.value?.community_segment === 'carlotta' ? 'Carlotta' : 'Gabriel',
+  likes_count: 0,
+  created_at: post.value?.created_at ?? '',
+})
+
+// Fetch likes count
+const { data: likesData } = await useAsyncData(`post-likes-${id}`, async () => {
+  if (isNew) return 0
+  const { count } = await client.from('post_reactions').select('*', { count: 'exact', head: true }).eq('post_id', id)
+  return count ?? 0
+})
+form.likes_count = likesData.value ?? 0
 
 const authorOptions = [
   { value: 'Gabriel', label: 'Gabriel' },
@@ -144,11 +181,7 @@ const authorAvatar = computed(() =>
   form.author === 'Carlotta' ? '/images/carlotta.png' : '/images/gabriel.png',
 )
 
-const comments = ref([
-  { id: 'cmt-001', author_name: 'Laura Mendez', body: 'Justo lo que necesitaba leer hoy. Gracias!', created_at: '2026-02-24T08:15:00', is_hidden: false },
-  { id: 'cmt-002', author_name: 'Pedro Sanchez', body: 'Voy a empezar con 10 minutos de meditación. ¿Alguien se une?', created_at: '2026-02-24T08:30:00', is_hidden: false },
-  { id: 'cmt-003', author_name: 'Sofia Torres', body: 'Me encanta esta comunidad! Cada día me motivan más.', created_at: '2026-02-24T09:00:00', is_hidden: false },
-])
+const comments = ref(rawComments.value ?? [])
 
 // ── Media upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -191,18 +224,34 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
-function hideComment(comment: any) {
+async function hideComment(comment: any) {
+  const newStatus = comment.is_hidden ? 'published' : 'hidden'
+  await client.from('post_comments').update({ status: newStatus }).eq('id', comment.id)
   comment.is_hidden = !comment.is_hidden
-  alert(`Comentario ${comment.is_hidden ? 'ocultado' : 'restaurado'} (mock)`)
 }
 
-function handleSave() {
-  alert('Publicación actualizada (mock)')
+async function handleSave() {
+  const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
+  const payload = {
+    title: form.title || null,
+    body: form.body,
+    media_url: form.media_url || null,
+    status: form.status,
+    community_segment: communitySegment,
+    is_official: true,
+  }
+
+  if (isNew) {
+    await client.from('posts').insert(payload)
+  } else {
+    await client.from('posts').update(payload).eq('id', id)
+  }
+  navigateTo('/admin/comunidad')
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (confirm('¿Seguro que deseas eliminar esta publicación?')) {
-    alert('Publicación eliminada (mock)')
+    await client.from('posts').delete().eq('id', id)
     navigateTo('/admin/comunidad')
   }
 }

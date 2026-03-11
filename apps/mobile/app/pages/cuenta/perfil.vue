@@ -86,6 +86,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
 const { user, isSubscriber, updateProfile, setSegment } = useAuth()
 
 const displayName = ref(user.value?.display_name || '')
@@ -103,16 +104,27 @@ const initials = computed(() => {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 })
 
-const vipAccesos = ref([
-  { id: 'mock-addon-002', title: 'Módulo VIP: Liderazgo avanzado', typeLabel: 'CONTENIDO PREMIUM', img: '/images/lib-8.jpg' },
-])
+const { data: vipAccesos } = await useAsyncData('profile-vip-accesos', async () => {
+  const { data } = await client
+    .from('addon_purchases')
+    .select('addon_id, addons(id, title, plan, cover_url)')
+    .eq('user_id', user.value?.id ?? '')
+  return (data ?? []).map(p => ({
+    id: (p.addons as any)?.id ?? p.addon_id,
+    title: (p.addons as any)?.title ?? '',
+    typeLabel: 'CONTENIDO PREMIUM',
+    img: (p.addons as any)?.cover_url ?? '/images/lib-8.jpg',
+  }))
+})
 
 async function handleSave() {
   saving.value = true
-  updateProfile({ display_name: displayName.value })
-  if (segment.value) setSegment(segment.value as any)
-  await new Promise(r => setTimeout(r, 500))
-  saving.value = false
+  try {
+    await updateProfile({ display_name: displayName.value })
+    if (segment.value) await setSegment(segment.value as any)
+  } finally {
+    saving.value = false
+  }
 }
 
 function handleManageSub() {

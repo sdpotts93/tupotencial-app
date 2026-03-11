@@ -5,10 +5,6 @@
 export default defineNuxtRouteMiddleware((to) => {
   const { isLoggedIn, isOnboarded, isSubscriber } = useAuth()
 
-  // Dev mode: allow direct access to all routes for QA (section 0.0)
-  const runtimeConfig = useRuntimeConfig()
-  if (runtimeConfig.public.devMode) return
-
   const path = to.path
 
   // ---- Public routes (no auth required) ----

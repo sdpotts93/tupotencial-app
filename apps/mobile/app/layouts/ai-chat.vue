@@ -7,7 +7,7 @@
           <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" />
         </NuxtLink>
 
-        <button class="ai-sidebar__new" @click="navigateTo('/cuenta/ia/chat/mock-ai-session-new')">
+        <button class="ai-sidebar__new" @click="navigateTo('/cuenta/ia/chat/new')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Nueva conversación
         </button>
@@ -58,10 +58,15 @@
 </template>
 
 <script setup lang="ts">
+const client = useSupabaseClient()
 const { user } = useAuth()
 const route = useRoute()
 
-const streak = ref(7)
+const { data: streakData } = await useAsyncData('ai-chat-streak', async () => {
+  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value?.id ?? '').maybeSingle()
+  return data?.current_streak ?? 0
+})
+const streak = computed(() => streakData.value ?? 0)
 
 const initials = computed(() => {
   const name = user.value?.display_name || '?'
@@ -72,13 +77,22 @@ function isActiveSession(id: string) {
   return route.params.sessionId === id
 }
 
-const sessions = ref([
-  { id: 'mock-ai-session-001', preview: 'Hablamos sobre gratitud y propósito...', tone: 'carlotta', date: 'Hoy, 8:30' },
-  { id: 'mock-ai-session-002', preview: 'Plan de productividad matutina', tone: 'gabriel', date: 'Ayer, 7:15' },
-  { id: 'mock-ai-session-003', preview: 'Reflexión sobre mis metas del mes', tone: 'carlotta', date: '27 Feb' },
-  { id: 'mock-ai-session-004', preview: 'Manejo de estrés laboral', tone: 'gabriel', date: '25 Feb' },
-  { id: 'mock-ai-session-005', preview: 'Rutina de meditación matutina', tone: 'carlotta', date: '23 Feb' },
-])
+const { data: rawSessions } = await useAsyncData('ai-chat-sessions', async () => {
+  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value?.id ?? '').order('created_at', { ascending: false })
+  return data ?? []
+})
+
+const sessions = computed(() =>
+  (rawSessions.value ?? []).map(s => {
+    const firstMsg = Array.isArray(s.ai_messages) ? s.ai_messages[0]?.content ?? '' : ''
+    return {
+      id: s.id,
+      preview: firstMsg.slice(0, 80) || 'Nueva conversación',
+      tone: s.tone ?? 'carlotta',
+      date: new Date(s.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }),
+    }
+  }),
+)
 </script>
 
 <style scoped>

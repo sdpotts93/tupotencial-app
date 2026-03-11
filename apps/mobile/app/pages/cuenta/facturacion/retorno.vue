@@ -57,12 +57,31 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' })
 
+const client = useSupabaseClient()
+const { user } = useAuth()
 const status = ref<'loading' | 'success' | 'error'>('loading')
 
-// Mock: simulate checking payment status
 onMounted(async () => {
-  await new Promise(r => setTimeout(r, 2000))
-  status.value = 'success'
+  const maxAttempts = 10
+  const intervalMs = 2000
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const { data } = await client
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', user.value?.id ?? '')
+      .in('status', ['active', 'trialing'])
+      .maybeSingle()
+
+    if (data) {
+      status.value = 'success'
+      return
+    }
+
+    await new Promise(r => setTimeout(r, intervalMs))
+  }
+
+  status.value = 'error'
 })
 </script>
 

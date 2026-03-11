@@ -59,7 +59,7 @@
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
-        <UiButton variant="soft" size="sm" @click.stop="handleDuplicate(row as typeof rows[number])">
+        <UiButton variant="soft" size="sm" @click.stop="handleDuplicate(row)">
           <template #icon><Icon name="lucide:copy" size="16" /></template>
           Duplicar
         </UiButton>
@@ -119,18 +119,17 @@ const columns = [
   { key: 'enrolled_count', label: 'Inscritos' },
 ]
 
-const rows = ref([
-  { id: 'prg-001', title: 'Reto 21 días de meditación', program_type: 'reto', status: 'published', enrolled_count: 3420, plan: 'core', entitlement_key: null as string | null },
-  { id: 'prg-002', title: 'Programa de nutrición consciente', program_type: 'program', status: 'published', enrolled_count: 1856, plan: 'core', entitlement_key: null as string | null },
-  { id: 'prg-003', title: 'Bootcamp de bienestar integral', program_type: 'bootcamp', status: 'published', enrolled_count: 978, plan: 'core', entitlement_key: 'bootcamp_liderazgo' as string | null },
-  { id: 'prg-004', title: 'Reto 7 días de gratitud', program_type: 'reto', status: 'published', enrolled_count: 4512, plan: 'free', entitlement_key: null as string | null },
-  { id: 'prg-005', title: 'Programa de yoga para principiantes', program_type: 'program', status: 'draft', enrolled_count: 0, plan: 'core', entitlement_key: null as string | null },
-  { id: 'prg-006', title: 'Bootcamp productividad personal', program_type: 'bootcamp', status: 'draft', enrolled_count: 0, plan: 'free', entitlement_key: null as string | null },
-  { id: 'prg-007', title: 'Reto detox digital', program_type: 'reto', status: 'archived', enrolled_count: 1230, plan: 'free', entitlement_key: null as string | null },
-])
+const client = useSupabaseClient()
+const { data: rows, refresh } = await useAsyncData('admin-programs', async () => {
+  const { data } = await client.from('programs').select('*').order('created_at', { ascending: false })
+  return (data ?? []).map(p => ({
+    ...p,
+    program_type: p.type,
+  }))
+})
 
 const filteredRows = computed(() => {
-  return rows.value.filter(row => {
+  return (rows.value ?? []).filter(row => {
     if (search.value) {
       const q = search.value.toLowerCase()
       if (!row.title.toLowerCase().includes(q)) return false
@@ -162,19 +161,23 @@ function statusLabel(status: string) {
   return map[status] ?? status
 }
 
-function handleDuplicate(row: typeof rows.value[number]) {
-  rows.value.push({
-    ...row,
-    id: `prg-${Date.now()}`,
+async function handleDuplicate(row: Record<string, any>) {
+  await client.from('programs').insert({
     title: `${row.title} (copia)`,
+    type: row.type,
+    plan: row.plan,
     status: 'draft',
-    enrolled_count: 0,
+    description: row.description,
+    cover_url: row.cover_url,
+    entitlement_key: row.entitlement_key,
   })
+  refresh()
 }
 
-function handleDelete(row: Record<string, any>) {
+async function handleDelete(row: Record<string, any>) {
   if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
-    rows.value = rows.value.filter(r => r.id !== row.id)
+    await client.from('programs').delete().eq('id', row.id)
+    refresh()
   }
 }
 

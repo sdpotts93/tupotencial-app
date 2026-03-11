@@ -99,6 +99,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 const form = reactive({
   title: '',
   body: '',
@@ -154,8 +156,17 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function handleSave() {
-  alert('Publicación creada (mock)')
+async function handleSave() {
+  const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
+  const payload = {
+    title: form.title || null,
+    body: form.body,
+    status: form.status,
+    community_segment: communitySegment,
+    is_official: true,
+  }
+
+  await client.from('posts').insert(payload)
   navigateTo('/admin/comunidad')
 }
 </script>

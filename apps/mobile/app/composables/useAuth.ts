@@ -1,6 +1,5 @@
-// Dev-mode mock auth composable
-// Shaped to match Supabase auth for easy swap later
-import { useState } from '#app'
+// Auth composable — powered by @nuxtjs/supabase
+import { useState, navigateTo, watch, computed } from '#imports'
 
 export interface AuthUser {
   id: string
@@ -15,17 +14,45 @@ export interface AuthUser {
 }
 
 export function useAuth() {
-  const user = useState<AuthUser | null>('auth-user', () => ({
-    id: 'mock-user-001',
-    email: 'maria@ejemplo.com',
-    display_name: 'María García',
-    avatar_url: null,
-    community_segment: 'carlotta',
-    is_subscriber: true,
-    subscription_status: 'active',
-    entitlements: ['core'],
-    is_admin: false,
-  }))
+  const client = useSupabaseClient()
+  const supaUser = useSupabaseUser()
+  const user = useState<AuthUser | null>('auth-user', () => null)
+  const loading = useState('auth-loading', () => false)
+
+  async function fetchProfile(uid: string) {
+    const [profileRes, subRes, entRes, adminRes] = await Promise.all([
+      client.from('profiles').select('display_name, avatar_url, community_segment').eq('id', uid).single(),
+      client.from('subscriptions').select('status').eq('user_id', uid).maybeSingle(),
+      client.from('user_entitlements').select('entitlement_key').eq('user_id', uid),
+      client.from('admin_users').select('role').eq('user_id', uid).maybeSingle(),
+    ])
+    user.value = {
+      id: uid,
+      email: supaUser.value?.email ?? '',
+      display_name: profileRes.data?.display_name ?? '',
+      avatar_url: profileRes.data?.avatar_url ?? null,
+      community_segment: profileRes.data?.community_segment ?? null,
+      is_subscriber: subRes.data?.status === 'active' || subRes.data?.status === 'trialing',
+      subscription_status: subRes.data?.status ?? null,
+      entitlements: (entRes.data ?? []).map(e => e.entitlement_key),
+      is_admin: !!adminRes.data,
+    }
+  }
+
+  // Sync auth state when supabase user changes
+  watch(supaUser, async (u) => {
+    if (!u) {
+      user.value = null
+      return
+    }
+    if (user.value?.id === u.id) return // already loaded
+    loading.value = true
+    try {
+      await fetchProfile(u.id)
+    } finally {
+      loading.value = false
+    }
+  }, { immediate: true })
 
   const isLoggedIn = computed(() => !!user.value)
   const isOnboarded = computed(() => !!user.value?.community_segment)
@@ -35,50 +62,32 @@ export function useAuth() {
     return user.value?.entitlements.includes(key) ?? false
   }
 
-  async function login(email: string, _password: string) {
-    // Mock login
-    user.value = {
-      id: 'mock-user-001',
-      email,
-      display_name: 'María García',
-      avatar_url: null,
-      community_segment: 'carlotta',
-      is_subscriber: true,
-      subscription_status: 'active',
-      entitlements: ['core'],
-      is_admin: false,
-    }
+  async function login(email: string, password: string) {
+    const { error } = await client.auth.signInWithPassword({ email, password })
+    if (error) throw error
   }
 
-  async function register(email: string, _password: string) {
-    user.value = {
-      id: 'mock-user-new',
-      email,
-      display_name: '',
-      avatar_url: null,
-      community_segment: null,
-      is_subscriber: false,
-      subscription_status: null,
-      entitlements: [],
-      is_admin: false,
-    }
+  async function register(email: string, password: string) {
+    const { error } = await client.auth.signUp({ email, password })
+    if (error) throw error
   }
 
-  function logout() {
+  async function logout() {
+    await client.auth.signOut()
     user.value = null
     navigateTo('/iniciar-sesion')
   }
 
-  function setSegment(segment: 'gabriel' | 'carlotta' | 'conjunta') {
-    if (user.value) {
-      user.value = { ...user.value, community_segment: segment }
-    }
+  async function setSegment(segment: 'gabriel' | 'carlotta' | 'conjunta') {
+    if (!user.value) return
+    await client.from('profiles').update({ community_segment: segment }).eq('id', user.value.id)
+    user.value = { ...user.value, community_segment: segment }
   }
 
-  function updateProfile(data: { display_name?: string; avatar_url?: string | null }) {
-    if (user.value) {
-      user.value = { ...user.value, ...data }
-    }
+  async function updateProfile(data: { display_name?: string; avatar_url?: string | null }) {
+    if (!user.value) return
+    await client.from('profiles').update(data).eq('id', user.value.id)
+    user.value = { ...user.value, ...data }
   }
 
   return {

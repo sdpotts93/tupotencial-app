@@ -30,22 +30,6 @@ BEGIN
 END;
 $$;
 
--- ---------------------------------------------------------------------------
--- 2. Helper: is_admin() — returns true when the current user has a row in
---    admin_users. Used inside RLS policies.
--- ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS boolean
-LANGUAGE sql
-STABLE
-SECURITY INVOKER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.admin_users WHERE user_id = (select auth.uid())
-  );
-$$;
-
 -- ===========================================================================
 --  TABLES
 -- ===========================================================================
@@ -700,6 +684,22 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.ai_global_usage
 
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.app_settings
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- Helper: is_admin() — returns true when the current user has a row in
+--    admin_users. Used inside RLS policies.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.admin_users WHERE user_id = (select auth.uid())
+  );
+$$;
 
 -- ===========================================================================
 --  ROW LEVEL SECURITY — Enable on ALL tables

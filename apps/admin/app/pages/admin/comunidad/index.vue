@@ -87,17 +87,22 @@ const columns = [
   { key: 'created_at', label: 'Fecha' },
 ]
 
-const rows = ref([
-  { id: 'post-001', author: 'Gabriel', body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar hábitos saludables.', likes_count: 245, comments_count: 32, status: 'published', created_at: '2026-02-24T08:00:00' },
-  { id: 'post-002', author: 'Carlotta', body: 'Nuevo reto: 7 días de gratitud. ¡Inscríbete desde la sección de Retos!', likes_count: 156, comments_count: 18, status: 'published', created_at: '2026-02-23T10:00:00' },
-  { id: 'post-003', author: 'Gabriel', body: 'Nuevo artículo disponible: "5 pasos para el bienestar emocional". Descúbrelo en la sección de contenido.', likes_count: 89, comments_count: 12, status: 'published', created_at: '2026-02-22T14:00:00' },
-  { id: 'post-004', author: 'Carlotta', body: 'Esta semana les compartimos una meditación guiada especial para la gratitud. Disponible en la biblioteca.', likes_count: 134, comments_count: 21, status: 'published', created_at: '2026-02-21T09:00:00' },
-  { id: 'post-005', author: 'Gabriel', body: 'Tip de la semana: Intenta hacer 3 respiraciones profundas antes de cada comida. Notarás la diferencia.', likes_count: 67, comments_count: 8, status: 'draft', created_at: '2026-02-20T16:00:00' },
-  { id: 'post-006', author: 'Carlotta', body: 'Publicación oculta por revisión.', likes_count: 0, comments_count: 0, status: 'hidden', created_at: '2026-02-19T11:00:00' },
-])
+const client = useSupabaseClient()
+const { data: rows, refresh } = await useAsyncData('admin-posts', async () => {
+  const { data } = await client
+    .from('posts')
+    .select('*, profiles:author_user_id(display_name, avatar_url)')
+    .order('created_at', { ascending: false })
+  return (data ?? []).map(p => ({
+    ...p,
+    author: (p.profiles as any)?.display_name ?? 'Anónimo',
+    author_name: (p.profiles as any)?.display_name ?? 'Anónimo',
+    author_avatar: (p.profiles as any)?.avatar_url ?? null,
+  }))
+})
 
 const filteredRows = computed(() => {
-  let result = rows.value
+  let result = rows.value ?? []
   if (activeTab.value === 'gabriel') result = result.filter(r => r.author === 'Gabriel')
   else if (activeTab.value === 'carlotta') result = result.filter(r => r.author === 'Carlotta')
   if (search.value) {
@@ -129,9 +134,10 @@ function authorAvatar(name: string) {
   return name === 'Carlotta' ? '/images/carlotta.png' : '/images/gabriel.png'
 }
 
-function handleDelete(row: Record<string, any>) {
+async function handleDelete(row: Record<string, any>) {
   if (confirm(`¿Seguro que deseas eliminar esta publicación de ${row.author}?`)) {
-    rows.value = rows.value.filter(r => r.id !== row.id)
+    await client.from('posts').delete().eq('id', row.id)
+    await refresh()
   }
 }
 </script>

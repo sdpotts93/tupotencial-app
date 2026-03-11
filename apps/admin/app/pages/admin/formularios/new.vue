@@ -88,6 +88,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 // ── Form state ──
 const form = reactive({
   title: '',
@@ -127,8 +129,25 @@ function removeField(index: number) {
   fields.value.splice(index, 1)
 }
 
-function handleSave() {
-  alert('Formulario creado (mock). Redirigiendo...')
+function localFieldsToDb(localFields: FormField[]) {
+  return localFields.map(f => ({
+    question: f.question,
+    type: f.type,
+    ...(f.type === 'select' && f.optionsText
+      ? { options: f.optionsText.split(',').map(o => o.trim()).filter(Boolean) }
+      : {}),
+  }))
+}
+
+async function handleSave() {
+  const payload = {
+    title: form.title,
+    description: form.description || null,
+    fields: localFieldsToDb(fields.value),
+    status: form.status,
+  }
+
+  await client.from('forms').insert(payload)
   navigateTo('/admin/formularios')
 }
 </script>

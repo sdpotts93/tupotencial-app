@@ -118,17 +118,32 @@
 </template>
 
 <script setup lang="ts">
-import { mockAddons, mockAddonPurchases } from '@tupotencial/shared/mock'
-
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
+const client = useSupabaseClient()
+const id = route.params.id as string
+const isNew = id === 'new'
 
-// ── Load mock data ──
-const addon = mockAddons.find(a => a.id === route.params.id) ?? mockAddons[0]!
-const addonPurchases = mockAddonPurchases.filter(p => p.addon_id === addon.id)
-const purchases = addonPurchases.length
-const revenue = addonPurchases.reduce((sum, p) => sum + p.amount, 0)
+// ── Fetch existing addon + purchase stats ──
+const { data: addon } = await useAsyncData(`addon-${id}`, async () => {
+  if (isNew) return null
+  const { data } = await client.from('addons').select('*').eq('id', id).single()
+  return data
+})
+
+const { data: stats } = await useAsyncData(`addon-stats-${id}`, async () => {
+  if (isNew) return { purchases: 0, revenue: 0 }
+  const { data } = await client.from('addon_purchases').select('amount').eq('addon_id', id)
+  const rows = data ?? []
+  return {
+    purchases: rows.length,
+    revenue: rows.reduce((sum, p) => sum + (p.amount ?? 0), 0),
+  }
+})
+
+const purchases = computed(() => stats.value?.purchases ?? 0)
+const revenue = computed(() => stats.value?.revenue ?? 0)
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -163,14 +178,14 @@ function formatFileSize(bytes: number): string {
 
 // ── Form state ──
 const form = reactive({
-  title: addon.title,
-  description: addon.description ?? '',
-  cover_url: addon.cover_url ?? '',
-  price: String(addon.price / 100),
-  plan: addon.plan,
-  grants_core_months: addon.grants_core_months ? String(addon.grants_core_months) : '',
-  stripe_price_id: addon.stripe_price_id ?? '',
-  status: addon.status,
+  title: addon.value?.title ?? '',
+  description: addon.value?.description ?? '',
+  cover_url: addon.value?.cover_url ?? '',
+  price: addon.value ? String(addon.value.price / 100) : '',
+  plan: addon.value?.plan ?? 'todos',
+  grants_core_months: addon.value?.grants_core_months ? String(addon.value.grants_core_months) : '',
+  stripe_price_id: addon.value?.stripe_price_id ?? '',
+  status: addon.value?.status ?? 'active',
 })
 
 const planOptions = [
@@ -183,13 +198,29 @@ const statusOptions = [
   { value: 'inactive', label: 'Inactivo' },
 ]
 
-function handleSave() {
-  alert('Add-on actualizado (mock)')
+async function handleSave() {
+  const payload = {
+    title: form.title,
+    description: form.description || null,
+    cover_url: form.cover_url || null,
+    price: Math.round(Number(form.price) * 100),
+    plan: form.plan,
+    grants_core_months: form.grants_core_months ? Number(form.grants_core_months) : null,
+    stripe_price_id: form.stripe_price_id || null,
+    status: form.status,
+  }
+
+  if (isNew) {
+    await client.from('addons').insert(payload)
+  } else {
+    await client.from('addons').update(payload).eq('id', id)
+  }
+  navigateTo('/admin/complementos')
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (confirm('¿Seguro que deseas eliminar este add-on?')) {
-    alert('Add-on eliminado (mock)')
+    await client.from('addons').delete().eq('id', id)
     navigateTo('/admin/complementos')
   }
 }

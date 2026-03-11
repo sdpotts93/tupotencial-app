@@ -49,7 +49,9 @@
 
 <script setup lang="ts">
 const router = useRouter()
+const { user } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+const client = useSupabaseClient()
 
 const activeTab = ref('all')
 const showPurchaseModal = ref(false)
@@ -62,45 +64,44 @@ const tabs = [
   { value: 'bootcamp', label: 'Bootcamps' },
 ]
 
-const programs = ref([
-  {
-    id: 'mock-prog-001', type: 'reto', typeLabel: 'RETO', title: 'Reto 7 días de gratitud',
-    description: 'Transforma tu perspectiva con un ejercicio diario de agradecimiento.',
-    duration: '7 días', img: '/images/lib-3.jpg', enrolled: true, free: true, progress: 'Día 5/7',
-    entitlement_key: null as string | null,
-  },
-  {
-    id: 'mock-prog-002', type: 'program', typeLabel: 'PROGRAMA', title: 'Despertar consciente',
-    description: 'Un programa de 30 días para desarrollar una rutina matutina transformadora.',
-    duration: '30 días', img: '/images/lib-5.jpg', enrolled: true, free: false, progress: 'Día 12/30',
-    entitlement_key: null as string | null,
-  },
-  {
-    id: 'mock-prog-003', type: 'reto', typeLabel: 'RETO', title: 'Reto 15 días sin quejas',
-    description: 'Desarrolla consciencia sobre tu lenguaje interno y externo.',
-    duration: '15 días', img: '/images/lib-7.jpg', enrolled: false, free: true, progress: null,
-    entitlement_key: null as string | null,
-  },
-  {
-    id: 'mock-prog-004', type: 'bootcamp', typeLabel: 'BOOTCAMP', title: 'Liderazgo interior',
-    description: 'Intensivo de 5 días para descubrir tu estilo de liderazgo.',
-    duration: '5 días', img: '/images/lib-2.jpg', enrolled: false, free: false, progress: null,
-    entitlement_key: 'bootcamp_liderazgo' as string | null,
-  },
-  {
-    id: 'mock-prog-005', type: 'program', typeLabel: 'PROGRAMA', title: 'Equilibrio emocional',
-    description: 'Aprende técnicas para manejar tus emociones día a día.',
-    duration: '30 días', img: '/images/lib-8.jpg', enrolled: false, free: false, progress: null,
-    entitlement_key: null as string | null,
-  },
-])
-
-const filteredPrograms = computed(() => {
-  if (activeTab.value === 'all') return programs.value
-  return programs.value.filter(p => p.type === activeTab.value)
+const { data: programs } = await useAsyncData('mobile-programs', async () => {
+  const { data: progs } = await client.from('programs').select('*').eq('is_active', true).order('created_at')
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id, status').eq('user_id', user.value?.id ?? '')
+  const enrollMap = new Map((enrollments ?? []).map(e => [e.program_id, e]))
+  // Get checkin progress
+  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value?.id ?? '')
+  const checkinMap = new Map<string, number>()
+  for (const c of checkins ?? []) {
+    checkinMap.set(c.program_id, Math.max(checkinMap.get(c.program_id) ?? 0, c.day_index))
+  }
+  // Get program total days
+  const { data: days } = await client.from('program_days').select('program_id, day_index')
+  const totalDaysMap = new Map<string, number>()
+  for (const d of days ?? []) {
+    totalDaysMap.set(d.program_id, Math.max(totalDaysMap.get(d.program_id) ?? 0, d.day_index))
+  }
+  return (progs ?? []).map(p => {
+    const enrollment = enrollMap.get(p.id)
+    const currentDay = checkinMap.get(p.id) ?? 0
+    const totalDays = totalDaysMap.get(p.id) ?? 0
+    return {
+      ...p,
+      typeLabel: p.type.toUpperCase(),
+      img: p.cover_url ?? '/images/lib-3.jpg',
+      duration: `${totalDays} días`,
+      enrolled: !!enrollment,
+      free: p.plan === 'free',
+      progress: enrollment ? `Día ${currentDay}/${totalDays}` : null,
+    }
+  })
 })
 
-function handleCardClick(item: typeof programs.value[number]) {
+const filteredPrograms = computed(() => {
+  if (activeTab.value === 'all') return programs.value ?? []
+  return (programs.value ?? []).filter(p => p.type === activeTab.value)
+})
+
+function handleCardClick(item: NonNullable<typeof programs.value>[number]) {
   if (isLocked(item.entitlement_key)) {
     selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
     showPurchaseModal.value = true

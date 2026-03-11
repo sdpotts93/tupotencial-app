@@ -113,6 +113,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
@@ -164,8 +166,18 @@ const statusOptions = [
   { value: 'inactive', label: 'Inactivo' },
 ]
 
-function handleSave() {
-  alert('Add-on creado (mock)')
+async function handleSave() {
+  const payload = {
+    title: form.title,
+    description: form.description || null,
+    price: Math.round(Number(form.price) * 100),
+    plan: form.plan,
+    grants_core_months: form.grants_core_months ? Number(form.grants_core_months) : null,
+    stripe_price_id: form.stripe_price_id || null,
+    status: form.status,
+  }
+
+  await client.from('addons').insert(payload)
   navigateTo('/admin/complementos')
 }
 </script>

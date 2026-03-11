@@ -169,25 +169,52 @@
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
+const client = useSupabaseClient()
+const id = route.params.id as string
+const isNew = id === 'new'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
 
+// ── Fetch existing content item + junction category ──
+const { data: contentItem } = await useAsyncData(`content-${id}`, async () => {
+  if (isNew) return null
+  const { data } = await client.from('content_items').select('*').eq('id', id).single()
+  return data
+})
+
+const { data: itemCategory } = await useAsyncData(`content-category-${id}`, async () => {
+  if (isNew) return null
+  const { data } = await client.from('content_item_categories').select('category_id').eq('content_item_id', id).limit(1).single()
+  return data
+})
+
+// ── Fetch categories & objectives for dropdowns ──
+const { data: categories } = await useAsyncData('content-categories', async () => {
+  const { data } = await client.from('content_categories').select('id, title').order('sort_order')
+  return data ?? []
+})
+
+const { data: objectives } = await useAsyncData('content-objectives', async () => {
+  const { data } = await client.from('content_objectives').select('id, title').order('position')
+  return data ?? []
+})
+
 const form = reactive({
-  title: '5 pasos para el bienestar emocional',
-  introduction: 'El bienestar emocional es fundamental para una vida plena.',
-  body: 'En este artículo, exploraremos cinco pasos prácticos que puedes implementar hoy mismo para mejorar tu salud emocional.\n\n1. Practica la atención plena\n2. Establece límites saludables\n3. Cultiva relaciones significativas\n4. Mueve tu cuerpo diariamente\n5. Duerme lo suficiente',
-  content_type: 'video',
-  category_id: 'cat-001',
-  objective_id: 'obj-003',
-  duration: '15 min',
-  segment: 'free',
-  entitlement_key: '',
-  status: 'published',
-  scheduled_at: '',
-  unpublished_at: '',
-  existing_media: 'bienestar-emocional.mp4',
+  title: contentItem.value?.title ?? '',
+  introduction: contentItem.value?.subtitle ?? '',
+  body: contentItem.value?.body ?? '',
+  content_type: contentItem.value?.type ?? 'video',
+  category_id: itemCategory.value?.category_id ?? '',
+  objective_id: contentItem.value?.objective_id ?? '',
+  duration: contentItem.value?.duration_seconds ? `${contentItem.value.duration_seconds} seg` : '',
+  segment: contentItem.value?.plan ?? 'free',
+  entitlement_key: contentItem.value?.entitlement_key ?? '',
+  status: contentItem.value?.status ?? 'draft',
+  scheduled_at: contentItem.value?.available_from ?? '',
+  unpublished_at: contentItem.value?.available_to ?? '',
+  existing_media: contentItem.value?.media_url ?? '',
 })
 
 const typeOptions = [
@@ -210,24 +237,13 @@ const entitlementOptions = [
   { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
 ]
 
-const categoryOptions = [
-  { value: 'cat-001', label: 'Mindfulness' },
-  { value: 'cat-002', label: 'Nutrición' },
-  { value: 'cat-003', label: 'Ejercicio' },
-  { value: 'cat-004', label: 'Sueño' },
-  { value: 'cat-005', label: 'Productividad' },
-  { value: 'cat-006', label: 'Relaciones' },
-  { value: 'cat-007', label: 'Finanzas personales' },
-]
+const categoryOptions = computed(() =>
+  (categories.value ?? []).map(c => ({ value: c.id, label: c.title })),
+)
 
-const objectiveOptions = [
-  { value: 'obj-001', label: 'Reducir estrés' },
-  { value: 'obj-002', label: 'Rutina matutina' },
-  { value: 'obj-003', label: 'Crecimiento personal' },
-  { value: 'obj-004', label: 'Inteligencia emocional' },
-  { value: 'obj-005', label: 'Mindfulness' },
-  { value: 'obj-006', label: 'Hábitos positivos' },
-]
+const objectiveOptions = computed(() =>
+  (objectives.value ?? []).map(o => ({ value: o.id, label: o.title })),
+)
 
 const statusOptions = [
   { value: 'draft', label: 'Borrador' },
@@ -305,18 +321,47 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function handleSave() {
-  alert('Cambios guardados (mock)')
+async function handleSave() {
+  const payload = {
+    title: form.title,
+    subtitle: form.introduction || null,
+    description: form.introduction || null,
+    body: form.body || null,
+    type: form.content_type,
+    media_url: form.existing_media || null,
+    plan: form.segment,
+    status: form.status,
+    published_at: form.status === 'published' ? new Date().toISOString() : null,
+    entitlement_key: form.entitlement_key || null,
+    objective_id: form.objective_id || null,
+    available_from: form.scheduled_at || null,
+    available_to: form.unpublished_at || null,
+  }
+
+  if (isNew) {
+    const { data: inserted } = await client.from('content_items').insert({ ...payload, type: form.content_type }).select('id').single()
+    if (inserted && form.category_id) {
+      await client.from('content_item_categories').insert({ content_item_id: inserted.id, category_id: form.category_id })
+    }
+  } else {
+    await client.from('content_items').update(payload).eq('id', id)
+    // Update junction category
+    if (form.category_id) {
+      await client.from('content_item_categories').delete().eq('content_item_id', id)
+      await client.from('content_item_categories').insert({ content_item_id: id, category_id: form.category_id })
+    }
+  }
+  navigateTo('/admin/contenido')
 }
 
 function handleDuplicate() {
-  alert(`Contenido duplicado como "Copia de ${form.title}" (mock)`)
   navigateTo('/admin/contenido/new')
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (confirm('¿Seguro que deseas eliminar este contenido?')) {
-    alert('Contenido eliminado (mock)')
+    await client.from('content_item_categories').delete().eq('content_item_id', id)
+    await client.from('content_items').delete().eq('id', id)
     navigateTo('/admin/contenido')
   }
 }

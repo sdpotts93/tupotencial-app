@@ -305,7 +305,9 @@
 </template>
 
 <script setup lang="ts">
+const client = useSupabaseClient()
 const { user } = useAuth()
+const today = new Date().toISOString().split('T')[0]
 
 // ─── Time-aware greeting ───
 const greeting = computed(() => {
@@ -318,7 +320,11 @@ const greeting = computed(() => {
 })
 
 // ─── Streak ───
-const streak = ref(7)
+const { data: streakData } = await useAsyncData('hoy-streak', async () => {
+  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value?.id ?? '').maybeSingle()
+  return data?.current_streak ?? 0
+})
+const streak = computed(() => streakData.value ?? 0)
 
 const streakMessage = computed(() => {
   const next = streak.value + 1
@@ -329,10 +335,45 @@ const streakMessage = computed(() => {
   return '¡Sigue así!'
 })
 
+// ─── Today's daily plan for user's segment ───
+const { data: dailyPlanData } = await useAsyncData('hoy-plan', async () => {
+  const { data } = await client.from('daily_plans').select('*').eq('date', today).eq('community_segment', user.value?.community_segment ?? '').eq('status', 'published').maybeSingle()
+  return data
+})
+
+const dailyPlan = computed(() => ({
+  eyebrow: 'Acción del día',
+  title: dailyPlanData.value?.title ?? 'Acción del día',
+  message: dailyPlanData.value?.message ?? '',
+  badgeShareText: dailyPlanData.value?.badge_share_text ?? null,
+}))
+
+// ─── Mensaje del día (derived from daily plan payload or fallback) ───
+const mensajeDelDia = computed(() => {
+  const payload = dailyPlanData.value?.primary_action_payload as Record<string, any> | null
+  return {
+    text: payload?.quote_text ?? 'El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.',
+    author: (payload?.quote_author ?? dailyPlanData.value?.community_segment ?? 'gabriel') as 'gabriel' | 'carlotta',
+  }
+})
+
+// ─── Today's checkin (to know if already completed) ───
+const { data: todayCheckin, refresh: refreshCheckin } = await useAsyncData('hoy-checkin', async () => {
+  const { data } = await client.from('daily_checkins').select('id').eq('date', today).eq('user_id', user.value?.id ?? '').maybeSingle()
+  return data
+})
+
+// ─── Today's accion completion (tracked as a daily_checkins row with type=accion in payload) ───
+const { data: todayAccion, refresh: refreshAccion } = await useAsyncData('hoy-accion', async () => {
+  const { data } = await client.from('daily_checkins').select('id, payload').eq('date', today).eq('user_id', user.value?.id ?? '')
+  const accion = (data ?? []).find(row => (row.payload as any)?.type === 'accion')
+  return accion ?? null
+})
+
 // ─── Daily retos queue (2 items: check-in + admin-configurable action) ───
-const dailyRetos = ref([
-  { id: 'checkin', type: 'checkin' as const, title: 'Completa tu check-in', completed: false },
-  { id: 'accion', type: 'accion' as const, title: 'Acción del día', completed: false },
+const dailyRetos = computed(() => [
+  { id: 'checkin', type: 'checkin' as const, title: 'Completa tu check-in', completed: !!todayCheckin.value },
+  { id: 'accion', type: 'accion' as const, title: 'Acción del día', completed: !!todayAccion.value },
 ])
 
 const retosCompleted = computed(() => dailyRetos.value.filter(r => r.completed).length)
@@ -361,11 +402,6 @@ watch(retosProgressWidth, (val) => {
   animatedProgressWidth.value = val
 })
 
-function completeReto(type: 'checkin' | 'accion') {
-  const reto = dailyRetos.value.find(r => r.type === type)
-  if (reto) reto.completed = true
-}
-
 function handleRetoTap(type: 'checkin' | 'accion') {
   const reto = dailyRetos.value.find(r => r.type === type)
   if (reto?.completed) return
@@ -373,56 +409,56 @@ function handleRetoTap(type: 'checkin' | 'accion') {
   else activeSheet.value = 'accion'
 }
 
-// ─── Mensaje del día (admin-configurable) ───
-const mensajeDelDia = ref({
-  text: 'El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.',
-  author: 'gabriel' as 'gabriel' | 'carlotta',
+// ─── Active programs ───
+const { data: activeProgramsData } = await useAsyncData('hoy-programs', async () => {
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title)').eq('user_id', user.value?.id ?? '').eq('status', 'active')
+  if (!enrollments?.length) return []
+
+  const programIds = enrollments.map(e => (e.programs as any)?.id ?? e.program_id)
+
+  // Count total days per program
+  const { data: days } = await client.from('program_days').select('program_id').in('program_id', programIds)
+  const dayCountMap: Record<string, number> = {}
+  for (const d of days ?? []) {
+    dayCountMap[d.program_id] = (dayCountMap[d.program_id] ?? 0) + 1
+  }
+
+  // Get user's checkins per program
+  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value?.id ?? '').in('program_id', programIds)
+  const checkinCountMap: Record<string, number> = {}
+  for (const c of checkins ?? []) {
+    checkinCountMap[c.program_id] = (checkinCountMap[c.program_id] ?? 0) + 1
+  }
+
+  return enrollments.map(e => {
+    const prog = e.programs as any
+    const pid = prog?.id ?? e.program_id
+    const totalDays = dayCountMap[pid] ?? 0
+    const currentDay = checkinCountMap[pid] ?? 0
+    return { id: pid, title: prog?.title ?? '', currentDay, totalDays }
+  })
 })
 
-// ─── Mock daily plan ───
-const dailyPlan = ref({
-  eyebrow: 'Acción del día',
-  title: 'Prioriza una sola cosa',
-  message: 'Enfoca tu energía en una acción clave. Hazla con intención.',
-  badgeShareText: 'Hoy prioricé lo importante. Una sola cosa, con intención. #TuPotencial' as string | null,
+const activePrograms = computed(() =>
+  (activeProgramsData.value ?? []).map(p => ({
+    ...p,
+    progressPct: p.totalDays > 0 ? p.currentDay / p.totalDays : 0,
+  })),
+)
+
+// ─── Latest from biblioteca (most recent published) ───
+const { data: latestContent } = await useAsyncData('hoy-content', async () => {
+  const { data } = await client.from('content_items').select('id, type, title, thumbnail_url, duration_seconds').eq('status', 'published').order('published_at', { ascending: false }).limit(3)
+  return (data ?? []).map(item => ({
+    id: item.id,
+    type: item.type,
+    typeLabel: item.type === 'video' ? 'Video' : item.type === 'audio' ? 'Audio' : 'Artículo',
+    title: item.title,
+    thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+    duration: item.duration_seconds ? `${Math.round(item.duration_seconds / 60)} min` : '',
+    to: `/cuenta/biblioteca/${item.id}`,
+  }))
 })
-
-// ─── Active programs (mock) ───
-const activePrograms = ref([
-  { id: 'mock-uuid-prog-001', title: 'Reto 7 días de gratitud', currentDay: 4, totalDays: 7, progressPct: 4 / 7 },
-  { id: 'mock-uuid-prog-002', title: 'Despertar consciente', currentDay: 12, totalDays: 30, progressPct: 12 / 30 },
-])
-
-// ─── Latest from biblioteca (mock — most recent published) ───
-const latestContent = ref([
-  {
-    id: 'mock-uuid-ci-001',
-    type: 'video' as const,
-    typeLabel: 'Video',
-    title: 'Meditación matutina: Gratitud y presencia',
-    thumbnail: '/images/lib-1.jpg',
-    duration: '10 min',
-    to: '/cuenta/biblioteca/mock-uuid-ci-001',
-  },
-  {
-    id: 'mock-uuid-ci-002',
-    type: 'video' as const,
-    typeLabel: 'Video',
-    title: 'Rutina energizante de 5 minutos',
-    thumbnail: '/images/lib-2.jpg',
-    duration: '5 min',
-    to: '/cuenta/biblioteca/mock-uuid-ci-002',
-  },
-  {
-    id: 'mock-uuid-ci-003',
-    type: 'video' as const,
-    typeLabel: 'Video',
-    title: 'Respiración 4-7-8 para calmar la ansiedad',
-    thumbnail: '/images/lib-3.jpg',
-    duration: '8 min',
-    to: '/cuenta/biblioteca/mock-uuid-ci-003',
-  },
-])
 
 function contentTypeIcon(type: string) {
   switch (type) {
@@ -485,10 +521,17 @@ const moods = [
 async function handleCheckin() {
   if (!selectedMood.value) return
   checkinLoading.value = true
-  await new Promise(r => setTimeout(r, 800))
-  checkinLoading.value = false
-  checkinSuccess.value = true
-  completeReto('checkin')
+  try {
+    await client.from('daily_checkins').insert({
+      date: today,
+      user_id: user.value!.id,
+      payload: { mood: selectedMood.value, reflection: checkinReflection.value },
+    })
+    checkinSuccess.value = true
+    await refreshCheckin()
+  } finally {
+    checkinLoading.value = false
+  }
 }
 
 function closeCheckinSheet() {
@@ -510,10 +553,17 @@ const showShareBadge = ref(false)
 async function handleAccion() {
   if (!accionChoice.value) return
   accionLoading.value = true
-  await new Promise(r => setTimeout(r, 600))
-  accionLoading.value = false
-  accionSuccess.value = true
-  completeReto('accion')
+  try {
+    await client.from('daily_checkins').insert({
+      date: today,
+      user_id: user.value!.id,
+      payload: { type: 'accion', outcome: accionChoice.value, daily_plan_id: dailyPlanData.value?.id ?? null },
+    })
+    accionSuccess.value = true
+    await refreshAccion()
+  } finally {
+    accionLoading.value = false
+  }
 }
 
 function closeAccionSheet() {

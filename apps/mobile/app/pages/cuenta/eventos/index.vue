@@ -64,15 +64,40 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
-const upcomingEvents = ref([
-  { id: 'mock-event-001', title: 'Live: Meditación grupal', description: 'Sesión guiada de meditación con Carlotta.', dateLabel: '28 Feb', timeLabel: 'JUEVES 19:00 CDMX', img: '/images/lib-4.jpg', requiresSub: true },
-  { id: 'mock-event-002', title: 'Q&A: Hábitos de alto rendimiento', description: 'Preguntas y respuestas con Gabriel.', dateLabel: '5 Mar', timeLabel: 'MIÉRCOLES 20:00 CDMX', img: '/images/lib-8.jpg', requiresSub: true },
-])
+const client = useSupabaseClient()
+const dateFmt = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' })
+const dateFmtFull = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
 
-const pastEvents = ref([
-  { id: 'mock-event-003', title: 'Live: Respiración y estrés', dateLabel: '15 Feb 2026', img: '/images/lib-2.jpg' },
-  { id: 'mock-event-004', title: 'Taller: Diario de gratitud', dateLabel: '8 Feb 2026', img: '/images/lib-6.jpg' },
-])
+const { data: events } = await useAsyncData('mobile-events', async () => {
+  const { data } = await client.from('events').select('*').in('status', ['published']).order('start_at')
+  return data ?? []
+})
+
+const upcomingEvents = computed(() =>
+  (events.value ?? [])
+    .filter(e => new Date(e.start_at) > new Date())
+    .map(e => ({
+      id: e.id,
+      title: e.title,
+      description: e.description,
+      dateLabel: dateFmt.format(new Date(e.start_at)),
+      timeLabel: dayTimeFmt.format(new Date(e.start_at)).toUpperCase() + ' CDMX',
+      img: e.cover_url ?? '/images/lib-4.jpg',
+      requiresSub: e.requires_subscription,
+    })),
+)
+
+const pastEvents = computed(() =>
+  (events.value ?? [])
+    .filter(e => new Date(e.start_at) <= new Date())
+    .map(e => ({
+      id: e.id,
+      title: e.title,
+      dateLabel: dateFmtFull.format(new Date(e.start_at)),
+      img: e.cover_url ?? '/images/lib-2.jpg',
+    })),
+)
 </script>
 
 <style scoped>

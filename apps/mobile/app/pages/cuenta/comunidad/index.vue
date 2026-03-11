@@ -99,6 +99,9 @@
 </template>
 
 <script setup lang="ts">
+const { user } = useAuth()
+const client = useSupabaseClient()
+
 const activeFilter = ref('all')
 
 const filters = [
@@ -146,61 +149,55 @@ const shortcuts = [
   },
 ]
 
-const posts = ref([
-  {
-    id: 'mock-post-001', author: 'Gabriel', avatar: '/images/gabriel.png',
-    title: 'Bienvenidos a la comunidad',
-    body: 'Este es un espacio seguro para compartir tu camino de crecimiento. Cuéntanos: ¿qué te motivó a empezar?',
-    media_url: null,
-    reactions: 24, comments: 8, liked: false, timeAgo: 'Hace 2 horas',
-  },
-  {
-    id: 'mock-post-002', author: 'Carlotta', avatar: '/images/carlotta.png',
-    title: null,
-    body: 'Hoy quiero compartir una técnica de respiración que me ha ayudado mucho en momentos de estrés. Inhala 4 segundos, retén 4, exhala 6. Repite 5 veces.',
-    media_url: 'https://picsum.photos/seed/breathing/800/400',
-    reactions: 31, comments: 12, liked: true, timeAgo: 'Hace 4 horas',
-  },
-  {
-    id: 'mock-post-003', author: 'Ambos', avatar: '/images/gabriel.png',
-    title: '¿Qué tema quieren para el próximo live?',
-    body: 'Estamos planeando el siguiente evento en vivo. ¿Qué les gustaría explorar? Déjenos sus ideas en los comentarios.',
-    media_url: null,
-    reactions: 18, comments: 15, liked: false, timeAgo: 'Hace 6 horas',
-  },
-  {
-    id: 'mock-post-004', author: 'Gabriel', avatar: '/images/gabriel.png',
-    title: 'Reflexión del día',
-    body: 'El crecimiento no es lineal. Algunos días sentirás que retrocedes, pero cada paso cuenta. Confía en el proceso.',
-    media_url: '/videos/helmet-short-coded.mp4',
-    reactions: 42, comments: 7, liked: false, timeAgo: 'Hace 1 día',
-  },
-  {
-    id: 'mock-post-005', author: 'Carlotta', avatar: '/images/carlotta.png',
-    title: null,
-    body: 'Nuevo contenido en la biblioteca: "Escaneo corporal para dormir mejor". Ideal para quienes luchan con el insomnio.',
-    media_url: null,
-    reactions: 27, comments: 4, liked: false, timeAgo: 'Hace 2 días',
-  },
-])
+function formatTimeAgo(dateStr: string) {
+  const now = Date.now()
+  const diff = now - new Date(dateStr).getTime()
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return 'Ahora'
+  if (minutes < 60) return `Hace ${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`
+  const days = Math.floor(hours / 24)
+  return `Hace ${days} ${days === 1 ? 'día' : 'días'}`
+}
 
-const filteredPosts = computed(() => {
-  if (activeFilter.value === 'all') return posts.value
-  return posts.value.filter(p => p.author === activeFilter.value)
+const { data: posts, refresh } = await useAsyncData('mobile-posts', async () => {
+  const { data } = await client
+    .from('posts')
+    .select('*, profiles:author_user_id(display_name, avatar_url), post_reactions(user_id, reaction), post_comments(count)')
+    .eq('status', 'published')
+    .order('created_at', { ascending: false })
+  return (data ?? []).map(p => ({
+    ...p,
+    author: (p.profiles as any)?.display_name ?? 'Anónimo',
+    avatar: (p.profiles as any)?.avatar_url ?? '/images/gabriel.png',
+    reactions: ((p.post_reactions as any) ?? []).length,
+    liked: ((p.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
+    comments: (p.post_comments as any)?.[0]?.count ?? 0,
+    timeAgo: formatTimeAgo(p.created_at),
+  }))
 })
 
-const recentPosts = computed(() => posts.value.slice(0, 4))
+const filteredPosts = computed(() => {
+  if (activeFilter.value === 'all') return posts.value ?? []
+  return (posts.value ?? []).filter(p => p.author === activeFilter.value)
+})
+
+const recentPosts = computed(() => (posts.value ?? []).slice(0, 4))
 
 function isVideo(url: string) {
   return /\.(mp4|mov|webm)(\?|$)/i.test(url)
 }
 
-function toggleReaction(id: string) {
-  const post = posts.value.find(p => p.id === id)
-  if (post) {
-    post.liked = !post.liked
-    post.reactions += post.liked ? 1 : -1
+async function toggleReaction(id: string) {
+  const post = (posts.value ?? []).find(p => p.id === id)
+  if (!post || !user.value?.id) return
+  if (post.liked) {
+    await client.from('post_reactions').delete().eq('post_id', id).eq('user_id', user.value.id)
+  } else {
+    await client.from('post_reactions').insert({ post_id: id, user_id: user.value.id, reaction: 'like' })
   }
+  await refresh()
 }
 </script>
 

@@ -32,19 +32,53 @@
 <script setup lang="ts">
 const route = useRoute()
 const slug = route.params.slug as string
+const client = useSupabaseClient()
+
+function formatDuration(seconds: number | null) {
+  if (!seconds) return null
+  const m = Math.round(seconds / 60)
+  return `${m} min`
+}
+
+const { data: categoryData } = await useAsyncData(`category-${slug}`, async () => {
+  // Fetch the category by slug
+  const { data: cat } = await client
+    .from('content_categories')
+    .select('id, title, slug')
+    .eq('slug', slug)
+    .single()
+  if (!cat) return { title: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), items: [] }
+
+  // Fetch content items linked to this category
+  const { data: itemCats } = await client
+    .from('content_item_categories')
+    .select('position, content_items(id, title, type, duration_seconds, thumbnail_url)')
+    .eq('category_id', cat.id)
+    .order('position')
+
+  const items = (itemCats ?? [])
+    .map(ic => {
+      const item = ic.content_items as any
+      if (!item) return null
+      const durationLabel = formatDuration(item.duration_seconds)
+      const typeLabel = item.type ? item.type.charAt(0).toUpperCase() + item.type.slice(1) : ''
+      return {
+        id: item.id,
+        title: item.title,
+        meta: [durationLabel, typeLabel].filter(Boolean).join(' \u2022 '),
+        thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+      }
+    })
+    .filter(Boolean)
+
+  return { title: cat.title, items }
+})
 
 const category = computed(() => ({
-  title: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+  title: categoryData.value?.title ?? slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
 }))
 
-const items = ref([
-  { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio • Meditación', tag: 'Meditación', thumbnail: '/images/lib-1.jpg' },
-  { id: 'mock-content-002', title: 'Escaneo corporal', meta: '15 min • Audio • Relajación', tag: 'Body Scan', thumbnail: '/images/lib-2.jpg' },
-  { id: 'mock-content-003', title: 'Atención plena', meta: '8 min • Video • Mindfulness', tag: 'Mindfulness', thumbnail: '/images/lib-3.jpg' },
-  { id: 'mock-content-004', title: 'Gratitud matutina', meta: '5 min • Texto • Reflexión', tag: 'Journaling', thumbnail: '/images/lib-4.jpg' },
-  { id: 'mock-content-005', title: 'Despertar con energía', meta: '12 min • Video • Rutina', tag: 'Rutina AM', thumbnail: '/images/lib-5.jpg' },
-  { id: 'mock-content-006', title: 'Mentalidad de crecimiento', meta: '20 min • Video • Desarrollo', tag: 'Growth Mindset', thumbnail: '/images/lib-6.jpg' },
-])
+const items = computed(() => categoryData.value?.items ?? [])
 </script>
 
 <style scoped>

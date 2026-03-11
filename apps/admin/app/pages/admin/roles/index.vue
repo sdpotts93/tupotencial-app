@@ -127,6 +127,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 const showInviteModal = ref(false)
 const showEditModal = ref(false)
 const search = ref('')
@@ -144,29 +146,49 @@ const inviteForm = reactive({
   role: 'editor',
 })
 
-const roles = [
-  {
-    key: 'admin',
-    name: 'Administrador',
-    description: 'Acceso completo al sistema incluyendo gestión de usuarios.',
-    count: 4,
-    variant: 'primary',
-  },
-  {
-    key: 'editor',
-    name: 'Editor',
-    description: 'Puede crear y editar todo el contenido del sistema.',
-    count: 5,
-    variant: 'accent',
-  },
-  {
-    key: 'read_only',
-    name: 'Solo lectura',
-    description: 'Acceso de solo lectura al panel de administración.',
-    count: 2,
-    variant: 'default',
-  },
-]
+// ── Fetch admin users from Supabase ──
+const { data: adminUsers, refresh } = await useAsyncData('admin-roles', async () => {
+  const { data } = await client
+    .from('admin_users')
+    .select('*, profiles:user_id(display_name, avatar_url)')
+    .order('created_at', { ascending: false })
+  return (data ?? []).map(a => ({
+    ...a,
+    full_name: (a.profiles as any)?.display_name ?? 'Sin nombre',
+    avatar_url: (a.profiles as any)?.avatar_url ?? null,
+    email: '\u2014',
+    status: 'active',
+    last_login: null as string | null,
+  }))
+})
+
+// ── Computed role summary cards ──
+const roles = computed(() => {
+  const list = adminUsers.value ?? []
+  return [
+    {
+      key: 'admin',
+      name: 'Administrador',
+      description: 'Acceso completo al sistema incluyendo gestión de usuarios.',
+      count: list.filter(u => u.role === 'admin').length,
+      variant: 'primary',
+    },
+    {
+      key: 'editor',
+      name: 'Editor',
+      description: 'Puede crear y editar todo el contenido del sistema.',
+      count: list.filter(u => u.role === 'editor').length,
+      variant: 'accent',
+    },
+    {
+      key: 'read_only',
+      name: 'Solo lectura',
+      description: 'Acceso de solo lectura al panel de administración.',
+      count: list.filter(u => u.role === 'read_only').length,
+      variant: 'default',
+    },
+  ]
+})
 
 const columns = [
   { key: 'full_name', label: 'Administrador', width: '30%' },
@@ -175,24 +197,11 @@ const columns = [
   { key: 'last_login', label: 'Último acceso' },
 ]
 
-const adminUsers = ref([
-  { id: 'adm-001', full_name: 'Ana García', email: 'ana.garcia@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-24T10:30:00' },
-  { id: 'adm-002', full_name: 'Carlos López', email: 'carlos.lopez@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-24T09:15:00' },
-  { id: 'adm-003', full_name: 'Maria Torres', email: 'maria.torres@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-23T16:00:00' },
-  { id: 'adm-004', full_name: 'Luis Mendoza', email: 'luis.mendoza@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-22T14:30:00' },
-  { id: 'adm-005', full_name: 'Patricia Ruiz', email: 'patricia.ruiz@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-24T08:00:00' },
-  { id: 'adm-006', full_name: 'Jorge Fernández', email: 'jorge.f@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-23T11:00:00' },
-  { id: 'adm-007', full_name: 'Diana Salazar', email: 'diana.s@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-21T15:00:00' },
-  { id: 'adm-008', full_name: 'Ricardo Pérez', email: 'ricardo.p@tupotencial.app', role: 'editor', status: 'pending', last_login: null },
-  { id: 'adm-009', full_name: 'Isabel Contreras', email: 'isabel.c@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-20T09:00:00' },
-  { id: 'adm-010', full_name: 'Eduardo Vargas', email: 'eduardo.v@tupotencial.app', role: 'read_only', status: 'active', last_login: '2026-02-24T07:30:00' },
-  { id: 'adm-011', full_name: 'Camila Rios', email: 'camila.r@tupotencial.app', role: 'read_only', status: 'active', last_login: '2026-02-19T13:00:00' },
-])
-
 const filteredAdmins = computed(() => {
-  if (!search.value) return adminUsers.value
+  const list = adminUsers.value ?? []
+  if (!search.value) return list
   const q = search.value.toLowerCase()
-  return adminUsers.value.filter(r => r.full_name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q))
+  return list.filter(r => r.full_name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q))
 })
 
 const roleOptions = [
@@ -223,20 +232,26 @@ function editAdmin(row: Record<string, any>) {
   showEditModal.value = true
 }
 
-function saveEdit() {
-  const user = adminUsers.value.find(u => u.id === editingId.value)
-  if (user) user.role = editForm.role
+async function saveEdit() {
+  if (!editingId.value) return
+  await client
+    .from('admin_users')
+    .update({ role: editForm.role })
+    .eq('id', editingId.value)
   showEditModal.value = false
+  await refresh()
 }
 
-function deleteAdmin(row: Record<string, any>) {
+async function deleteAdmin(row: Record<string, any>) {
   if (confirm(`¿Seguro que deseas eliminar a ${row.full_name}?`)) {
-    adminUsers.value = adminUsers.value.filter(u => u.id !== row.id)
+    await client.from('admin_users').delete().eq('id', row.id)
+    await refresh()
   }
 }
 
 function sendInvite() {
-  alert(`Invitación enviada a ${inviteForm.email} (mock)`)
+  // TODO: implement invite via server API route (requires auth.admin to create users)
+  alert(`Invitación enviada a ${inviteForm.email} (pendiente implementación)`)
   showInviteModal.value = false
   inviteForm.email = ''
   inviteForm.full_name = ''

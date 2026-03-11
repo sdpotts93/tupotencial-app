@@ -66,16 +66,65 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'blank' })
 
-const currentStreak = ref(7)
-const bestStreak = ref(14)
-const totalCheckins = ref(42)
-const activeProgramsCount = ref(2)
-const contentViewed = ref(28)
+const client = useSupabaseClient()
+const { user } = useAuth()
 
-const activePrograms = ref([
-  { id: 'mock-prog-001', title: 'Reto 7 días de gratitud', currentDay: 5, totalDays: 7, img: '/images/lib-4.jpg' },
-  { id: 'mock-prog-002', title: 'Despertar consciente', currentDay: 12, totalDays: 30, img: '/images/lib-6.jpg' },
-])
+const { data: streakData } = await useAsyncData('mobile-streak', async () => {
+  const { data } = await client.from('user_streaks').select('*').eq('user_id', user.value?.id ?? '').maybeSingle()
+  return data
+})
+
+const currentStreak = computed(() => streakData.value?.current_streak ?? 0)
+const bestStreak = computed(() => streakData.value?.best_streak ?? 0)
+
+const { data: totalCheckins } = await useAsyncData('mobile-total-checkins', async () => {
+  const { count } = await client.from('daily_checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.value?.id ?? '')
+  return count ?? 0
+})
+
+const { data: activeEnrollments } = await useAsyncData('mobile-active-programs', async () => {
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title, type, cover_url)').eq('user_id', user.value?.id ?? '').eq('status', 'active')
+  if (!enrollments?.length) return []
+
+  const programIds = enrollments.map(e => (e.programs as any)?.id ?? e.program_id)
+
+  // Count total days per program
+  const { data: days } = await client.from('program_days').select('program_id').in('program_id', programIds)
+  const dayCountMap: Record<string, number> = {}
+  for (const d of days ?? []) {
+    dayCountMap[d.program_id] = (dayCountMap[d.program_id] ?? 0) + 1
+  }
+
+  // Get user's checkins per program
+  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value?.id ?? '').in('program_id', programIds)
+  const checkinCountMap: Record<string, number> = {}
+  for (const c of checkins ?? []) {
+    checkinCountMap[c.program_id] = (checkinCountMap[c.program_id] ?? 0) + 1
+  }
+
+  return enrollments.map(e => {
+    const prog = e.programs as any
+    const pid = prog?.id ?? e.program_id
+    return {
+      id: pid,
+      title: prog?.title ?? '',
+      currentDay: checkinCountMap[pid] ?? 0,
+      totalDays: dayCountMap[pid] ?? 0,
+      img: prog?.cover_url ?? '/images/lib-4.jpg',
+    }
+  })
+})
+
+const activeProgramsCount = computed(() => activeEnrollments.value?.length ?? 0)
+
+const activePrograms = computed(() => activeEnrollments.value ?? [])
+
+// Content viewed count (count content_item_categories or benefit_clicks as a proxy; fallback to 0)
+const { data: contentViewed } = await useAsyncData('mobile-content-viewed', async () => {
+  // No dedicated content_views table; count the user's unique form_submissions as an activity proxy
+  const { count } = await client.from('form_submissions').select('id', { count: 'exact', head: true }).eq('user_id', user.value?.id ?? '')
+  return count ?? 0
+})
 </script>
 
 <style scoped>

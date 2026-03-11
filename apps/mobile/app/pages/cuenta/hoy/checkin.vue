@@ -47,11 +47,22 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'blank' })
 
+const client = useSupabaseClient()
+const { user } = useAuth()
+
 const selectedMood = ref<string | null>(null)
 const reflection = ref('')
 const loading = ref(false)
 const showSuccess = ref(false)
-const streak = ref(7)
+
+const today = new Date().toISOString().split('T')[0]
+
+// ── Fetch current streak ──
+const { data: streakData } = await useAsyncData('checkin-streak', async () => {
+  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value?.id ?? '').maybeSingle()
+  return data?.current_streak ?? 0
+})
+const streak = computed(() => streakData.value ?? 0)
 
 const moods = [
   { value: 'great', emoji: 'lucide:laugh', label: 'Increíble' },
@@ -64,10 +75,16 @@ const moods = [
 async function handleSubmit() {
   if (!selectedMood.value) return
   loading.value = true
-  // Mock async submit
-  await new Promise(r => setTimeout(r, 800))
-  loading.value = false
-  showSuccess.value = true
+  try {
+    await client.from('daily_checkins').insert({
+      date: today,
+      user_id: user.value!.id,
+      payload: { mood: selectedMood.value, reflection: reflection.value },
+    })
+    showSuccess.value = true
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 

@@ -82,16 +82,31 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+const { user } = useAuth()
+
 const selectedTone = ref<'carlotta' | 'gabriel'>('carlotta')
 const limitReached = ref(false)
 
-const sessions = ref([
-  { id: 'mock-ai-session-001', preview: 'Hablamos sobre gratitud y propósito...', tone: 'carlotta', date: 'Hoy, 8:30' },
-  { id: 'mock-ai-session-002', preview: 'Plan de productividad matutina', tone: 'gabriel', date: 'Ayer, 7:15' },
-])
+const { data: rawSessions } = await useAsyncData('mobile-ai-sessions', async () => {
+  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value?.id ?? '').order('created_at', { ascending: false })
+  return data ?? []
+})
+
+const sessions = computed(() =>
+  (rawSessions.value ?? []).map(s => {
+    const firstMsg = Array.isArray(s.ai_messages) ? s.ai_messages[0]?.content ?? '' : ''
+    return {
+      id: s.id,
+      preview: firstMsg.slice(0, 80) || 'Nueva conversación',
+      tone: s.tone ?? 'carlotta',
+      date: new Date(s.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }),
+    }
+  }),
+)
 
 function startChat(prompt?: string) {
-  navigateTo('/cuenta/ia/chat/mock-ai-session-new')
+  navigateTo('/cuenta/ia/chat/new')
 }
 </script>
 

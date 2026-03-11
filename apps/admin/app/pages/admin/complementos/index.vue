@@ -49,10 +49,9 @@
 </template>
 
 <script setup lang="ts">
-import { mockAddons, mockAddonPurchases } from '@tupotencial/shared/mock'
-
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
 const router = useRouter()
 const search = ref('')
 
@@ -64,15 +63,22 @@ const columns = [
   { key: 'compras', label: 'Compras' },
 ]
 
-const filteredRows = computed(() => {
-  if (!search.value) return mockAddons
-  const q = search.value.toLowerCase()
-  return mockAddons.filter(r => r.title.toLowerCase().includes(q))
+const { data: rows, refresh } = await useAsyncData('admin-addons', async () => {
+  const { data } = await client
+    .from('addons')
+    .select('*, addon_purchases(count)')
+    .order('created_at', { ascending: false })
+  return (data ?? []).map(a => ({
+    ...a,
+    purchases: (a.addon_purchases as any)?.[0]?.count ?? 0,
+  }))
 })
 
-function purchaseCount(addonId: string) {
-  return mockAddonPurchases.filter(p => p.addon_id === addonId).length
-}
+const filteredRows = computed(() => {
+  if (!search.value) return rows.value ?? []
+  const q = search.value.toLowerCase()
+  return (rows.value ?? []).filter(r => r.title.toLowerCase().includes(q))
+})
 
 function goToEdit(row: Record<string, any>) {
   router.push(`/admin/complementos/${row.id}`)

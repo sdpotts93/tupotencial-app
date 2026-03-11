@@ -45,9 +45,7 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    public: {
-      devMode: true,
-    },
+    public: {},
   },
 
   typescript: {

@@ -39,12 +39,24 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
-const benefits = ref([
-  { id: 'mock-ben-001', title: 'Descuento en retiros', description: '15% de descuento en retiros presenciales', emoji: 'lucide:mountain', color: 'var(--color-mood-great)', bgColor: 'rgba(var(--color-mood-great-rgb), 0.15)' },
-  { id: 'mock-ben-002', title: 'Acceso a comunidad VIP', description: 'Grupo exclusivo de WhatsApp con mentores', emoji: 'lucide:message-circle', color: 'var(--color-benefit-purple)', bgColor: 'rgba(var(--color-benefit-purple-rgb), 0.15)' },
-  { id: 'mock-ben-003', title: 'Sesión 1:1 gratuita', description: 'Una sesión de coaching al mes sin costo', emoji: 'lucide:target', color: 'var(--color-mood-low)', bgColor: 'rgba(var(--color-mood-low-rgb), 0.15)' },
-  { id: 'mock-ben-004', title: 'Descuento en libros', description: '20% en la tienda de libros recomendados', emoji: 'lucide:book-open', color: 'var(--color-benefit-pink)', bgColor: 'rgba(var(--color-benefit-pink-rgb), 0.15)' },
-])
+const client = useSupabaseClient()
+
+const BENEFIT_COLORS = [
+  { color: 'var(--color-mood-great)', bgColor: 'rgba(var(--color-mood-great-rgb), 0.15)' },
+  { color: 'var(--color-benefit-purple)', bgColor: 'rgba(var(--color-benefit-purple-rgb), 0.15)' },
+  { color: 'var(--color-mood-low)', bgColor: 'rgba(var(--color-mood-low-rgb), 0.15)' },
+  { color: 'var(--color-benefit-pink)', bgColor: 'rgba(var(--color-benefit-pink-rgb), 0.15)' },
+]
+
+const { data: benefits } = await useAsyncData('mobile-benefits', async () => {
+  const { data } = await client.from('benefits').select('*').eq('status', 'active').order('position')
+  return (data ?? []).map((b, i) => ({
+    ...b,
+    emoji: 'lucide:tag',
+    color: BENEFIT_COLORS[i % BENEFIT_COLORS.length].color,
+    bgColor: BENEFIT_COLORS[i % BENEFIT_COLORS.length].bgColor,
+  }))
+})
 </script>
 
 <style scoped>

@@ -189,6 +189,9 @@
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
+const client = useSupabaseClient()
+const id = route.params.id as string
+const isNew = id === 'new'
 const activeTab = ref('info')
 
 const tabs = [
@@ -201,15 +204,48 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
 
-// ── Form state (pre-filled) ──
+// ── Fetch existing program ──
+const { data: program } = await useAsyncData(`program-${id}`, async () => {
+  if (isNew) return null
+  const { data } = await client.from('programs').select('*').eq('id', id).single()
+  return data
+})
+
+// ── Fetch program days with items ──
+const { data: dbDays } = await useAsyncData(`program-days-${id}`, async () => {
+  if (isNew) return []
+  const { data } = await client
+    .from('program_days')
+    .select('id, day_index, title, description, program_day_items ( id, type, content_item_id, form_id, position )')
+    .eq('program_id', id)
+    .order('day_index')
+  return data ?? []
+})
+
+// ── Fetch content items and forms for dropdowns ──
+const { data: contentItemsList } = await useAsyncData('program-content-items', async () => {
+  const { data } = await client.from('content_items').select('id, title, entitlement_key').order('title')
+  return data ?? []
+})
+
+const { data: formsList } = await useAsyncData('program-forms', async () => {
+  const { data } = await client.from('forms').select('id, title').order('title')
+  return data ?? []
+})
+
+// ── Map DB item type to UI type ──
+const dbTypeToUi: Record<string, string> = { content: 'contenido', form: 'formulario', ai_prompt: 'talk_to_ai' }
+const uiTypeToDb: Record<string, string> = { contenido: 'content', formulario: 'form', talk_to_ai: 'ai_prompt' }
+
+// ── Form state ──
 const form = reactive({
-  title: 'Reto 21 días de meditación',
-  description: 'Un reto diseñado para construir el hábito de la meditación. Cada día incluye una sesión guiada, un ejercicio de reflexión y un check-in de progreso.',
-  program_type: 'reto',
-  plan: 'core',
-  entitlement_key: '',
-  status: 'published',
-  existing_media: 'meditacion-21-portada.jpg',
+  title: program.value?.title ?? '',
+  description: program.value?.description ?? '',
+  program_type: program.value?.type ?? 'program',
+  plan: program.value?.plan ?? 'free',
+  entitlement_key: program.value?.entitlement_key ?? '',
+  status: program.value?.status ?? 'draft',
+  existing_media: program.value?.cover_url ?? '',
 })
 
 // ── Options ──
@@ -245,30 +281,22 @@ const activityTypeOptions = [
   { value: 'formulario', label: 'Formulario' },
 ]
 
-const formOptions = [
-  { value: 'frm-001', label: 'Evaluación inicial de bienestar' },
-  { value: 'frm-002', label: 'Check-in semanal' },
-  { value: 'frm-003', label: 'Encuesta de satisfacción del programa' },
-  { value: 'frm-004', label: 'Registro de hábitos diarios' },
-  { value: 'frm-005', label: 'Evaluación de progreso mensual' },
-]
+const formOptions = computed(() =>
+  (formsList.value ?? []).map(f => ({ value: f.id, label: f.title })),
+)
 
-const contentOptions = [
-  { value: 'cnt-001', label: '5 pasos para el bienestar emocional' },
-  { value: 'cnt-002', label: 'Meditación guiada para la mañana' },
-  { value: 'cnt-003', label: 'Nutrición consciente: guía básica' },
-  { value: 'cnt-004', label: 'Rutina de yoga para principiantes' },
-  { value: 'cnt-005', label: 'Higiene del sueño: consejos prácticos' },
-  { value: 'cnt-006', label: 'Cómo manejar el estrés laboral' },
-  { value: 'cnt-007', label: 'Ejercicios de respiración 4-7-8' },
-  { value: 'cnt-008', label: 'Alimentación para la energía diaria' },
-]
+const contentOptions = computed(() =>
+  (contentItemsList.value ?? []).map(c => ({ value: c.id, label: c.title })),
+)
 
-// Content entitlement map (mirrors content_items.entitlement_key)
-const contentEntitlementMap: Record<string, string> = {
-  'cnt-005': 'vip',
-  'cnt-008': 'bootcamp_liderazgo',
-}
+// Content entitlement map built from real data
+const contentEntitlementMap = computed(() => {
+  const map: Record<string, string> = {}
+  for (const c of contentItemsList.value ?? []) {
+    if (c.entitlement_key) map[c.id] = c.entitlement_key
+  }
+  return map
+})
 
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
@@ -280,7 +308,7 @@ const entitlementLabels: Record<string, string> = {
 
 function contentConflictLabel(contentId: string): string | null {
   if (form.entitlement_key) return null
-  const key = contentEntitlementMap[contentId]
+  const key = contentEntitlementMap.value[contentId]
   if (!key) return null
   return entitlementLabels[key] ?? key
 }
@@ -298,50 +326,25 @@ interface ProgramDay {
   activities: Activity[]
 }
 
-const programDays = ref<ProgramDay[]>([
-  {
-    title: 'Introducción a la meditación',
-    description: 'Aprende los fundamentos de la práctica meditativa y realiza tu primera sesión guiada de 5 minutos.',
-    activities: [
-      { type: 'contenido', content_id: 'cnt-001', form_id: '' },
-      { type: 'contenido', content_id: 'cnt-002', form_id: '' },
-      { type: 'talk_to_ai', content_id: '', form_id: '' },
-    ],
-  },
-  {
-    title: 'Respiración consciente',
-    description: 'Explora técnicas de respiración que te ayudarán a centrar tu atención y calmar la mente.',
-    activities: [
-      { type: 'contenido', content_id: 'cnt-007', form_id: '' },
-      { type: 'talk_to_ai', content_id: '', form_id: '' },
-    ],
-  },
-  {
-    title: 'El escaneo corporal',
-    description: 'Practica la técnica del body scan para conectar con las sensaciones de tu cuerpo.',
-    activities: [
-      { type: 'contenido', content_id: 'cnt-004', form_id: '' },
-      { type: 'talk_to_ai', content_id: '', form_id: '' },
-    ],
-  },
-  {
-    title: 'Meditación caminando',
-    description: 'Descubre cómo meditar en movimiento con una práctica guiada de caminata consciente.',
-    activities: [
-      { type: 'contenido', content_id: 'cnt-003', form_id: '' },
-      { type: 'contenido', content_id: 'cnt-006', form_id: '' },
-      { type: 'talk_to_ai', content_id: '', form_id: '' },
-    ],
-  },
-  {
-    title: 'Manejo de pensamientos',
-    description: 'Aprende a observar tus pensamientos sin juzgarlos ni engancharte en ellos.',
-    activities: [
-      { type: 'contenido', content_id: 'cnt-005', form_id: '' },
-      { type: 'talk_to_ai', content_id: '', form_id: '' },
-    ],
-  },
-])
+// Convert DB days to local structure
+function buildLocalDays(): ProgramDay[] {
+  return (dbDays.value ?? []).map((day: any) => {
+    const items = Array.isArray(day.program_day_items)
+      ? [...day.program_day_items].sort((a: any, b: any) => a.position - b.position)
+      : []
+    return {
+      title: day.title ?? '',
+      description: day.description ?? '',
+      activities: items.map((item: any) => ({
+        type: dbTypeToUi[item.type] ?? item.type,
+        content_id: item.content_item_id ?? '',
+        form_id: item.form_id ?? '',
+      })),
+    }
+  })
+}
+
+const programDays = ref<ProgramDay[]>(isNew ? [] : buildLocalDays())
 
 function addDay() {
   programDays.value.push({
@@ -403,22 +406,80 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function handleSave() {
+async function handleSave() {
   if (!form.entitlement_key) {
     const hasConflict = programDays.value.some(day =>
-      day.activities.some(a => a.type === 'contenido' && contentEntitlementMap[a.content_id]),
+      day.activities.some(a => a.type === 'contenido' && contentEntitlementMap.value[a.content_id]),
     )
     if (hasConflict) {
       alert('No se puede guardar: hay contenido que requiere un complemento pero el programa no tiene restricción. Asigna un complemento al programa o cambia el contenido.')
       return
     }
   }
-  alert('Programa actualizado (mock)')
+
+  const programPayload = {
+    title: form.title,
+    description: form.description || null,
+    type: form.program_type,
+    plan: form.plan,
+    entitlement_key: form.entitlement_key || null,
+    status: form.status,
+    cover_url: form.existing_media || null,
+  }
+
+  let programId = id
+
+  if (isNew) {
+    const { data: inserted } = await client.from('programs').insert(programPayload).select('id').single()
+    if (!inserted) return
+    programId = inserted.id
+  } else {
+    await client.from('programs').update(programPayload).eq('id', id)
+    // Delete existing days and items to replace them
+    const existingDayIds = (dbDays.value ?? []).map((d: any) => d.id)
+    if (existingDayIds.length) {
+      await client.from('program_day_items').delete().in('program_day_id', existingDayIds)
+      await client.from('program_days').delete().eq('program_id', id)
+    }
+  }
+
+  // Insert days + items
+  for (let i = 0; i < programDays.value.length; i++) {
+    const day = programDays.value[i]!
+    const { data: insertedDay } = await client
+      .from('program_days')
+      .insert({
+        program_id: programId,
+        day_index: i,
+        title: day.title || null,
+        description: day.description || null,
+      })
+      .select('id')
+      .single()
+
+    if (insertedDay && day.activities.length) {
+      const items = day.activities.map((a, pos) => ({
+        program_day_id: insertedDay.id,
+        type: uiTypeToDb[a.type] ?? a.type,
+        content_item_id: a.type === 'contenido' && a.content_id ? a.content_id : null,
+        form_id: a.type === 'formulario' && a.form_id ? a.form_id : null,
+        position: pos,
+      }))
+      await client.from('program_day_items').insert(items)
+    }
+  }
+
+  navigateTo('/admin/programas')
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (confirm('¿Seguro que deseas eliminar este programa?')) {
-    alert('Programa eliminado (mock)')
+    const existingDayIds = (dbDays.value ?? []).map((d: any) => d.id)
+    if (existingDayIds.length) {
+      await client.from('program_day_items').delete().in('program_day_id', existingDayIds)
+      await client.from('program_days').delete().eq('program_id', id)
+    }
+    await client.from('programs').delete().eq('id', id)
     navigateTo('/admin/programas')
   }
 }

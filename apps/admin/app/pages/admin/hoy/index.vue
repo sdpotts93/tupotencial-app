@@ -267,6 +267,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
 const router = useRouter()
 const search = ref('')
 const viewMode = ref<'calendar' | 'list'>(
@@ -288,54 +289,69 @@ const columns = [
   { key: 'status', label: 'Estado' },
 ]
 
-const calendarDays = ref([
-  { date: '2026-03-09', dayName: 'Lun', dayNumber: 9, items: 5, isToday: true },
-  { date: '2026-03-10', dayName: 'Mar', dayNumber: 10, items: 4, isToday: false },
-  { date: '2026-03-11', dayName: 'Mié', dayNumber: 11, items: 3, isToday: false },
-  { date: '2026-03-12', dayName: 'Jue', dayNumber: 12, items: 4, isToday: false },
-  { date: '2026-03-13', dayName: 'Vie', dayNumber: 13, items: 2, isToday: false },
-  { date: '2026-03-14', dayName: 'Sáb', dayNumber: 14, items: 1, isToday: false },
-  { date: '2026-03-15', dayName: 'Dom', dayNumber: 15, items: 0, isToday: false },
-])
+// ── Fetch all daily plans from Supabase ──
+const { data: plans, refresh } = await useAsyncData('admin-daily-plans', async () => {
+  const { data } = await client
+    .from('daily_plans')
+    .select('*')
+    .order('date', { ascending: false })
+  return data ?? []
+})
 
-const dailyPlans = ref([
-  { id: 'dp-001', date: '2026-03-09', theme: 'Bienestar emocional', items_count: 4, status: 'published' },
-  { id: 'dp-002', date: '2026-03-10', theme: 'Nutrición consciente', items_count: 3, status: 'scheduled' },
-  { id: 'dp-003', date: '2026-03-11', theme: 'Movimiento y energía', items_count: 4, status: 'scheduled' },
-  { id: 'dp-004', date: '2026-03-12', theme: 'Descanso y recuperación', items_count: 2, status: 'draft' },
-  { id: 'dp-005', date: '2026-03-13', theme: 'Conexión social', items_count: 1, status: 'draft' },
-  { id: 'dp-006', date: '2026-03-14', theme: 'Productividad y enfoque', items_count: 5, status: 'published' },
-])
+// ── Helper: get Monday of a given week offset (0 = current, 1 = next) ──
+function getWeekMonday(offset: number): Date {
+  const now = new Date()
+  const day = now.getDay()
+  const diff = day === 0 ? -6 : 1 - day // Monday
+  const monday = new Date(now)
+  monday.setDate(now.getDate() + diff + offset * 7)
+  monday.setHours(0, 0, 0, 0)
+  return monday
+}
+
+function toDateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const DAY_NAMES_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+
+// ── Build calendar days for the selected week tab ──
+const calendarDays = computed(() => {
+  const weekOffset = activeTab.value === 'next' ? 1 : 0
+  const monday = getWeekMonday(weekOffset)
+  const todayStr = toDateStr(new Date())
+  const days = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    const dateStr = toDateStr(d)
+    const plansForDay = (plans.value ?? []).filter(p => p.date === dateStr)
+    days.push({
+      date: dateStr,
+      dayName: DAY_NAMES_ES[d.getDay()]!,
+      dayNumber: d.getDate(),
+      items: plansForDay.length,
+      isToday: dateStr === todayStr,
+    })
+  }
+  return days
+})
+
+// ── Map plans into table-friendly rows (for list view) ──
+const dailyPlans = computed(() => {
+  return (plans.value ?? []).map(p => ({
+    id: p.id,
+    date: p.date,
+    theme: (p as any).title ?? '',
+    items_count: 1,
+    status: p.status,
+  }))
+})
 
 const filteredPlans = computed(() => {
   if (!search.value) return dailyPlans.value
   const q = search.value.toLowerCase()
   return dailyPlans.value.filter(r => r.theme.toLowerCase().includes(q))
-})
-
-// ── Tab switching: swap mock data for weekly views ──
-watch(activeTab, (tab) => {
-  if (tab === 'current') {
-    calendarDays.value = [
-      { date: '2026-03-09', dayName: 'Lun', dayNumber: 9, items: 5, isToday: true },
-      { date: '2026-03-10', dayName: 'Mar', dayNumber: 10, items: 4, isToday: false },
-      { date: '2026-03-11', dayName: 'Mié', dayNumber: 11, items: 3, isToday: false },
-      { date: '2026-03-12', dayName: 'Jue', dayNumber: 12, items: 4, isToday: false },
-      { date: '2026-03-13', dayName: 'Vie', dayNumber: 13, items: 2, isToday: false },
-      { date: '2026-03-14', dayName: 'Sáb', dayNumber: 14, items: 1, isToday: false },
-      { date: '2026-03-15', dayName: 'Dom', dayNumber: 15, items: 0, isToday: false },
-    ]
-  } else if (tab === 'next') {
-    calendarDays.value = [
-      { date: '2026-03-16', dayName: 'Lun', dayNumber: 16, items: 0, isToday: false },
-      { date: '2026-03-17', dayName: 'Mar', dayNumber: 17, items: 0, isToday: false },
-      { date: '2026-03-18', dayName: 'Mié', dayNumber: 18, items: 0, isToday: false },
-      { date: '2026-03-19', dayName: 'Jue', dayNumber: 19, items: 0, isToday: false },
-      { date: '2026-03-20', dayName: 'Vie', dayNumber: 20, items: 0, isToday: false },
-      { date: '2026-03-21', dayName: 'Sáb', dayNumber: 21, items: 0, isToday: false },
-      { date: '2026-03-22', dayName: 'Dom', dayNumber: 22, items: 0, isToday: false },
-    ]
-  }
 })
 
 // ── Year view for "Todos los planes" ──
@@ -346,15 +362,12 @@ const MONTH_NAMES_ES = [
 
 const dayNamesShort = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
-const datesWithContent = new Set([
-  '2026-01-05', '2026-01-12', '2026-01-19',
-  '2026-02-02', '2026-02-09', '2026-02-16', '2026-02-23',
-  '2026-03-02', '2026-03-09', '2026-03-10', '2026-03-11',
-  '2026-03-12', '2026-03-13', '2026-03-14',
-])
+const datesWithContent = computed(() => {
+  return new Set((plans.value ?? []).map(p => p.date))
+})
 
 const yearMonths = computed(() => {
-  const year = 2026
+  const year = new Date().getFullYear()
   const today = new Date().toISOString().slice(0, 10)
   return MONTH_NAMES_ES.map((name, monthIndex) => {
     const firstDay = new Date(year, monthIndex, 1)
@@ -368,7 +381,7 @@ const yearMonths = computed(() => {
         date: dateStr,
         dayNumber: d,
         isToday: dateStr === today,
-        hasContent: datesWithContent.has(dateStr),
+        hasContent: datesWithContent.value.has(dateStr),
       })
     }
     return { key: `${year}-${monthIndex}`, name: `${name} ${year}`, startOffset: startDow, days }

@@ -38,26 +38,29 @@
 </template>
 
 <script setup lang="ts">
-import { mockAddons, mockAddonPurchases, MOCK_CURRENT_USER_ID } from '@tupotencial/shared/mock'
-
 definePageMeta({ layout: 'default' })
+
+const client = useSupabaseClient()
+const { user } = useAuth()
 
 function formatPrice(cents: number) {
   return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
 }
 
-const addons = computed(() =>
-  mockAddons
-    .filter(a => a.status === 'active')
-    .map(a => ({
-      id: a.id,
-      title: a.title,
-      description: a.description,
-      priceLabel: formatPrice(a.price),
-      img: a.cover_url,
-      owned: mockAddonPurchases.some(p => p.addon_id === a.id && p.user_id === MOCK_CURRENT_USER_ID),
-    }))
-)
+const { data: addons } = await useAsyncData('mobile-addons', async () => {
+  const { data: addonsList } = await client.from('addons').select('*').eq('status', 'active').order('created_at')
+  const { data: purchases } = await client.from('addon_purchases').select('addon_id').eq('user_id', user.value?.id ?? '')
+  const purchasedIds = new Set((purchases ?? []).map(p => p.addon_id))
+  return (addonsList ?? []).map(a => ({
+    id: a.id,
+    title: a.title,
+    description: a.description,
+    priceLabel: formatPrice(a.price),
+    img: a.cover_url,
+    bg: 'linear-gradient(135deg, var(--color-surface-alt) 0%, var(--color-surface) 100%)',
+    owned: purchasedIds.has(a.id),
+  }))
+})
 </script>
 
 <style scoped>

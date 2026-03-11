@@ -113,15 +113,16 @@ const segmentOptions = [
   { value: 'core', label: 'Core' },
 ]
 
-const categoryFilterOptions = [
+const client = useSupabaseClient()
+
+const { data: categories } = await useAsyncData('admin-content-categories', async () => {
+  const { data } = await client.from('content_categories').select('id, title').order('sort_order')
+  return data ?? []
+})
+const categoryFilterOptions = computed(() => [
   { value: '', label: 'Todas las categorías' },
-  { value: 'cat-001', label: 'Mindfulness' },
-  { value: 'cat-002', label: 'Nutrición' },
-  { value: 'cat-003', label: 'Ejercicio' },
-  { value: 'cat-004', label: 'Sueño' },
-  { value: 'cat-005', label: 'Productividad' },
-  { value: 'cat-006', label: 'Relaciones' },
-]
+  ...(categories.value ?? []).map(c => ({ value: c.id, label: c.title })),
+])
 
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
@@ -140,19 +141,18 @@ const columns = [
   { key: 'published_at', label: 'Publicación' },
 ]
 
-const rows = ref([
-  { id: 'cnt-001', title: '5 pasos para el bienestar emocional', content_type: 'video', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-20T08:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-002', title: 'Meditación guiada para la mañana', content_type: 'audio', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-18T06:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-003', title: 'Nutrición consciente: guía básica', content_type: 'article', segment: 'free', category: 'cat-002', status: 'published', published_at: '2026-02-15T10:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-004', title: 'Rutina de yoga para principiantes', content_type: 'video', segment: 'core', category: 'cat-003', status: 'published', published_at: '2026-02-12T07:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-005', title: 'Higiene del sueño: consejos prácticos', content_type: 'article', segment: 'free', category: 'cat-004', status: 'draft', published_at: null, entitlement_key: 'vip' as string | null },
-  { id: 'cnt-006', title: 'Como manejar el estrés laboral', content_type: 'audio', segment: 'free', category: 'cat-005', status: 'draft', published_at: null, entitlement_key: null as string | null },
-  { id: 'cnt-007', title: 'Ejercicios de respiración 4-7-8', content_type: 'video', segment: 'free', category: 'cat-001', status: 'published', published_at: '2026-02-10T09:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-008', title: 'Alimentación para la energía diaria', content_type: 'article', segment: 'core', category: 'cat-002', status: 'archived', published_at: '2026-01-28T08:00:00', entitlement_key: 'bootcamp_liderazgo' as string | null },
-])
+const { data: rows, refresh } = await useAsyncData('admin-content', async () => {
+  const { data } = await client.from('content_items').select('*, content_item_categories(category_id)').order('created_at', { ascending: false })
+  return (data ?? []).map(item => ({
+    ...item,
+    content_type: item.type,
+    segment: item.plan,
+    category: (item.content_item_categories as any)?.[0]?.category_id ?? null,
+  }))
+})
 
 const filteredRows = computed(() => {
-  return rows.value.filter(row => {
+  return (rows.value ?? []).filter(row => {
     if (search.value) {
       const q = search.value.toLowerCase()
       if (!row.title.toLowerCase().includes(q)) return false
@@ -184,9 +184,10 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function handleDelete(row: Record<string, any>) {
+async function handleDelete(row: Record<string, any>) {
   if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
-    rows.value = rows.value.filter(r => r.id !== row.id)
+    await client.from('content_items').delete().eq('id', row.id)
+    refresh()
   }
 }
 

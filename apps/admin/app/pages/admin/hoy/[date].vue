@@ -88,16 +88,25 @@
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
+const client = useSupabaseClient()
 const dateParam = computed(() => route.params.date as string)
 
+// ── Fetch existing daily plan for this date ──
+const { data: existingPlan } = await useAsyncData(`daily-plan-${dateParam.value}`, async () => {
+  const { data } = await client.from('daily_plans').select('*').eq('date', dateParam.value).maybeSingle()
+  return data
+})
+
+const existingPayload = existingPlan.value?.primary_action_payload as Record<string, any> | null
+
 const form = reactive({
-  phrase_text: 'Cada día es una nueva oportunidad para cuidar de ti.',
-  phrase_author: 'gabriel' as 'gabriel' | 'carlotta',
-  action_type: 'talk_to_ai' as string,
-  content_id: '',
-  form_id: '',
-  badge_title: 'Día completado',
-  badge_subtitle: 'Sigue así, vas genial',
+  phrase_text: existingPayload?.quote_text ?? 'Cada día es una nueva oportunidad para cuidar de ti.',
+  phrase_author: (existingPlan.value?.community_segment ?? 'gabriel') as 'gabriel' | 'carlotta',
+  action_type: existingPlan.value?.primary_action_type ?? 'talk_to_ai' as string,
+  content_id: existingPayload?.content_id ?? '',
+  form_id: existingPayload?.form_id ?? '',
+  badge_title: existingPlan.value?.badge_share_text ?? 'Día completado',
+  badge_subtitle: existingPlan.value?.message ?? 'Sigue así, vas genial',
 })
 
 const authorOptions = [
@@ -111,24 +120,24 @@ const actionTypeOptions = [
   { value: 'formulario', label: 'Formulario' },
 ]
 
-const contentOptions = [
-  { value: 'cnt-001', label: '5 pasos para el bienestar emocional' },
-  { value: 'cnt-002', label: 'Meditación guiada para la mañana' },
-  { value: 'cnt-003', label: 'Nutrición consciente: guía básica' },
-  { value: 'cnt-004', label: 'Rutina de yoga para principiantes' },
-  { value: 'cnt-005', label: 'Higiene del sueño: consejos prácticos' },
-  { value: 'cnt-006', label: 'Cómo manejar el estrés laboral' },
-  { value: 'cnt-007', label: 'Ejercicios de respiración 4-7-8' },
-  { value: 'cnt-008', label: 'Alimentación para la energía diaria' },
-]
+// ── Fetch content items and forms for dropdowns ──
+const { data: contentItemsList } = await useAsyncData('daily-plan-content-items', async () => {
+  const { data } = await client.from('content_items').select('id, title').order('title')
+  return data ?? []
+})
 
-const formOptions = [
-  { value: 'frm-001', label: 'Evaluación inicial de bienestar' },
-  { value: 'frm-002', label: 'Check-in semanal' },
-  { value: 'frm-003', label: 'Encuesta de satisfacción del programa' },
-  { value: 'frm-004', label: 'Registro de hábitos diarios' },
-  { value: 'frm-005', label: 'Evaluación de progreso mensual' },
-]
+const { data: formsList } = await useAsyncData('daily-plan-forms', async () => {
+  const { data } = await client.from('forms').select('id, title').order('title')
+  return data ?? []
+})
+
+const contentOptions = computed(() =>
+  (contentItemsList.value ?? []).map(c => ({ value: c.id, label: c.title })),
+)
+
+const formOptions = computed(() =>
+  (formsList.value ?? []).map(f => ({ value: f.id, label: f.title })),
+)
 
 watch(() => form.action_type, () => {
   form.content_id = ''
@@ -144,8 +153,35 @@ function formatDate(iso: string) {
   })
 }
 
-function handleSave() {
-  alert('Plan del día guardado (mock)')
+async function handleSave() {
+  const actionPayload: Record<string, any> = {
+    quote_text: form.phrase_text,
+    quote_author: form.phrase_author,
+  }
+  if (form.action_type === 'contenido' && form.content_id) {
+    actionPayload.content_id = form.content_id
+  }
+  if (form.action_type === 'formulario' && form.form_id) {
+    actionPayload.form_id = form.form_id
+  }
+
+  const payload = {
+    date: dateParam.value,
+    community_segment: form.phrase_author,
+    title: form.badge_title,
+    message: form.badge_subtitle,
+    primary_action_type: form.action_type,
+    primary_action_payload: actionPayload,
+    badge_share_text: form.badge_title,
+    status: 'published',
+  }
+
+  if (existingPlan.value) {
+    await client.from('daily_plans').update(payload).eq('id', existingPlan.value.id)
+  } else {
+    await client.from('daily_plans').insert(payload)
+  }
+  navigateTo('/admin/hoy')
 }
 </script>
 

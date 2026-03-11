@@ -163,72 +163,119 @@ function activityIcon(activity: DayActivity): string {
   }
 }
 
+function formatDuration(seconds: number | null) {
+  if (!seconds) return undefined
+  const m = Math.round(seconds / 60)
+  return `${m} min`
+}
+
 const route = useRoute()
+const { user } = useAuth()
+const client = useSupabaseClient()
 const programId = route.params.id as string
 const dayIndex = route.params.indDia as string
 
-const programTypeMap: Record<string, ProgramType> = {
-  'mock-prog-001': 'reto',
-  'mock-prog-002': 'programa',
-  'mock-prog-003': 'reto',
-  'mock-prog-004': 'bootcamp',
-  'mock-prog-005': 'programa',
-}
-const programType = ref<ProgramType>(programTypeMap[programId] || 'reto')
-const totalDays = 7
+const { data: dayData } = await useAsyncData(`program-day-${programId}-${dayIndex}`, async () => {
+  // Fetch program type
+  const { data: program } = await client
+    .from('programs')
+    .select('id, type')
+    .eq('id', programId)
+    .single()
 
-const dayTitle = ref('Oportunidades')
-const dayDescription = ref('Hoy reflexiona sobre las oportunidades que has tenido en tu vida. Piensa en cómo cada experiencia te ha llevado a donde estás ahora.')
+  const pType: ProgramType = (program?.type as ProgramType) ?? 'reto'
 
-const baseActivities: DayActivity[] = [
-  {
-    id: 'act-001',
-    type: 'media',
-    mediaType: 'audio',
-    title: 'Meditación de gratitud',
-    description: 'Una meditación guiada de 10 minutos.',
-    thumbnail: '/images/lib-1.jpg',
-    duration: '10 min',
-    done: true,
-    to: '/cuenta/contenido/mock-content-001/reproducir',
-  },
-  {
-    id: 'act-002',
-    type: 'media',
-    mediaType: 'text',
-    title: 'Diario de gratitud',
-    description: 'Lee y reflexiona sobre la gratitud.',
-    thumbnail: '/images/lib-6.jpg',
-    duration: '5 min',
-    done: false,
-    to: '/cuenta/contenido/mock-content-005',
-  },
-  {
-    id: 'act-003',
-    type: 'ai',
-    title: 'Reflexión con Coach IA',
-    description: 'Habla con tu coach sobre el tema del día.',
-    thumbnail: '/images/lib-3.jpg',
-    duration: '5 min',
-    done: false,
-    to: '/cuenta/ia',
-  },
-]
+  // Fetch the program day by program_id + day_index
+  const { data: day } = await client
+    .from('program_days')
+    .select('id, title, description')
+    .eq('program_id', programId)
+    .eq('day_index', Number(dayIndex))
+    .single()
 
-const formActivity: DayActivity = {
-  id: 'act-form',
-  type: 'form',
-  title: 'Check-in del día',
-  description: 'Comparte tu reflexión.',
-  thumbnail: '/images/lib-7.jpg',
-  done: false,
-}
+  // Count total days in this program
+  const { data: allDays } = await client
+    .from('program_days')
+    .select('id')
+    .eq('program_id', programId)
+  const total = allDays?.length ?? 0
 
-const activities = ref<DayActivity[]>(
-  programType.value === 'bootcamp'
-    ? [...baseActivities, formActivity]
-    : [...baseActivities],
-)
+  if (!day) return { programType: pType, totalDays: total, title: '', description: '', activities: [] }
+
+  // Fetch day items with linked content and forms
+  const { data: dayItems } = await client
+    .from('program_day_items')
+    .select('id, type, position, content_item_id, form_id, content_items(id, title, description, type, duration_seconds, thumbnail_url)')
+    .eq('program_day_id', day.id)
+    .order('position')
+
+  // Check which day items the user has completed (via program_checkins payload)
+  const { data: checkin } = await client
+    .from('program_checkins')
+    .select('payload')
+    .eq('program_id', programId)
+    .eq('day_index', Number(dayIndex))
+    .eq('user_id', user.value?.id ?? '')
+    .maybeSingle()
+
+  const completedItems = new Set<string>(
+    ((checkin?.payload as any)?.completed_items as string[]) ?? [],
+  )
+
+  const acts: DayActivity[] = (dayItems ?? []).map(di => {
+    const content = di.content_items as any
+    if (di.type === 'content' && content) {
+      return {
+        id: di.id,
+        type: 'media' as ActivityType,
+        mediaType: content.type as 'video' | 'audio' | 'text',
+        title: content.title,
+        description: content.description ?? '',
+        thumbnail: content.thumbnail_url ?? '/images/lib-1.jpg',
+        duration: formatDuration(content.duration_seconds),
+        done: completedItems.has(di.id),
+        to: content.type === 'text'
+          ? `/cuenta/contenido/${content.id}`
+          : `/cuenta/contenido/${content.id}/reproducir`,
+      }
+    }
+    if (di.type === 'ai_prompt') {
+      return {
+        id: di.id,
+        type: 'ai' as ActivityType,
+        title: 'Reflexión con Coach IA',
+        description: 'Habla con tu coach sobre el tema del día.',
+        thumbnail: '',
+        duration: '5 min',
+        done: completedItems.has(di.id),
+        to: '/cuenta/ia',
+      }
+    }
+    // form
+    return {
+      id: di.id,
+      type: 'form' as ActivityType,
+      title: 'Check-in del día',
+      description: 'Comparte tu reflexión.',
+      thumbnail: '',
+      done: completedItems.has(di.id),
+    }
+  })
+
+  return {
+    programType: pType,
+    totalDays: total,
+    title: day.title ?? '',
+    description: day.description ?? '',
+    activities: acts,
+  }
+})
+
+const programType = computed<ProgramType>(() => dayData.value?.programType ?? 'reto')
+const totalDays = computed(() => dayData.value?.totalDays ?? 0)
+const dayTitle = computed(() => dayData.value?.title ?? '')
+const dayDescription = computed(() => dayData.value?.description ?? '')
+const activities = ref<DayActivity[]>(dayData.value?.activities ?? [])
 
 const hasForm = computed(() => {
   if (programType.value === 'bootcamp') return true
@@ -249,11 +296,24 @@ function handleActivityClick(activity: DayActivity) {
 
 async function handleFormSubmit() {
   formLoading.value = true
-  await new Promise(r => setTimeout(r, 800))
-  formLoading.value = false
-  formSuccess.value = true
-  const fa = activities.value.find(a => a.type === 'form')
-  if (fa) fa.done = true
+  try {
+    // Record checkin for this program day
+    const completedIds = activities.value.filter(a => a.done).map(a => a.id)
+    const formAct = activities.value.find(a => a.type === 'form')
+    if (formAct) completedIds.push(formAct.id)
+
+    await client.from('program_checkins').upsert({
+      program_id: programId,
+      user_id: user.value!.id,
+      day_index: Number(dayIndex),
+      payload: { reflection: reflection.value, completed_items: completedIds },
+    }, { onConflict: 'program_id,user_id,day_index' })
+
+    formSuccess.value = true
+    if (formAct) formAct.done = true
+  } finally {
+    formLoading.value = false
+  }
 }
 
 function closeFormSheet() {

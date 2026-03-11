@@ -91,6 +91,9 @@
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
+const client = useSupabaseClient()
+const id = route.params.id as string
+const isNew = id === 'new'
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -123,16 +126,23 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+// ── Fetch existing benefit ──
+const { data: benefit } = await useAsyncData(`benefit-${id}`, async () => {
+  if (isNew) return null
+  const { data } = await client.from('benefits').select('*').eq('id', id).single()
+  return data
+})
+
 // ── Form state ──
 const form = reactive({
-  title: '20% en suplementos',
-  description: 'Obtén un 20% de descuento en toda la línea de suplementos NutriVida. Incluye vitaminas, minerales, proteínas y más. Válido en compras en línea y tiendas físicas.',
-  cover_url: 'https://images.tupotencial.app/benefits/nutrivida.jpg',
-  url: 'https://nutrivida.com/tupotencial',
-  utm_template: '?utm_source=tupotencial&utm_medium=benefit&utm_campaign=nutrivida',
-  code: 'TUPOTENCIAL20',
-  plan: 'core',
-  status: 'active',
+  title: benefit.value?.title ?? '',
+  description: benefit.value?.description ?? '',
+  cover_url: benefit.value?.cover_url ?? '',
+  url: benefit.value?.url ?? '',
+  utm_template: benefit.value?.utm_template ?? '',
+  code: benefit.value?.code ?? '',
+  plan: benefit.value?.plan ?? 'free',
+  status: benefit.value?.status ?? 'active',
 })
 
 const planOptions = [
@@ -145,13 +155,29 @@ const statusOptions = [
   { value: 'inactive', label: 'Inactivo' },
 ]
 
-function handleSave() {
-  alert('Beneficio actualizado (mock)')
+async function handleSave() {
+  const payload = {
+    title: form.title,
+    description: form.description || null,
+    cover_url: form.cover_url || null,
+    url: form.url,
+    utm_template: form.utm_template || null,
+    code: form.code || null,
+    plan: form.plan,
+    status: form.status,
+  }
+
+  if (isNew) {
+    await client.from('benefits').insert(payload)
+  } else {
+    await client.from('benefits').update(payload).eq('id', id)
+  }
+  navigateTo('/admin/beneficios')
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (confirm('¿Seguro que deseas eliminar este beneficio?')) {
-    alert('Beneficio eliminado (mock)')
+    await client.from('benefits').delete().eq('id', id)
     navigateTo('/admin/beneficios')
   }
 }

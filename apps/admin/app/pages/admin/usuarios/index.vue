@@ -65,6 +65,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 const search = ref('')
 const filterPlan = ref('')
 const filterStatus = ref('')
@@ -96,21 +98,27 @@ const columns = [
   { key: 'created_at', label: 'Registro' },
 ]
 
-const rows = ref([
-  { id: 'usr-001', full_name: 'Maria López Hernandez', email: 'maria.lopez@gmail.com', plan: 'core', segment: 'carlotta', status: 'active', created_at: '2025-08-15T10:00:00' },
-  { id: 'usr-002', full_name: 'Carlos Ramírez Torres', email: 'carlos.rt@outlook.com', plan: 'core', segment: 'gabriel', status: 'active', created_at: '2025-10-03T14:30:00' },
-  { id: 'usr-003', full_name: 'Ana Sofia Gutiérrez', email: 'ana.gtz@gmail.com', plan: 'free', segment: 'carlotta', status: 'active', created_at: '2026-01-20T09:00:00' },
-  { id: 'usr-004', full_name: 'Roberto Díaz Mora', email: 'rdiaz@empresa.com', plan: 'core', segment: 'gabriel', status: 'active', created_at: '2025-05-10T08:00:00' },
-  { id: 'usr-005', full_name: 'Laura Mendez', email: 'laura.mendez@yahoo.com', plan: 'free', segment: 'carlotta', status: 'inactive', created_at: '2025-12-01T16:00:00' },
-  { id: 'usr-006', full_name: 'Fernando Castillo', email: 'fcastillo@gmail.com', plan: 'core', segment: 'gabriel', status: 'active', created_at: '2026-01-05T11:30:00' },
-  { id: 'usr-007', full_name: 'Sofia Torres Vega', email: 'sofia.tv@hotmail.com', plan: 'free', segment: 'carlotta', status: 'active', created_at: '2026-02-15T13:00:00' },
-  { id: 'usr-008', full_name: 'Pedro Sánchez', email: 'pedro.s@empresa.com', plan: 'core', segment: 'gabriel', status: 'inactive', created_at: '2025-09-20T10:00:00' },
-  { id: 'usr-009', full_name: 'Valentina Morales', email: 'val.morales@gmail.com', plan: 'core', segment: 'carlotta', status: 'active', created_at: '2025-07-12T07:00:00' },
-  { id: 'usr-010', full_name: 'Diego Herrera Ruiz', email: 'dherrera@outlook.com', plan: 'free', segment: 'gabriel', status: 'active', created_at: '2026-02-22T20:00:00' },
-])
+// ── Fetch users from Supabase ──
+const { data: rows, refresh } = await useAsyncData('admin-users', async () => {
+  const { data: profiles } = await client
+    .from('profiles')
+    .select('*, subscriptions(status), user_entitlements(entitlement_key)')
+    .order('created_at', { ascending: false })
+  return (profiles ?? []).map(p => ({
+    ...p,
+    full_name: (p as any).display_name ?? 'Sin nombre',
+    email: '\u2014',
+    segment: (p as any).community_segment ?? '',
+    plan: (p.subscriptions as any)?.[0]?.status === 'active' ? 'core' : 'free',
+    subscription_status: (p.subscriptions as any)?.[0]?.status ?? null,
+    status: (p.subscriptions as any)?.[0]?.status === 'active' ? 'active' : 'inactive',
+    entitlements: ((p.user_entitlements as any) ?? []).map((e: any) => e.entitlement_key),
+  }))
+})
 
 const filteredRows = computed(() => {
-  return rows.value.filter(row => {
+  const list = rows.value ?? []
+  return list.filter(row => {
     if (search.value) {
       const q = search.value.toLowerCase()
       if (!row.full_name.toLowerCase().includes(q) && !row.email.toLowerCase().includes(q)) return false

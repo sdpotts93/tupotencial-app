@@ -81,17 +81,17 @@ definePageMeta({ layout: 'default' })
 const router = useRouter()
 const search = ref('')
 
-const benefits = ref([
-  { id: 'ben-001', sort_order: 1, title: '20% en suplementos', plan: 'core', status: 'active' },
-  { id: 'ben-002', sort_order: 2, title: 'Clase gratis de yoga', plan: 'free', status: 'active' },
-  { id: 'ben-003', sort_order: 3, title: '$50 de descuento en pedido', plan: 'core', status: 'active' },
-  { id: 'ben-004', sort_order: 4, title: '15% en colchones y almohadas', plan: 'core', status: 'active' },
-  { id: 'ben-005', sort_order: 5, title: '2 meses gratis de membresía', plan: 'free', status: 'active' },
-  { id: 'ben-006', sort_order: 6, title: '30% en libros de bienestar', plan: 'free', status: 'inactive' },
-])
+const client = useSupabaseClient()
+const { data: benefits, refresh } = await useAsyncData('admin-benefits', async () => {
+  const { data } = await client.from('benefits').select('*').order('position')
+  return (data ?? []).map(b => ({
+    ...b,
+    sort_order: b.position,
+  }))
+})
 
 const filteredRows = computed(() => {
-  const sorted = [...benefits.value].sort((a, b) => a.sort_order - b.sort_order)
+  const sorted = [...(benefits.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)
   if (!search.value) return sorted
   const q = search.value.toLowerCase()
   return sorted.filter(r => r.title.toLowerCase().includes(q))
@@ -112,9 +112,10 @@ function onDragOver(index: number) {
   dragOverIndex.value = index
 }
 
-function onDragEnd() {
+async function onDragEnd() {
   if (dragIndex.value !== null && dragOverIndex.value !== null && dragIndex.value !== dragOverIndex.value) {
-    const sorted = [...benefits.value].sort((a, b) => a.sort_order - b.sort_order)
+    const items = [...(benefits.value ?? [])]
+    const sorted = items.sort((a, b) => a.sort_order - b.sort_order)
     const fromItem = sorted[dragIndex.value]
     const toItem = sorted[dragOverIndex.value]
     if (fromItem && toItem) {
@@ -122,15 +123,21 @@ function onDragEnd() {
       const toOrder = toItem.sort_order
 
       if (fromOrder < toOrder) {
-        for (const b of benefits.value) {
+        for (const b of items) {
           if (b.sort_order > fromOrder && b.sort_order <= toOrder) b.sort_order--
         }
       } else {
-        for (const b of benefits.value) {
+        for (const b of items) {
           if (b.sort_order >= toOrder && b.sort_order < fromOrder) b.sort_order++
         }
       }
       fromItem.sort_order = toOrder
+
+      // Persist new positions
+      await Promise.all(
+        items.map(b => client.from('benefits').update({ position: b.sort_order }).eq('id', b.id)),
+      )
+      refresh()
     }
   }
   dragIndex.value = null
@@ -148,9 +155,10 @@ function statusLabel(status: string) {
   return map[status] ?? status
 }
 
-function handleDelete(row: Record<string, any>) {
+async function handleDelete(row: Record<string, any>) {
   if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
-    benefits.value = benefits.value.filter(b => b.id !== row.id)
+    await client.from('benefits').delete().eq('id', row.id)
+    refresh()
   }
 }
 

@@ -4,7 +4,7 @@
     <video
       ref="videoRef"
       class="player__video"
-      src="/videos/helmet-short-coded.mp4"
+      :src="content.mediaUrl"
       playsinline
       preload="metadata"
       @loadedmetadata="onLoadedMetadata"
@@ -92,6 +92,10 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'blank' })
 
+const route = useRoute()
+const contentId = route.params.id as string
+const client = useSupabaseClient()
+
 // ── Video refs ──
 const videoRef = ref<HTMLVideoElement | null>(null)
 const progressRef = ref<HTMLElement | null>(null)
@@ -107,10 +111,29 @@ const isScrubbing = ref(false)
 const controlsVisible = ref(true)
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 
-// ── Content (mock) ──
-const content = ref({
-  title: 'Respiración consciente',
-  subtitle: 'Meditación guiada • 10 min',
+// ── Content from DB ──
+const { data: contentData } = await useAsyncData(`content-player-${contentId}`, async () => {
+  const { data } = await client
+    .from('content_items')
+    .select('id, title, subtitle, type, duration_seconds, media_url')
+    .eq('id', contentId)
+    .single()
+  if (!data) return null
+  const durationLabel = data.duration_seconds
+    ? `${Math.round(data.duration_seconds / 60)} min`
+    : ''
+  const typeLabel = data.type ? data.type.charAt(0).toUpperCase() + data.type.slice(1) : ''
+  return {
+    title: data.title,
+    subtitle: [typeLabel, durationLabel].filter(Boolean).join(' \u2022 '),
+    mediaUrl: data.media_url ?? '/videos/helmet-short-coded.mp4',
+  }
+})
+
+const content = computed(() => contentData.value ?? {
+  title: '',
+  subtitle: '',
+  mediaUrl: '/videos/helmet-short-coded.mp4',
 })
 
 // ── Computed ──

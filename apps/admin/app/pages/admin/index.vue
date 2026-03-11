@@ -55,12 +55,24 @@ definePageMeta({
   layout: 'default',
 })
 
-const kpis = ref([
-  { label: 'Usuarios totales', value: '12,847', bg: 'var(--color-ai-cool-bg)', accent: 'var(--color-ai-cool)' },
-  { label: 'Suscriptores activos', value: '8,203', bg: 'var(--color-complete-bg)', accent: 'var(--color-complete)' },
-  { label: 'Check-ins hoy', value: '1,456', bg: 'var(--color-ai-warm-bg)', accent: 'var(--color-ai-warm)' },
-  { label: 'Programas activos', value: '24', bg: 'var(--color-pro-bg)', accent: 'var(--color-pro)' },
-])
+const client = useSupabaseClient()
+
+// ── KPIs from Supabase aggregate queries ──
+const { data: kpis } = await useAsyncData('admin-dashboard-kpis', async () => {
+  const today = new Date().toISOString().split('T')[0]
+  const [usersRes, subsRes, checkinsRes, programsRes] = await Promise.all([
+    client.from('profiles').select('*', { count: 'exact', head: true }),
+    client.from('subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+    client.from('daily_checkins').select('*', { count: 'exact', head: true }).eq('date', today!),
+    client.from('programs').select('*', { count: 'exact', head: true }).eq('is_active', true),
+  ])
+  return [
+    { label: 'Usuarios totales', value: (usersRes.count ?? 0).toLocaleString('es-MX'), bg: 'var(--color-ai-cool-bg)', accent: 'var(--color-ai-cool)' },
+    { label: 'Suscriptores activos', value: (subsRes.count ?? 0).toLocaleString('es-MX'), bg: 'var(--color-complete-bg)', accent: 'var(--color-complete)' },
+    { label: 'Check-ins hoy', value: (checkinsRes.count ?? 0).toLocaleString('es-MX'), bg: 'var(--color-ai-warm-bg)', accent: 'var(--color-ai-warm)' },
+    { label: 'Programas activos', value: (programsRes.count ?? 0).toLocaleString('es-MX'), bg: 'var(--color-pro-bg)', accent: 'var(--color-pro)' },
+  ]
+})
 
 const quickActions = [
   { title: 'Crear contenido', description: 'Artículo, video o audio nuevo', icon: 'lucide:file-plus', to: '/admin/contenido/new' },
@@ -75,16 +87,37 @@ const activityColumns = [
   { key: 'action', label: 'Acción' },
   { key: 'type', label: 'Tipo' },
   { key: 'item', label: 'Elemento' },
-{ key: 'created_at', label: 'Fecha' },
+  { key: 'created_at', label: 'Fecha' },
 ]
 
-const activityRows = ref([
-  { id: '1', action: 'Contenido publicado', type: 'contenido', item: '5 pasos para el bienestar emocional', created_at: '2026-02-24T10:30:00' },
-  { id: '2', action: 'Programa actualizado', type: 'programa', item: 'Reto 21 días de meditación', created_at: '2026-02-24T09:15:00' },
-  { id: '3', action: 'Evento creado', type: 'evento', item: 'Taller de mindfulness', created_at: '2026-02-23T16:45:00' },
-  { id: '4', action: 'Beneficio agregado', type: 'beneficio', item: '20% en suplementos NutriVida', created_at: '2026-02-23T14:20:00' },
-  { id: '5', action: 'Usuario registrado', type: 'usuario', item: 'Luisa Fernández', created_at: '2026-02-23T11:00:00' },
-])
+// ── Recent activity from multiple tables ──
+const { data: _activityData } = await useAsyncData('admin-dashboard-activity', async () => {
+  const [contentRes, programsRes, eventsRes, profilesRes] = await Promise.all([
+    client.from('content_items').select('id, title, created_at').order('created_at', { ascending: false }).limit(3),
+    client.from('programs').select('id, title, created_at').order('created_at', { ascending: false }).limit(3),
+    client.from('events').select('id, title, created_at').order('created_at', { ascending: false }).limit(3),
+    client.from('profiles').select('id, display_name, created_at').order('created_at', { ascending: false }).limit(3),
+  ])
+
+  const rows: { id: string; action: string; type: string; item: string; created_at: string }[] = []
+
+  for (const c of contentRes.data ?? []) {
+    rows.push({ id: c.id, action: 'Contenido publicado', type: 'contenido', item: c.title, created_at: c.created_at })
+  }
+  for (const p of programsRes.data ?? []) {
+    rows.push({ id: p.id, action: 'Programa creado', type: 'programa', item: p.title, created_at: p.created_at })
+  }
+  for (const e of eventsRes.data ?? []) {
+    rows.push({ id: e.id, action: 'Evento creado', type: 'evento', item: e.title, created_at: e.created_at })
+  }
+  for (const u of profilesRes.data ?? []) {
+    rows.push({ id: u.id, action: 'Usuario registrado', type: 'usuario', item: u.display_name ?? 'Sin nombre', created_at: u.created_at })
+  }
+
+  rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  return rows.slice(0, 10)
+})
+const activityRows = computed(() => _activityData.value ?? [])
 
 function typeVariant(type: string) {
   const map: Record<string, string> = {

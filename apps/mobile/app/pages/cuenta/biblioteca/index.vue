@@ -62,17 +62,16 @@
         <!-- ═══════════ TAB: Categorías ═══════════ -->
         <template v-if="activeTab === 'categorias'">
           <!-- Featured / hero -->
-          <section class="library__featured">
+          <section v-if="featuredItem" class="library__featured">
             <h2 class="library__section-title">Destacado</h2>
-            <NuxtLink to="/cuenta/contenido/mock-content-001" class="library__featured-card">
-              <img src="/images/lib-1.jpg" alt="" class="library__featured-img" />
+            <NuxtLink :to="`/cuenta/contenido/${featuredItem.id}`" class="library__featured-card">
+              <img :src="featuredItem.thumbnail" alt="" class="library__featured-img" />
               <div class="library__featured-info">
                 <div class="library__featured-eyebrow-row">
-                  <span class="library__featured-eyebrow">Meditación • 10 min</span>
+                  <span class="library__featured-eyebrow">{{ featuredItem.typeLabel }} {{ featuredItem.duration ? `\u2022 ${featuredItem.duration}` : '' }}</span>
                   <Icon name="lucide:arrow-up-right" size="16" class="library__featured-arrow" />
                 </div>
-                <h3 class="library__featured-name">Respiración consciente</h3>
-                <p class="library__featured-desc">Reconecta con tu cuerpo y tu calma en 10 minutos.</p>
+                <h3 class="library__featured-name">{{ featuredItem.title }}</h3>
               </div>
             </NuxtLink>
           </section>
@@ -196,7 +195,9 @@
 
 <script setup lang="ts">
 const router = useRouter()
+const { user } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+const client = useSupabaseClient()
 
 const searching = ref(false)
 const query = ref('')
@@ -223,20 +224,31 @@ function closeSearch() {
   query.value = ''
 }
 
-// ─── Search data ───
-const allContent = [
-  { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio', category: 'Meditación', thumbnail: '/images/lib-1.jpg' },
-  { id: 'mock-content-002', title: 'Escaneo corporal', meta: '15 min • Audio', category: 'Meditación', thumbnail: '/images/lib-2.jpg' },
-  { id: 'mock-content-003', title: 'Atención plena', meta: '8 min • Video', category: 'Mindfulness', thumbnail: '/images/lib-3.jpg' },
-  { id: 'mock-content-004', title: 'Despertar con energía', meta: '12 min • Video', category: 'Rutinas De Mañana', thumbnail: '/images/lib-5.jpg' },
-  { id: 'mock-content-005', title: 'Diario de gratitud', meta: '5 min • Texto', category: 'Rutinas De Mañana', thumbnail: '/images/lib-6.jpg' },
-  { id: 'mock-content-006', title: 'Mentalidad de crecimiento', meta: '20 min • Video', category: 'Crecimiento Personal', thumbnail: '/images/lib-7.jpg' },
-  { id: 'mock-content-007', title: 'Hábitos atómicos', meta: '8 min • Texto', category: 'Crecimiento Personal', thumbnail: '/images/lib-2.jpg' },
-]
+function formatDuration(seconds: number | null) {
+  if (!seconds) return null
+  const m = Math.round(seconds / 60)
+  return `${m} min`
+}
+
+// ─── Search data (all published content) ───
+const { data: allContent } = await useAsyncData('mobile-library-search', async () => {
+  const { data } = await client
+    .from('content_items')
+    .select('id, title, type, duration_seconds, thumbnail_url, entitlement_key, content_item_categories(category_id, content_categories(title))')
+    .eq('status', 'published')
+    .order('created_at', { ascending: false })
+  return (data ?? []).map(c => ({
+    id: c.id,
+    title: c.title,
+    meta: `${formatDuration(c.duration_seconds) ?? ''} ${c.type ? `\u2022 ${c.type.charAt(0).toUpperCase() + c.type.slice(1)}` : ''}`.trim(),
+    category: ((c.content_item_categories as any)?.[0]?.content_categories as any)?.title ?? '',
+    thumbnail: c.thumbnail_url ?? '/images/lib-1.jpg',
+  }))
+})
 
 const filteredResults = computed(() => {
   const q = query.value.toLowerCase()
-  return allContent.filter(c =>
+  return (allContent.value ?? []).filter(c =>
     c.title.toLowerCase().includes(q)
     || c.meta.toLowerCase().includes(q)
     || c.category.toLowerCase().includes(q),
@@ -244,39 +256,63 @@ const filteredResults = computed(() => {
 })
 
 // ─── Tab: Categorías ───
-const recordedEvents = ref([
-  { id: 'mock-event-003', title: 'Live: Respiración y estrés', dateLabel: '15 Feb 2026', img: '/images/lib-2.jpg' },
-  { id: 'mock-event-004', title: 'Taller: Diario de gratitud', dateLabel: '8 Feb 2026', img: '/images/lib-6.jpg' },
-  { id: 'mock-event-005', title: 'Q&A: Hábitos de alto rendimiento', dateLabel: '1 Feb 2026', img: '/images/lib-8.jpg' },
-])
+const { data: categoriesData } = await useAsyncData('mobile-library-categories', async () => {
+  // Fetch categories
+  const { data: cats } = await client
+    .from('content_categories')
+    .select('id, title, slug')
+    .eq('status', 'active')
+    .order('sort_order')
+  // Fetch content items with their category links
+  const { data: itemCats } = await client
+    .from('content_item_categories')
+    .select('category_id, position, content_items(id, title, type, duration_seconds, thumbnail_url, entitlement_key, status)')
+    .order('position')
+  // Group items by category
+  const catItemsMap = new Map<string, any[]>()
+  for (const ic of itemCats ?? []) {
+    const item = ic.content_items as any
+    if (!item || item.status !== 'published') continue
+    const arr = catItemsMap.get(ic.category_id) ?? []
+    arr.push({
+      id: item.id,
+      title: item.title,
+      typeLabel: item.type ? item.type.charAt(0).toUpperCase() + item.type.slice(1) : '',
+      duration: formatDuration(item.duration_seconds),
+      thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+      entitlement_key: item.entitlement_key,
+    })
+    catItemsMap.set(ic.category_id, arr)
+  }
+  return (cats ?? []).filter(cat => (catItemsMap.get(cat.id) ?? []).length > 0).map(cat => ({
+    title: cat.title,
+    slug: cat.slug,
+    items: catItemsMap.get(cat.id) ?? [],
+  }))
+})
+const categories = computed(() => categoriesData.value ?? [])
 
-const categories = ref([
-  {
-    title: 'Meditaciones',
-    slug: 'meditaciones',
-    items: [
-      { id: 'mock-content-001', title: 'Respiración consciente', typeLabel: 'Audio', duration: '10 min', thumbnail: '/images/lib-1.jpg', entitlement_key: null as string | null },
-      { id: 'mock-content-002', title: 'Escaneo corporal', typeLabel: 'Audio', duration: '15 min', thumbnail: '/images/lib-2.jpg', entitlement_key: null as string | null },
-      { id: 'mock-content-003', title: 'Atención plena', typeLabel: 'Video', duration: '8 min', thumbnail: '/images/lib-3.jpg', entitlement_key: null as string | null },
-    ],
-  },
-  {
-    title: 'Rutinas de mañana',
-    slug: 'rutinas-manana',
-    items: [
-      { id: 'mock-content-004', title: 'Despertar con energía', typeLabel: 'Video', duration: '12 min', thumbnail: '/images/lib-5.jpg', entitlement_key: null as string | null },
-      { id: 'mock-content-005', title: 'Diario de gratitud', typeLabel: 'Texto', duration: '5 min', thumbnail: '/images/lib-6.jpg', entitlement_key: 'vip' as string | null },
-    ],
-  },
-  {
-    title: 'Crecimiento personal',
-    slug: 'crecimiento-personal',
-    items: [
-      { id: 'mock-content-006', title: 'Mentalidad de crecimiento', typeLabel: 'Video', duration: '20 min', thumbnail: '/images/lib-7.jpg', entitlement_key: null as string | null },
-      { id: 'mock-content-007', title: 'Hábitos atómicos', typeLabel: 'Texto', duration: '8 min', thumbnail: '/images/lib-2.jpg', entitlement_key: null as string | null },
-    ],
-  },
-])
+// Featured content (first published item)
+const featuredItem = computed(() => {
+  const firstCat = categories.value[0]
+  return firstCat?.items?.[0] ?? null
+})
+
+const { data: recordedEvents } = await useAsyncData('mobile-library-recorded-events', async () => {
+  const { data } = await client
+    .from('events')
+    .select('id, title, start_at, cover_url')
+    .eq('status', 'published')
+    .lt('start_at', new Date().toISOString())
+    .order('start_at', { ascending: false })
+    .limit(5)
+  return (data ?? []).map(e => ({
+    id: e.id,
+    title: e.title,
+    dateLabel: new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(e.start_at)),
+    img: e.cover_url ?? '/images/lib-2.jpg',
+  }))
+})
 
 function handleContentClick(item: { id: string; entitlement_key: string | null }) {
   if (isLocked(item.entitlement_key)) {
@@ -288,93 +324,68 @@ function handleContentClick(item: { id: string; entitlement_key: string | null }
 }
 
 // ─── Tab: Programas ───
-// Mock: content grouped by program (simulates program → days → day_items → content join)
-const programsWithContent = ref([
-  {
-    id: 'mock-uuid-prog-001',
-    type: 'reto',
-    typeLabel: 'RETO',
-    title: 'Reto 7 días de gratitud',
-    enrolled: true,
-    free: true,
-    items: [
-      { id: 'mock-content-001', title: 'Meditación matutina: Gratitud y presencia', duration: '10 min', thumbnail: '/images/lib-1.jpg' },
-      { id: 'mock-content-006', title: 'Las 5 preguntas que transforman tu mañana', duration: '5 min lectura', thumbnail: '/images/lib-6.jpg' },
-      { id: 'mock-content-004', title: 'Meditación nocturna: Soltar el día', duration: '15 min', thumbnail: '/images/lib-3.jpg' },
-    ],
-  },
-  {
-    id: 'mock-uuid-prog-002',
-    type: 'program',
-    typeLabel: 'PROGRAMA',
-    title: 'Despertar consciente',
-    enrolled: true,
-    free: false,
-    items: [
-      { id: 'mock-content-002', title: 'Rutina energizante de 5 minutos', duration: '5 min', thumbnail: '/images/lib-5.jpg' },
-      { id: 'mock-content-001', title: 'Meditación matutina: Gratitud y presencia', duration: '10 min', thumbnail: '/images/lib-1.jpg' },
-      { id: 'mock-content-006', title: 'Las 5 preguntas que transforman tu mañana', duration: '5 min lectura', thumbnail: '/images/lib-6.jpg' },
-    ],
-  },
-  {
-    id: 'mock-uuid-prog-003',
-    type: 'bootcamp',
-    typeLabel: 'BOOTCAMP',
-    title: 'Liderazgo interior',
-    enrolled: false,
-    free: false,
-    items: [
-      { id: 'mock-content-005', title: 'Visualización guiada: Tu mejor versión', duration: '15 min', thumbnail: '/images/lib-7.jpg' },
-      { id: 'mock-content-006', title: 'Las 5 preguntas que transforman tu mañana', duration: '5 min lectura', thumbnail: '/images/lib-6.jpg' },
-    ],
-  },
-])
+const { data: programsWithContent } = await useAsyncData('mobile-library-programs', async () => {
+  const { data: progs } = await client.from('programs').select('id, type, title, plan, is_active').eq('is_active', true).order('created_at')
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id').eq('user_id', user.value?.id ?? '')
+  const enrolledIds = new Set((enrollments ?? []).map(e => e.program_id))
+  // Get content items linked to programs via program_days -> program_day_items -> content_items
+  const { data: dayItems } = await client
+    .from('program_day_items')
+    .select('program_days(program_id), content_items(id, title, duration_seconds, thumbnail_url)')
+    .eq('type', 'content')
+    .order('position')
+  // Group content items by program_id
+  const progContentMap = new Map<string, any[]>()
+  for (const di of dayItems ?? []) {
+    const programId = (di.program_days as any)?.program_id
+    const item = di.content_items as any
+    if (!programId || !item) continue
+    const arr = progContentMap.get(programId) ?? []
+    // Avoid duplicates
+    if (!arr.some(existing => existing.id === item.id)) {
+      arr.push({
+        id: item.id,
+        title: item.title,
+        duration: formatDuration(item.duration_seconds),
+        thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+      })
+    }
+    progContentMap.set(programId, arr)
+  }
+  return (progs ?? []).filter(p => (progContentMap.get(p.id) ?? []).length > 0).map(p => ({
+    id: p.id,
+    type: p.type,
+    typeLabel: p.type.toUpperCase(),
+    title: p.title,
+    enrolled: enrolledIds.has(p.id),
+    free: p.plan === 'free',
+    items: progContentMap.get(p.id) ?? [],
+  }))
+})
 
 // ─── Tab: Objetivos ───
-const objectives = ref([
-  {
-    slug: 'reducir-estres',
-    title: 'Reducir estrés',
-    description: 'Técnicas para calmar la mente y soltar la tensión acumulada.',
-    icon: 'lucide:wind',
-    count: 6,
-  },
-  {
-    slug: 'rutina-matutina',
-    title: 'Rutina matutina',
-    description: 'Empieza cada día con intención, energía y claridad.',
-    icon: 'lucide:sunrise',
-    count: 4,
-  },
-  {
-    slug: 'crecimiento-personal',
-    title: 'Crecimiento personal',
-    description: 'Herramientas para tu desarrollo integral como ser humano.',
-    icon: 'lucide:sprout',
-    count: 5,
-  },
-  {
-    slug: 'inteligencia-emocional',
-    title: 'Inteligencia emocional',
-    description: 'Reconoce, entiende y gestiona tus emociones.',
-    icon: 'lucide:heart',
-    count: 3,
-  },
-  {
-    slug: 'mindfulness',
-    title: 'Mindfulness',
-    description: 'Prácticas de atención plena para vivir el presente.',
-    icon: 'lucide:brain',
-    count: 4,
-  },
-  {
-    slug: 'habitos-positivos',
-    title: 'Hábitos positivos',
-    description: 'Construye rutinas que transformen tu vida paso a paso.',
-    icon: 'lucide:repeat',
-    count: 3,
-  },
-])
+const { data: objectives } = await useAsyncData('mobile-library-objectives', async () => {
+  const { data: objs } = await client.from('content_objectives').select('id, title, slug').order('position')
+  // Count published content per objective
+  const { data: items } = await client
+    .from('content_items')
+    .select('id, objective_id')
+    .eq('status', 'published')
+    .not('objective_id', 'is', null)
+  const countMap = new Map<string, number>()
+  for (const item of items ?? []) {
+    if (item.objective_id) {
+      countMap.set(item.objective_id, (countMap.get(item.objective_id) ?? 0) + 1)
+    }
+  }
+  return (objs ?? []).map(o => ({
+    slug: o.slug,
+    title: o.title,
+    description: '',
+    icon: 'lucide:target',
+    count: countMap.get(o.id) ?? 0,
+  }))
+})
 </script>
 
 <style scoped>

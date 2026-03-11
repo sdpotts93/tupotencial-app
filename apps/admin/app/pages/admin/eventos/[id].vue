@@ -122,6 +122,11 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const route = useRoute()
+const client = useSupabaseClient()
+const id = route.params.id as string
+const isNew = id === 'new'
+
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
@@ -153,17 +158,24 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+// ── Fetch existing event ──
+const { data: event } = await useAsyncData(`event-${id}`, async () => {
+  if (isNew) return null
+  const { data } = await client.from('events').select('*').eq('id', id).single()
+  return data
+})
+
 // ── Form state ──
 const form = reactive({
-  title: 'Taller de mindfulness para principiantes',
-  description: 'Un taller práctico de 90 minutos donde aprenderás las bases de la meditación mindfulness. Incluye ejercicios guiados, técnicas de respiración y herramientas para incorporar la práctica en tu vida diaria.',
-  cover_url: 'https://images.tupotencial.app/events/mindfulness-taller.jpg',
-  starts_at: new Date('2026-03-05T18:00:00') as Date | null,
-  duration: '90',
-  vimeo_live_event_id: '4829371',
-  plan: 'core',
-  entitlement_key: '',
-  status: 'published',
+  title: event.value?.title ?? '',
+  description: event.value?.description ?? '',
+  cover_url: event.value?.cover_url ?? '',
+  starts_at: event.value?.start_at ? new Date(event.value.start_at) : null as Date | null,
+  duration: event.value?.duration ?? '',
+  vimeo_live_event_id: event.value?.vimeo_live_event_id ?? '',
+  plan: event.value?.plan ?? 'free',
+  entitlement_key: event.value?.entitlement_key ?? '',
+  status: event.value?.status ?? 'draft',
 })
 
 const durationOptions = [
@@ -201,13 +213,40 @@ const statusOptions = [
   { value: 'cancelled', label: 'Cancelado' },
 ]
 
-function handleSave() {
-  alert('Evento actualizado (mock)')
+async function handleSave() {
+  const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
+
+  if (isNew) {
+    await client.from('events').insert({
+      title: form.title,
+      description: form.description,
+      cover_url: form.cover_url || null,
+      start_at: startAt,
+      duration: form.duration || null,
+      vimeo_live_event_id: form.vimeo_live_event_id || null,
+      plan: form.plan,
+      entitlement_key: form.entitlement_key || null,
+      status: form.status,
+    })
+  } else {
+    await client.from('events').update({
+      title: form.title,
+      description: form.description,
+      cover_url: form.cover_url || null,
+      start_at: startAt,
+      duration: form.duration || null,
+      vimeo_live_event_id: form.vimeo_live_event_id || null,
+      plan: form.plan,
+      entitlement_key: form.entitlement_key || null,
+      status: form.status,
+    }).eq('id', id)
+  }
+  navigateTo('/admin/eventos')
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (confirm('¿Seguro que deseas eliminar este evento?')) {
-    alert('Evento eliminado (mock)')
+    await client.from('events').delete().eq('id', id)
     navigateTo('/admin/eventos')
   }
 }

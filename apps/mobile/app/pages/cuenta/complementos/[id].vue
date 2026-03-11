@@ -47,25 +47,33 @@
 </template>
 
 <script setup lang="ts">
-import { mockAddons, mockAddonPurchases, MOCK_CURRENT_USER_ID } from '@tupotencial/shared/mock'
-
 definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
+const client = useSupabaseClient()
+const { user } = useAuth()
 
 function formatPrice(cents: number) {
   return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
 }
 
-const raw = mockAddons.find(a => a.id === route.params.id) ?? mockAddons[0]
-
-const addon = ref({
-  title: raw.title,
-  description: raw.description ?? '',
-  priceLabel: formatPrice(raw.price),
-  img: raw.cover_url ?? '/images/lib-4.jpg',
-  owned: mockAddonPurchases.some(p => p.addon_id === raw.id && p.user_id === MOCK_CURRENT_USER_ID),
+const { data: rawAddon } = await useAsyncData(`addon-${route.params.id}`, async () => {
+  const { data } = await client.from('addons').select('*').eq('id', route.params.id).single()
+  return data
 })
+
+const { data: isOwned } = await useAsyncData(`addon-owned-${route.params.id}`, async () => {
+  const { data } = await client.from('addon_purchases').select('id').eq('addon_id', route.params.id as string).eq('user_id', user.value?.id ?? '').maybeSingle()
+  return !!data
+})
+
+const addon = computed(() => ({
+  title: rawAddon.value?.title ?? '',
+  description: rawAddon.value?.description ?? '',
+  priceLabel: formatPrice(rawAddon.value?.price ?? 0),
+  img: rawAddon.value?.cover_url ?? '/images/lib-4.jpg',
+  owned: isOwned.value ?? false,
+}))
 </script>
 
 <style scoped>

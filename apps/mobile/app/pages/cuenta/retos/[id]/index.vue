@@ -87,44 +87,63 @@
 definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
+const client = useSupabaseClient()
 const id = route.params.id as string
+const { user } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 
 const showPurchaseModal = ref(false)
 
-const coverMap: Record<string, string> = {
-  'mock-prog-001': '/images/lib-3.jpg',
-  'mock-prog-002': '/images/lib-5.jpg',
-  'mock-prog-003': '/images/lib-7.jpg',
-  'mock-prog-004': '/images/lib-2.jpg',
-  'mock-prog-005': '/images/lib-8.jpg',
-}
+// ── Fetch program from Supabase ──
+const { data: programData } = await useAsyncData(`program-detail-${id}`, async () => {
+  const { data } = await client.from('programs').select('*').eq('id', id).single()
+  return data
+})
 
-// Mock: map program ids to entitlement keys
-const entitlementMap: Record<string, string | null> = {
-  'mock-prog-004': 'bootcamp_liderazgo',
-}
+// ── Fetch program days ──
+const { data: programDays } = await useAsyncData(`program-days-${id}`, async () => {
+  const { data } = await client.from('program_days').select('day_index, title').eq('program_id', id).order('day_index')
+  return data ?? []
+})
 
-const program = ref({
-  title: 'Reto 7 días de gratitud',
-  typeLabel: 'RETO',
-  duration: '7 días',
-  totalDays: 7,
-  enrolled: true,
-  free: true,
-  currentDay: 5,
-  entitlement_key: (entitlementMap[id] ?? null) as string | null,
-  description: 'Cada día te invitamos a reflexionar sobre lo que agradeces. Este reto transformará tu perspectiva y te ayudará a encontrar alegría en las pequeñas cosas. Dedica solo 5 minutos diarios a esta práctica.',
-  thumbnail: coverMap[id] || '/images/lib-1.jpg',
-  days: [
-    { index: 1, title: 'Gratitud personal', done: true },
-    { index: 2, title: 'Personas importantes', done: true },
-    { index: 3, title: 'Momentos del día', done: true },
-    { index: 4, title: 'Tu cuerpo', done: true },
-    { index: 5, title: 'Oportunidades', done: false },
-    { index: 6, title: 'Naturaleza', done: false },
-    { index: 7, title: 'Tu camino', done: false },
-  ],
+// ── Fetch enrollment status ──
+const { data: enrollment, refresh: refreshEnrollment } = await useAsyncData(`program-enrollment-${id}`, async () => {
+  const { data } = await client.from('program_enrollments').select('id').eq('program_id', id).eq('user_id', user.value?.id ?? '').maybeSingle()
+  return data
+})
+
+// ── Fetch checkin progress ──
+const { data: checkins } = await useAsyncData(`program-checkins-${id}`, async () => {
+  const { data } = await client.from('program_checkins').select('day_index').eq('program_id', id).eq('user_id', user.value?.id ?? '')
+  return data ?? []
+})
+
+const completedDays = computed(() => new Set((checkins.value ?? []).map(c => c.day_index)))
+const totalDays = computed(() => programDays.value?.length ?? 0)
+const currentDay = computed(() => {
+  const maxDone = Math.max(0, ...Array.from(completedDays.value))
+  return Math.min(maxDone + 1, totalDays.value)
+})
+
+const program = computed(() => {
+  const p = programData.value
+  return {
+    title: p?.title ?? '',
+    typeLabel: (p?.type ?? 'program').toUpperCase(),
+    duration: `${totalDays.value} días`,
+    totalDays: totalDays.value,
+    enrolled: !!enrollment.value,
+    free: p?.plan === 'free',
+    currentDay: currentDay.value,
+    entitlement_key: (p?.entitlement_key ?? null) as string | null,
+    description: p?.description ?? '',
+    thumbnail: p?.cover_url ?? '/images/lib-1.jpg',
+    days: (programDays.value ?? []).map(d => ({
+      index: d.day_index,
+      title: d.title ?? '',
+      done: completedDays.value.has(d.day_index),
+    })),
+  }
 })
 
 const locked = computed(() => isLocked(program.value.entitlement_key))
@@ -132,8 +151,9 @@ const addonInfo = computed(() =>
   program.value.entitlement_key ? getAddonForEntitlement(program.value.entitlement_key) : null,
 )
 
-function enroll() {
-  program.value.enrolled = true
+async function enroll() {
+  await client.from('program_enrollments').insert({ program_id: id, user_id: user.value!.id, status: 'active' })
+  await refreshEnrollment()
 }
 </script>
 

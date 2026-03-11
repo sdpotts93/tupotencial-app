@@ -94,12 +94,42 @@
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
+const client = useSupabaseClient()
+const id = route.params.id as string
+const isNew = id === 'new'
 
-// ── Form state (pre-filled) ──
+// ── Fetch existing form ──
+const { data: formRecord } = await useAsyncData(`form-${id}`, async () => {
+  if (isNew) return null
+  const { data } = await client.from('forms').select('*').eq('id', id).single()
+  return data
+})
+
+// Convert DB fields (jsonb array) to local FormField[]
+function dbFieldsToLocal(dbFields: unknown): FormField[] {
+  if (!Array.isArray(dbFields)) return []
+  return dbFields.map((f: any) => ({
+    question: f.question ?? '',
+    type: f.type === 'select' ? 'select' : 'text',
+    optionsText: Array.isArray(f.options) ? f.options.join(', ') : '',
+  }))
+}
+
+function localFieldsToDb(localFields: FormField[]) {
+  return localFields.map(f => ({
+    question: f.question,
+    type: f.type,
+    ...(f.type === 'select' && f.optionsText
+      ? { options: f.optionsText.split(',').map(o => o.trim()).filter(Boolean) }
+      : {}),
+  }))
+}
+
+// ── Form state ──
 const form = reactive({
-  title: 'Evaluación inicial de bienestar',
-  description: 'Formulario para evaluar el estado de bienestar del usuario al iniciar un programa. Incluye preguntas sobre hábitos, estado emocional y objetivos.',
-  status: 'active',
+  title: formRecord.value?.title ?? '',
+  description: formRecord.value?.description ?? '',
+  status: formRecord.value?.status ?? 'active',
 })
 
 // ── Options ──
@@ -120,33 +150,9 @@ interface FormField {
   optionsText: string
 }
 
-const fields = ref<FormField[]>([
-  {
-    question: '¿Cómo describirías tu nivel de energía actualmente?',
-    type: 'select',
-    optionsText: 'Muy bajo, Bajo, Normal, Alto, Muy alto',
-  },
-  {
-    question: '¿Cuántas horas duermes en promedio por noche?',
-    type: 'select',
-    optionsText: 'Menos de 5, 5-6, 6-7, 7-8, Más de 8',
-  },
-  {
-    question: '¿Cuál es tu principal objetivo al iniciar este programa?',
-    type: 'text',
-    optionsText: '',
-  },
-  {
-    question: '¿Con qué frecuencia realizas actividad física?',
-    type: 'select',
-    optionsText: 'Nunca, 1-2 veces por semana, 3-4 veces por semana, Diariamente',
-  },
-  {
-    question: '¿Hay algo más que te gustaría compartir con tu coach?',
-    type: 'text',
-    optionsText: '',
-  },
-])
+const fields = ref<FormField[]>(
+  formRecord.value ? dbFieldsToLocal(formRecord.value.fields) : [],
+)
 
 function addField() {
   fields.value.push({
@@ -160,13 +166,25 @@ function removeField(index: number) {
   fields.value.splice(index, 1)
 }
 
-function handleSave() {
-  alert('Formulario actualizado (mock)')
+async function handleSave() {
+  const payload = {
+    title: form.title,
+    description: form.description || null,
+    fields: localFieldsToDb(fields.value),
+    status: form.status,
+  }
+
+  if (isNew) {
+    await client.from('forms').insert(payload)
+  } else {
+    await client.from('forms').update(payload).eq('id', id)
+  }
+  navigateTo('/admin/formularios')
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (confirm('¿Seguro que deseas eliminar este formulario?')) {
-    alert('Formulario eliminado (mock)')
+    await client.from('forms').delete().eq('id', id)
     navigateTo('/admin/formularios')
   }
 }

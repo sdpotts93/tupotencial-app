@@ -160,6 +160,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
@@ -199,24 +201,24 @@ const entitlementOptions = [
   { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
 ]
 
-const categoryOptions = [
-  { value: 'cat-001', label: 'Mindfulness' },
-  { value: 'cat-002', label: 'Nutrición' },
-  { value: 'cat-003', label: 'Ejercicio' },
-  { value: 'cat-004', label: 'Sueño' },
-  { value: 'cat-005', label: 'Productividad' },
-  { value: 'cat-006', label: 'Relaciones' },
-  { value: 'cat-007', label: 'Finanzas personales' },
-]
+// ── Fetch categories & objectives for dropdowns ──
+const { data: categories } = await useAsyncData('content-categories', async () => {
+  const { data } = await client.from('content_categories').select('id, title').order('sort_order')
+  return data ?? []
+})
 
-const objectiveOptions = [
-  { value: 'obj-001', label: 'Reducir estrés' },
-  { value: 'obj-002', label: 'Rutina matutina' },
-  { value: 'obj-003', label: 'Crecimiento personal' },
-  { value: 'obj-004', label: 'Inteligencia emocional' },
-  { value: 'obj-005', label: 'Mindfulness' },
-  { value: 'obj-006', label: 'Hábitos positivos' },
-]
+const { data: objectives } = await useAsyncData('content-objectives', async () => {
+  const { data } = await client.from('content_objectives').select('id, title').order('position')
+  return data ?? []
+})
+
+const categoryOptions = computed(() =>
+  (categories.value ?? []).map(c => ({ value: c.id, label: c.title })),
+)
+
+const objectiveOptions = computed(() =>
+  (objectives.value ?? []).map(o => ({ value: o.id, label: o.title })),
+)
 
 const statusOptions = [
   { value: 'draft', label: 'Borrador' },
@@ -287,8 +289,26 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function handleSave() {
-  alert('Contenido guardado (mock). Redirigiendo a la lista...')
+async function handleSave() {
+  const payload = {
+    title: form.title,
+    subtitle: form.introduction || null,
+    description: form.introduction || null,
+    body: form.body || null,
+    type: form.content_type,
+    plan: form.segment,
+    status: form.status,
+    published_at: form.status === 'published' ? new Date().toISOString() : null,
+    entitlement_key: form.entitlement_key || null,
+    objective_id: form.objective_id || null,
+    available_from: form.scheduled_at || null,
+    available_to: form.unpublished_at || null,
+  }
+
+  const { data: inserted } = await client.from('content_items').insert(payload).select('id').single()
+  if (inserted && form.category_id) {
+    await client.from('content_item_categories').insert({ content_item_id: inserted.id, category_id: form.category_id })
+  }
   navigateTo('/admin/contenido')
 }
 </script>

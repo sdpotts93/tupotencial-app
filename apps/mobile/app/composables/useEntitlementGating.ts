@@ -1,5 +1,5 @@
 // Composable for checking entitlement-based gating on programs & content
-// Uses mock data; swap to Supabase queries later
+// Queries addon_entitlements + addons from Supabase
 
 interface AddonInfo {
   id: string
@@ -7,38 +7,27 @@ interface AddonInfo {
   description: string | null
 }
 
-// Mock mapping: entitlement_key → addon info
-// Mirrors mockAddonEntitlements + mockAddons from packages/shared/mock/addons.ts
-const entitlementAddonMap: Record<string, AddonInfo> = {
-  mentoria_grupal: {
-    id: 'mock-uuid-addon-001',
-    title: 'Mentoría grupal mensual',
-    description: 'Sesión grupal de mentoría de 90 minutos una vez al mes con Carlotta o Gabriel.',
-  },
-  vip: {
-    id: 'mock-uuid-addon-002',
-    title: 'Acceso VIP: Contenido exclusivo',
-    description: 'Desbloquea contenido premium que no está disponible en la membresía Core.',
-  },
-  bootcamp_liderazgo: {
-    id: 'mock-uuid-addon-003',
-    title: 'Bootcamp: Liderazgo Interior (acceso completo)',
-    description: 'Acceso completo al bootcamp intensivo de 14 días.',
-  },
-  coaching_1on1: {
-    id: 'mock-uuid-addon-004',
-    title: 'Sesión 1:1 con coach certificado',
-    description: 'Una sesión individual de 60 minutos con un coach certificado de Tu Potencial.',
-  },
-  retiro_marzo_2026: {
-    id: 'mock-uuid-addon-005',
-    title: 'Retiro presencial: Reconexión (marzo 2026)',
-    description: 'Retiro de fin de semana en Valle de Bravo.',
-  },
-}
-
 export function useEntitlementGating() {
   const { hasEntitlement } = useAuth()
+  const client = useSupabaseClient()
+  const addonMap = useState<Record<string, AddonInfo>>('entitlement-addon-map', () => ({}))
+
+  // Fetch addon entitlements once, cache in state
+  async function ensureLoaded() {
+    if (Object.keys(addonMap.value).length) return
+    const { data } = await client
+      .from('addon_entitlements')
+      .select('entitlement_key, addon_id, addons(id, title, description)')
+    for (const row of data ?? []) {
+      const addon = row.addons as unknown as AddonInfo | null
+      if (addon) {
+        addonMap.value[row.entitlement_key] = addon
+      }
+    }
+  }
+
+  // Eagerly load on first use
+  ensureLoaded()
 
   function isLocked(entitlementKey: string | null): boolean {
     if (!entitlementKey) return false
@@ -46,7 +35,7 @@ export function useEntitlementGating() {
   }
 
   function getAddonForEntitlement(entitlementKey: string): AddonInfo | null {
-    return entitlementAddonMap[entitlementKey] ?? null
+    return addonMap.value[entitlementKey] ?? null
   }
 
   return { isLocked, getAddonForEntitlement }

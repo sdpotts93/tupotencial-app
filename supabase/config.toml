@@ -3,8 +3,7 @@
 # =============================================================================
 # Docs: https://supabase.com/docs/guides/cli/config
 
-[project]
-id = "geeasiskunssknfwqoko"  # Replace with your Supabase project reference ID
+project_id = "geeasiskunssknfwqoko"
 
 [api]
 enabled = true

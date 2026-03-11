@@ -33,91 +33,47 @@
 
 <script setup lang="ts">
 const route = useRoute()
+const client = useSupabaseClient()
 const slug = route.params.slug as string
 
-// Mock objectives lookup (matches library/index.vue objectives)
-const objectivesMap: Record<string, { title: string; description: string }> = {
-  'reducir-estres': {
-    title: 'Reducir estrés',
-    description: 'Técnicas para calmar la mente y soltar la tensión acumulada.',
-  },
-  'rutina-matutina': {
-    title: 'Rutina matutina',
-    description: 'Empieza cada día con intención, energía y claridad.',
-  },
-  'crecimiento-personal': {
-    title: 'Crecimiento personal',
-    description: 'Herramientas para tu desarrollo integral como ser humano.',
-  },
-  'inteligencia-emocional': {
-    title: 'Inteligencia emocional',
-    description: 'Reconoce, entiende y gestiona tus emociones.',
-  },
-  'mindfulness': {
-    title: 'Mindfulness',
-    description: 'Prácticas de atención plena para vivir el presente.',
-  },
-  'habitos-positivos': {
-    title: 'Hábitos positivos',
-    description: 'Construye rutinas que transformen tu vida paso a paso.',
-  },
-}
+// ── Fetch objective by slug ──
+const { data: objectiveData } = await useAsyncData(`objective-${slug}`, async () => {
+  const { data } = await client.from('content_objectives').select('id, title, description, slug').eq('slug', slug).single()
+  return data
+})
 
 const objective = computed(() => {
-  if (objectivesMap[slug]) return objectivesMap[slug]
+  if (objectiveData.value) return { title: objectiveData.value.title, description: objectiveData.value.description ?? '' }
   return {
     title: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
     description: '',
   }
 })
 
-interface ContentItem { id: string; title: string; meta: string; thumbnail: string }
+// ── Fetch content items for this objective ──
+const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Texto' }
 
-// Mock content per objective (simulates content_item_objectives join)
-const contentByObjective: Record<string, ContentItem[]> = {
-  'reducir-estres': [
-    { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio', thumbnail: '/images/lib-1.jpg' },
-    { id: 'mock-content-002', title: 'Escaneo corporal', meta: '15 min • Audio', thumbnail: '/images/lib-2.jpg' },
-    { id: 'mock-content-003', title: 'Respiración 4-7-8 para calmar la ansiedad', meta: '8 min • Video', thumbnail: '/images/lib-3.jpg' },
-    { id: 'mock-content-004', title: 'Meditación nocturna: Soltar el día', meta: '15 min • Audio', thumbnail: '/images/lib-5.jpg' },
-    { id: 'mock-content-005', title: 'Body scan: Reconecta con tu cuerpo', meta: '20 min • Audio', thumbnail: '/images/lib-6.jpg' },
-    { id: 'mock-content-006', title: 'Guía rápida: Cómo crear un espacio sagrado en casa', meta: '5 min • Texto', thumbnail: '/images/lib-7.jpg' },
-  ],
-  'rutina-matutina': [
-    { id: 'mock-content-004', title: 'Despertar con energía', meta: '12 min • Video', thumbnail: '/images/lib-5.jpg' },
-    { id: 'mock-content-005', title: 'Las 5 preguntas que transforman tu mañana', meta: '5 min • Texto', thumbnail: '/images/lib-6.jpg' },
-    { id: 'mock-content-001', title: 'Meditación matutina: Gratitud y presencia', meta: '10 min • Video', thumbnail: '/images/lib-1.jpg' },
-    { id: 'mock-content-002', title: 'Rutina energizante de 5 minutos', meta: '5 min • Video', thumbnail: '/images/lib-2.jpg' },
-  ],
-  'crecimiento-personal': [
-    { id: 'mock-content-006', title: 'Mentalidad de crecimiento', meta: '20 min • Video', thumbnail: '/images/lib-7.jpg' },
-    { id: 'mock-content-007', title: 'Hábitos atómicos', meta: '8 min • Texto', thumbnail: '/images/lib-2.jpg' },
-    { id: 'mock-content-005', title: 'Visualización guiada: Tu mejor versión', meta: '15 min • Audio', thumbnail: '/images/lib-3.jpg' },
-    { id: 'mock-content-008', title: 'Las 5 preguntas que transforman tu mañana', meta: '5 min • Texto', thumbnail: '/images/lib-6.jpg' },
-    { id: 'mock-content-009', title: 'Artículo: La ciencia detrás de los hábitos', meta: 'Lectura externa', thumbnail: '/images/lib-8.jpg' },
-  ],
-  'inteligencia-emocional': [
-    { id: 'mock-content-006', title: 'Mentalidad de crecimiento', meta: '20 min • Video', thumbnail: '/images/lib-7.jpg' },
-    { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio', thumbnail: '/images/lib-1.jpg' },
-    { id: 'mock-content-005', title: 'Visualización guiada: Tu mejor versión', meta: '15 min • Audio', thumbnail: '/images/lib-3.jpg' },
-  ],
-  'mindfulness': [
-    { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio', thumbnail: '/images/lib-1.jpg' },
-    { id: 'mock-content-003', title: 'Atención plena', meta: '8 min • Video', thumbnail: '/images/lib-3.jpg' },
-    { id: 'mock-content-005', title: 'Body scan: Reconecta con tu cuerpo', meta: '20 min • Audio', thumbnail: '/images/lib-6.jpg' },
-    { id: 'mock-content-002', title: 'Escaneo corporal', meta: '15 min • Audio', thumbnail: '/images/lib-2.jpg' },
-  ],
-  'habitos-positivos': [
-    { id: 'mock-content-007', title: 'Hábitos atómicos', meta: '8 min • Texto', thumbnail: '/images/lib-2.jpg' },
-    { id: 'mock-content-009', title: 'Artículo: La ciencia detrás de los hábitos', meta: 'Lectura externa', thumbnail: '/images/lib-8.jpg' },
-    { id: 'mock-content-004', title: 'Despertar con energía', meta: '12 min • Video', thumbnail: '/images/lib-5.jpg' },
-  ],
+function formatDuration(seconds: number | null): string {
+  if (!seconds) return ''
+  const mins = Math.round(seconds / 60)
+  return `${mins} min`
 }
 
-const items = ref(contentByObjective[slug] ?? [
-  { id: 'mock-content-001', title: 'Respiración consciente', meta: '10 min • Audio', thumbnail: '/images/lib-1.jpg' },
-  { id: 'mock-content-003', title: 'Atención plena', meta: '8 min • Video', thumbnail: '/images/lib-3.jpg' },
-])
+const { data: items } = await useAsyncData(`objective-content-${slug}`, async () => {
+  if (!objectiveData.value) return []
+  const { data } = await client
+    .from('content_items')
+    .select('id, title, type, duration_seconds, thumbnail_url')
+    .eq('objective_id', objectiveData.value.id)
+    .eq('status', 'published')
+    .order('created_at', { ascending: false })
+  return (data ?? []).map(item => ({
+    id: item.id,
+    title: item.title,
+    meta: [formatDuration(item.duration_seconds), typeLabels[item.type] ?? item.type].filter(Boolean).join(' \u2022 '),
+    thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+  }))
+})
 </script>
 
 <style scoped>

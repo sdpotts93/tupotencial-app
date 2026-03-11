@@ -178,6 +178,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 const activeTab = ref('info')
 
 const tabs = [
@@ -189,6 +191,20 @@ const tabs = [
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
+
+// ── Fetch content items and forms for dropdowns ──
+const { data: contentItemsList } = await useAsyncData('program-content-items', async () => {
+  const { data } = await client.from('content_items').select('id, title, entitlement_key').order('title')
+  return data ?? []
+})
+
+const { data: formsList } = await useAsyncData('program-forms', async () => {
+  const { data } = await client.from('forms').select('id, title').order('title')
+  return data ?? []
+})
+
+// ── Map UI type to DB type ──
+const uiTypeToDb: Record<string, string> = { contenido: 'content', formulario: 'form', talk_to_ai: 'ai_prompt' }
 
 // ── Form state ──
 const form = reactive({
@@ -233,30 +249,22 @@ const activityTypeOptions = [
   { value: 'formulario', label: 'Formulario' },
 ]
 
-const formOptions = [
-  { value: 'frm-001', label: 'Evaluación inicial de bienestar' },
-  { value: 'frm-002', label: 'Check-in semanal' },
-  { value: 'frm-003', label: 'Encuesta de satisfacción del programa' },
-  { value: 'frm-004', label: 'Registro de hábitos diarios' },
-  { value: 'frm-005', label: 'Evaluación de progreso mensual' },
-]
+const formOptions = computed(() =>
+  (formsList.value ?? []).map(f => ({ value: f.id, label: f.title })),
+)
 
-const contentOptions = [
-  { value: 'cnt-001', label: '5 pasos para el bienestar emocional' },
-  { value: 'cnt-002', label: 'Meditación guiada para la mañana' },
-  { value: 'cnt-003', label: 'Nutrición consciente: guía básica' },
-  { value: 'cnt-004', label: 'Rutina de yoga para principiantes' },
-  { value: 'cnt-005', label: 'Higiene del sueño: consejos prácticos' },
-  { value: 'cnt-006', label: 'Cómo manejar el estrés laboral' },
-  { value: 'cnt-007', label: 'Ejercicios de respiración 4-7-8' },
-  { value: 'cnt-008', label: 'Alimentación para la energía diaria' },
-]
+const contentOptions = computed(() =>
+  (contentItemsList.value ?? []).map(c => ({ value: c.id, label: c.title })),
+)
 
-// Content entitlement map (mirrors content_items.entitlement_key)
-const contentEntitlementMap: Record<string, string> = {
-  'cnt-005': 'vip',
-  'cnt-008': 'bootcamp_liderazgo',
-}
+// Content entitlement map built from real data
+const contentEntitlementMap = computed(() => {
+  const map: Record<string, string> = {}
+  for (const c of contentItemsList.value ?? []) {
+    if (c.entitlement_key) map[c.id] = c.entitlement_key
+  }
+  return map
+})
 
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
@@ -268,7 +276,7 @@ const entitlementLabels: Record<string, string> = {
 
 function contentConflictLabel(contentId: string): string | null {
   if (form.entitlement_key) return null
-  const key = contentEntitlementMap[contentId]
+  const key = contentEntitlementMap.value[contentId]
   if (!key) return null
   return entitlementLabels[key] ?? key
 }
@@ -342,17 +350,55 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function handleSave() {
+async function handleSave() {
   if (!form.entitlement_key) {
     const hasConflict = programDays.value.some(day =>
-      day.activities.some(a => a.type === 'contenido' && contentEntitlementMap[a.content_id]),
+      day.activities.some(a => a.type === 'contenido' && contentEntitlementMap.value[a.content_id]),
     )
     if (hasConflict) {
       alert('No se puede guardar: hay contenido que requiere un complemento pero el programa no tiene restricción. Asigna un complemento al programa o cambia el contenido.')
       return
     }
   }
-  alert('Programa creado (mock). Redirigiendo...')
+
+  const programPayload = {
+    title: form.title,
+    description: form.description || null,
+    type: form.program_type,
+    plan: form.plan,
+    entitlement_key: form.entitlement_key || null,
+    status: form.status,
+  }
+
+  const { data: inserted } = await client.from('programs').insert(programPayload).select('id').single()
+  if (!inserted) return
+
+  // Insert days + items
+  for (let i = 0; i < programDays.value.length; i++) {
+    const day = programDays.value[i]!
+    const { data: insertedDay } = await client
+      .from('program_days')
+      .insert({
+        program_id: inserted.id,
+        day_index: i,
+        title: day.title || null,
+        description: day.description || null,
+      })
+      .select('id')
+      .single()
+
+    if (insertedDay && day.activities.length) {
+      const items = day.activities.map((a, pos) => ({
+        program_day_id: insertedDay.id,
+        type: uiTypeToDb[a.type] ?? a.type,
+        content_item_id: a.type === 'contenido' && a.content_id ? a.content_id : null,
+        form_id: a.type === 'formulario' && a.form_id ? a.form_id : null,
+        position: pos,
+      }))
+      await client.from('program_day_items').insert(items)
+    }
+  }
+
   navigateTo('/admin/programas')
 }
 </script>

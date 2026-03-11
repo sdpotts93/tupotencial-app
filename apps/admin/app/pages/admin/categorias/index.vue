@@ -98,6 +98,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const client = useSupabaseClient()
+
 const showCreateModal = ref(false)
 const editingCategory = ref<Record<string, any> | null>(null)
 const search = ref('')
@@ -115,18 +117,20 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-const categories = ref([
-  { id: 'cat-001', name: 'Mindfulness', slug: 'mindfulness', icon_url: '/icons/mindfulness.svg', is_active: true, sort_order: 1, content_count: 42 },
-  { id: 'cat-002', name: 'Nutrición', slug: 'nutricion', icon_url: '/icons/nutricion.svg', is_active: true, sort_order: 2, content_count: 38 },
-  { id: 'cat-003', name: 'Ejercicio', slug: 'ejercicio', icon_url: '/icons/ejercicio.svg', is_active: true, sort_order: 3, content_count: 31 },
-  { id: 'cat-004', name: 'Sueño', slug: 'sueno', icon_url: '/icons/sueno.svg', is_active: true, sort_order: 4, content_count: 19 },
-  { id: 'cat-005', name: 'Productividad', slug: 'productividad', icon_url: '/icons/productividad.svg', is_active: true, sort_order: 5, content_count: 25 },
-  { id: 'cat-006', name: 'Relaciones', slug: 'relaciones', icon_url: '/icons/relaciones.svg', is_active: true, sort_order: 6, content_count: 15 },
-  { id: 'cat-007', name: 'Finanzas personales', slug: 'finanzas-personales', icon_url: '', is_active: false, sort_order: 7, content_count: 8 },
-])
+const { data: categories, refresh } = await useAsyncData('admin-categories', async () => {
+  const { data } = await client
+    .from('content_categories')
+    .select('*, content_item_categories(count)')
+    .order('sort_order')
+  return (data ?? []).map(c => ({
+    ...c,
+    name: c.title,
+    content_count: (c.content_item_categories as any)?.[0]?.count ?? 0,
+  }))
+})
 
 const filteredRows = computed(() => {
-  const sorted = [...categories.value].sort((a, b) => a.sort_order - b.sort_order)
+  const sorted = [...(categories.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)
   if (!search.value) return sorted
   const q = search.value.toLowerCase()
   return sorted.filter(r => r.name.toLowerCase().includes(q) || r.slug.toLowerCase().includes(q))
@@ -147,27 +151,39 @@ function onDragOver(index: number) {
   dragOverIndex.value = index
 }
 
-function onDragEnd() {
+async function onDragEnd() {
   if (dragIndex.value !== null && dragOverIndex.value !== null && dragIndex.value !== dragOverIndex.value) {
-    const sorted = [...categories.value].sort((a, b) => a.sort_order - b.sort_order)
+    const sorted = [...(categories.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)
     const fromItem = sorted[dragIndex.value]
     const toItem = sorted[dragOverIndex.value]
     if (fromItem && toItem) {
-      // Swap sort_order values
       const fromOrder = fromItem.sort_order
       const toOrder = toItem.sort_order
 
-      // Shift all items between the two positions
-      if (fromOrder < toOrder) {
-        for (const cat of categories.value) {
-          if (cat.sort_order > fromOrder && cat.sort_order <= toOrder) cat.sort_order--
+      // Build updated sort_order for all affected items
+      const updates: { id: string; sort_order: number }[] = []
+      for (const cat of (categories.value ?? [])) {
+        let newOrder = cat.sort_order
+        if (cat.id === fromItem.id) {
+          newOrder = toOrder
+        } else if (fromOrder < toOrder) {
+          if (cat.sort_order > fromOrder && cat.sort_order <= toOrder) newOrder = cat.sort_order - 1
+        } else {
+          if (cat.sort_order >= toOrder && cat.sort_order < fromOrder) newOrder = cat.sort_order + 1
         }
-      } else {
-        for (const cat of categories.value) {
-          if (cat.sort_order >= toOrder && cat.sort_order < fromOrder) cat.sort_order++
+        if (newOrder !== cat.sort_order || cat.id === fromItem.id) {
+          updates.push({ id: cat.id, sort_order: newOrder })
         }
       }
-      fromItem.sort_order = toOrder
+
+      if (updates.length) {
+        await Promise.all(
+          updates.map(u =>
+            client.from('content_categories').update({ sort_order: u.sort_order }).eq('id', u.id),
+          ),
+        )
+        await refresh()
+      }
     }
   }
   dragIndex.value = null
@@ -182,22 +198,33 @@ function editCategory(row: Record<string, any>) {
   showCreateModal.value = true
 }
 
-function saveCategory() {
+async function saveCategory() {
+  const slug = slugify(categoryForm.name)
+  const isActive = categoryForm.is_active === 'true'
+
   if (editingCategory.value) {
-    editingCategory.value.name = categoryForm.name
-    editingCategory.value.slug = slugify(categoryForm.name)
-    editingCategory.value.is_active = categoryForm.is_active === 'true'
+    await client
+      .from('content_categories')
+      .update({ title: categoryForm.name, slug, is_active: isActive })
+      .eq('id', editingCategory.value.id)
+  } else {
+    const maxOrder = (categories.value ?? []).reduce((max, c) => Math.max(max, c.sort_order ?? 0), 0)
+    await client
+      .from('content_categories')
+      .insert({ title: categoryForm.name, slug, is_active: isActive, sort_order: maxOrder + 1 })
   }
-  alert(editingCategory.value ? 'Categoría actualizada (mock)' : 'Categoría creada (mock)')
+
+  await refresh()
   showCreateModal.value = false
   editingCategory.value = null
   categoryForm.name = ''
   categoryForm.is_active = 'true'
 }
 
-function handleDelete(row: Record<string, any>) {
+async function handleDelete(row: Record<string, any>) {
   if (confirm(`¿Seguro que deseas eliminar "${row.name}"?`)) {
-    categories.value = categories.value.filter(c => c.id !== row.id)
+    await client.from('content_categories').delete().eq('id', row.id)
+    await refresh()
   }
 }
 </script>
