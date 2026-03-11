@@ -6,7 +6,7 @@
 
     <UiTabs v-model="activeTab" :tabs="tabs" />
 
-    <!-- Tab 1: Informacion -->
+    <!-- Tab 1: Información -->
     <div v-if="activeTab === 'info'" class="tab-content">
       <div class="form-layout">
         <div class="form-layout__main">
@@ -14,12 +14,12 @@
             <div class="form-section">
               <UiInput
                 v-model="form.title"
-                label="Titulo del programa"
+                label="Título del programa"
               />
 
               <UiTextarea
                 v-model="form.description"
-                label="Descripcion"
+                label="Descripción"
                 :rows="4"
               />
 
@@ -47,7 +47,7 @@
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                       </svg>
                     </div>
-                    <p class="upload__text">Arrastra tu imagen aqui o <span class="upload__link">selecciona</span></p>
+                    <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
                     <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
                   </template>
                   <template v-else-if="uploadedFile">
@@ -88,7 +88,7 @@
                 v-model="form.entitlement_key"
                 label="Complemento requerido"
                 :options="entitlementOptions"
-                placeholder="Sin restriccion"
+                placeholder="Sin restricción"
               />
               <UiSelect
                 v-model="form.status"
@@ -101,34 +101,34 @@
             <div class="form-section">
               <p class="meta-label">Inscritos: 3,420</p>
               <p class="meta-label">Completados: 1,847</p>
-              <p class="meta-label">Tasa de finalizacion: 54%</p>
+              <p class="meta-label">Tasa de finalización: 54%</p>
             </div>
           </UiCard> -->
         </div>
       </div>
     </div>
 
-    <!-- Tab 2: Dias del programa -->
+    <!-- Tab 2: Días del programa -->
     <div v-if="activeTab === 'days'" class="tab-content">
       <div class="days-header">
-        <h2 class="days-header__title">Dias del programa</h2>
+        <h2 class="days-header__title">Días del programa</h2>
       </div>
 
       <div v-if="programDays.length === 0" class="days-empty">
-        <p>No hay dias configurados. Agrega el primer dia del programa.</p>
+        <p>No hay días configurados. Agrega el primer día del programa.</p>
       </div>
 
       <div class="days-list">
         <UiCard v-for="(day, dayIndex) in programDays" :key="dayIndex" variant="outlined">
           <div class="form-section">
             <div class="day-card__header">
-              <span class="day-card__number eyebrow">Dia {{ dayIndex + 1 }}</span>
+              <span class="day-card__number eyebrow">Día {{ dayIndex + 1 }}</span>
               <UiButton variant="danger-ghost" size="sm" @click="removeDay(dayIndex)">Quitar</UiButton>
             </div>
 
             <div class="day-card__fields">
-              <UiInput v-model="day.title" label="Titulo del dia" placeholder="Ej: Introduccion a la meditacion" />
-              <UiTextarea v-model="day.description" label="Descripcion" placeholder="Describe las actividades del dia..." :rows="2" />
+              <UiInput v-model="day.title" label="Título del día" placeholder="Ej: Introducción a la meditación" />
+              <UiTextarea v-model="day.description" label="Descripción" placeholder="Describe las actividades del día..." :rows="2" />
             </div>
 
             <!-- Activities -->
@@ -154,7 +154,7 @@
                     placeholder="Selecciona contenido"
                   />
                   <p v-if="activity.type === 'contenido' && contentConflictLabel(activity.content_id)" class="activity-item__warning">
-                    Este contenido requiere el complemento "{{ contentConflictLabel(activity.content_id) }}" pero el programa no tiene restriccion.
+                    Este contenido requiere el complemento "{{ contentConflictLabel(activity.content_id) }}" pero el programa no tiene restricción.
                   </p>
                   <UiSelect
                     v-if="activity.type === 'formulario'"
@@ -172,14 +172,14 @@
         </UiCard>
       </div>
 
-      <UiButton variant="primary-outline" size="sm" @click="addDay" style="align-self: flex-start; margin-top: var(--space-3);">+ Agregar dia</UiButton>
+      <UiButton variant="primary-outline" size="sm" @click="addDay" style="align-self: flex-start; margin-top: var(--space-3);">+ Agregar día</UiButton>
     </div>
 
     <div class="page-actions">
       <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/programas">Cancelar</UiButton>
       <UiButton v-if="activeTab === 'info'" variant="soft" size="sm" @click="activeTab = 'days'">Siguiente</UiButton>
-      <UiButton v-if="activeTab === 'days'" variant="soft" size="sm" @click="activeTab = 'info'">Atras</UiButton>
+      <UiButton v-if="activeTab === 'days'" variant="soft" size="sm" @click="activeTab = 'info'">Atrás</UiButton>
       <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
     </div>
   </div>
@@ -192,8 +192,8 @@ const route = useRoute()
 const activeTab = ref('info')
 
 const tabs = [
-  { value: 'info', label: '1. Informacion' },
-  { value: 'days', label: '2. Dias del programa' },
+  { value: 'info', label: '1. Información' },
+  { value: 'days', label: '2. Días del programa' },
 ]
 
 // ── Image upload ──
@@ -203,8 +203,8 @@ const isDragging = ref(false)
 
 // ── Form state (pre-filled) ──
 const form = reactive({
-  title: 'Reto 21 dias de meditacion',
-  description: 'Un reto disenado para construir el habito de la meditacion. Cada dia incluye una sesion guiada, un ejercicio de reflexion y un check-in de progreso.',
+  title: 'Reto 21 días de meditación',
+  description: 'Un reto diseñado para construir el hábito de la meditación. Cada día incluye una sesión guiada, un ejercicio de reflexión y un check-in de progreso.',
   program_type: 'reto',
   plan: 'core',
   entitlement_key: '',
@@ -225,9 +225,9 @@ const planOptions = [
 ]
 
 const entitlementOptions = [
-  { value: '', label: 'Sin restriccion (abierto)' },
+  { value: '', label: 'Sin restricción (abierto)' },
   { value: 'vip', label: 'VIP' },
-  { value: 'mentoria_grupal', label: 'Mentoria grupal' },
+  { value: 'mentoria_grupal', label: 'Mentoría grupal' },
   { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
   { value: 'coaching_1on1', label: 'Coaching 1:1' },
   { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
@@ -246,22 +246,22 @@ const activityTypeOptions = [
 ]
 
 const formOptions = [
-  { value: 'frm-001', label: 'Evaluacion inicial de bienestar' },
+  { value: 'frm-001', label: 'Evaluación inicial de bienestar' },
   { value: 'frm-002', label: 'Check-in semanal' },
-  { value: 'frm-003', label: 'Encuesta de satisfaccion del programa' },
-  { value: 'frm-004', label: 'Registro de habitos diarios' },
-  { value: 'frm-005', label: 'Evaluacion de progreso mensual' },
+  { value: 'frm-003', label: 'Encuesta de satisfacción del programa' },
+  { value: 'frm-004', label: 'Registro de hábitos diarios' },
+  { value: 'frm-005', label: 'Evaluación de progreso mensual' },
 ]
 
 const contentOptions = [
   { value: 'cnt-001', label: '5 pasos para el bienestar emocional' },
-  { value: 'cnt-002', label: 'Meditacion guiada para la manana' },
-  { value: 'cnt-003', label: 'Nutricion consciente: guia basica' },
+  { value: 'cnt-002', label: 'Meditación guiada para la mañana' },
+  { value: 'cnt-003', label: 'Nutrición consciente: guía básica' },
   { value: 'cnt-004', label: 'Rutina de yoga para principiantes' },
-  { value: 'cnt-005', label: 'Higiene del sueno: consejos practicos' },
-  { value: 'cnt-006', label: 'Como manejar el estres laboral' },
-  { value: 'cnt-007', label: 'Ejercicios de respiracion 4-7-8' },
-  { value: 'cnt-008', label: 'Alimentacion para la energia diaria' },
+  { value: 'cnt-005', label: 'Higiene del sueño: consejos prácticos' },
+  { value: 'cnt-006', label: 'Cómo manejar el estrés laboral' },
+  { value: 'cnt-007', label: 'Ejercicios de respiración 4-7-8' },
+  { value: 'cnt-008', label: 'Alimentación para la energía diaria' },
 ]
 
 // Content entitlement map (mirrors content_items.entitlement_key)
@@ -272,7 +272,7 @@ const contentEntitlementMap: Record<string, string> = {
 
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
-  mentoria_grupal: 'Mentoria grupal',
+  mentoria_grupal: 'Mentoría grupal',
   bootcamp_liderazgo: 'Bootcamp: Liderazgo',
   coaching_1on1: 'Coaching 1:1',
   retiro_marzo_2026: 'Retiro marzo 2026',
@@ -300,8 +300,8 @@ interface ProgramDay {
 
 const programDays = ref<ProgramDay[]>([
   {
-    title: 'Introduccion a la meditacion',
-    description: 'Aprende los fundamentos de la practica meditativa y realiza tu primera sesion guiada de 5 minutos.',
+    title: 'Introducción a la meditación',
+    description: 'Aprende los fundamentos de la práctica meditativa y realiza tu primera sesión guiada de 5 minutos.',
     activities: [
       { type: 'contenido', content_id: 'cnt-001', form_id: '' },
       { type: 'contenido', content_id: 'cnt-002', form_id: '' },
@@ -309,8 +309,8 @@ const programDays = ref<ProgramDay[]>([
     ],
   },
   {
-    title: 'Respiracion consciente',
-    description: 'Explora tecnicas de respiracion que te ayudaran a centrar tu atencion y calmar la mente.',
+    title: 'Respiración consciente',
+    description: 'Explora técnicas de respiración que te ayudarán a centrar tu atención y calmar la mente.',
     activities: [
       { type: 'contenido', content_id: 'cnt-007', form_id: '' },
       { type: 'talk_to_ai', content_id: '', form_id: '' },
@@ -318,15 +318,15 @@ const programDays = ref<ProgramDay[]>([
   },
   {
     title: 'El escaneo corporal',
-    description: 'Practica la tecnica del body scan para conectar con las sensaciones de tu cuerpo.',
+    description: 'Practica la técnica del body scan para conectar con las sensaciones de tu cuerpo.',
     activities: [
       { type: 'contenido', content_id: 'cnt-004', form_id: '' },
       { type: 'talk_to_ai', content_id: '', form_id: '' },
     ],
   },
   {
-    title: 'Meditacion caminando',
-    description: 'Descubre como meditar en movimiento con una practica guiada de caminata consciente.',
+    title: 'Meditación caminando',
+    description: 'Descubre cómo meditar en movimiento con una práctica guiada de caminata consciente.',
     activities: [
       { type: 'contenido', content_id: 'cnt-003', form_id: '' },
       { type: 'contenido', content_id: 'cnt-006', form_id: '' },
@@ -409,7 +409,7 @@ function handleSave() {
       day.activities.some(a => a.type === 'contenido' && contentEntitlementMap[a.content_id]),
     )
     if (hasConflict) {
-      alert('No se puede guardar: hay contenido que requiere un complemento pero el programa no tiene restriccion. Asigna un complemento al programa o cambia el contenido.')
+      alert('No se puede guardar: hay contenido que requiere un complemento pero el programa no tiene restricción. Asigna un complemento al programa o cambia el contenido.')
       return
     }
   }
@@ -417,7 +417,7 @@ function handleSave() {
 }
 
 function handleDelete() {
-  if (confirm('Seguro que deseas eliminar este programa?')) {
+  if (confirm('¿Seguro que deseas eliminar este programa?')) {
     alert('Programa eliminado (mock)')
     navigateTo('/admin/programas')
   }

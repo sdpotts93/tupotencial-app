@@ -1,9 +1,9 @@
 <template>
   <div class="page--fill">
     <div class="page-header">
-      <h1 class="page-header__title">Categorias</h1>
+      <h1 class="page-header__title">Categorías</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" @click="showCreateModal = true">+ Nueva categoria</UiButton>
+        <UiButton variant="primary-outline" size="sm" @click="showCreateModal = true">+ Nueva categoría</UiButton>
       </div>
     </div>
 
@@ -72,12 +72,12 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    <UiModal v-model="showCreateModal" :title="editingCategory ? 'Editar categoria' : 'Nueva categoria'" variant="center" :show-handle="false">
+    <UiModal v-model="showCreateModal" :title="editingCategory ? 'Editar categoría' : 'Nueva categoría'" variant="center" :show-handle="false">
       <div class="modal-form">
         <UiInput
           v-model="categoryForm.name"
           label="Nombre"
-          placeholder="Nombre de la categoria"
+          placeholder="Nombre de la categoría"
         />
         <UiSelect
           v-model="categoryForm.is_active"
@@ -88,7 +88,7 @@
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showCreateModal = false">Cancelar</UiButton>
-          <UiButton variant="primary-outline" size="sm" @click="saveCategory">{{ editingCategory ? 'Guardar cambios' : 'Crear categoria' }}</UiButton>
+          <UiButton variant="primary-outline" size="sm" @click="saveCategory">{{ editingCategory ? 'Guardar cambios' : 'Crear categoría' }}</UiButton>
         </div>
       </template>
     </UiModal>
@@ -117,9 +117,9 @@ function slugify(text: string) {
 
 const categories = ref([
   { id: 'cat-001', name: 'Mindfulness', slug: 'mindfulness', icon_url: '/icons/mindfulness.svg', is_active: true, sort_order: 1, content_count: 42 },
-  { id: 'cat-002', name: 'Nutricion', slug: 'nutricion', icon_url: '/icons/nutricion.svg', is_active: true, sort_order: 2, content_count: 38 },
+  { id: 'cat-002', name: 'Nutrición', slug: 'nutricion', icon_url: '/icons/nutricion.svg', is_active: true, sort_order: 2, content_count: 38 },
   { id: 'cat-003', name: 'Ejercicio', slug: 'ejercicio', icon_url: '/icons/ejercicio.svg', is_active: true, sort_order: 3, content_count: 31 },
-  { id: 'cat-004', name: 'Sueno', slug: 'sueno', icon_url: '/icons/sueno.svg', is_active: true, sort_order: 4, content_count: 19 },
+  { id: 'cat-004', name: 'Sueño', slug: 'sueno', icon_url: '/icons/sueno.svg', is_active: true, sort_order: 4, content_count: 19 },
   { id: 'cat-005', name: 'Productividad', slug: 'productividad', icon_url: '/icons/productividad.svg', is_active: true, sort_order: 5, content_count: 25 },
   { id: 'cat-006', name: 'Relaciones', slug: 'relaciones', icon_url: '/icons/relaciones.svg', is_active: true, sort_order: 6, content_count: 15 },
   { id: 'cat-007', name: 'Finanzas personales', slug: 'finanzas-personales', icon_url: '', is_active: false, sort_order: 7, content_count: 8 },
@@ -188,7 +188,7 @@ function saveCategory() {
     editingCategory.value.slug = slugify(categoryForm.name)
     editingCategory.value.is_active = categoryForm.is_active === 'true'
   }
-  alert(editingCategory.value ? 'Categoria actualizada (mock)' : 'Categoria creada (mock)')
+  alert(editingCategory.value ? 'Categoría actualizada (mock)' : 'Categoría creada (mock)')
   showCreateModal.value = false
   editingCategory.value = null
   categoryForm.name = ''
@@ -196,7 +196,7 @@ function saveCategory() {
 }
 
 function handleDelete(row: Record<string, any>) {
-  if (confirm(`Seguro que deseas eliminar "${row.name}"?`)) {
+  if (confirm(`¿Seguro que deseas eliminar "${row.name}"?`)) {
     categories.value = categories.value.filter(c => c.id !== row.id)
   }
 }

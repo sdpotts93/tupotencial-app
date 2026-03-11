@@ -10,13 +10,13 @@
           <div class="form-section">
             <UiInput
               v-model="form.title"
-              label="Titulo del evento"
+              label="Título del evento"
               placeholder="Nombre del evento"
             />
 
             <UiTextarea
               v-model="form.description"
-              label="Descripcion"
+              label="Descripción"
               placeholder="Describe el evento..."
               :rows="5"
             />
@@ -45,7 +45,7 @@
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>
                   </div>
-                  <p class="upload__text">Arrastra tu imagen aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
                   <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
                 </template>
                 <template v-else>
@@ -67,9 +67,9 @@
               />
               <UiSelect
                 v-model="form.duration"
-                label="Duracion"
+                label="Duración"
                 :options="durationOptions"
-                placeholder="Selecciona duracion"
+                placeholder="Selecciona duración"
               />
             </div>
 
@@ -100,7 +100,7 @@
               v-model="form.entitlement_key"
               label="Complemento requerido"
               :options="entitlementOptions"
-              placeholder="Sin restriccion"
+              placeholder="Sin restricción"
             />
 
             <UiSelect
@@ -113,7 +113,7 @@
 
         <UiCard variant="filled">
           <div class="form-section">
-            <p class="eyebrow">Configuracion de Vimeo</p>
+            <p class="eyebrow">Configuración de Vimeo</p>
             <p class="meta-text">
               Para eventos en vivo necesitas <strong>Vimeo Premium</strong>. Crea un evento en vivo en Vimeo con privacidad "No listado" — la app controla el acceso mediante complementos.
             </p>
@@ -199,9 +199,9 @@ const planOptions = [
 ]
 
 const entitlementOptions = [
-  { value: '', label: 'Sin restriccion (abierto)' },
+  { value: '', label: 'Sin restricción (abierto)' },
   { value: 'vip', label: 'VIP' },
-  { value: 'mentoria_grupal', label: 'Mentoria grupal' },
+  { value: 'mentoria_grupal', label: 'Mentoría grupal' },
   { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
   { value: 'coaching_1on1', label: 'Coaching 1:1' },
   { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },

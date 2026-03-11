@@ -10,28 +10,28 @@
           <div class="form-section">
             <UiInput
               v-model="form.title"
-              label="Titulo"
-              placeholder="Escribe el titulo del contenido"
+              label="Título"
+              placeholder="Escribe el título del contenido"
             />
 
             <UiTextarea
               v-model="form.introduction"
-              label="Introduccion"
-              placeholder="Escribe una breve introduccion..."
+              label="Introducción"
+              placeholder="Escribe una breve introducción..."
               :rows="3"
             />
 
             <UiEditor
               v-if="form.content_type === 'article'"
               v-model="form.body"
-              label="Contenido del articulo"
-              placeholder="Escribe el contenido del articulo aqui..."
+              label="Contenido del artículo"
+              placeholder="Escribe el contenido del artículo aquí..."
             />
             <UiTextarea
               v-else
               v-model="form.body"
               label="Texto"
-              placeholder="Escribe el contenido aqui..."
+              placeholder="Escribe el contenido aquí..."
               :rows="10"
             />
 
@@ -65,7 +65,7 @@
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>
                   </div>
-                  <p class="upload__text">Arrastra tu archivo aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__text">Arrastra tu archivo aquí o <span class="upload__link">selecciona</span></p>
                   <p class="upload__hint">{{ acceptHint }}</p>
                 </template>
                 <template v-else>
@@ -93,9 +93,9 @@
 
             <UiSelect
               v-model="form.category_id"
-              label="Categoria"
+              label="Categoría"
               :options="categoryOptions"
-              placeholder="Selecciona la categoria"
+              placeholder="Selecciona la categoría"
             />
 
             <UiSelect
@@ -107,7 +107,7 @@
 
             <UiInput
               v-model="form.duration"
-              label="Duracion"
+              label="Duración"
               placeholder="Ej: 10 min"
             />
 
@@ -122,7 +122,7 @@
               v-model="form.entitlement_key"
               label="Complemento requerido"
               :options="entitlementOptions"
-              placeholder="Sin restriccion"
+              placeholder="Sin restricción"
             />
 
             <UiSelect
@@ -135,15 +135,15 @@
             <UiInput
               v-if="form.status === 'scheduled'"
               v-model="form.scheduled_at"
-              label="Fecha de publicacion programada"
+              label="Fecha de publicación programada"
               type="datetime-local"
             />
 
             <UiInput
               v-model="form.unpublished_at"
-              label="Despublicar automaticamente (opcional)"
+              label="Despublicar automáticamente (opcional)"
               type="datetime-local"
-              hint="Fecha en que el contenido se archivara automaticamente"
+              hint="Fecha en que el contenido se archivará automáticamente"
             />
           </div>
         </UiCard>
@@ -182,7 +182,7 @@ const form = reactive({
 const typeOptions = [
   { value: 'video', label: 'Video' },
   { value: 'audio', label: 'Audio' },
-  { value: 'article', label: 'Articulo' },
+  { value: 'article', label: 'Artículo' },
 ]
 
 const segmentOptions = [
@@ -191,9 +191,9 @@ const segmentOptions = [
 ]
 
 const entitlementOptions = [
-  { value: '', label: 'Sin restriccion (abierto)' },
+  { value: '', label: 'Sin restricción (abierto)' },
   { value: 'vip', label: 'VIP' },
-  { value: 'mentoria_grupal', label: 'Mentoria grupal' },
+  { value: 'mentoria_grupal', label: 'Mentoría grupal' },
   { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
   { value: 'coaching_1on1', label: 'Coaching 1:1' },
   { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
@@ -201,21 +201,21 @@ const entitlementOptions = [
 
 const categoryOptions = [
   { value: 'cat-001', label: 'Mindfulness' },
-  { value: 'cat-002', label: 'Nutricion' },
+  { value: 'cat-002', label: 'Nutrición' },
   { value: 'cat-003', label: 'Ejercicio' },
-  { value: 'cat-004', label: 'Sueno' },
+  { value: 'cat-004', label: 'Sueño' },
   { value: 'cat-005', label: 'Productividad' },
   { value: 'cat-006', label: 'Relaciones' },
   { value: 'cat-007', label: 'Finanzas personales' },
 ]
 
 const objectiveOptions = [
-  { value: 'obj-001', label: 'Reducir estres' },
+  { value: 'obj-001', label: 'Reducir estrés' },
   { value: 'obj-002', label: 'Rutina matutina' },
   { value: 'obj-003', label: 'Crecimiento personal' },
   { value: 'obj-004', label: 'Inteligencia emocional' },
   { value: 'obj-005', label: 'Mindfulness' },
-  { value: 'obj-006', label: 'Habitos positivos' },
+  { value: 'obj-006', label: 'Hábitos positivos' },
 ]
 
 const statusOptions = [
@@ -229,7 +229,7 @@ const uploadLabel = computed(() => {
   const labels: Record<string, string> = {
     video: 'Subir video',
     audio: 'Subir audio',
-    article: 'Imagen del articulo',
+    article: 'Imagen del artículo',
   }
   return labels[form.content_type] || 'Subir archivo'
 })

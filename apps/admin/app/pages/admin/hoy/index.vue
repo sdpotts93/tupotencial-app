@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-header__title">Hoy - Planificacion diaria</h1>
+      <h1 class="page-header__title">Hoy - Planificación diaria</h1>
       <div class="page-header__actions">
         <UiButton v-if="activeTab !== 'all'" variant="outline" size="sm" @click="viewMode = viewMode === 'calendar' ? 'list' : 'calendar'">
           {{ viewMode === 'calendar' ? 'Ver lista' : 'Ver calendario' }}
@@ -11,7 +11,7 @@
 
     <UiTabs v-model="activeTab" :tabs="weekTabs" />
 
-    <!-- Weekly views (Esta semana / Proxima semana) -->
+    <!-- Weekly views (Esta semana / Próxima semana) -->
     <template v-if="activeTab !== 'all'">
       <!-- Calendar View -->
       <div v-if="viewMode === 'calendar'" class="hoy-calendar">
@@ -92,11 +92,11 @@
     <!-- Defaults (shown when a day has no specific plan) -->
     <section class="hoy-config-section">
       <h2 class="section-title">Valores predeterminados</h2>
-      <p class="section-description">Valores que se muestran en la app cuando un dia no tiene plan configurado. La frase, accion y badge por defecto.</p>
+      <p class="section-description">Valores que se muestran en la app cuando un día no tiene plan configurado. La frase, acción y badge por defecto.</p>
 
       <UiCard variant="outlined">
         <div class="form-section">
-          <span class="eyebrow">Frase del dia</span>
+          <span class="eyebrow">Frase del día</span>
           <UiTextarea
             v-model="defaults.phrase_text"
             label="Frase"
@@ -105,7 +105,7 @@
           />
           <UiSelect
             v-model="defaults.phrase_author"
-            label="Quien dice la frase"
+            label="Quién dice la frase"
             :options="defaultAuthorOptions"
           />
         </div>
@@ -113,7 +113,7 @@
 
       <UiCard variant="outlined" style="margin-top: var(--space-4);">
         <div class="form-section">
-          <span class="eyebrow">Accion del dia</span>
+          <span class="eyebrow">Acción del día</span>
           <UiSelect
             v-model="defaults.action_type"
             label="Tipo"
@@ -144,13 +144,13 @@
           <span class="eyebrow">Badge</span>
           <UiInput
             v-model="defaults.badge_title"
-            label="Titulo del badge"
-            placeholder="Ej: Dia completado"
+            label="Título del badge"
+            placeholder="Ej: Día completado"
           />
           <UiInput
             v-model="defaults.badge_subtitle"
-            label="Subtitulo del badge"
-            placeholder="Ej: Sigue asi, vas genial"
+            label="Subtítulo del badge"
+            placeholder="Ej: Sigue así, vas genial"
           />
         </div>
       </UiCard>
@@ -159,13 +159,13 @@
     <!-- Contenido Reciente Configuration -->
     <section class="hoy-config-section">
       <h2 class="section-title">Contenido reciente</h2>
-      <p class="section-description">Configura que contenido se muestra en la seccion "Contenido Reciente" de la pantalla Hoy.</p>
+      <p class="section-description">Configura qué contenido se muestra en la sección "Contenido Reciente" de la pantalla Hoy.</p>
 
       <UiCard variant="outlined">
         <div class="form-section">
           <UiSelect
             v-model="recentContentMode"
-            label="Modo de seleccion"
+            label="Modo de selección"
             :options="recentContentModeOptions"
           />
 
@@ -209,7 +209,7 @@
 
           <p v-else class="meta-hint">
             <Icon name="lucide:info" size="14" style="vertical-align: -2px;" />
-            Se mostrara automaticamente el contenido mas reciente publicado en la biblioteca.
+            Se mostrará automáticamente el contenido más reciente publicado en la biblioteca.
           </p>
         </div>
       </UiCard>
@@ -218,7 +218,7 @@
     <!-- Explora otras secciones Configuration -->
     <section class="hoy-config-section">
       <h2 class="section-title">Explora otras secciones</h2>
-      <p class="section-description">Administra las secciones que aparecen en "Explora otras secciones" en la pantalla Hoy. Agrega, quita y elige cual es la destacada.</p>
+      <p class="section-description">Administra las secciones que aparecen en "Explora otras secciones" en la pantalla Hoy. Agrega, quita y elige cuál es la destacada.</p>
 
       <UiCard variant="outlined">
         <div class="form-section">
@@ -249,9 +249,9 @@
 
           <!-- Add from available sections -->
           <div v-if="availableSectionsToAdd.length" class="explore-add">
-            <span class="eyebrow">Agregar seccion</span>
+            <span class="eyebrow">Agregar sección</span>
             <div class="explore-add__row">
-              <UiSelect v-model="sectionToAdd" :options="availableSectionsToAdd" placeholder="Selecciona una seccion..." />
+              <UiSelect v-model="sectionToAdd" :options="availableSectionsToAdd" placeholder="Selecciona una sección..." />
               <UiButton variant="outline" size="sm" :disabled="!sectionToAdd" @click="addExploreSection">
                 <template #icon><Icon name="lucide:plus" size="14" /></template>
                 Agregar
@@ -277,13 +277,13 @@ const activeTab = ref('current')
 
 const weekTabs = [
   { value: 'current', label: 'Esta semana' },
-  { value: 'next', label: 'Proxima semana' },
+  { value: 'next', label: 'Próxima semana' },
   { value: 'all', label: 'Todos los planes' },
 ]
 
 const columns = [
   { key: 'date', label: 'Fecha' },
-  { key: 'theme', label: 'Tema del dia' },
+  { key: 'theme', label: 'Tema del día' },
   { key: 'items_count', label: 'Elementos' },
   { key: 'status', label: 'Estado' },
 ]
@@ -291,19 +291,19 @@ const columns = [
 const calendarDays = ref([
   { date: '2026-03-09', dayName: 'Lun', dayNumber: 9, items: 5, isToday: true },
   { date: '2026-03-10', dayName: 'Mar', dayNumber: 10, items: 4, isToday: false },
-  { date: '2026-03-11', dayName: 'Mie', dayNumber: 11, items: 3, isToday: false },
+  { date: '2026-03-11', dayName: 'Mié', dayNumber: 11, items: 3, isToday: false },
   { date: '2026-03-12', dayName: 'Jue', dayNumber: 12, items: 4, isToday: false },
   { date: '2026-03-13', dayName: 'Vie', dayNumber: 13, items: 2, isToday: false },
-  { date: '2026-03-14', dayName: 'Sab', dayNumber: 14, items: 1, isToday: false },
+  { date: '2026-03-14', dayName: 'Sáb', dayNumber: 14, items: 1, isToday: false },
   { date: '2026-03-15', dayName: 'Dom', dayNumber: 15, items: 0, isToday: false },
 ])
 
 const dailyPlans = ref([
   { id: 'dp-001', date: '2026-03-09', theme: 'Bienestar emocional', items_count: 4, status: 'published' },
-  { id: 'dp-002', date: '2026-03-10', theme: 'Nutricion consciente', items_count: 3, status: 'scheduled' },
-  { id: 'dp-003', date: '2026-03-11', theme: 'Movimiento y energia', items_count: 4, status: 'scheduled' },
-  { id: 'dp-004', date: '2026-03-12', theme: 'Descanso y recuperacion', items_count: 2, status: 'draft' },
-  { id: 'dp-005', date: '2026-03-13', theme: 'Conexion social', items_count: 1, status: 'draft' },
+  { id: 'dp-002', date: '2026-03-10', theme: 'Nutrición consciente', items_count: 3, status: 'scheduled' },
+  { id: 'dp-003', date: '2026-03-11', theme: 'Movimiento y energía', items_count: 4, status: 'scheduled' },
+  { id: 'dp-004', date: '2026-03-12', theme: 'Descanso y recuperación', items_count: 2, status: 'draft' },
+  { id: 'dp-005', date: '2026-03-13', theme: 'Conexión social', items_count: 1, status: 'draft' },
   { id: 'dp-006', date: '2026-03-14', theme: 'Productividad y enfoque', items_count: 5, status: 'published' },
 ])
 
@@ -319,20 +319,20 @@ watch(activeTab, (tab) => {
     calendarDays.value = [
       { date: '2026-03-09', dayName: 'Lun', dayNumber: 9, items: 5, isToday: true },
       { date: '2026-03-10', dayName: 'Mar', dayNumber: 10, items: 4, isToday: false },
-      { date: '2026-03-11', dayName: 'Mie', dayNumber: 11, items: 3, isToday: false },
+      { date: '2026-03-11', dayName: 'Mié', dayNumber: 11, items: 3, isToday: false },
       { date: '2026-03-12', dayName: 'Jue', dayNumber: 12, items: 4, isToday: false },
       { date: '2026-03-13', dayName: 'Vie', dayNumber: 13, items: 2, isToday: false },
-      { date: '2026-03-14', dayName: 'Sab', dayNumber: 14, items: 1, isToday: false },
+      { date: '2026-03-14', dayName: 'Sáb', dayNumber: 14, items: 1, isToday: false },
       { date: '2026-03-15', dayName: 'Dom', dayNumber: 15, items: 0, isToday: false },
     ]
   } else if (tab === 'next') {
     calendarDays.value = [
       { date: '2026-03-16', dayName: 'Lun', dayNumber: 16, items: 0, isToday: false },
       { date: '2026-03-17', dayName: 'Mar', dayNumber: 17, items: 0, isToday: false },
-      { date: '2026-03-18', dayName: 'Mie', dayNumber: 18, items: 0, isToday: false },
+      { date: '2026-03-18', dayName: 'Mié', dayNumber: 18, items: 0, isToday: false },
       { date: '2026-03-19', dayName: 'Jue', dayNumber: 19, items: 0, isToday: false },
       { date: '2026-03-20', dayName: 'Vie', dayNumber: 20, items: 0, isToday: false },
-      { date: '2026-03-21', dayName: 'Sab', dayNumber: 21, items: 0, isToday: false },
+      { date: '2026-03-21', dayName: 'Sáb', dayNumber: 21, items: 0, isToday: false },
       { date: '2026-03-22', dayName: 'Dom', dayNumber: 22, items: 0, isToday: false },
     ]
   }
@@ -344,7 +344,7 @@ const MONTH_NAMES_ES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ]
 
-const dayNamesShort = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom']
+const dayNamesShort = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 const datesWithContent = new Set([
   '2026-01-05', '2026-01-12', '2026-01-19',
@@ -377,13 +377,13 @@ const yearMonths = computed(() => {
 
 // ── Defaults config ──
 const defaults = reactive({
-  phrase_text: 'Cada dia es una nueva oportunidad para cuidar de ti.',
+  phrase_text: 'Cada día es una nueva oportunidad para cuidar de ti.',
   phrase_author: 'gabriel',
   action_type: 'talk_to_ai',
   content_id: '',
   form_id: '',
-  badge_title: 'Dia completado',
-  badge_subtitle: 'Sigue asi, vas genial',
+  badge_title: 'Día completado',
+  badge_subtitle: 'Sigue así, vas genial',
 })
 
 const defaultAuthorOptions = [
@@ -399,21 +399,21 @@ const defaultActionTypeOptions = [
 
 const defaultContentOptions = [
   { value: 'cnt-001', label: '5 pasos para el bienestar emocional' },
-  { value: 'cnt-002', label: 'Meditacion guiada para la manana' },
-  { value: 'cnt-003', label: 'Nutricion consciente: guia basica' },
+  { value: 'cnt-002', label: 'Meditación guiada para la mañana' },
+  { value: 'cnt-003', label: 'Nutrición consciente: guía básica' },
   { value: 'cnt-004', label: 'Rutina de yoga para principiantes' },
-  { value: 'cnt-005', label: 'Higiene del sueno: consejos practicos' },
-  { value: 'cnt-006', label: 'Como manejar el estres laboral' },
-  { value: 'cnt-007', label: 'Ejercicios de respiracion 4-7-8' },
-  { value: 'cnt-008', label: 'Alimentacion para la energia diaria' },
+  { value: 'cnt-005', label: 'Higiene del sueño: consejos prácticos' },
+  { value: 'cnt-006', label: 'Cómo manejar el estrés laboral' },
+  { value: 'cnt-007', label: 'Ejercicios de respiración 4-7-8' },
+  { value: 'cnt-008', label: 'Alimentación para la energía diaria' },
 ]
 
 const defaultFormOptions = [
-  { value: 'frm-001', label: 'Evaluacion inicial de bienestar' },
+  { value: 'frm-001', label: 'Evaluación inicial de bienestar' },
   { value: 'frm-002', label: 'Check-in semanal' },
-  { value: 'frm-003', label: 'Encuesta de satisfaccion del programa' },
-  { value: 'frm-004', label: 'Registro de habitos diarios' },
-  { value: 'frm-005', label: 'Evaluacion de progreso mensual' },
+  { value: 'frm-003', label: 'Encuesta de satisfacción del programa' },
+  { value: 'frm-004', label: 'Registro de hábitos diarios' },
+  { value: 'frm-005', label: 'Evaluación de progreso mensual' },
 ]
 
 watch(() => defaults.action_type, () => {
@@ -437,7 +437,7 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
 const recentContentMode = ref<'automatic' | 'manual'>('automatic')
 
 const recentContentModeOptions = [
-  { value: 'automatic', label: 'Automatico (contenido mas reciente)' },
+  { value: 'automatic', label: 'Automático (contenido más reciente)' },
   { value: 'manual', label: 'Manual (seleccionar contenido)' },
 ]
 
@@ -445,18 +445,18 @@ const contentSearch = ref('')
 
 const allContentItems = ref([
   { id: 'cnt-001', type: 'video', title: '5 pasos para el bienestar emocional', duration: '15 min' },
-  { id: 'cnt-002', type: 'audio', title: 'Meditacion guiada para la manana', duration: '10 min' },
-  { id: 'cnt-003', type: 'video', title: 'Nutricion consciente: guia basica', duration: '20 min' },
+  { id: 'cnt-002', type: 'audio', title: 'Meditación guiada para la mañana', duration: '10 min' },
+  { id: 'cnt-003', type: 'video', title: 'Nutrición consciente: guía básica', duration: '20 min' },
   { id: 'cnt-004', type: 'video', title: 'Rutina de yoga para principiantes', duration: '25 min' },
-  { id: 'cnt-005', type: 'audio', title: 'Higiene del sueno: consejos practicos', duration: '12 min' },
-  { id: 'cnt-006', type: 'video', title: 'Como manejar el estres laboral', duration: '18 min' },
-  { id: 'cnt-007', type: 'audio', title: 'Ejercicios de respiracion 4-7-8', duration: '8 min' },
-  { id: 'cnt-008', type: 'video', title: 'Alimentacion para la energia diaria', duration: '14 min' },
+  { id: 'cnt-005', type: 'audio', title: 'Higiene del sueño: consejos prácticos', duration: '12 min' },
+  { id: 'cnt-006', type: 'video', title: 'Cómo manejar el estrés laboral', duration: '18 min' },
+  { id: 'cnt-007', type: 'audio', title: 'Ejercicios de respiración 4-7-8', duration: '8 min' },
+  { id: 'cnt-008', type: 'video', title: 'Alimentación para la energía diaria', duration: '14 min' },
 ])
 
 const selectedContent = ref([
   { id: 'cnt-001', type: 'video', title: '5 pasos para el bienestar emocional', duration: '15 min' },
-  { id: 'cnt-002', type: 'audio', title: 'Meditacion guiada para la manana', duration: '10 min' },
+  { id: 'cnt-002', type: 'audio', title: 'Meditación guiada para la mañana', duration: '10 min' },
 ])
 
 watch(contentSearch, () => { contentDropdownOpen.value = true })

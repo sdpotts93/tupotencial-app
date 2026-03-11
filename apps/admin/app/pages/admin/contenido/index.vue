@@ -11,7 +11,7 @@
       <template #toolbar>
         <UiInput
           v-model="search"
-          placeholder="Buscar por titulo..."
+          placeholder="Buscar por título..."
           style="min-width: 200px;"
         >
           <template #suffix><Icon name="lucide:search" size="18" /></template>
@@ -34,7 +34,7 @@
         <UiSelect
           v-model="filterCategory"
           :options="categoryFilterOptions"
-          placeholder="Categoria"
+          placeholder="Categoría"
         />
       </template>
 
@@ -104,7 +104,7 @@ const typeOptions = [
   { value: '', label: 'Todos los tipos' },
   { value: 'video', label: 'Video' },
   { value: 'audio', label: 'Audio' },
-  { value: 'article', label: 'Articulo' },
+  { value: 'article', label: 'Artículo' },
 ]
 
 const segmentOptions = [
@@ -114,41 +114,41 @@ const segmentOptions = [
 ]
 
 const categoryFilterOptions = [
-  { value: '', label: 'Todas las categorias' },
+  { value: '', label: 'Todas las categorías' },
   { value: 'cat-001', label: 'Mindfulness' },
-  { value: 'cat-002', label: 'Nutricion' },
+  { value: 'cat-002', label: 'Nutrición' },
   { value: 'cat-003', label: 'Ejercicio' },
-  { value: 'cat-004', label: 'Sueno' },
+  { value: 'cat-004', label: 'Sueño' },
   { value: 'cat-005', label: 'Productividad' },
   { value: 'cat-006', label: 'Relaciones' },
 ]
 
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
-  mentoria_grupal: 'Mentoria grupal',
+  mentoria_grupal: 'Mentoría grupal',
   bootcamp_liderazgo: 'Bootcamp: Liderazgo',
   coaching_1on1: 'Coaching 1:1',
   retiro_marzo_2026: 'Retiro marzo 2026',
 }
 
 const columns = [
-  { key: 'title', label: 'Titulo', width: '210px' },
+  { key: 'title', label: 'Título', width: '210px' },
   { key: 'content_type', label: 'Tipo' },
   { key: 'segment', label: 'Plan' },
   { key: 'entitlement_key', label: 'Complemento' },
   { key: 'status', label: 'Estado' },
-  { key: 'published_at', label: 'Publicacion' },
+  { key: 'published_at', label: 'Publicación' },
 ]
 
 const rows = ref([
   { id: 'cnt-001', title: '5 pasos para el bienestar emocional', content_type: 'video', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-20T08:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-002', title: 'Meditacion guiada para la manana', content_type: 'audio', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-18T06:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-003', title: 'Nutricion consciente: guia basica', content_type: 'article', segment: 'free', category: 'cat-002', status: 'published', published_at: '2026-02-15T10:00:00', entitlement_key: null as string | null },
+  { id: 'cnt-002', title: 'Meditación guiada para la mañana', content_type: 'audio', segment: 'core', category: 'cat-001', status: 'published', published_at: '2026-02-18T06:00:00', entitlement_key: null as string | null },
+  { id: 'cnt-003', title: 'Nutrición consciente: guía básica', content_type: 'article', segment: 'free', category: 'cat-002', status: 'published', published_at: '2026-02-15T10:00:00', entitlement_key: null as string | null },
   { id: 'cnt-004', title: 'Rutina de yoga para principiantes', content_type: 'video', segment: 'core', category: 'cat-003', status: 'published', published_at: '2026-02-12T07:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-005', title: 'Higiene del sueno: consejos practicos', content_type: 'article', segment: 'free', category: 'cat-004', status: 'draft', published_at: null, entitlement_key: 'vip' as string | null },
-  { id: 'cnt-006', title: 'Como manejar el estres laboral', content_type: 'audio', segment: 'free', category: 'cat-005', status: 'draft', published_at: null, entitlement_key: null as string | null },
-  { id: 'cnt-007', title: 'Ejercicios de respiracion 4-7-8', content_type: 'video', segment: 'free', category: 'cat-001', status: 'published', published_at: '2026-02-10T09:00:00', entitlement_key: null as string | null },
-  { id: 'cnt-008', title: 'Alimentacion para la energia diaria', content_type: 'article', segment: 'core', category: 'cat-002', status: 'archived', published_at: '2026-01-28T08:00:00', entitlement_key: 'bootcamp_liderazgo' as string | null },
+  { id: 'cnt-005', title: 'Higiene del sueño: consejos prácticos', content_type: 'article', segment: 'free', category: 'cat-004', status: 'draft', published_at: null, entitlement_key: 'vip' as string | null },
+  { id: 'cnt-006', title: 'Como manejar el estrés laboral', content_type: 'audio', segment: 'free', category: 'cat-005', status: 'draft', published_at: null, entitlement_key: null as string | null },
+  { id: 'cnt-007', title: 'Ejercicios de respiración 4-7-8', content_type: 'video', segment: 'free', category: 'cat-001', status: 'published', published_at: '2026-02-10T09:00:00', entitlement_key: null as string | null },
+  { id: 'cnt-008', title: 'Alimentación para la energía diaria', content_type: 'article', segment: 'core', category: 'cat-002', status: 'archived', published_at: '2026-01-28T08:00:00', entitlement_key: 'bootcamp_liderazgo' as string | null },
 ])
 
 const filteredRows = computed(() => {
@@ -176,7 +176,7 @@ function statusLabel(status: string) {
 }
 
 function typeLabel(type: string) {
-  const map: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Articulo' }
+  const map: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo' }
   return map[type] ?? type
 }
 
@@ -185,7 +185,7 @@ function formatDate(iso: string) {
 }
 
 function handleDelete(row: Record<string, any>) {
-  if (confirm(`Seguro que deseas eliminar "${row.title}"?`)) {
+  if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
     rows.value = rows.value.filter(r => r.id !== row.id)
   }
 }

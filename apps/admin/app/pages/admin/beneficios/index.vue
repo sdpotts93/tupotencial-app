@@ -86,7 +86,7 @@ const benefits = ref([
   { id: 'ben-002', sort_order: 2, title: 'Clase gratis de yoga', plan: 'free', status: 'active' },
   { id: 'ben-003', sort_order: 3, title: '$50 de descuento en pedido', plan: 'core', status: 'active' },
   { id: 'ben-004', sort_order: 4, title: '15% en colchones y almohadas', plan: 'core', status: 'active' },
-  { id: 'ben-005', sort_order: 5, title: '2 meses gratis de membresia', plan: 'free', status: 'active' },
+  { id: 'ben-005', sort_order: 5, title: '2 meses gratis de membresía', plan: 'free', status: 'active' },
   { id: 'ben-006', sort_order: 6, title: '30% en libros de bienestar', plan: 'free', status: 'inactive' },
 ])
 
@@ -149,7 +149,7 @@ function statusLabel(status: string) {
 }
 
 function handleDelete(row: Record<string, any>) {
-  if (confirm(`Seguro que deseas eliminar "${row.title}"?`)) {
+  if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
     benefits.value = benefits.value.filter(b => b.id !== row.id)
   }
 }

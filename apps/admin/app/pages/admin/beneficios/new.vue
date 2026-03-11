@@ -10,13 +10,13 @@
           <div class="form-section">
             <UiInput
               v-model="form.title"
-              label="Titulo del beneficio"
+              label="Título del beneficio"
               placeholder="Ej: 20% en suplementos"
             />
 
             <UiTextarea
               v-model="form.description"
-              label="Descripcion"
+              label="Descripción"
               placeholder="Describe el beneficio en detalle..."
               :rows="4"
             />
@@ -45,7 +45,7 @@
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>
                   </div>
-                  <p class="upload__text">Arrastra tu imagen aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
                   <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
                 </template>
                 <template v-else>
@@ -68,12 +68,12 @@
               v-model="form.utm_template"
               label="Plantilla UTM"
               placeholder="?utm_source=tupotencial&utm_medium=benefit&utm_campaign=..."
-              hint="Parametros UTM que se agregan a la URL"
+              hint="Parámetros UTM que se agregan a la URL"
             />
 
             <UiInput
               v-model="form.code"
-              label="Codigo promocional"
+              label="Código promocional"
               placeholder="TUPOTENCIAL20"
             />
           </div>

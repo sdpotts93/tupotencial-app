@@ -37,7 +37,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
-  placeholder: 'Escribe aqui...',
+  placeholder: 'Escribe aquí...',
 })
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
@@ -93,14 +93,14 @@ const toolbarButtons = computed(() => {
     },
     {
       action: 'h2',
-      title: 'Titulo',
+      title: 'Título',
       icon: 'H2',
       isActive: () => e.isActive('heading', { level: 2 }),
       command: () => e.chain().focus().toggleHeading({ level: 2 }).run(),
     },
     {
       action: 'h3',
-      title: 'Subtitulo',
+      title: 'Subtítulo',
       icon: 'H3',
       isActive: () => e.isActive('heading', { level: 3 }),
       command: () => e.chain().focus().toggleHeading({ level: 3 }).run(),

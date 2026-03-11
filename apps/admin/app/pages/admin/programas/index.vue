@@ -11,7 +11,7 @@
       <template #toolbar>
         <UiInput
           v-model="search"
-          placeholder="Buscar por titulo..."
+          placeholder="Buscar por título..."
           style="min-width: 200px;"
         >
           <template #suffix><Icon name="lucide:search" size="18" /></template>
@@ -104,14 +104,14 @@ const planFilterOptions = [
 
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
-  mentoria_grupal: 'Mentoria grupal',
+  mentoria_grupal: 'Mentoría grupal',
   bootcamp_liderazgo: 'Bootcamp: Liderazgo',
   coaching_1on1: 'Coaching 1:1',
   retiro_marzo_2026: 'Retiro marzo 2026',
 }
 
 const columns = [
-  { key: 'title', label: 'Titulo', width: '25%' },
+  { key: 'title', label: 'Título', width: '25%' },
   { key: 'program_type', label: 'Tipo' },
   { key: 'plan', label: 'Plan' },
   { key: 'entitlement_key', label: 'Complemento' },
@@ -120,10 +120,10 @@ const columns = [
 ]
 
 const rows = ref([
-  { id: 'prg-001', title: 'Reto 21 dias de meditacion', program_type: 'reto', status: 'published', enrolled_count: 3420, plan: 'core', entitlement_key: null as string | null },
-  { id: 'prg-002', title: 'Programa de nutricion consciente', program_type: 'program', status: 'published', enrolled_count: 1856, plan: 'core', entitlement_key: null as string | null },
+  { id: 'prg-001', title: 'Reto 21 días de meditación', program_type: 'reto', status: 'published', enrolled_count: 3420, plan: 'core', entitlement_key: null as string | null },
+  { id: 'prg-002', title: 'Programa de nutrición consciente', program_type: 'program', status: 'published', enrolled_count: 1856, plan: 'core', entitlement_key: null as string | null },
   { id: 'prg-003', title: 'Bootcamp de bienestar integral', program_type: 'bootcamp', status: 'published', enrolled_count: 978, plan: 'core', entitlement_key: 'bootcamp_liderazgo' as string | null },
-  { id: 'prg-004', title: 'Reto 7 dias de gratitud', program_type: 'reto', status: 'published', enrolled_count: 4512, plan: 'free', entitlement_key: null as string | null },
+  { id: 'prg-004', title: 'Reto 7 días de gratitud', program_type: 'reto', status: 'published', enrolled_count: 4512, plan: 'free', entitlement_key: null as string | null },
   { id: 'prg-005', title: 'Programa de yoga para principiantes', program_type: 'program', status: 'draft', enrolled_count: 0, plan: 'core', entitlement_key: null as string | null },
   { id: 'prg-006', title: 'Bootcamp productividad personal', program_type: 'bootcamp', status: 'draft', enrolled_count: 0, plan: 'free', entitlement_key: null as string | null },
   { id: 'prg-007', title: 'Reto detox digital', program_type: 'reto', status: 'archived', enrolled_count: 1230, plan: 'free', entitlement_key: null as string | null },
@@ -173,7 +173,7 @@ function handleDuplicate(row: typeof rows.value[number]) {
 }
 
 function handleDelete(row: Record<string, any>) {
-  if (confirm(`Seguro que deseas eliminar "${row.title}"?`)) {
+  if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
     rows.value = rows.value.filter(r => r.id !== row.id)
   }
 }

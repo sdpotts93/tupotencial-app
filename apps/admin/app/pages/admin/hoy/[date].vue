@@ -1,34 +1,34 @@
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-header__title">Plan del dia: {{ formatDate(dateParam) }}</h1>
+      <h1 class="page-header__title">Plan del día: {{ formatDate(dateParam) }}</h1>
     </div>
 
     <div class="form-layout__main">
 
-      <!-- 1. Frase del dia -->
+      <!-- 1. Frase del día -->
       <UiCard variant="outlined">
         <div class="form-section">
-          <h3 class="section-title">Frase del dia</h3>
+          <h3 class="section-title">Frase del día</h3>
           <UiTextarea
             v-model="form.phrase_text"
             label="Frase"
-            placeholder="Escribe la frase motivacional del dia..."
+            placeholder="Escribe la frase motivacional del día..."
             :rows="3"
           />
           <UiSelect
             v-model="form.phrase_author"
-            label="Quien dice la frase"
+            label="Quién dice la frase"
             :options="authorOptions"
           />
         </div>
       </UiCard>
 
-      <!-- 2. Accion del dia -->
+      <!-- 2. Acción del día -->
       <UiCard variant="outlined">
         <div class="form-section">
-          <h3 class="section-title">Accion del dia</h3>
-          <p class="section-hint">El usuario vera esta accion como su reto principal del dia. Selecciona el tipo y configura los detalles.</p>
+          <h3 class="section-title">Acción del día</h3>
+          <p class="section-hint">El usuario verá esta acción como su reto principal del día. Selecciona el tipo y configura los detalles.</p>
           <UiSelect
             v-model="form.action_type"
             label="Tipo"
@@ -61,16 +61,16 @@
       <UiCard variant="outlined">
         <div class="form-section">
           <h3 class="section-title">Badge</h3>
-          <p class="section-hint">El badge aparece despues de que el usuario completa la accion del dia.</p>
+          <p class="section-hint">El badge aparece después de que el usuario completa la acción del día.</p>
           <UiInput
             v-model="form.badge_title"
-            label="Titulo del badge"
-            placeholder="Ej: Dia completado"
+            label="Título del badge"
+            placeholder="Ej: Día completado"
           />
           <UiInput
             v-model="form.badge_subtitle"
-            label="Subtitulo del badge"
-            placeholder="Ej: Sigue asi, vas genial"
+            label="Subtítulo del badge"
+            placeholder="Ej: Sigue así, vas genial"
           />
         </div>
       </UiCard>
@@ -91,13 +91,13 @@ const route = useRoute()
 const dateParam = computed(() => route.params.date as string)
 
 const form = reactive({
-  phrase_text: 'Cada dia es una nueva oportunidad para cuidar de ti.',
+  phrase_text: 'Cada día es una nueva oportunidad para cuidar de ti.',
   phrase_author: 'gabriel' as 'gabriel' | 'carlotta',
   action_type: 'talk_to_ai' as string,
   content_id: '',
   form_id: '',
-  badge_title: 'Dia completado',
-  badge_subtitle: 'Sigue asi, vas genial',
+  badge_title: 'Día completado',
+  badge_subtitle: 'Sigue así, vas genial',
 })
 
 const authorOptions = [
@@ -113,21 +113,21 @@ const actionTypeOptions = [
 
 const contentOptions = [
   { value: 'cnt-001', label: '5 pasos para el bienestar emocional' },
-  { value: 'cnt-002', label: 'Meditacion guiada para la manana' },
-  { value: 'cnt-003', label: 'Nutricion consciente: guia basica' },
+  { value: 'cnt-002', label: 'Meditación guiada para la mañana' },
+  { value: 'cnt-003', label: 'Nutrición consciente: guía básica' },
   { value: 'cnt-004', label: 'Rutina de yoga para principiantes' },
-  { value: 'cnt-005', label: 'Higiene del sueno: consejos practicos' },
-  { value: 'cnt-006', label: 'Como manejar el estres laboral' },
-  { value: 'cnt-007', label: 'Ejercicios de respiracion 4-7-8' },
-  { value: 'cnt-008', label: 'Alimentacion para la energia diaria' },
+  { value: 'cnt-005', label: 'Higiene del sueño: consejos prácticos' },
+  { value: 'cnt-006', label: 'Cómo manejar el estrés laboral' },
+  { value: 'cnt-007', label: 'Ejercicios de respiración 4-7-8' },
+  { value: 'cnt-008', label: 'Alimentación para la energía diaria' },
 ]
 
 const formOptions = [
-  { value: 'frm-001', label: 'Evaluacion inicial de bienestar' },
+  { value: 'frm-001', label: 'Evaluación inicial de bienestar' },
   { value: 'frm-002', label: 'Check-in semanal' },
-  { value: 'frm-003', label: 'Encuesta de satisfaccion del programa' },
-  { value: 'frm-004', label: 'Registro de habitos diarios' },
-  { value: 'frm-005', label: 'Evaluacion de progreso mensual' },
+  { value: 'frm-003', label: 'Encuesta de satisfacción del programa' },
+  { value: 'frm-004', label: 'Registro de hábitos diarios' },
+  { value: 'frm-005', label: 'Evaluación de progreso mensual' },
 ]
 
 watch(() => form.action_type, () => {
@@ -145,7 +145,7 @@ function formatDate(iso: string) {
 }
 
 function handleSave() {
-  alert('Plan del dia guardado (mock)')
+  alert('Plan del día guardado (mock)')
 }
 </script>
 

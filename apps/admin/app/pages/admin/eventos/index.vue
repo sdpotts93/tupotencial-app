@@ -14,7 +14,7 @@
         <template #toolbar>
           <UiInput
             v-model="search"
-            placeholder="Buscar por titulo..."
+            placeholder="Buscar por título..."
             style="min-width: 200px;"
           >
             <template #suffix><Icon name="lucide:search" size="18" /></template>
@@ -61,7 +61,7 @@ const search = ref('')
 const activeTab = ref('upcoming')
 
 const tabs = [
-  { value: 'upcoming', label: 'Proximos' },
+  { value: 'upcoming', label: 'Próximos' },
   { value: 'past', label: 'Pasados' },
   { value: 'draft', label: 'Borradores' },
 ]
@@ -78,7 +78,7 @@ const columns = [
 const rows = ref([
   { id: 'evt-001', title: 'Taller de mindfulness para principiantes', starts_at: '2026-03-05T18:00:00', plan: 'core', registered_count: 234, status: 'published', is_upcoming: true, entitlement_key: null as string | null },
   { id: 'evt-002', title: 'Clase de yoga restaurativa', starts_at: '2026-03-08T10:00:00', plan: 'core', registered_count: 156, status: 'published', is_upcoming: true, entitlement_key: 'vip' as string | null },
-  { id: 'evt-003', title: 'Conferencia: Nutricion y bienestar', starts_at: '2026-03-15T17:00:00', plan: 'free', registered_count: 89, status: 'published', is_upcoming: true, entitlement_key: null as string | null },
+  { id: 'evt-003', title: 'Conferencia: Nutrición y bienestar', starts_at: '2026-03-15T17:00:00', plan: 'free', registered_count: 89, status: 'published', is_upcoming: true, entitlement_key: null as string | null },
   { id: 'evt-004', title: 'Retiro de fin de semana', starts_at: '2026-03-22T09:00:00', plan: 'core', registered_count: 42, status: 'published', is_upcoming: true, entitlement_key: 'retiro_marzo_2026' as string | null },
   { id: 'evt-005', title: 'Mesa redonda: Salud mental en el trabajo', starts_at: '2026-02-20T16:00:00', plan: 'free', registered_count: 312, status: 'published', is_upcoming: false, entitlement_key: null as string | null },
   { id: 'evt-006', title: 'Taller de cocina saludable', starts_at: '2026-04-01T11:00:00', plan: 'free', registered_count: 0, status: 'draft', is_upcoming: true, entitlement_key: null as string | null },
@@ -87,7 +87,7 @@ const rows = ref([
 
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
-  mentoria_grupal: 'Mentoria grupal',
+  mentoria_grupal: 'Mentoría grupal',
   bootcamp_liderazgo: 'Bootcamp: Liderazgo',
   coaching_1on1: 'Coaching 1:1',
   retiro_marzo_2026: 'Retiro marzo 2026',

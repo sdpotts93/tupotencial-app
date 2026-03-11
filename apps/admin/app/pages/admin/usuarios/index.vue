@@ -97,14 +97,14 @@ const columns = [
 ]
 
 const rows = ref([
-  { id: 'usr-001', full_name: 'Maria Lopez Hernandez', email: 'maria.lopez@gmail.com', plan: 'core', segment: 'carlotta', status: 'active', created_at: '2025-08-15T10:00:00' },
-  { id: 'usr-002', full_name: 'Carlos Ramirez Torres', email: 'carlos.rt@outlook.com', plan: 'core', segment: 'gabriel', status: 'active', created_at: '2025-10-03T14:30:00' },
-  { id: 'usr-003', full_name: 'Ana Sofia Gutierrez', email: 'ana.gtz@gmail.com', plan: 'free', segment: 'carlotta', status: 'active', created_at: '2026-01-20T09:00:00' },
-  { id: 'usr-004', full_name: 'Roberto Diaz Mora', email: 'rdiaz@empresa.com', plan: 'core', segment: 'gabriel', status: 'active', created_at: '2025-05-10T08:00:00' },
+  { id: 'usr-001', full_name: 'Maria López Hernandez', email: 'maria.lopez@gmail.com', plan: 'core', segment: 'carlotta', status: 'active', created_at: '2025-08-15T10:00:00' },
+  { id: 'usr-002', full_name: 'Carlos Ramírez Torres', email: 'carlos.rt@outlook.com', plan: 'core', segment: 'gabriel', status: 'active', created_at: '2025-10-03T14:30:00' },
+  { id: 'usr-003', full_name: 'Ana Sofia Gutiérrez', email: 'ana.gtz@gmail.com', plan: 'free', segment: 'carlotta', status: 'active', created_at: '2026-01-20T09:00:00' },
+  { id: 'usr-004', full_name: 'Roberto Díaz Mora', email: 'rdiaz@empresa.com', plan: 'core', segment: 'gabriel', status: 'active', created_at: '2025-05-10T08:00:00' },
   { id: 'usr-005', full_name: 'Laura Mendez', email: 'laura.mendez@yahoo.com', plan: 'free', segment: 'carlotta', status: 'inactive', created_at: '2025-12-01T16:00:00' },
   { id: 'usr-006', full_name: 'Fernando Castillo', email: 'fcastillo@gmail.com', plan: 'core', segment: 'gabriel', status: 'active', created_at: '2026-01-05T11:30:00' },
   { id: 'usr-007', full_name: 'Sofia Torres Vega', email: 'sofia.tv@hotmail.com', plan: 'free', segment: 'carlotta', status: 'active', created_at: '2026-02-15T13:00:00' },
-  { id: 'usr-008', full_name: 'Pedro Sanchez', email: 'pedro.s@empresa.com', plan: 'core', segment: 'gabriel', status: 'inactive', created_at: '2025-09-20T10:00:00' },
+  { id: 'usr-008', full_name: 'Pedro Sánchez', email: 'pedro.s@empresa.com', plan: 'core', segment: 'gabriel', status: 'inactive', created_at: '2025-09-20T10:00:00' },
   { id: 'usr-009', full_name: 'Valentina Morales', email: 'val.morales@gmail.com', plan: 'core', segment: 'carlotta', status: 'active', created_at: '2025-07-12T07:00:00' },
   { id: 'usr-010', full_name: 'Diego Herrera Ruiz', email: 'dherrera@outlook.com', plan: 'free', segment: 'gabriel', status: 'active', created_at: '2026-02-22T20:00:00' },
 ])

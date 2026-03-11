@@ -10,14 +10,14 @@
           <div class="form-section">
             <UiInput
               v-model="form.title"
-              label="Titulo del add-on"
+              label="Título del add-on"
               placeholder="Nombre descriptivo del add-on"
             />
 
             <UiTextarea
               v-model="form.description"
-              label="Descripcion"
-              placeholder="Describe que incluye este add-on..."
+              label="Descripción"
+              placeholder="Describe qué incluye este add-on..."
               :rows="4"
             />
 
@@ -45,7 +45,7 @@
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>
                   </div>
-                  <p class="upload__text">Arrastra tu imagen aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
                   <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
                 </template>
                 <template v-else>
@@ -83,7 +83,7 @@
               label="Meses de Core incluidos"
               type="number"
               placeholder="0"
-              hint="Dejar vacio si no aplica"
+              hint="Dejar vacío si no aplica"
             />
 
             <UiInput

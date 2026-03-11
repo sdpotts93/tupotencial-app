@@ -1,7 +1,7 @@
 <template>
   <div class="page--fill">
     <div class="page-header">
-      <h1 class="page-header__title">Roles de administracion</h1>
+      <h1 class="page-header__title">Roles de administración</h1>
       <div class="page-header__actions">
         <UiButton variant="primary-outline" size="sm" @click="showInviteModal = true">+ Invitar administrador</UiButton>
       </div>
@@ -77,7 +77,7 @@
         />
         <UiInput
           :model-value="editForm.email"
-          label="Correo electronico"
+          label="Correo electrónico"
           disabled
         />
         <UiSelect
@@ -99,7 +99,7 @@
       <div class="modal-form">
         <UiInput
           v-model="inviteForm.email"
-          label="Correo electronico"
+          label="Correo electrónico"
           type="email"
           placeholder="nuevo@admin.com"
         />
@@ -117,7 +117,7 @@
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showInviteModal = false">Cancelar</UiButton>
-          <UiButton variant="primary-outline" size="sm" @click="sendInvite">Enviar invitacion</UiButton>
+          <UiButton variant="primary-outline" size="sm" @click="sendInvite">Enviar invitación</UiButton>
         </div>
       </template>
     </UiModal>
@@ -148,7 +148,7 @@ const roles = [
   {
     key: 'admin',
     name: 'Administrador',
-    description: 'Acceso completo al sistema incluyendo gestion de usuarios.',
+    description: 'Acceso completo al sistema incluyendo gestión de usuarios.',
     count: 4,
     variant: 'primary',
   },
@@ -162,7 +162,7 @@ const roles = [
   {
     key: 'read_only',
     name: 'Solo lectura',
-    description: 'Acceso de solo lectura al panel de administracion.',
+    description: 'Acceso de solo lectura al panel de administración.',
     count: 2,
     variant: 'default',
   },
@@ -172,18 +172,18 @@ const columns = [
   { key: 'full_name', label: 'Administrador', width: '30%' },
   { key: 'role', label: 'Rol' },
   { key: 'status', label: 'Estado' },
-  { key: 'last_login', label: 'Ultimo acceso' },
+  { key: 'last_login', label: 'Último acceso' },
 ]
 
 const adminUsers = ref([
-  { id: 'adm-001', full_name: 'Ana Garcia', email: 'ana.garcia@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-24T10:30:00' },
-  { id: 'adm-002', full_name: 'Carlos Lopez', email: 'carlos.lopez@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-24T09:15:00' },
+  { id: 'adm-001', full_name: 'Ana García', email: 'ana.garcia@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-24T10:30:00' },
+  { id: 'adm-002', full_name: 'Carlos López', email: 'carlos.lopez@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-24T09:15:00' },
   { id: 'adm-003', full_name: 'Maria Torres', email: 'maria.torres@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-23T16:00:00' },
   { id: 'adm-004', full_name: 'Luis Mendoza', email: 'luis.mendoza@tupotencial.app', role: 'admin', status: 'active', last_login: '2026-02-22T14:30:00' },
   { id: 'adm-005', full_name: 'Patricia Ruiz', email: 'patricia.ruiz@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-24T08:00:00' },
-  { id: 'adm-006', full_name: 'Jorge Fernandez', email: 'jorge.f@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-23T11:00:00' },
+  { id: 'adm-006', full_name: 'Jorge Fernández', email: 'jorge.f@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-23T11:00:00' },
   { id: 'adm-007', full_name: 'Diana Salazar', email: 'diana.s@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-21T15:00:00' },
-  { id: 'adm-008', full_name: 'Ricardo Perez', email: 'ricardo.p@tupotencial.app', role: 'editor', status: 'pending', last_login: null },
+  { id: 'adm-008', full_name: 'Ricardo Pérez', email: 'ricardo.p@tupotencial.app', role: 'editor', status: 'pending', last_login: null },
   { id: 'adm-009', full_name: 'Isabel Contreras', email: 'isabel.c@tupotencial.app', role: 'editor', status: 'active', last_login: '2026-02-20T09:00:00' },
   { id: 'adm-010', full_name: 'Eduardo Vargas', email: 'eduardo.v@tupotencial.app', role: 'read_only', status: 'active', last_login: '2026-02-24T07:30:00' },
   { id: 'adm-011', full_name: 'Camila Rios', email: 'camila.r@tupotencial.app', role: 'read_only', status: 'active', last_login: '2026-02-19T13:00:00' },
@@ -230,13 +230,13 @@ function saveEdit() {
 }
 
 function deleteAdmin(row: Record<string, any>) {
-  if (confirm(`Seguro que deseas eliminar a ${row.full_name}?`)) {
+  if (confirm(`¿Seguro que deseas eliminar a ${row.full_name}?`)) {
     adminUsers.value = adminUsers.value.filter(u => u.id !== row.id)
   }
 }
 
 function sendInvite() {
-  alert(`Invitacion enviada a ${inviteForm.email} (mock)`)
+  alert(`Invitación enviada a ${inviteForm.email} (mock)`)
   showInviteModal.value = false
   inviteForm.email = ''
   inviteForm.full_name = ''

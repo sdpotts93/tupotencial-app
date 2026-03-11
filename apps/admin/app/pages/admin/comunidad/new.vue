@@ -1,7 +1,7 @@
 <template>
   <div class="page-fill">
     <div class="page-header">
-      <h1 class="page-header__title">Nueva publicacion</h1>
+      <h1 class="page-header__title">Nueva publicación</h1>
     </div>
 
     <div class="form-layout">
@@ -10,14 +10,14 @@
           <div class="form-section">
             <UiInput
               v-model="form.title"
-              label="Titulo (opcional)"
-              placeholder="Ej: Reflexion del dia"
+              label="Título (opcional)"
+              placeholder="Ej: Reflexión del día"
             />
 
             <UiTextarea
               v-model="form.body"
-              label="Contenido de la publicacion"
-              placeholder="Escribe tu publicacion aqui..."
+              label="Contenido de la publicación"
+              placeholder="Escribe tu publicación aquí..."
               :rows="6"
             />
 
@@ -45,7 +45,7 @@
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>
                   </div>
-                  <p class="upload__text">Arrastra tu archivo aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__text">Arrastra tu archivo aquí o <span class="upload__link">selecciona</span></p>
                   <p class="upload__hint">JPG, PNG, WebP, MP4, MOV — max 50 MB</p>
                 </template>
                 <template v-else>
@@ -82,7 +82,7 @@
           <div class="form-section">
             <div class="author-preview">
               <img :src="authorAvatar" :alt="form.author" class="author-preview__avatar" />
-              <p class="meta-info">Se publicara como <strong>{{ form.author }}</strong></p>
+              <p class="meta-info">Se publicará como <strong>{{ form.author }}</strong></p>
             </div>
           </div>
         </UiCard>
@@ -155,7 +155,7 @@ function formatFileSize(bytes: number): string {
 }
 
 function handleSave() {
-  alert('Publicacion creada (mock)')
+  alert('Publicación creada (mock)')
   navigateTo('/admin/comunidad')
 }
 </script>

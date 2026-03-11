@@ -1,7 +1,7 @@
 <template>
   <div class="page-fill">
     <div class="page-header">
-      <h1 class="page-header__title">Editar publicacion</h1>
+      <h1 class="page-header__title">Editar publicación</h1>
     </div>
 
     <div class="form-layout">
@@ -10,13 +10,13 @@
           <div class="form-section">
             <UiInput
               v-model="form.title"
-              label="Titulo (opcional)"
-              placeholder="Ej: Reflexion del dia"
+              label="Título (opcional)"
+              placeholder="Ej: Reflexión del día"
             />
 
             <UiTextarea
               v-model="form.body"
-              label="Contenido de la publicacion"
+              label="Contenido de la publicación"
               :rows="6"
             />
 
@@ -44,7 +44,7 @@
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>
                   </div>
-                  <p class="upload__text">Arrastra tu archivo aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__text">Arrastra tu archivo aquí o <span class="upload__link">selecciona</span></p>
                   <p class="upload__hint">JPG, PNG, WebP, MP4, MOV — max 50 MB</p>
                 </template>
                 <template v-else>
@@ -121,7 +121,7 @@ definePageMeta({ layout: 'default' })
 
 const form = reactive({
   title: 'Bienvenidos a la comunidad',
-  body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar habitos saludables. Que van a hacer hoy para cuidarse?',
+  body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar hábitos saludables. ¿Qué van a hacer hoy para cuidarse?',
   media_url: '',
   status: 'published',
   author: 'Gabriel',
@@ -146,8 +146,8 @@ const authorAvatar = computed(() =>
 
 const comments = ref([
   { id: 'cmt-001', author_name: 'Laura Mendez', body: 'Justo lo que necesitaba leer hoy. Gracias!', created_at: '2026-02-24T08:15:00', is_hidden: false },
-  { id: 'cmt-002', author_name: 'Pedro Sanchez', body: 'Voy a empezar con 10 minutos de meditacion. Alguien se une?', created_at: '2026-02-24T08:30:00', is_hidden: false },
-  { id: 'cmt-003', author_name: 'Sofia Torres', body: 'Me encanta esta comunidad! Cada dia me motivan mas.', created_at: '2026-02-24T09:00:00', is_hidden: false },
+  { id: 'cmt-002', author_name: 'Pedro Sanchez', body: 'Voy a empezar con 10 minutos de meditación. ¿Alguien se une?', created_at: '2026-02-24T08:30:00', is_hidden: false },
+  { id: 'cmt-003', author_name: 'Sofia Torres', body: 'Me encanta esta comunidad! Cada día me motivan más.', created_at: '2026-02-24T09:00:00', is_hidden: false },
 ])
 
 // ── Media upload ──
@@ -197,12 +197,12 @@ function hideComment(comment: any) {
 }
 
 function handleSave() {
-  alert('Publicacion actualizada (mock)')
+  alert('Publicación actualizada (mock)')
 }
 
 function handleDelete() {
-  if (confirm('Seguro que deseas eliminar esta publicacion?')) {
-    alert('Publicacion eliminada (mock)')
+  if (confirm('¿Seguro que deseas eliminar esta publicación?')) {
+    alert('Publicación eliminada (mock)')
     navigateTo('/admin/comunidad')
   }
 }

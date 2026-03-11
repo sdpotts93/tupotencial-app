@@ -18,7 +18,7 @@
     </div>
 
     <!-- Quick Actions -->
-    <h2 class="dashboard__section-title">Acciones rapidas</h2>
+    <h2 class="dashboard__section-title">Acciones rápidas</h2>
     <div class="dashboard__actions-grid">
       <NuxtLink
         v-for="action in quickActions"
@@ -63,16 +63,16 @@ const kpis = ref([
 ])
 
 const quickActions = [
-  { title: 'Crear contenido', description: 'Articulo, video o audio nuevo', icon: 'lucide:file-plus', to: '/admin/contenido/new' },
-  { title: 'Nuevo programa', description: 'Disenar un programa de bienestar', icon: 'lucide:layers', to: '/admin/programas/new' },
+  { title: 'Crear contenido', description: 'Artículo, video o audio nuevo', icon: 'lucide:file-plus', to: '/admin/contenido/new' },
+  { title: 'Nuevo programa', description: 'Diseñar un programa de bienestar', icon: 'lucide:layers', to: '/admin/programas/new' },
   { title: 'Publicar evento', description: 'Agendar un evento o taller', icon: 'lucide:calendar-plus', to: '/admin/eventos/new' },
   { title: 'Agregar beneficio', description: 'Nuevo beneficio para miembros', icon: 'lucide:gift', to: '/admin/beneficios/new' },
-  { title: 'Post comunidad', description: 'Publicacion oficial en la comunidad', icon: 'lucide:message-square-plus', to: '/admin/comunidad/new' },
-  { title: 'Planificar hoy', description: 'Configurar el plan del dia', icon: 'lucide:sun', to: '/admin/hoy' },
+  { title: 'Post comunidad', description: 'Publicación oficial en la comunidad', icon: 'lucide:message-square-plus', to: '/admin/comunidad/new' },
+  { title: 'Planificar hoy', description: 'Configurar el plan del día', icon: 'lucide:sun', to: '/admin/hoy' },
 ]
 
 const activityColumns = [
-  { key: 'action', label: 'Accion' },
+  { key: 'action', label: 'Acción' },
   { key: 'type', label: 'Tipo' },
   { key: 'item', label: 'Elemento' },
   { key: 'user', label: 'Responsable' },
@@ -80,11 +80,11 @@ const activityColumns = [
 ]
 
 const activityRows = ref([
-  { id: '1', action: 'Contenido publicado', type: 'contenido', item: '5 pasos para el bienestar emocional', user: 'Ana Garcia', created_at: '2026-02-24T10:30:00' },
-  { id: '2', action: 'Programa actualizado', type: 'programa', item: 'Reto 21 dias de meditacion', user: 'Carlos Lopez', created_at: '2026-02-24T09:15:00' },
-  { id: '3', action: 'Evento creado', type: 'evento', item: 'Taller de mindfulness', user: 'Ana Garcia', created_at: '2026-02-23T16:45:00' },
+  { id: '1', action: 'Contenido publicado', type: 'contenido', item: '5 pasos para el bienestar emocional', user: 'Ana García', created_at: '2026-02-24T10:30:00' },
+  { id: '2', action: 'Programa actualizado', type: 'programa', item: 'Reto 21 días de meditación', user: 'Carlos López', created_at: '2026-02-24T09:15:00' },
+  { id: '3', action: 'Evento creado', type: 'evento', item: 'Taller de mindfulness', user: 'Ana García', created_at: '2026-02-23T16:45:00' },
   { id: '4', action: 'Beneficio agregado', type: 'beneficio', item: '20% en suplementos NutriVida', user: 'Maria Torres', created_at: '2026-02-23T14:20:00' },
-  { id: '5', action: 'Usuario registrado', type: 'usuario', item: 'Luisa Fernandez', user: 'Sistema', created_at: '2026-02-23T11:00:00' },
+  { id: '5', action: 'Usuario registrado', type: 'usuario', item: 'Luisa Fernández', user: 'Sistema', created_at: '2026-02-23T11:00:00' },
 ])
 
 function typeVariant(type: string) {

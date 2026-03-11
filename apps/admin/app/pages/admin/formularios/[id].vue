@@ -10,12 +10,12 @@
           <div class="form-section">
             <UiInput
               v-model="form.title"
-              label="Titulo del formulario"
+              label="Título del formulario"
             />
 
             <UiTextarea
               v-model="form.description"
-              label="Descripcion"
+              label="Descripción"
               :rows="3"
             />
           </div>
@@ -76,7 +76,7 @@
         <!-- <UiCard variant="filled">
           <div class="form-section">
             <p class="meta-label">Respuestas: 247</p>
-            <p class="meta-label">Ultima respuesta: 7 mar 2026</p>
+            <p class="meta-label">Última respuesta: 7 mar 2026</p>
           </div>
         </UiCard> -->
       </div>
@@ -97,8 +97,8 @@ const route = useRoute()
 
 // ── Form state (pre-filled) ──
 const form = reactive({
-  title: 'Evaluacion inicial de bienestar',
-  description: 'Formulario para evaluar el estado de bienestar del usuario al iniciar un programa. Incluye preguntas sobre habitos, estado emocional y objetivos.',
+  title: 'Evaluación inicial de bienestar',
+  description: 'Formulario para evaluar el estado de bienestar del usuario al iniciar un programa. Incluye preguntas sobre hábitos, estado emocional y objetivos.',
   status: 'active',
 })
 
@@ -110,7 +110,7 @@ const statusOptions = [
 
 const fieldTypeOptions = [
   { value: 'text', label: 'Pregunta abierta' },
-  { value: 'select', label: 'Seleccion' },
+  { value: 'select', label: 'Selección' },
 ]
 
 // ── Field management ──
@@ -122,27 +122,27 @@ interface FormField {
 
 const fields = ref<FormField[]>([
   {
-    question: 'Como describirias tu nivel de energia actualmente?',
+    question: '¿Cómo describirías tu nivel de energía actualmente?',
     type: 'select',
     optionsText: 'Muy bajo, Bajo, Normal, Alto, Muy alto',
   },
   {
-    question: 'Cuantas horas duermes en promedio por noche?',
+    question: '¿Cuántas horas duermes en promedio por noche?',
     type: 'select',
-    optionsText: 'Menos de 5, 5-6, 6-7, 7-8, Mas de 8',
+    optionsText: 'Menos de 5, 5-6, 6-7, 7-8, Más de 8',
   },
   {
-    question: 'Cual es tu principal objetivo al iniciar este programa?',
+    question: '¿Cuál es tu principal objetivo al iniciar este programa?',
     type: 'text',
     optionsText: '',
   },
   {
-    question: 'Con que frecuencia realizas actividad fisica?',
+    question: '¿Con qué frecuencia realizas actividad física?',
     type: 'select',
     optionsText: 'Nunca, 1-2 veces por semana, 3-4 veces por semana, Diariamente',
   },
   {
-    question: 'Hay algo mas que te gustaria compartir con tu coach?',
+    question: '¿Hay algo más que te gustaría compartir con tu coach?',
     type: 'text',
     optionsText: '',
   },
@@ -165,7 +165,7 @@ function handleSave() {
 }
 
 function handleDelete() {
-  if (confirm('Seguro que deseas eliminar este formulario?')) {
+  if (confirm('¿Seguro que deseas eliminar este formulario?')) {
     alert('Formulario eliminado (mock)')
     navigateTo('/admin/formularios')
   }

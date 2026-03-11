@@ -10,14 +10,14 @@
           <div class="form-section">
             <UiInput
               v-model="form.title"
-              label="Titulo del formulario"
-              placeholder="Escribe el titulo del formulario"
+              label="Título del formulario"
+              placeholder="Escribe el título del formulario"
             />
 
             <UiTextarea
               v-model="form.description"
-              label="Descripcion"
-              placeholder="Describe el proposito del formulario..."
+              label="Descripción"
+              placeholder="Describe el propósito del formulario..."
               :rows="3"
             />
           </div>
@@ -103,7 +103,7 @@ const statusOptions = [
 
 const fieldTypeOptions = [
   { value: 'text', label: 'Pregunta abierta' },
-  { value: 'select', label: 'Seleccion' },
+  { value: 'select', label: 'Selección' },
 ]
 
 // ── Field management ──

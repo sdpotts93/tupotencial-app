@@ -11,7 +11,7 @@
       <template #toolbar>
         <UiInput
           v-model="search"
-          placeholder="Buscar por titulo..."
+          placeholder="Buscar por título..."
           style="min-width: 200px;"
         >
           <template #suffix><Icon name="lucide:search" size="18" /></template>
@@ -64,18 +64,18 @@ const statusOptions = [
 ]
 
 const columns = [
-  { key: 'title', label: 'Titulo', width: '40%' },
+  { key: 'title', label: 'Título', width: '40%' },
   { key: 'fields_count', label: 'Campos' },
   { key: 'status', label: 'Estado' },
   { key: 'created_at', label: 'Creado' },
 ]
 
 const rows = ref([
-  { id: 'frm-001', title: 'Evaluacion inicial de bienestar', fields_count: 5, status: 'active', created_at: '2026-02-20T08:00:00' },
+  { id: 'frm-001', title: 'Evaluación inicial de bienestar', fields_count: 5, status: 'active', created_at: '2026-02-20T08:00:00' },
   { id: 'frm-002', title: 'Check-in semanal', fields_count: 3, status: 'active', created_at: '2026-02-15T10:00:00' },
-  { id: 'frm-003', title: 'Encuesta de satisfaccion del programa', fields_count: 4, status: 'inactive', created_at: '2026-03-01T12:00:00' },
-  { id: 'frm-004', title: 'Registro de habitos diarios', fields_count: 6, status: 'active', created_at: '2026-01-28T09:00:00' },
-  { id: 'frm-005', title: 'Evaluacion de progreso mensual', fields_count: 4, status: 'inactive', created_at: '2026-01-10T08:00:00' },
+  { id: 'frm-003', title: 'Encuesta de satisfacción del programa', fields_count: 4, status: 'inactive', created_at: '2026-03-01T12:00:00' },
+  { id: 'frm-004', title: 'Registro de hábitos diarios', fields_count: 6, status: 'active', created_at: '2026-01-28T09:00:00' },
+  { id: 'frm-005', title: 'Evaluación de progreso mensual', fields_count: 4, status: 'inactive', created_at: '2026-01-10T08:00:00' },
 ])
 
 const filteredRows = computed(() => {
@@ -104,7 +104,7 @@ function formatDate(iso: string) {
 }
 
 function handleDelete(row: Record<string, any>) {
-  if (confirm(`Seguro que deseas eliminar "${row.title}"?`)) {
+  if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
     rows.value = rows.value.filter(r => r.id !== row.id)
   }
 }

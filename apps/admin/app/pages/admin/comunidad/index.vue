@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Comunidad</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/comunidad/new">+ Nueva publicacion</UiButton>
+        <UiButton variant="primary-outline" size="sm" to="/admin/comunidad/new">+ Nueva publicación</UiButton>
       </div>
     </div>
 
@@ -88,12 +88,12 @@ const columns = [
 ]
 
 const rows = ref([
-  { id: 'post-001', author: 'Gabriel', body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar habitos saludables.', likes_count: 245, comments_count: 32, status: 'published', created_at: '2026-02-24T08:00:00' },
-  { id: 'post-002', author: 'Carlotta', body: 'Nuevo reto: 7 dias de gratitud. Inscribete desde la seccion de Retos!', likes_count: 156, comments_count: 18, status: 'published', created_at: '2026-02-23T10:00:00' },
-  { id: 'post-003', author: 'Gabriel', body: 'Nuevo articulo disponible: "5 pasos para el bienestar emocional". Descubrelo en la seccion de contenido.', likes_count: 89, comments_count: 12, status: 'published', created_at: '2026-02-22T14:00:00' },
-  { id: 'post-004', author: 'Carlotta', body: 'Esta semana les compartimos una meditacion guiada especial para la gratitud. Disponible en la biblioteca.', likes_count: 134, comments_count: 21, status: 'published', created_at: '2026-02-21T09:00:00' },
-  { id: 'post-005', author: 'Gabriel', body: 'Tip de la semana: Intenta hacer 3 respiraciones profundas antes de cada comida. Notaras la diferencia.', likes_count: 67, comments_count: 8, status: 'draft', created_at: '2026-02-20T16:00:00' },
-  { id: 'post-006', author: 'Carlotta', body: 'Publicacion oculta por revision.', likes_count: 0, comments_count: 0, status: 'hidden', created_at: '2026-02-19T11:00:00' },
+  { id: 'post-001', author: 'Gabriel', body: 'Feliz lunes! Recuerda que cada semana es una oportunidad nueva para cultivar hábitos saludables.', likes_count: 245, comments_count: 32, status: 'published', created_at: '2026-02-24T08:00:00' },
+  { id: 'post-002', author: 'Carlotta', body: 'Nuevo reto: 7 días de gratitud. ¡Inscríbete desde la sección de Retos!', likes_count: 156, comments_count: 18, status: 'published', created_at: '2026-02-23T10:00:00' },
+  { id: 'post-003', author: 'Gabriel', body: 'Nuevo artículo disponible: "5 pasos para el bienestar emocional". Descúbrelo en la sección de contenido.', likes_count: 89, comments_count: 12, status: 'published', created_at: '2026-02-22T14:00:00' },
+  { id: 'post-004', author: 'Carlotta', body: 'Esta semana les compartimos una meditación guiada especial para la gratitud. Disponible en la biblioteca.', likes_count: 134, comments_count: 21, status: 'published', created_at: '2026-02-21T09:00:00' },
+  { id: 'post-005', author: 'Gabriel', body: 'Tip de la semana: Intenta hacer 3 respiraciones profundas antes de cada comida. Notarás la diferencia.', likes_count: 67, comments_count: 8, status: 'draft', created_at: '2026-02-20T16:00:00' },
+  { id: 'post-006', author: 'Carlotta', body: 'Publicación oculta por revisión.', likes_count: 0, comments_count: 0, status: 'hidden', created_at: '2026-02-19T11:00:00' },
 ])
 
 const filteredRows = computed(() => {
@@ -130,7 +130,7 @@ function authorAvatar(name: string) {
 }
 
 function handleDelete(row: Record<string, any>) {
-  if (confirm(`Seguro que deseas eliminar esta publicacion de ${row.author}?`)) {
+  if (confirm(`¿Seguro que deseas eliminar esta publicación de ${row.author}?`)) {
     rows.value = rows.value.filter(r => r.id !== row.id)
   }
 }

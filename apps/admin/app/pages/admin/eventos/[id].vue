@@ -8,8 +8,8 @@
       <div class="form-layout__main">
         <UiCard variant="outlined">
           <div class="form-section">
-            <UiInput v-model="form.title" label="Titulo del evento" />
-            <UiTextarea v-model="form.description" label="Descripcion" :rows="5" />
+            <UiInput v-model="form.title" label="Título del evento" />
+            <UiTextarea v-model="form.description" label="Descripción" :rows="5" />
             <!-- Image upload -->
             <div class="upload">
               <label class="upload__label">Imagen de portada</label>
@@ -34,7 +34,7 @@
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>
                   </div>
-                  <p class="upload__text">Arrastra tu imagen aqui o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
                   <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
                 </template>
                 <template v-else-if="coverFile">
@@ -63,9 +63,9 @@
               />
               <UiSelect
                 v-model="form.duration"
-                label="Duracion"
+                label="Duración"
                 :options="durationOptions"
-                placeholder="Selecciona duracion"
+                placeholder="Selecciona duración"
               />
             </div>
 
@@ -92,7 +92,7 @@
               v-model="form.entitlement_key"
               label="Complemento requerido"
               :options="entitlementOptions"
-              placeholder="Sin restriccion"
+              placeholder="Sin restricción"
             />
 
             <UiSelect v-model="form.status" label="Estado" :options="statusOptions" />
@@ -103,7 +103,7 @@
           <div class="form-section">
             <p class="eyebrow">Embed en vivo</p>
             <p class="meta-text">
-              URL para embed durante la transmision:
+              URL para embed durante la transmisión:
             </p>
             <code class="embed-url">https://vimeo.com/event/{{ form.vimeo_live_event_id }}/embed</code>
           </div>
@@ -156,7 +156,7 @@ function formatFileSize(bytes: number): string {
 // ── Form state ──
 const form = reactive({
   title: 'Taller de mindfulness para principiantes',
-  description: 'Un taller practico de 90 minutos donde aprenderas las bases de la meditacion mindfulness. Incluye ejercicios guiados, tecnicas de respiracion y herramientas para incorporar la practica en tu vida diaria.',
+  description: 'Un taller práctico de 90 minutos donde aprenderás las bases de la meditación mindfulness. Incluye ejercicios guiados, técnicas de respiración y herramientas para incorporar la práctica en tu vida diaria.',
   cover_url: 'https://images.tupotencial.app/events/mindfulness-taller.jpg',
   starts_at: new Date('2026-03-05T18:00:00') as Date | null,
   duration: '90',
@@ -187,9 +187,9 @@ const planOptions = [
 ]
 
 const entitlementOptions = [
-  { value: '', label: 'Sin restriccion (abierto)' },
+  { value: '', label: 'Sin restricción (abierto)' },
   { value: 'vip', label: 'VIP' },
-  { value: 'mentoria_grupal', label: 'Mentoria grupal' },
+  { value: 'mentoria_grupal', label: 'Mentoría grupal' },
   { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
   { value: 'coaching_1on1', label: 'Coaching 1:1' },
   { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
@@ -206,7 +206,7 @@ function handleSave() {
 }
 
 function handleDelete() {
-  if (confirm('Seguro que deseas eliminar este evento?')) {
+  if (confirm('¿Seguro que deseas eliminar este evento?')) {
     alert('Evento eliminado (mock)')
     navigateTo('/admin/eventos')
   }
