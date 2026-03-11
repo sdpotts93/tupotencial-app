@@ -75,16 +75,15 @@ const activityColumns = [
   { key: 'action', label: 'Acción' },
   { key: 'type', label: 'Tipo' },
   { key: 'item', label: 'Elemento' },
-  { key: 'user', label: 'Responsable' },
-  { key: 'created_at', label: 'Fecha' },
+{ key: 'created_at', label: 'Fecha' },
 ]
 
 const activityRows = ref([
-  { id: '1', action: 'Contenido publicado', type: 'contenido', item: '5 pasos para el bienestar emocional', user: 'Ana García', created_at: '2026-02-24T10:30:00' },
-  { id: '2', action: 'Programa actualizado', type: 'programa', item: 'Reto 21 días de meditación', user: 'Carlos López', created_at: '2026-02-24T09:15:00' },
-  { id: '3', action: 'Evento creado', type: 'evento', item: 'Taller de mindfulness', user: 'Ana García', created_at: '2026-02-23T16:45:00' },
-  { id: '4', action: 'Beneficio agregado', type: 'beneficio', item: '20% en suplementos NutriVida', user: 'Maria Torres', created_at: '2026-02-23T14:20:00' },
-  { id: '5', action: 'Usuario registrado', type: 'usuario', item: 'Luisa Fernández', user: 'Sistema', created_at: '2026-02-23T11:00:00' },
+  { id: '1', action: 'Contenido publicado', type: 'contenido', item: '5 pasos para el bienestar emocional', created_at: '2026-02-24T10:30:00' },
+  { id: '2', action: 'Programa actualizado', type: 'programa', item: 'Reto 21 días de meditación', created_at: '2026-02-24T09:15:00' },
+  { id: '3', action: 'Evento creado', type: 'evento', item: 'Taller de mindfulness', created_at: '2026-02-23T16:45:00' },
+  { id: '4', action: 'Beneficio agregado', type: 'beneficio', item: '20% en suplementos NutriVida', created_at: '2026-02-23T14:20:00' },
+  { id: '5', action: 'Usuario registrado', type: 'usuario', item: 'Luisa Fernández', created_at: '2026-02-23T11:00:00' },
 ])
 
 function typeVariant(type: string) {
