@@ -325,8 +325,9 @@ function handleContentClick(item: { id: string; entitlement_key: string | null }
 
 // ─── Tab: Programas ───
 const { data: programsWithContent } = await useAsyncData('mobile-library-programs', async () => {
+  if (!user.value?.id) return []
   const { data: progs } = await client.from('programs').select('id, type, title, plan, is_active').eq('is_active', true).order('created_at')
-  const { data: enrollments } = await client.from('program_enrollments').select('program_id').eq('user_id', user.value?.id ?? '')
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id').eq('user_id', user.value.id)
   const enrolledIds = new Set((enrollments ?? []).map(e => e.program_id))
   // Get content items linked to programs via program_days -> program_day_items -> content_items
   const { data: dayItems } = await client
@@ -361,7 +362,7 @@ const { data: programsWithContent } = await useAsyncData('mobile-library-program
     free: p.plan === 'free',
     items: progContentMap.get(p.id) ?? [],
   }))
-})
+}, { watch: [() => user.value?.id] })
 
 // ─── Tab: Objetivos ───
 const { data: objectives } = await useAsyncData('mobile-library-objectives', async () => {

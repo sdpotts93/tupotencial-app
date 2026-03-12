@@ -50,7 +50,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' })
 
-const { setSegment } = useAuth()
+const { setSegment, user } = useAuth()
+const supabase = useSupabaseClient()
 
 const step = ref(0)
 
@@ -141,17 +142,27 @@ function handleBack() {
   }
 }
 
-function handleContinue() {
+async function handleContinue() {
   if (!hasAnswer()) return
 
   if (step.value < steps.length - 1) {
     step.value++
   } else {
-    // Final step — save segment and finish
+    // Final step — save segment + onboarding preferences
     const segment = answers.value.segment as 'gabriel' | 'carlotta' | 'conjunta'
     if (segment) {
-      setSegment(segment)
+      await setSegment(segment)
     }
+
+    // Save onboarding preferences for AI context
+    if (user.value) {
+      await supabase.from('profiles').update({
+        onboarding_motivation: answers.value.motivation as string[],
+        onboarding_focus: answers.value.focus as string[],
+        onboarding_time: answers.value.time as string,
+      }).eq('id', user.value.id)
+    }
+
     navigateTo('/cuenta/hoy')
   }
 }

@@ -59,9 +59,10 @@ const today = new Date().toISOString().split('T')[0]
 
 // ── Fetch current streak ──
 const { data: streakData } = await useAsyncData('checkin-streak', async () => {
-  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value?.id ?? '').maybeSingle()
+  if (!user.value?.id) return null
+  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value.id).maybeSingle()
   return data?.current_streak ?? 0
-})
+}, { watch: [() => user.value?.id] })
 const streak = computed(() => streakData.value ?? 0)
 
 const moods = [

@@ -63,9 +63,10 @@ const { data: rawAddon } = await useAsyncData(`addon-${route.params.id}`, async 
 })
 
 const { data: isOwned } = await useAsyncData(`addon-owned-${route.params.id}`, async () => {
-  const { data } = await client.from('addon_purchases').select('id').eq('addon_id', route.params.id as string).eq('user_id', user.value?.id ?? '').maybeSingle()
+  if (!user.value?.id) return null
+  const { data } = await client.from('addon_purchases').select('id').eq('addon_id', route.params.id as string).eq('user_id', user.value.id).maybeSingle()
   return !!data
-})
+}, { watch: [() => user.value?.id] })
 
 const addon = computed(() => ({
   title: rawAddon.value?.title ?? '',

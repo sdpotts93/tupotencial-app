@@ -36,14 +36,57 @@ Tuteas al usuario. Ejemplo: "Vamos con todo. ¿Cuál es tu meta hoy?"`
 
 export interface UserContext {
   displayName?: string | null
+  motivation?: string[] | null
+  focus?: string[] | null
+  time?: string | null
+}
+
+const MOTIVATION_LABELS: Record<string, string> = {
+  calm: 'encontrar calma y reducir estrés',
+  discipline: 'ser más disciplinado/a',
+  growth: 'crecimiento personal',
+  motivation: 'motivación diaria',
+  community: 'conectar con una comunidad',
+}
+
+const FOCUS_LABELS: Record<string, string> = {
+  emotional: 'bienestar emocional',
+  productivity: 'productividad y hábitos',
+  relationships: 'relaciones y comunicación',
+  confidence: 'autoconfianza',
+  mindfulness: 'mindfulness y meditación',
+}
+
+const TIME_LABELS: Record<string, string> = {
+  '5': '5 minutos al día',
+  '10': '10 minutos al día',
+  '15': '15 minutos al día',
+  '20': '20+ minutos al día',
 }
 
 export function getSystemPrompt(tone: string, userCtx?: UserContext): string {
   const base = tone === 'carlotta' ? CARLOTTA_PROMPT : GABRIEL_PROMPT
 
-  if (!userCtx?.displayName) return base
+  if (!userCtx) return base
 
-  return base + `\n\nCONTEXTO DEL USUARIO:\n- Nombre: ${userCtx.displayName}. Usa su nombre de forma natural en la conversación.`
+  const parts: string[] = []
+
+  if (userCtx.displayName) {
+    parts.push(`- Nombre: ${userCtx.displayName}. Usa su nombre de forma natural en la conversación.`)
+  }
+  if (userCtx.motivation?.length) {
+    parts.push(`- Motivaciones: ${userCtx.motivation.map(m => MOTIVATION_LABELS[m] || m).join(', ')}`)
+  }
+  if (userCtx.focus?.length) {
+    parts.push(`- Áreas de enfoque: ${userCtx.focus.map(f => FOCUS_LABELS[f] || f).join(', ')}`)
+  }
+  if (userCtx.time) {
+    parts.push(`- Tiempo disponible: ${TIME_LABELS[userCtx.time] || userCtx.time}`)
+  }
+
+  if (parts.length === 0) return base
+
+  return base + `\n\nCONTEXTO DEL USUARIO:\n${parts.join('\n')}\nAdapta tus respuestas y sugerencias a este contexto.`
 }
 
 export const MAX_MESSAGES_PER_DAY = 20

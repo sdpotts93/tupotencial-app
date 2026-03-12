@@ -94,7 +94,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 }
 
 .input-field__error {
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--color-danger);
 }
 

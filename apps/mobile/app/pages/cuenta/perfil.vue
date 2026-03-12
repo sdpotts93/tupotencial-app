@@ -105,17 +105,18 @@ const initials = computed(() => {
 })
 
 const { data: vipAccesos } = await useAsyncData('profile-vip-accesos', async () => {
+  if (!user.value?.id) return []
   const { data } = await client
     .from('addon_purchases')
     .select('addon_id, addons(id, title, plan, cover_url)')
-    .eq('user_id', user.value?.id ?? '')
+    .eq('user_id', user.value.id)
   return (data ?? []).map(p => ({
     id: (p.addons as any)?.id ?? p.addon_id,
     title: (p.addons as any)?.title ?? '',
     typeLabel: 'CONTENIDO PREMIUM',
     img: (p.addons as any)?.cover_url ?? '/images/lib-8.jpg',
   }))
-})
+}, { watch: [() => user.value?.id] })
 
 async function handleSave() {
   saving.value = true

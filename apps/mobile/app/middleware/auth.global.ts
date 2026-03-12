@@ -4,8 +4,12 @@
 
 export default defineNuxtRouteMiddleware((to) => {
   const { isLoggedIn, isOnboarded, isSubscriber } = useAuth()
+  const supaUser = useSupabaseUser()
 
   const path = to.path
+
+  // Use both app state and supabase session to determine auth
+  const hasSession = !!supaUser.value
 
   // ---- Public routes (no auth required) ----
   const publicRoutes = ['/iniciar-sesion', '/registro', '/precios']
@@ -13,13 +17,13 @@ export default defineNuxtRouteMiddleware((to) => {
 
   // ---- Root redirect ----
   if (path === '/') {
-    if (!isLoggedIn.value) return navigateTo('/iniciar-sesion')
-    if (!isOnboarded.value) return navigateTo('/cuenta/bienvenida/segmento')
+    if (!isLoggedIn.value && !hasSession) return navigateTo('/iniciar-sesion')
+    if (!isOnboarded.value && isLoggedIn.value) return navigateTo('/cuenta/bienvenida/segmento')
     return navigateTo('/cuenta/hoy')
   }
 
   // ---- Authed routes ----
-  if (!isLoggedIn.value) {
+  if (!isLoggedIn.value && !hasSession) {
     return navigateTo('/iniciar-sesion')
   }
 
@@ -34,7 +38,9 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // ---- Onboarded routes ----
-  if (!isOnboarded.value) {
+  // If we have a supabase session but profile hasn't loaded yet, don't redirect —
+  // the profile watcher will hydrate state shortly after mount.
+  if (!isOnboarded.value && isLoggedIn.value) {
     return navigateTo('/cuenta/bienvenida/segmento')
   }
 

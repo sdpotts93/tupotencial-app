@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
 import { getSystemPrompt, MAX_MESSAGES_PER_DAY } from '~~/server/utils/ai-prompts'
 
 // Per-user rate limit: 1 request every 3 seconds
@@ -10,16 +10,18 @@ export default defineEventHandler(async (event) => {
   // 1. Auth check
   const user = await serverSupabaseUser(event)
   if (!user) throw createError({ statusCode: 401, message: 'No autenticado' })
+  const userId = user.id ?? (user as any).sub as string
+  if (!userId) throw createError({ statusCode: 401, message: 'No se pudo obtener el ID del usuario' })
 
   // 1b. Per-user rate limit
   const now = Date.now()
-  const lastReq = lastRequestByUser.get(user.id)
+  const lastReq = lastRequestByUser.get(userId)
   if (lastReq && now - lastReq < RATE_LIMIT_MS) {
     throw createError({ statusCode: 429, message: 'Espera unos segundos antes de enviar otro mensaje' })
   }
-  lastRequestByUser.set(user.id, now)
+  lastRequestByUser.set(userId, now)
 
-  const client = await serverSupabaseClient(event)
+  const client = serverSupabaseServiceRole(event)
   const body = await readBody<{
     sessionId: string
     message: string
@@ -33,7 +35,7 @@ export default defineEventHandler(async (event) => {
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
   const { data: quota } = await client.from('ai_quotas')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('day', today)
     .maybeSingle()
 
@@ -45,17 +47,17 @@ export default defineEventHandler(async (event) => {
   let activeSessionId = sessionId
   if (sessionId === 'new') {
     const { data: session, error } = await client.from('ai_sessions')
-      .insert({ user_id: user.id, tone: tone ?? 'carlotta', status: 'active' })
+      .insert({ user_id: userId, tone: tone ?? 'carlotta', status: 'active' })
       .select('id')
       .single()
-    if (error || !session) throw createError({ statusCode: 500, message: 'Error al crear sesión' })
+    if (error || !session) throw createError({ statusCode: 500, message: `Error al crear sesión: ${error?.message}` })
     activeSessionId = session.id
   }
 
   // 4. Insert user message
   await client.from('ai_messages').insert({
     session_id: activeSessionId,
-    user_id: user.id,
+    user_id: userId,
     role: 'user',
     content: message.trim(),
   })
@@ -68,8 +70,8 @@ export default defineEventHandler(async (event) => {
       .order('created_at', { ascending: true })
       .limit(50),
     client.from('profiles')
-      .select('display_name')
-      .eq('id', user.id)
+      .select('display_name, onboarding_motivation, onboarding_focus, onboarding_time')
+      .eq('id', userId)
       .single(),
   ])
 
@@ -87,6 +89,9 @@ export default defineEventHandler(async (event) => {
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: 'developer', content: getSystemPrompt(sessionTone, {
       displayName: profile?.display_name,
+      motivation: profile?.onboarding_motivation,
+      focus: profile?.onboarding_focus,
+      time: profile?.onboarding_time,
     }) },
     ...(history ?? [])
       .filter(m => m.role === 'user' || m.role === 'assistant')
@@ -106,7 +111,7 @@ export default defineEventHandler(async (event) => {
     messages: openaiMessages,
     stream: true,
     stream_options: { include_usage: true },
-    max_tokens: 500,
+    max_completion_tokens: 500,
     temperature: 0.8,
   })
 
@@ -138,7 +143,7 @@ export default defineEventHandler(async (event) => {
   const { data: assistantMsg } = await client.from('ai_messages')
     .insert({
       session_id: activeSessionId,
-      user_id: user.id,
+      user_id: userId,
       role: 'assistant',
       content: fullContent,
       tokens_in: tokensIn || null,
@@ -149,7 +154,7 @@ export default defineEventHandler(async (event) => {
 
   // 12. Upsert daily quota
   await client.from('ai_quotas').upsert({
-    user_id: user.id,
+    user_id: userId,
     day: today,
     messages_used: (quota?.messages_used ?? 0) + 1,
     tokens_used: (quota?.tokens_used ?? 0) + tokensIn + tokensOut,

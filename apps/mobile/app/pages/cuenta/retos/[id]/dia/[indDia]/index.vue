@@ -176,6 +176,7 @@ const programId = route.params.id as string
 const dayIndex = route.params.indDia as string
 
 const { data: dayData } = await useAsyncData(`program-day-${programId}-${dayIndex}`, async () => {
+  if (!user.value?.id) return null
   // Fetch program type
   const { data: program } = await client
     .from('programs')
@@ -215,7 +216,7 @@ const { data: dayData } = await useAsyncData(`program-day-${programId}-${dayInde
     .select('payload')
     .eq('program_id', programId)
     .eq('day_index', Number(dayIndex))
-    .eq('user_id', user.value?.id ?? '')
+    .eq('user_id', user.value.id)
     .maybeSingle()
 
   const completedItems = new Set<string>(
@@ -269,7 +270,7 @@ const { data: dayData } = await useAsyncData(`program-day-${programId}-${dayInde
     description: day.description ?? '',
     activities: acts,
   }
-})
+}, { watch: [() => user.value?.id] })
 
 const programType = computed<ProgramType>(() => dayData.value?.programType ?? 'reto')
 const totalDays = computed(() => dayData.value?.totalDays ?? 0)

@@ -121,6 +121,7 @@
             placeholder="tu@correo.com"
             autocomplete="email"
             :error="regErrors.email"
+            @update:model-value="scheduleRegValidation"
           />
           <UiInput
             v-model="regPassword"
@@ -129,6 +130,7 @@
             placeholder="Mínimo 8 caracteres"
             autocomplete="new-password"
             :error="regErrors.password"
+            @update:model-value="scheduleRegValidation"
           />
           <UiInput
             v-model="regConfirm"
@@ -137,6 +139,7 @@
             placeholder="Repite tu contraseña"
             autocomplete="new-password"
             :error="regErrors.confirm"
+            @update:model-value="scheduleRegValidation"
           />
 
           <UiButton
@@ -182,7 +185,31 @@ const regEmail = ref('')
 const regPassword = ref('')
 const regConfirm = ref('')
 const regLoading = ref(false)
-const regErrors = ref<{ email?: string; password?: string; confirm?: string }>({})
+const regErrors = reactive<{ email?: string; password?: string; confirm?: string }>({})
+
+// Debounced live validation for register form
+let regValidateTimer: ReturnType<typeof setTimeout> | null = null
+
+function scheduleRegValidation() {
+  if (regValidateTimer) clearTimeout(regValidateTimer)
+  regValidateTimer = setTimeout(() => {
+    if (regEmail.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail.value)) {
+      regErrors.email = 'Correo electrónico no válido'
+    } else {
+      regErrors.email = undefined
+    }
+    if (regPassword.value && regPassword.value.length < 8) {
+      regErrors.password = 'Mínimo 8 caracteres'
+    } else {
+      regErrors.password = undefined
+    }
+    if (regConfirm.value && regPassword.value !== regConfirm.value) {
+      regErrors.confirm = 'Las contraseñas no coinciden'
+    } else {
+      regErrors.confirm = undefined
+    }
+  }, 1000)
+}
 
 async function handleLogin() {
   loginErrors.value = {}
@@ -219,17 +246,19 @@ async function handleLogin() {
 }
 
 async function handleRegister() {
-  regErrors.value = {}
-  if (!regEmail.value) { regErrors.value.email = 'Ingresa tu correo electrónico'; return }
-  if (regPassword.value.length < 8) { regErrors.value.password = 'Mínimo 8 caracteres'; return }
-  if (regPassword.value !== regConfirm.value) { regErrors.value.confirm = 'Las contraseñas no coinciden'; return }
+  regErrors.email = undefined; regErrors.password = undefined; regErrors.confirm = undefined
+  if (!regEmail.value) { regErrors.email = 'Ingresa tu correo electrónico'; return }
+  if (regPassword.value.length < 8) { regErrors.password = 'Mínimo 8 caracteres'; return }
+  if (regPassword.value !== regConfirm.value) { regErrors.confirm = 'Las contraseñas no coinciden'; return }
 
   regLoading.value = true
   try {
     await register(regEmail.value, regPassword.value)
+    console.log('Register success, navigating to /configurar-perfil')
     navigateTo('/configurar-perfil')
-  } catch {
-    regErrors.value.email = 'Error al crear la cuenta'
+  } catch (err) {
+    console.error('Register error:', err)
+    regErrors.email = 'Error al crear la cuenta'
   } finally {
     regLoading.value = false
   }

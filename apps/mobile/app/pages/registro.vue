@@ -50,6 +50,7 @@
             placeholder="tu@correo.com"
             autocomplete="email"
             :error="errors.email"
+            @update:model-value="scheduleValidation"
           />
           <UiInput
             v-model="password"
@@ -58,6 +59,7 @@
             placeholder="Mínimo 8 caracteres"
             autocomplete="new-password"
             :error="errors.password"
+            @update:model-value="scheduleValidation"
           />
           <UiInput
             v-model="confirmPassword"
@@ -66,6 +68,7 @@
             placeholder="Repite tu contraseña"
             autocomplete="new-password"
             :error="errors.confirm"
+            @update:model-value="scheduleValidation"
           />
 
           <UiButton
@@ -104,20 +107,45 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
-const errors = ref<{ email?: string; password?: string; confirm?: string }>({})
+const errors = reactive<{ email?: string; password?: string; confirm?: string }>({})
+
+// Debounced live validation
+let validateTimer: ReturnType<typeof setTimeout> | null = null
+
+function scheduleValidation() {
+  if (validateTimer) clearTimeout(validateTimer)
+  validateTimer = setTimeout(() => {
+    if (email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+      errors.email = 'Correo electrónico no válido'
+    } else {
+      errors.email = undefined
+    }
+    if (password.value && password.value.length < 8) {
+      errors.password = 'Mínimo 8 caracteres'
+    } else {
+      errors.password = undefined
+    }
+    if (confirmPassword.value && password.value !== confirmPassword.value) {
+      errors.confirm = 'Las contraseñas no coinciden'
+    } else {
+      errors.confirm = undefined
+    }
+  }, 1000)
+}
+
 
 async function handleRegister() {
-  errors.value = {}
-  if (!email.value) { errors.value.email = 'Ingresa tu correo electrónico'; return }
-  if (password.value.length < 8) { errors.value.password = 'Mínimo 8 caracteres'; return }
-  if (password.value !== confirmPassword.value) { errors.value.confirm = 'Las contraseñas no coinciden'; return }
+  errors.email = undefined; errors.password = undefined; errors.confirm = undefined
+  if (!email.value) { errors.email = 'Ingresa tu correo electrónico'; return }
+  if (password.value.length < 8) { errors.password = 'Mínimo 8 caracteres'; return }
+  if (password.value !== confirmPassword.value) { errors.confirm = 'Las contraseñas no coinciden'; return }
 
   loading.value = true
   try {
     await register(email.value, password.value)
     navigateTo('/configurar-perfil')
   } catch {
-    errors.value.email = 'Error al crear la cuenta'
+    errors.email = 'Error al crear la cuenta'
   } finally {
     loading.value = false
   }

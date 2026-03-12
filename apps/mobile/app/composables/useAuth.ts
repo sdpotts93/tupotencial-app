@@ -45,6 +45,7 @@ export function useAuth() {
       user.value = null
       return
     }
+    if (!u.id) return // guard against incomplete user object
     if (user.value?.id === u.id) return // already loaded
     loading.value = true
     try {
@@ -68,8 +69,21 @@ export function useAuth() {
   }
 
   async function register(email: string, password: string) {
-    const { error } = await client.auth.signUp({ email, password })
+    const { data, error } = await client.auth.signUp({ email, password })
     if (error) throw error
+
+    // Create the profiles row for the new user
+    if (data.user) {
+      const { error: profileError } = await client.from('profiles').insert({
+        id: data.user.id,
+        email,
+        display_name: '',
+      })
+      if (profileError) console.error('Profile insert error:', profileError)
+
+      // Load profile into state so middleware sees the user as logged in
+      await fetchProfile(data.user.id)
+    }
   }
 
   async function logout() {

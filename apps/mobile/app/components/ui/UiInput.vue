@@ -61,7 +61,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   align-items: center;
   gap: var(--space-2);
   background: var(--color-input-bg);
-  border: none;
+  border: 1.5px solid transparent;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -94,7 +94,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 }
 
 .input-field__error {
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--color-danger);
 }
 

@@ -70,20 +70,23 @@ const client = useSupabaseClient()
 const { user } = useAuth()
 
 const { data: streakData } = await useAsyncData('mobile-streak', async () => {
-  const { data } = await client.from('user_streaks').select('*').eq('user_id', user.value?.id ?? '').maybeSingle()
+  if (!user.value?.id) return null
+  const { data } = await client.from('user_streaks').select('*').eq('user_id', user.value.id).maybeSingle()
   return data
-})
+}, { watch: [() => user.value?.id] })
 
 const currentStreak = computed(() => streakData.value?.current_streak ?? 0)
 const bestStreak = computed(() => streakData.value?.best_streak ?? 0)
 
 const { data: totalCheckins } = await useAsyncData('mobile-total-checkins', async () => {
-  const { count } = await client.from('daily_checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.value?.id ?? '')
+  if (!user.value?.id) return 0
+  const { count } = await client.from('daily_checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.value.id)
   return count ?? 0
-})
+}, { watch: [() => user.value?.id] })
 
 const { data: activeEnrollments } = await useAsyncData('mobile-active-programs', async () => {
-  const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title, type, cover_url)').eq('user_id', user.value?.id ?? '').eq('status', 'active')
+  if (!user.value?.id) return []
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title, type, cover_url)').eq('user_id', user.value.id).eq('status', 'active')
   if (!enrollments?.length) return []
 
   const programIds = enrollments.map(e => (e.programs as any)?.id ?? e.program_id)
@@ -96,7 +99,7 @@ const { data: activeEnrollments } = await useAsyncData('mobile-active-programs',
   }
 
   // Get user's checkins per program
-  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value?.id ?? '').in('program_id', programIds)
+  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value.id).in('program_id', programIds)
   const checkinCountMap: Record<string, number> = {}
   for (const c of checkins ?? []) {
     checkinCountMap[c.program_id] = (checkinCountMap[c.program_id] ?? 0) + 1
@@ -113,7 +116,7 @@ const { data: activeEnrollments } = await useAsyncData('mobile-active-programs',
       img: prog?.cover_url ?? '/images/lib-4.jpg',
     }
   })
-})
+}, { watch: [() => user.value?.id] })
 
 const activeProgramsCount = computed(() => activeEnrollments.value?.length ?? 0)
 
@@ -121,10 +124,11 @@ const activePrograms = computed(() => activeEnrollments.value ?? [])
 
 // Content viewed count (count content_item_categories or benefit_clicks as a proxy; fallback to 0)
 const { data: contentViewed } = await useAsyncData('mobile-content-viewed', async () => {
+  if (!user.value?.id) return 0
   // No dedicated content_views table; count the user's unique form_submissions as an activity proxy
-  const { count } = await client.from('form_submissions').select('id', { count: 'exact', head: true }).eq('user_id', user.value?.id ?? '')
+  const { count } = await client.from('form_submissions').select('id', { count: 'exact', head: true }).eq('user_id', user.value.id)
   return count ?? 0
-})
+}, { watch: [() => user.value?.id] })
 </script>
 
 <style scoped>

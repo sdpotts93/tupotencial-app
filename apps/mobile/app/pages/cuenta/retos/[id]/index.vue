@@ -108,15 +108,17 @@ const { data: programDays } = await useAsyncData(`program-days-${id}`, async () 
 
 // ── Fetch enrollment status ──
 const { data: enrollment, refresh: refreshEnrollment } = await useAsyncData(`program-enrollment-${id}`, async () => {
-  const { data } = await client.from('program_enrollments').select('id').eq('program_id', id).eq('user_id', user.value?.id ?? '').maybeSingle()
+  if (!user.value?.id) return null
+  const { data } = await client.from('program_enrollments').select('id').eq('program_id', id).eq('user_id', user.value.id).maybeSingle()
   return data
-})
+}, { watch: [() => user.value?.id] })
 
 // ── Fetch checkin progress ──
 const { data: checkins } = await useAsyncData(`program-checkins-${id}`, async () => {
-  const { data } = await client.from('program_checkins').select('day_index').eq('program_id', id).eq('user_id', user.value?.id ?? '')
+  if (!user.value?.id) return []
+  const { data } = await client.from('program_checkins').select('day_index').eq('program_id', id).eq('user_id', user.value.id)
   return data ?? []
-})
+}, { watch: [() => user.value?.id] })
 
 const completedDays = computed(() => new Set((checkins.value ?? []).map(c => c.day_index)))
 const totalDays = computed(() => programDays.value?.length ?? 0)

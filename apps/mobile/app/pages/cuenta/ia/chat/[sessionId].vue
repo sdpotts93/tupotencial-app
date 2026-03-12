@@ -33,12 +33,16 @@
               <span class="chat__msg-dot">&middot;</span>
               <span class="chat__msg-time">{{ msg.time }}</span>
             </div>
-            <p class="chat__msg-body">{{ msg.content }}</p>
+            <div v-if="msg.role === 'assistant'" class="chat__msg-body">
+              <span v-html="renderMarkdown(msg.content)" />
+              <span v-if="generating && streamingStarted && msg === messages[messages.length - 1]" class="chat__cursor" />
+            </div>
+            <p v-else class="chat__msg-body">{{ msg.content }}</p>
           </div>
         </div>
 
-        <!-- Typing indicator -->
-        <div v-if="generating" class="chat__msg">
+        <!-- Typing indicator (only before first chunk arrives) -->
+        <div v-if="generating && !streamingStarted" class="chat__msg">
           <div class="chat__msg-avatar chat__msg-avatar--coach">
             <Icon :name="toneIcon" size="14" />
           </div>
@@ -93,6 +97,15 @@
 </template>
 
 <script setup lang="ts">
+import { marked } from 'marked'
+
+// Configure marked for inline rendering (no wrapping <p> tags)
+marked.setOptions({ breaks: true })
+
+function renderMarkdown(text: string): string {
+  return marked.parse(text, { async: false }) as string
+}
+
 definePageMeta({ layout: 'ai-chat', pageTransition: false })
 
 const route = useRoute()
@@ -108,6 +121,7 @@ const toneName = ref(toneParam === 'gabriel' ? 'Gabriel' : 'Carlotta')
 const toneIcon = computed(() => toneName.value === 'Carlotta' ? 'lucide:flower' : 'lucide:waves')
 
 const generating = ref(false)
+const streamingStarted = ref(false)
 const limitReached = ref(false)
 const inputText = ref('')
 const error = ref(false)
@@ -183,6 +197,7 @@ async function sendMessage(text?: string) {
   })
   inputText.value = ''
   generating.value = true
+  streamingStarted.value = false
 
   // Placeholder for streaming assistant response
   const assistantMsg: ChatMessage = { id: '', role: 'assistant', content: '', time: formatTime() }
@@ -208,9 +223,6 @@ async function sendMessage(text?: string) {
       throw new Error(`HTTP ${response.status}`)
     }
 
-    // Show the assistant message container once streaming starts
-    messages.value.push(assistantMsg)
-
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
@@ -228,6 +240,10 @@ async function sendMessage(text?: string) {
         try {
           const data = JSON.parse(line.slice(6))
           if (data.type === 'chunk') {
+            if (!streamingStarted.value) {
+              streamingStarted.value = true
+              messages.value.push(assistantMsg)
+            }
             assistantMsg.content += data.content
           } else if (data.type === 'done') {
             assistantMsg.id = data.messageId ?? assistantMsg.id
@@ -367,6 +383,37 @@ async function retry() {
   color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
   white-space: pre-wrap;
+}
+
+/* Markdown inside assistant messages */
+.chat__msg-body :deep(p) { margin: 0 0 0.5em; }
+.chat__msg-body :deep(p:last-child) { margin-bottom: 0; }
+.chat__msg-body :deep(strong) { font-weight: var(--weight-semibold); color: var(--color-text); }
+.chat__msg-body :deep(em) { font-style: italic; }
+.chat__msg-body :deep(ol),
+.chat__msg-body :deep(ul) { margin: 0.25em 0 0.5em 1.2em; padding: 0; }
+.chat__msg-body :deep(li) { margin-bottom: 0.25em; }
+.chat__msg-body :deep(code) {
+  background: rgba(var(--tint-rgb), 0.06);
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* ─── Blinking cursor ─── */
+.chat__cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--color-text-secondary);
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: blink 0.6s steps(2) infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 /* ─── Typing dots ─── */

@@ -48,8 +48,9 @@ function formatPrice(cents: number) {
 }
 
 const { data: addons } = await useAsyncData('mobile-addons', async () => {
+  if (!user.value?.id) return []
   const { data: addonsList } = await client.from('addons').select('*').eq('status', 'active').order('created_at')
-  const { data: purchases } = await client.from('addon_purchases').select('addon_id').eq('user_id', user.value?.id ?? '')
+  const { data: purchases } = await client.from('addon_purchases').select('addon_id').eq('user_id', user.value.id)
   const purchasedIds = new Set((purchases ?? []).map(p => p.addon_id))
   return (addonsList ?? []).map(a => ({
     id: a.id,
@@ -60,7 +61,7 @@ const { data: addons } = await useAsyncData('mobile-addons', async () => {
     bg: 'linear-gradient(135deg, var(--color-surface-alt) 0%, var(--color-surface) 100%)',
     owned: purchasedIds.has(a.id),
   }))
-})
+}, { watch: [() => user.value?.id] })
 </script>
 
 <style scoped>

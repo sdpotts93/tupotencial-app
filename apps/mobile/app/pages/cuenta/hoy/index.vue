@@ -321,9 +321,10 @@ const greeting = computed(() => {
 
 // ─── Streak ───
 const { data: streakData } = await useAsyncData('hoy-streak', async () => {
-  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value?.id ?? '').maybeSingle()
+  if (!user.value?.id) return null
+  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value.id).maybeSingle()
   return data?.current_streak ?? 0
-})
+}, { watch: [() => user.value?.id] })
 const streak = computed(() => streakData.value ?? 0)
 
 const streakMessage = computed(() => {
@@ -359,16 +360,18 @@ const mensajeDelDia = computed(() => {
 
 // ─── Today's checkin (to know if already completed) ───
 const { data: todayCheckin, refresh: refreshCheckin } = await useAsyncData('hoy-checkin', async () => {
-  const { data } = await client.from('daily_checkins').select('id').eq('date', today).eq('user_id', user.value?.id ?? '').maybeSingle()
+  if (!user.value?.id) return null
+  const { data } = await client.from('daily_checkins').select('id').eq('date', today).eq('user_id', user.value.id).maybeSingle()
   return data
-})
+}, { watch: [() => user.value?.id] })
 
 // ─── Today's accion completion (tracked as a daily_checkins row with type=accion in payload) ───
 const { data: todayAccion, refresh: refreshAccion } = await useAsyncData('hoy-accion', async () => {
-  const { data } = await client.from('daily_checkins').select('id, payload').eq('date', today).eq('user_id', user.value?.id ?? '')
+  if (!user.value?.id) return null
+  const { data } = await client.from('daily_checkins').select('id, payload').eq('date', today).eq('user_id', user.value.id)
   const accion = (data ?? []).find(row => (row.payload as any)?.type === 'accion')
   return accion ?? null
-})
+}, { watch: [() => user.value?.id] })
 
 // ─── Daily retos queue (2 items: check-in + admin-configurable action) ───
 const dailyRetos = computed(() => [
@@ -411,7 +414,8 @@ function handleRetoTap(type: 'checkin' | 'accion') {
 
 // ─── Active programs ───
 const { data: activeProgramsData } = await useAsyncData('hoy-programs', async () => {
-  const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title)').eq('user_id', user.value?.id ?? '').eq('status', 'active')
+  if (!user.value?.id) return []
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title)').eq('user_id', user.value.id).eq('status', 'active')
   if (!enrollments?.length) return []
 
   const programIds = enrollments.map(e => (e.programs as any)?.id ?? e.program_id)
@@ -424,7 +428,7 @@ const { data: activeProgramsData } = await useAsyncData('hoy-programs', async ()
   }
 
   // Get user's checkins per program
-  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value?.id ?? '').in('program_id', programIds)
+  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value.id).in('program_id', programIds)
   const checkinCountMap: Record<string, number> = {}
   for (const c of checkins ?? []) {
     checkinCountMap[c.program_id] = (checkinCountMap[c.program_id] ?? 0) + 1
@@ -437,7 +441,7 @@ const { data: activeProgramsData } = await useAsyncData('hoy-programs', async ()
     const currentDay = checkinCountMap[pid] ?? 0
     return { id: pid, title: prog?.title ?? '', currentDay, totalDays }
   })
-})
+}, { watch: [() => user.value?.id] })
 
 const activePrograms = computed(() =>
   (activeProgramsData.value ?? []).map(p => ({

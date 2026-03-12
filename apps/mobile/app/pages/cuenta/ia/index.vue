@@ -88,18 +88,20 @@ const { user } = useAuth()
 const selectedTone = ref<'carlotta' | 'gabriel'>('carlotta')
 const limitReached = ref(false)
 
-const { data: rawSessions } = await useAsyncData('mobile-ai-sessions', async () => {
-  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value?.id ?? '').order('created_at', { ascending: false })
+const { data: rawSessions, refresh: refreshSessions } = await useAsyncData('mobile-ai-sessions', async () => {
+  if (!user.value?.id) return []
+  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value.id).order('created_at', { ascending: false })
   return data ?? []
-})
+}, { watch: [() => user.value?.id] })
 
 // Check daily quota
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
 const { data: quota } = await useAsyncData('ai-quota-check', async () => {
+  if (!user.value?.id) return null
   const { data } = await client.from('ai_quotas').select('messages_used')
-    .eq('user_id', user.value?.id ?? '').eq('day', today).maybeSingle()
+    .eq('user_id', user.value.id).eq('day', today).maybeSingle()
   return data
-})
+}, { watch: [() => user.value?.id] })
 watchEffect(() => {
   limitReached.value = (quota.value?.messages_used ?? 0) >= 20
 })
