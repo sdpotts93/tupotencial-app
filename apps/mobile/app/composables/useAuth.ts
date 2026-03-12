@@ -19,13 +19,14 @@ export function useAuth() {
   const user = useState<AuthUser | null>('auth-user', () => null)
   const loading = useState('auth-loading', () => false)
 
-  async function fetchProfile(uid: string) {
+  async function fetchProfile(uid: string): Promise<boolean> {
     const [profileRes, subRes, entRes, adminRes] = await Promise.all([
       client.from('profiles').select('display_name, avatar_url, community_segment').eq('id', uid).single(),
       client.from('subscriptions').select('status').eq('user_id', uid).maybeSingle(),
       client.from('user_entitlements').select('entitlement_key').eq('user_id', uid),
       client.from('admin_users').select('role').eq('user_id', uid).maybeSingle(),
     ])
+    if (profileRes.error || !profileRes.data) return false
     user.value = {
       id: uid,
       email: supaUser.value?.email ?? '',
@@ -37,6 +38,7 @@ export function useAuth() {
       entitlements: (entRes.data ?? []).map(e => e.entitlement_key),
       is_admin: !!adminRes.data,
     }
+    return true
   }
 
   // Sync auth state when supabase user changes
@@ -45,11 +47,19 @@ export function useAuth() {
       user.value = null
       return
     }
-    if (!u.id) return // guard against incomplete user object
-    if (user.value?.id === u.id) return // already loaded
+    const uid = u.id ?? (u as any).sub as string | undefined
+    if (!uid) return // guard against incomplete user object
+    if (user.value?.id === uid) return // already loaded
     loading.value = true
     try {
-      await fetchProfile(u.id)
+      const ok = await fetchProfile(uid)
+      if (!ok) {
+        // Profile doesn't exist (e.g. DB was reset) — sign out stale session
+        await client.auth.signOut()
+        user.value = null
+        navigateTo('/iniciar-sesion')
+        return
+      }
     } finally {
       loading.value = false
     }

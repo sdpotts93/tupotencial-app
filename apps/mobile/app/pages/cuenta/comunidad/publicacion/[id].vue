@@ -61,7 +61,7 @@
           class="post-detail__input"
           placeholder="Escribe un comentario..."
         />
-        <button class="post-detail__send" :disabled="!newComment.trim()">
+        <button class="post-detail__send" :disabled="!newComment.trim() || submitting" @click="submitComment">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
@@ -72,34 +72,102 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'blank' })
 
-const post = ref({
-  author: 'Gabriel',
-  avatar: '/images/gabriel.png',
-  timeAgo: 'Hace 2 horas',
-  title: 'Bienvenidos a la comunidad',
-  body: 'Este es un espacio seguro para compartir tu camino de crecimiento. Cuéntanos: ¿qué te motivó a empezar?',
-  media_url: '/videos/helmet-short-coded.mp4',
-  reactions: 24,
-  liked: false,
-})
+const route = useRoute()
+const client = useSupabaseClient()
+const { user } = useAuth()
+const postId = route.params.id as string
+
+function formatTimeAgo(dateStr: string) {
+  const now = Date.now()
+  const diff = now - new Date(dateStr).getTime()
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return 'Ahora'
+  if (minutes < 60) return `Hace ${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`
+  const days = Math.floor(hours / 24)
+  return `Hace ${days} ${days === 1 ? 'día' : 'días'}`
+}
+
+function getInitials(name: string) {
+  return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+}
 
 function isVideo(url: string) {
   return /\.(mp4|mov|webm)(\?|$)/i.test(url)
 }
 
-function toggleLike() {
-  post.value.liked = !post.value.liked
-  post.value.reactions += post.value.liked ? 1 : -1
+// Load post data
+const { data: postData, refresh: refreshPost } = await useAsyncData(`post-${postId}`, async () => {
+  const { data } = await client
+    .from('posts')
+    .select('*, profiles:author_user_id(display_name, avatar_url), post_reactions(user_id, reaction)')
+    .eq('id', postId)
+    .single()
+  if (!data) return null
+  return {
+    ...data,
+    author: (data.profiles as any)?.display_name ?? 'Anónimo',
+    avatar: (data.profiles as any)?.avatar_url ?? '/images/gabriel.png',
+    reactions: ((data.post_reactions as any) ?? []).length,
+    liked: ((data.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
+    timeAgo: formatTimeAgo(data.created_at),
+  }
+})
+
+const post = computed(() => postData.value ?? {
+  author: '', avatar: '', timeAgo: '', title: '', body: '', media_url: null, reactions: 0, liked: false,
+})
+
+// Load comments
+const { data: commentsData, refresh: refreshComments } = await useAsyncData(`post-comments-${postId}`, async () => {
+  const { data } = await client
+    .from('post_comments')
+    .select('*, profiles:user_id(display_name)')
+    .eq('post_id', postId)
+    .eq('status', 'published')
+    .order('created_at', { ascending: true })
+  return (data ?? []).map(c => ({
+    id: c.id,
+    author: (c.profiles as any)?.display_name ?? 'Anónimo',
+    initials: getInitials((c.profiles as any)?.display_name ?? 'A'),
+    body: c.body,
+    timeAgo: formatTimeAgo(c.created_at),
+  }))
+})
+
+const comments = computed(() => commentsData.value ?? [])
+
+// Toggle like
+async function toggleLike() {
+  if (!user.value?.id) return
+  if (post.value.liked) {
+    await client.from('post_reactions').delete().eq('post_id', postId).eq('user_id', user.value.id)
+  } else {
+    await client.from('post_reactions').insert({ post_id: postId, user_id: user.value.id, reaction: 'like' })
+  }
+  await refreshPost()
 }
 
-const comments = ref([
-  { id: 'c1', author: 'Ana López', initials: 'AL', body: '¡Me encanta esta iniciativa! Llevo una semana y ya siento la diferencia.', timeAgo: 'Hace 1 hora' },
-  { id: 'c2', author: 'Carlos Ruiz', initials: 'CR', body: 'Empecé porque quería mejorar mi rutina matutina. Ahora no puedo vivir sin mi check-in diario.', timeAgo: 'Hace 45 min' },
-  { id: 'c3', author: 'María Torres', initials: 'MT', body: 'Gracias por crear este espacio. Se siente bien saber que no estoy sola en este camino.', timeAgo: 'Hace 30 min' },
-  { id: 'c4', author: 'Diego Herrera', initials: 'DH', body: 'Lo que me motivó fue sentir que necesitaba un cambio real, no solo de hábitos sino de mentalidad.', timeAgo: 'Hace 20 min' },
-])
-
+// Submit comment
 const newComment = ref('')
+const submitting = ref(false)
+
+async function submitComment() {
+  if (!newComment.value.trim() || !user.value?.id || submitting.value) return
+  submitting.value = true
+  try {
+    await client.from('post_comments').insert({
+      post_id: postId,
+      user_id: user.value.id,
+      body: newComment.value.trim(),
+    })
+    newComment.value = ''
+    await refreshComments()
+  } finally {
+    submitting.value = false
+  }
+}
 </script>
 
 <style scoped>
