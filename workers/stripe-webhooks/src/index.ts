@@ -108,7 +108,7 @@ export default {
 
 // ── Checkout session creation ───────────────────────────────────────────────
 
-const CORE_PRICE_ID = 'price_core_monthly' // Replace with your actual Stripe Price ID
+const CORE_PRICE_ID = 'price_1T9zanA2z8ah71Y7yVvdFlJl'
 
 async function handleCreateCheckout(request: Request, env: Env): Promise<Response> {
   try {
