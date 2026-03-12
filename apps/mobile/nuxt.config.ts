@@ -47,6 +47,7 @@ export default defineNuxtConfig({
     openaiApiKey: process.env.OPENAI_API_KEY,
     public: {
       isNative: false,
+      stripeWorkerUrl: process.env.STRIPE_WORKER_URL || '',
     },
   },
 

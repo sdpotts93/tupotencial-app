@@ -1,6 +1,6 @@
 import OpenAI from 'openai'
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import { getSystemPrompt, MAX_MESSAGES_PER_DAY } from '~/server/utils/ai-prompts'
+import { getSystemPrompt, MAX_MESSAGES_PER_DAY } from '~~/server/utils/ai-prompts'
 
 // Per-user rate limit: 1 request every 3 seconds
 const lastRequestByUser = new Map<string, number>()

@@ -54,3 +54,4 @@ Append one line per completed task:
 2026-02-24 15:50 America/Mexico_City — Stripe webhooks Cloudflare Worker stub (checkout+webhook endpoints)
 2026-02-24 15:55 America/Mexico_City — Admin app (login, dashboard, 25+ CRUD screens with sidebar navigation)
 2026-02-24 16:00 America/Mexico_City — Feature spec files created for all MVP features
+2026-03-11 20:42 America/Mexico_City — Corrige alias de importación en API de AI del app mobile

@@ -33,8 +33,8 @@
           </div>
           <p class="pricing__plan-price">$399 <span>MXN/mes</span></p>
           <p class="pricing__plan-desc">Acceso completo a programas, comunidad y herramientas de cambio.</p>
-          <UiButton block class="pricing__cta-core">
-            Empezar Core
+          <UiButton block class="pricing__cta-core" :disabled="checkoutLoading" @click="startCheckout">
+            {{ checkoutLoading ? 'Redirigiendo...' : 'Empezar Core' }}
           </UiButton>
           <div class="pricing__divider" />
           <ul class="pricing__features">
@@ -57,6 +57,50 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false })
+
+const supabase = useSupabaseClient()
+const config = useRuntimeConfig()
+const checkoutLoading = ref(false)
+
+async function startCheckout() {
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session) {
+    navigateTo('/iniciar-sesion?redirect=/precios')
+    return
+  }
+
+  const workerUrl = config.public.stripeWorkerUrl
+  if (!workerUrl) {
+    console.error('STRIPE_WORKER_URL not configured')
+    return
+  }
+
+  checkoutLoading.value = true
+  try {
+    const res = await fetch(`${workerUrl}/create-checkout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        returnUrl: window.location.origin + '/cuenta/perfil',
+      }),
+    })
+
+    const data = await res.json()
+    if (data.url) {
+      window.location.href = data.url
+    } else {
+      console.error('Checkout error:', data.error)
+    }
+  } catch (err) {
+    console.error('Checkout error:', err)
+  } finally {
+    checkoutLoading.value = false
+  }
+}
 </script>
 
 <style scoped>

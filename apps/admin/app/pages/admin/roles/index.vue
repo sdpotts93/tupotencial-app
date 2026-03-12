@@ -114,10 +114,13 @@
           :options="roleOptions"
         />
       </div>
+      <p v-if="inviteError" class="invite-error">{{ inviteError }}</p>
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showInviteModal = false">Cancelar</UiButton>
-          <UiButton variant="primary-outline" size="sm" @click="sendInvite">Enviar invitación</UiButton>
+          <UiButton variant="primary-outline" size="sm" :disabled="inviteLoading" @click="sendInvite">
+            {{ inviteLoading ? 'Enviando...' : 'Enviar invitación' }}
+          </UiButton>
         </div>
       </template>
     </UiModal>
@@ -249,13 +252,33 @@ async function deleteAdmin(row: Record<string, any>) {
   }
 }
 
-function sendInvite() {
-  // TODO: implement invite via server API route (requires auth.admin to create users)
-  alert(`Invitación enviada a ${inviteForm.email} (pendiente implementación)`)
-  showInviteModal.value = false
-  inviteForm.email = ''
-  inviteForm.full_name = ''
-  inviteForm.role = 'editor'
+const inviteLoading = ref(false)
+const inviteError = ref('')
+
+async function sendInvite() {
+  if (!inviteForm.email.trim() || !inviteForm.full_name.trim()) return
+  inviteLoading.value = true
+  inviteError.value = ''
+
+  try {
+    await $fetch('/api/admin/invite', {
+      method: 'POST',
+      body: {
+        email: inviteForm.email,
+        full_name: inviteForm.full_name,
+        role: inviteForm.role,
+      },
+    })
+    showInviteModal.value = false
+    inviteForm.email = ''
+    inviteForm.full_name = ''
+    inviteForm.role = 'editor'
+    await refresh()
+  } catch (err: any) {
+    inviteError.value = err?.data?.message || 'Error al enviar la invitación'
+  } finally {
+    inviteLoading.value = false
+  }
 }
 </script>
 
@@ -348,5 +371,11 @@ function sendInvite() {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
+}
+
+.invite-error {
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  margin-top: var(--space-2);
 }
 </style>
