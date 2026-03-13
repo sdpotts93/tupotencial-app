@@ -8,6 +8,7 @@
 -- These inserts work with `supabase db reset` but NOT on hosted Supabase.
 -- On hosted environments, use the Auth API or dashboard to create users.
 
+-- All seed users share the password: admin123
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data)
 VALUES
   (
@@ -16,7 +17,7 @@ VALUES
     'authenticated',
     'authenticated',
     'mariana.lopez@example.com',
-    '$2a$10$PznXkhkFQEBErkzrGHdi7u/UZAMBhFRAoSrB.1JItAefHpfbo3VB.',
+    '$2a$10$QSmHMywaHs4u/afgW18.reSnbjELxDFUhW2y3dm8yFq0sM..8coai',
     '2025-11-10T08:02:00.000Z',
     '2025-11-10T08:00:00.000Z',
     '2026-02-20T10:00:00.000Z',
@@ -29,7 +30,7 @@ VALUES
     'authenticated',
     'authenticated',
     'diego.ramirez@example.com',
-    '$2a$10$PznXkhkFQEBErkzrGHdi7u/UZAMBhFRAoSrB.1JItAefHpfbo3VB.',
+    '$2a$10$QSmHMywaHs4u/afgW18.reSnbjELxDFUhW2y3dm8yFq0sM..8coai',
     '2025-12-01T14:35:00.000Z',
     '2025-12-01T14:30:00.000Z',
     '2026-02-01T14:30:00.000Z',
@@ -42,7 +43,7 @@ VALUES
     'authenticated',
     'authenticated',
     'sofia.hernandez@example.com',
-    '$2a$10$PznXkhkFQEBErkzrGHdi7u/UZAMBhFRAoSrB.1JItAefHpfbo3VB.',
+    '$2a$10$QSmHMywaHs4u/afgW18.reSnbjELxDFUhW2y3dm8yFq0sM..8coai',
     '2026-01-05T09:20:00.000Z',
     '2026-01-05T09:15:00.000Z',
     '2026-02-05T09:15:00.000Z',
@@ -55,7 +56,7 @@ VALUES
     'authenticated',
     'authenticated',
     'carlos.mendoza@example.com',
-    '$2a$10$PznXkhkFQEBErkzrGHdi7u/UZAMBhFRAoSrB.1JItAefHpfbo3VB.',
+    '$2a$10$QSmHMywaHs4u/afgW18.reSnbjELxDFUhW2y3dm8yFq0sM..8coai',
     '2026-01-20T11:50:00.000Z',
     '2026-01-20T11:45:00.000Z',
     '2026-02-10T11:45:00.000Z',
@@ -68,7 +69,7 @@ VALUES
     'authenticated',
     'authenticated',
     'valentina.torres@example.com',
-    '$2a$10$PznXkhkFQEBErkzrGHdi7u/UZAMBhFRAoSrB.1JItAefHpfbo3VB.',
+    '$2a$10$QSmHMywaHs4u/afgW18.reSnbjELxDFUhW2y3dm8yFq0sM..8coai',
     '2026-02-01T07:05:00.000Z',
     '2026-02-01T07:00:00.000Z',
     '2026-02-15T07:00:00.000Z',
@@ -77,6 +78,32 @@ VALUES
   )
 ON CONFLICT (id) DO NOTHING;
 
+-- GoTrue cannot scan NULL into Go strings, so coerce every nullable varchar to ''.
+UPDATE auth.users SET
+  confirmation_token      = COALESCE(confirmation_token, ''),
+  recovery_token          = COALESCE(recovery_token, ''),
+  email_change_token_new  = COALESCE(email_change_token_new, ''),
+  email_change            = COALESCE(email_change, ''),
+  email_change_token_current = COALESCE(email_change_token_current, ''),
+  phone_change_token      = COALESCE(phone_change_token, ''),
+  reauthentication_token  = COALESCE(reauthentication_token, '')
+WHERE id IN (
+  'a0000000-0000-4000-8000-000000000001',
+  'a0000000-0000-4000-8000-000000000002',
+  'a0000000-0000-4000-8000-000000000003',
+  'a0000000-0000-4000-8000-000000000004',
+  'a0000000-0000-4000-8000-000000000005'
+);
+
+-- ── 1b. Auth identities (required by GoTrue for email/password login) ────────
+INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+VALUES
+  ('a0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', '{"sub":"a0000000-0000-4000-8000-000000000001","email":"mariana.lopez@example.com"}'::jsonb, 'email', '2025-11-10T08:02:00.000Z', '2025-11-10T08:00:00.000Z', '2025-11-10T08:00:00.000Z'),
+  ('a0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000002', '{"sub":"a0000000-0000-4000-8000-000000000002","email":"diego.ramirez@example.com"}'::jsonb, 'email', '2025-12-01T14:35:00.000Z', '2025-12-01T14:30:00.000Z', '2025-12-01T14:30:00.000Z'),
+  ('a0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000003', '{"sub":"a0000000-0000-4000-8000-000000000003","email":"sofia.hernandez@example.com"}'::jsonb, 'email', '2026-01-05T09:20:00.000Z', '2026-01-05T09:15:00.000Z', '2026-01-05T09:15:00.000Z'),
+  ('a0000000-0000-4000-8000-000000000004', 'a0000000-0000-4000-8000-000000000004', 'a0000000-0000-4000-8000-000000000004', '{"sub":"a0000000-0000-4000-8000-000000000004","email":"carlos.mendoza@example.com"}'::jsonb, 'email', '2026-01-20T11:50:00.000Z', '2026-01-20T11:45:00.000Z', '2026-01-20T11:45:00.000Z'),
+  ('a0000000-0000-4000-8000-000000000005', 'a0000000-0000-4000-8000-000000000005', 'a0000000-0000-4000-8000-000000000005', '{"sub":"a0000000-0000-4000-8000-000000000005","email":"valentina.torres@example.com"}'::jsonb, 'email', '2026-02-01T07:05:00.000Z', '2026-02-01T07:00:00.000Z', '2026-02-01T07:00:00.000Z')
+ON CONFLICT DO NOTHING;
 
 -- ── 2. Profiles ──────────────────────────────────────────────────────────────
 
