@@ -1,30 +1,30 @@
-// Route protection middleware (global)
-// Ensures only authenticated admin users can access protected routes
+// Global route middleware — protects admin routes.
+// Uses useSupabaseUser() which is hydrated by @nuxtjs/supabase on both
+// server (via useSsrCookies) and client (via onAuthStateChange).
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const supaUser = useSupabaseUser()
-  const { isAuthenticated, restore } = useAdminAuth()
+  const publicRoutes = ['/iniciar-sesion', '/confirm']
+  if (publicRoutes.some(r => to.path === r || to.path.startsWith(r + '/'))) return
 
-  const path = to.path
+  const user = useSupabaseUser()
 
-  // ---- Public routes (no auth required) ----
-  const publicRoutes = ['/', '/iniciar-sesion', '/confirm']
-  if (publicRoutes.some(r => path === r || path.startsWith(r + '/'))) return
+  // Root redirect: logged in → dashboard, not logged in → login
+  if (to.path === '/') {
+    return navigateTo(user.value ? '/admin/hoy' : '/iniciar-sesion')
+  }
 
-  // ---- No session → login ----
-  if (!supaUser.value) {
+  // No supabase session → redirect to login
+  if (!user.value) {
     return navigateTo('/iniciar-sesion')
   }
 
-  // ---- Has session but admin state not hydrated → restore ----
+  // Has session → ensure admin role is loaded
+  const { isAuthenticated, restore } = useAdminAuth()
   if (!isAuthenticated.value) {
     await restore()
   }
 
-  // ---- Still not authenticated (user is not an admin) → sign out ----
   if (!isAuthenticated.value) {
-    const client = useSupabaseClient()
-    await client.auth.signOut()
     return navigateTo('/iniciar-sesion')
   }
 })

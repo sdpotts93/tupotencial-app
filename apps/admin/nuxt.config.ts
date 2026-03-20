@@ -37,10 +37,11 @@ export default defineNuxtConfig({
   modules: ['@nuxt/icon', '@nuxtjs/supabase'],
 
   supabase: {
-    redirectOptions: {
-      login: '/iniciar-sesion',
-      callback: '/confirm',
-      exclude: ['/', '/iniciar-sesion'],
+    redirect: false,
+    cookieOptions: {
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'lax' as const,
+      secure: true,
     },
   },
 

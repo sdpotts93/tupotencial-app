@@ -13,6 +13,11 @@ export interface AuthUser {
   is_admin: boolean
 }
 
+// Track whether the watcher has been registered to prevent duplicates.
+// Each call to useAuth() in middleware/pages/layouts would otherwise
+// register a new watcher, causing racing fetchProfile calls.
+const watcherRegistered = ref(false)
+
 export function useAuth() {
   const client = useSupabaseClient()
   const supaUser = useSupabaseUser()
@@ -20,6 +25,11 @@ export function useAuth() {
   const loading = useState('auth-loading', () => false)
 
   async function fetchProfile(uid: string): Promise<boolean> {
+    // Ensure the client has a fresh access token before querying.
+    // On SSR, the server plugin refreshes the token in a separate client
+    // instance, but useSupabaseClient() may still hold an expired JWT.
+    await client.auth.getSession()
+
     const [profileRes, subRes, entRes, adminRes] = await Promise.all([
       client.from('profiles').select('display_name, avatar_url, community_segment').eq('id', uid).single(),
       client.from('subscriptions').select('status').eq('user_id', uid).maybeSingle(),
@@ -41,29 +51,35 @@ export function useAuth() {
     return true
   }
 
-  // Sync auth state when supabase user changes
-  watch(supaUser, async (u) => {
-    if (!u) {
-      user.value = null
-      return
-    }
-    const uid = u.id ?? (u as any).sub as string | undefined
-    if (!uid) return // guard against incomplete user object
-    if (user.value?.id === uid) return // already loaded
-    loading.value = true
-    try {
-      const ok = await fetchProfile(uid)
-      if (!ok) {
-        // Profile doesn't exist (e.g. DB was reset) — sign out stale session
-        await client.auth.signOut()
-        user.value = null
-        navigateTo('/iniciar-sesion')
+  // Register the supaUser watcher ONCE across all useAuth() calls.
+  // The page:start hook in @nuxtjs/supabase can temporarily null out
+  // supaUser during navigation (cookie read race). We ignore transient
+  // nulls when we already have user state to avoid spurious logouts.
+  if (!watcherRegistered.value) {
+    watcherRegistered.value = true
+    watch(supaUser, async (u) => {
+      if (!u) {
+        // Only clear user state if we don't already have a loaded profile.
+        // The page:start hook can briefly null supaUser while cookies
+        // are still being written — clearing here would cause a logout loop.
+        if (!user.value) return
+        // If supaUser becomes null and stays null, the next middleware run
+        // will redirect to login. Don't proactively sign out.
         return
       }
-    } finally {
-      loading.value = false
-    }
-  }, { immediate: true })
+      const uid = u.id ?? (u as any).sub as string | undefined
+      if (!uid) return // guard against incomplete user object
+      if (user.value?.id === uid) return // already loaded
+      loading.value = true
+      try {
+        await fetchProfile(uid)
+        // If fetchProfile fails, leave the session intact.
+        // It's likely a transient network/DB error, not a missing profile.
+      } finally {
+        loading.value = false
+      }
+    }, { immediate: true })
+  }
 
   const isLoggedIn = computed(() => !!user.value)
   const isOnboarded = computed(() => !!user.value?.community_segment)

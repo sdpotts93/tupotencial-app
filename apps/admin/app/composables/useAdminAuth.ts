@@ -8,12 +8,12 @@ interface AdminUser {
   avatar_url?: string
 }
 
-const adminUser = ref<AdminUser | null>(null)
-const isAuthenticated = ref(false)
-const isLoading = ref(false)
-
 export function useAdminAuth() {
+  const adminUser = useState<AdminUser | null>('admin-user', () => null)
+  const isAuthenticated = useState('admin-is-authenticated', () => false)
+  const isLoading = useState('admin-is-loading', () => false)
   const client = useSupabaseClient()
+  const supaUser = useSupabaseUser()
 
   async function login(email: string, password: string): Promise<boolean> {
     isLoading.value = true
@@ -61,30 +61,55 @@ export function useAdminAuth() {
     navigateTo('/iniciar-sesion')
   }
 
-  // Restore session on page load if supabase has an active session
+  // Restore admin state from an existing supabase session.
+  // useSupabaseUser() is already hydrated by the @nuxtjs/supabase module
+  // on both server (useSsrCookies) and client (onAuthStateChange).
   async function restore() {
-    const supaUser = useSupabaseUser()
-    if (!supaUser.value || isAuthenticated.value) return
+    if (isAuthenticated.value) return
+
+    // On server, useSupabaseUser() returns JWT claims (has .sub).
+    // On client, it returns a User object (has .id).
+    const uid = supaUser.value?.id ?? (supaUser.value as any)?.sub
+    if (!uid) return
 
     isLoading.value = true
     try {
       const { data: adminRow } = await client
         .from('admin_users')
         .select('role')
-        .eq('user_id', supaUser.value.id)
+        .eq('user_id', uid)
         .single()
 
-      if (!adminRow) return
+      if (!adminRow) {
+        adminUser.value = null
+        isAuthenticated.value = false
+        return
+      }
+
+      const email = supaUser.value?.email ?? ''
+
+      // On server, skip the profile query to keep SSR fast
+      if (import.meta.server) {
+        adminUser.value = {
+          id: uid,
+          email,
+          full_name: 'Administrador',
+          role: adminRow.role as AdminUser['role'],
+          avatar_url: undefined,
+        }
+        isAuthenticated.value = true
+        return
+      }
 
       const { data: profile } = await client
         .from('profiles')
         .select('display_name, avatar_url')
-        .eq('id', supaUser.value.id)
+        .eq('id', uid)
         .single()
 
       adminUser.value = {
-        id: supaUser.value.id,
-        email: supaUser.value.email!,
+        id: uid,
+        email,
         full_name: profile?.display_name ?? 'Administrador',
         role: adminRow.role as AdminUser['role'],
         avatar_url: profile?.avatar_url ?? undefined,

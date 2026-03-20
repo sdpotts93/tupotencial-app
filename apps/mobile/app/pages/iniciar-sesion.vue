@@ -169,7 +169,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' })
 
-const { login, register } = useAuth()
+const { login, register, user } = useAuth()
 
 const activeSheet = ref<'none' | 'login' | 'register'>('none')
 
@@ -232,7 +232,10 @@ async function handleLogin() {
   loginLoading.value = true
   try {
     await login(loginEmail.value, loginPassword.value)
-    const { user } = useAuth()
+    // Wait for the auth state to propagate to cookies before navigating.
+    // The supabase.client.js page:start hook calls getClaims() on navigation —
+    // if cookies aren't written yet, it nulls out supaUser and triggers logout.
+    await new Promise(r => setTimeout(r, 300))
     if (!user.value?.community_segment) {
       navigateTo('/cuenta/bienvenida/segmento')
     } else {

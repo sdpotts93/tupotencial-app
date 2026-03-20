@@ -114,6 +114,10 @@ async function handleLogin() {
 
   const success = await login(email.value, password.value)
   if (success) {
+    // Wait for auth cookies to propagate before navigating.
+    // The supabase.client.js page:start hook calls getClaims() on navigation —
+    // if cookies aren't written yet, it nulls out supaUser and triggers logout.
+    await new Promise(r => setTimeout(r, 300))
     navigateTo('/admin')
   } else {
     loginError.value = 'Credenciales incorrectas'
