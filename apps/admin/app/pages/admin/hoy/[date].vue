@@ -37,7 +37,7 @@
 
           <!-- Contenido -->
           <UiSelect
-            v-if="form.action_type === 'contenido'"
+            v-if="form.action_type === 'content'"
             v-model="form.content_id"
             label="Contenido"
             :options="contentOptions"
@@ -46,7 +46,7 @@
 
           <!-- Formulario -->
           <UiSelect
-            v-if="form.action_type === 'formulario'"
+            v-if="form.action_type === 'form'"
             v-model="form.form_id"
             label="Formulario"
             :options="formOptions"
@@ -100,9 +100,9 @@ const { data: existingPlan } = await useAsyncData(`daily-plan-${dateParam.value}
 const existingPayload = existingPlan.value?.primary_action_payload as Record<string, any> | null
 
 const form = reactive({
-  phrase_text: existingPayload?.quote_text ?? 'Cada día es una nueva oportunidad para cuidar de ti.',
-  phrase_author: (existingPlan.value?.community_segment ?? 'gabriel') as 'gabriel' | 'carlotta',
-  action_type: existingPlan.value?.primary_action_type ?? 'talk_to_ai' as string,
+  phrase_text: existingPayload?.quote_text ?? '',
+  phrase_author: (existingPayload?.quote_author ?? '') as string,
+  action_type: existingPlan.value?.primary_action_type ?? 'ai_prompt' as string,
   content_id: existingPayload?.content_id ?? '',
   form_id: existingPayload?.form_id ?? '',
   badge_title: existingPlan.value?.badge_share_text ?? 'Día completado',
@@ -115,9 +115,9 @@ const authorOptions = [
 ]
 
 const actionTypeOptions = [
-  { value: 'talk_to_ai', label: 'Habla con tu Coach IA' },
-  { value: 'contenido', label: 'Contenido' },
-  { value: 'formulario', label: 'Formulario' },
+  { value: 'ai_prompt', label: 'Habla con tu Coach IA' },
+  { value: 'content', label: 'Contenido' },
+  { value: 'form', label: 'Formulario' },
 ]
 
 // ── Fetch content items and forms for dropdowns ──
@@ -158,16 +158,15 @@ async function handleSave() {
     quote_text: form.phrase_text,
     quote_author: form.phrase_author,
   }
-  if (form.action_type === 'contenido' && form.content_id) {
+  if (form.action_type === 'content' && form.content_id) {
     actionPayload.content_id = form.content_id
   }
-  if (form.action_type === 'formulario' && form.form_id) {
+  if (form.action_type === 'form' && form.form_id) {
     actionPayload.form_id = form.form_id
   }
 
   const payload = {
     date: dateParam.value,
-    community_segment: form.phrase_author,
     title: form.badge_title,
     message: form.badge_subtitle,
     primary_action_type: form.action_type,

@@ -338,7 +338,7 @@ const streakMessage = computed(() => {
 
 // ─── Today's daily plan for user's segment ───
 const { data: dailyPlanData } = await useAsyncData('hoy-plan', async () => {
-  const { data } = await client.from('daily_plans').select('*').eq('date', today).eq('community_segment', user.value?.community_segment ?? '').eq('status', 'published').maybeSingle()
+  const { data } = await client.from('daily_plans').select('*').eq('date', today).eq('status', 'published').order('created_at', { ascending: false }).limit(1).maybeSingle()
   return data
 })
 
