@@ -80,7 +80,7 @@
 
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/formularios">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
     </div>
   </div>
 </template>
@@ -89,6 +89,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const saving = ref(false)
 
 // ── Form state ──
 const form = reactive({
@@ -140,15 +141,20 @@ function localFieldsToDb(localFields: FormField[]) {
 }
 
 async function handleSave() {
-  const payload = {
-    title: form.title,
-    description: form.description || null,
-    fields: localFieldsToDb(fields.value),
-    status: form.status,
-  }
+  saving.value = true
+  try {
+    const payload = {
+      title: form.title,
+      description: form.description || null,
+      fields: localFieldsToDb(fields.value),
+      status: form.status,
+    }
 
-  await client.from('forms').insert(payload)
-  navigateTo('/admin/formularios')
+    await client.from('forms').insert(payload)
+    navigateTo('/admin/formularios')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 

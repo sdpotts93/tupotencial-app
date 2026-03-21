@@ -128,7 +128,7 @@
 
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
     </div>
   </div>
 </template>
@@ -137,6 +137,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const saving = ref(false)
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -215,19 +216,24 @@ const statusOptions = [
 ]
 
 async function handleSave() {
-  const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
+  saving.value = true
+  try {
+    const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
 
-  await client.from('events').insert({
-    title: form.title,
-    description: form.description,
-    start_at: startAt,
-    duration: form.duration || null,
-    vimeo_live_event_id: form.vimeo_live_event_id || null,
-    plan: form.plan,
-    entitlement_key: form.entitlement_key || null,
-    status: form.status,
-  })
-  navigateTo('/admin/eventos')
+    await client.from('events').insert({
+      title: form.title,
+      description: form.description,
+      start_at: startAt,
+      duration: form.duration || null,
+      vimeo_live_event_id: form.vimeo_live_event_id || null,
+      plan: form.plan,
+      entitlement_key: form.entitlement_key || null,
+      status: form.status,
+    })
+    navigateTo('/admin/eventos')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 

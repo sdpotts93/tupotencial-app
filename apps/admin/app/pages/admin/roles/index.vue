@@ -89,7 +89,7 @@
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showEditModal = false">Cancelar</UiButton>
-          <UiButton variant="primary-outline" size="sm" @click="saveEdit">Guardar</UiButton>
+          <UiButton variant="primary-outline" size="sm" :loading="editSaving" @click="saveEdit">Guardar</UiButton>
         </div>
       </template>
     </UiModal>
@@ -118,8 +118,8 @@
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showInviteModal = false">Cancelar</UiButton>
-          <UiButton variant="primary-outline" size="sm" :disabled="inviteLoading" @click="sendInvite">
-            {{ inviteLoading ? 'Enviando...' : 'Enviar invitación' }}
+          <UiButton variant="primary-outline" size="sm" :loading="inviteLoading" @click="sendInvite">
+            Enviar invitación
           </UiButton>
         </div>
       </template>
@@ -136,6 +136,8 @@ const showInviteModal = ref(false)
 const showEditModal = ref(false)
 const search = ref('')
 const editingId = ref<string | null>(null)
+
+const editSaving = ref(false)
 
 const editForm = reactive({
   full_name: '',
@@ -237,16 +239,23 @@ function editAdmin(row: Record<string, any>) {
 
 async function saveEdit() {
   if (!editingId.value) return
-  await client
-    .from('admin_users')
-    .update({ role: editForm.role })
-    .eq('id', editingId.value)
-  showEditModal.value = false
-  await refresh()
+  editSaving.value = true
+  try {
+    await client
+      .from('admin_users')
+      .update({ role: editForm.role })
+      .eq('id', editingId.value)
+    showEditModal.value = false
+    await refresh()
+  } finally {
+    editSaving.value = false
+  }
 }
 
+const confirm = useConfirm()
+
 async function deleteAdmin(row: Record<string, any>) {
-  if (confirm(`¿Seguro que deseas eliminar a ${row.full_name}?`)) {
+  if (await confirm({ message: `¿Seguro que deseas eliminar a ${row.full_name}?` })) {
     await client.from('admin_users').delete().eq('id', row.id)
     await refresh()
   }

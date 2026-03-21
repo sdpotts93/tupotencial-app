@@ -184,8 +184,10 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+const confirm = useConfirm()
+
 async function handleDelete(row: Record<string, any>) {
-  if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
+  if (await confirm({ message: `¿Seguro que deseas eliminar "${row.title}"?` })) {
     await client.from('content_items').delete().eq('id', row.id)
     refresh()
   }

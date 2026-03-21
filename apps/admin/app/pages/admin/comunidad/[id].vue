@@ -109,9 +109,9 @@
     </div>
 
     <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/comunidad">Volver</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">{{ form.status === 'draft' ? 'Guardar' : 'Publicar' }}</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">{{ form.status === 'draft' ? 'Guardar' : 'Publicar' }}</UiButton>
     </div>
   </div>
 </template>
@@ -123,6 +123,8 @@ const route = useRoute()
 const client = useSupabaseClient()
 const id = route.params.id as string
 const isNew = id === 'new'
+const saving = ref(false)
+const deleting = ref(false)
 
 // ── Fetch existing post ──
 const { data: post } = await useAsyncData(`post-${id}`, async () => {
@@ -231,28 +233,40 @@ async function hideComment(comment: any) {
 }
 
 async function handleSave() {
-  const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
-  const payload = {
-    title: form.title || null,
-    body: form.body,
-    media_url: form.media_url || null,
-    status: form.status,
-    community_segment: communitySegment,
-    is_official: true,
-  }
+  saving.value = true
+  try {
+    const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
+    const payload = {
+      title: form.title || null,
+      body: form.body,
+      media_url: form.media_url || null,
+      status: form.status,
+      community_segment: communitySegment,
+      is_official: true,
+    }
 
-  if (isNew) {
-    await client.from('posts').insert(payload)
-  } else {
-    await client.from('posts').update(payload).eq('id', id)
+    if (isNew) {
+      await client.from('posts').insert(payload)
+    } else {
+      await client.from('posts').update(payload).eq('id', id)
+    }
+    navigateTo('/admin/comunidad')
+  } finally {
+    saving.value = false
   }
-  navigateTo('/admin/comunidad')
 }
 
+const confirm = useConfirm()
+
 async function handleDelete() {
-  if (confirm('¿Seguro que deseas eliminar esta publicación?')) {
-    await client.from('posts').delete().eq('id', id)
-    navigateTo('/admin/comunidad')
+  if (await confirm({ message: '¿Seguro que deseas eliminar esta publicación?' })) {
+    deleting.value = true
+    try {
+      await client.from('posts').delete().eq('id', id)
+      navigateTo('/admin/comunidad')
+    } finally {
+      deleting.value = false
+    }
   }
 }
 </script>

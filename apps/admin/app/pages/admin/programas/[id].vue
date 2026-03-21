@@ -176,11 +176,11 @@
     </div>
 
     <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/programas">Cancelar</UiButton>
       <UiButton v-if="activeTab === 'info'" variant="soft" size="sm" @click="activeTab = 'days'">Siguiente</UiButton>
       <UiButton v-if="activeTab === 'days'" variant="soft" size="sm" @click="activeTab = 'info'">Atrás</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
     </div>
   </div>
 </template>
@@ -193,6 +193,8 @@ const client = useSupabaseClient()
 const id = route.params.id as string
 const isNew = id === 'new'
 const activeTab = ref('info')
+const saving = ref(false)
+const deleting = ref(false)
 
 const tabs = [
   { value: 'info', label: '1. Información' },
@@ -417,7 +419,9 @@ async function handleSave() {
     }
   }
 
-  const programPayload = {
+  saving.value = true
+  try {
+    const programPayload = {
     title: form.title,
     description: form.description || null,
     type: form.program_type,
@@ -469,18 +473,28 @@ async function handleSave() {
     }
   }
 
-  navigateTo('/admin/programas')
+    navigateTo('/admin/programas')
+  } finally {
+    saving.value = false
+  }
 }
 
+const confirm = useConfirm()
+
 async function handleDelete() {
-  if (confirm('¿Seguro que deseas eliminar este programa?')) {
-    const existingDayIds = (dbDays.value ?? []).map((d: any) => d.id)
-    if (existingDayIds.length) {
-      await client.from('program_day_items').delete().in('program_day_id', existingDayIds)
-      await client.from('program_days').delete().eq('program_id', id)
+  if (await confirm({ message: '¿Seguro que deseas eliminar este programa?' })) {
+    deleting.value = true
+    try {
+      const existingDayIds = (dbDays.value ?? []).map((d: any) => d.id)
+      if (existingDayIds.length) {
+        await client.from('program_day_items').delete().in('program_day_id', existingDayIds)
+        await client.from('program_days').delete().eq('program_id', id)
+      }
+      await client.from('programs').delete().eq('id', id)
+      navigateTo('/admin/programas')
+    } finally {
+      deleting.value = false
     }
-    await client.from('programs').delete().eq('id', id)
-    navigateTo('/admin/programas')
   }
 }
 </script>

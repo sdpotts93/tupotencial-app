@@ -139,17 +139,19 @@
               placeholder="Selecciona el estado"
             />
 
-            <UiInput
+            <UiDatePicker
               v-if="form.status === 'scheduled'"
               v-model="form.scheduled_at"
               label="Fecha de publicación programada"
-              type="datetime-local"
+              :enable-time="true"
+              placeholder="Selecciona fecha y hora"
             />
 
-            <UiInput
+            <UiDatePicker
               v-model="form.unpublished_at"
               label="Despublicar automáticamente (opcional)"
-              type="datetime-local"
+              :enable-time="true"
+              placeholder="Selecciona fecha y hora"
               hint="Fecha en que el contenido se archivará automáticamente"
             />
           </div>
@@ -158,9 +160,9 @@
     </div>
 
     <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/contenido">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
     </div>
   </div>
 </template>
@@ -176,6 +178,8 @@ const isNew = id === 'new'
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
+const saving = ref(false)
+const deleting = ref(false)
 
 // ── Fetch existing content item + junction category ──
 const { data: contentItem } = await useAsyncData(`content-${id}`, async () => {
@@ -212,8 +216,8 @@ const form = reactive({
   segment: contentItem.value?.plan ?? 'free',
   entitlement_key: contentItem.value?.entitlement_key ?? '',
   status: contentItem.value?.status ?? 'draft',
-  scheduled_at: contentItem.value?.available_from ?? '',
-  unpublished_at: contentItem.value?.available_to ?? '',
+  scheduled_at: contentItem.value?.available_from ? new Date(contentItem.value.available_from) : null as Date | null,
+  unpublished_at: contentItem.value?.available_to ? new Date(contentItem.value.available_to) : null as Date | null,
   existing_media: contentItem.value?.media_url ?? '',
 })
 
@@ -322,47 +326,59 @@ function formatFileSize(bytes: number): string {
 }
 
 async function handleSave() {
-  const payload = {
-    title: form.title,
-    subtitle: form.introduction || null,
-    description: form.introduction || null,
-    body: form.body || null,
-    type: form.content_type,
-    media_url: form.existing_media || null,
-    plan: form.segment,
-    status: form.status,
-    published_at: form.status === 'published' ? new Date().toISOString() : null,
-    entitlement_key: form.entitlement_key || null,
-    objective_id: form.objective_id || null,
-    available_from: form.scheduled_at || null,
-    available_to: form.unpublished_at || null,
-  }
+  saving.value = true
+  try {
+    const payload = {
+      title: form.title,
+      subtitle: form.introduction || null,
+      description: form.introduction || null,
+      body: form.body || null,
+      type: form.content_type,
+      media_url: form.existing_media || null,
+      plan: form.segment,
+      status: form.status,
+      published_at: form.status === 'published' ? new Date().toISOString() : null,
+      entitlement_key: form.entitlement_key || null,
+      objective_id: form.objective_id || null,
+      available_from: form.scheduled_at ? form.scheduled_at.toISOString() : null,
+      available_to: form.unpublished_at ? form.unpublished_at.toISOString() : null,
+    }
 
-  if (isNew) {
-    const { data: inserted } = await client.from('content_items').insert({ ...payload, type: form.content_type }).select('id').single()
-    if (inserted && form.category_id) {
-      await client.from('content_item_categories').insert({ content_item_id: inserted.id, category_id: form.category_id })
+    if (isNew) {
+      const { data: inserted } = await client.from('content_items').insert({ ...payload, type: form.content_type }).select('id').single()
+      if (inserted && form.category_id) {
+        await client.from('content_item_categories').insert({ content_item_id: inserted.id, category_id: form.category_id })
+      }
+    } else {
+      await client.from('content_items').update(payload).eq('id', id)
+      // Update junction category
+      if (form.category_id) {
+        await client.from('content_item_categories').delete().eq('content_item_id', id)
+        await client.from('content_item_categories').insert({ content_item_id: id, category_id: form.category_id })
+      }
     }
-  } else {
-    await client.from('content_items').update(payload).eq('id', id)
-    // Update junction category
-    if (form.category_id) {
-      await client.from('content_item_categories').delete().eq('content_item_id', id)
-      await client.from('content_item_categories').insert({ content_item_id: id, category_id: form.category_id })
-    }
+    navigateTo('/admin/contenido')
+  } finally {
+    saving.value = false
   }
-  navigateTo('/admin/contenido')
 }
 
 function handleDuplicate() {
   navigateTo('/admin/contenido/new')
 }
 
+const confirm = useConfirm()
+
 async function handleDelete() {
-  if (confirm('¿Seguro que deseas eliminar este contenido?')) {
-    await client.from('content_item_categories').delete().eq('content_item_id', id)
-    await client.from('content_items').delete().eq('id', id)
-    navigateTo('/admin/contenido')
+  if (await confirm({ message: '¿Seguro que deseas eliminar este contenido?' })) {
+    deleting.value = true
+    try {
+      await client.from('content_item_categories').delete().eq('content_item_id', id)
+      await client.from('content_items').delete().eq('id', id)
+      navigateTo('/admin/contenido')
+    } finally {
+      deleting.value = false
+    }
   }
 }
 </script>

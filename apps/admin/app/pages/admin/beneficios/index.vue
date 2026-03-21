@@ -155,8 +155,10 @@ function statusLabel(status: string) {
   return map[status] ?? status
 }
 
+const confirm = useConfirm()
+
 async function handleDelete(row: Record<string, any>) {
-  if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
+  if (await confirm({ message: `¿Seguro que deseas eliminar "${row.title}"?` })) {
     await client.from('benefits').delete().eq('id', row.id)
     refresh()
   }

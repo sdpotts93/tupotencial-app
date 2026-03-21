@@ -368,7 +368,8 @@ const datesWithContent = computed(() => {
 
 const yearMonths = computed(() => {
   const year = new Date().getFullYear()
-  const today = new Date().toISOString().slice(0, 10)
+  const _n = new Date()
+  const today = `${_n.getFullYear()}-${String(_n.getMonth() + 1).padStart(2, '0')}-${String(_n.getDate()).padStart(2, '0')}`
   return MONTH_NAMES_ES.map((name, monthIndex) => {
     const firstDay = new Date(year, monthIndex, 1)
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()

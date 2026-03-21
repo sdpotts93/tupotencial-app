@@ -110,9 +110,9 @@
     </div>
 
     <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/complementos">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
     </div>
   </div>
 </template>
@@ -149,6 +149,8 @@ const revenue = computed(() => stats.value?.revenue ?? 0)
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
 const isDragging = ref(false)
+const saving = ref(false)
+const deleting = ref(false)
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -199,29 +201,41 @@ const statusOptions = [
 ]
 
 async function handleSave() {
-  const payload = {
-    title: form.title,
-    description: form.description || null,
-    cover_url: form.cover_url || null,
-    price: Math.round(Number(form.price) * 100),
-    plan: form.plan,
-    grants_core_months: form.grants_core_months ? Number(form.grants_core_months) : null,
-    stripe_price_id: form.stripe_price_id || null,
-    status: form.status,
-  }
+  saving.value = true
+  try {
+    const payload = {
+      title: form.title,
+      description: form.description || null,
+      cover_url: form.cover_url || null,
+      price: Math.round(Number(form.price) * 100),
+      plan: form.plan,
+      grants_core_months: form.grants_core_months ? Number(form.grants_core_months) : null,
+      stripe_price_id: form.stripe_price_id || null,
+      status: form.status,
+    }
 
-  if (isNew) {
-    await client.from('addons').insert(payload)
-  } else {
-    await client.from('addons').update(payload).eq('id', id)
+    if (isNew) {
+      await client.from('addons').insert(payload)
+    } else {
+      await client.from('addons').update(payload).eq('id', id)
+    }
+    navigateTo('/admin/complementos')
+  } finally {
+    saving.value = false
   }
-  navigateTo('/admin/complementos')
 }
 
+const confirm = useConfirm()
+
 async function handleDelete() {
-  if (confirm('¿Seguro que deseas eliminar este add-on?')) {
-    await client.from('addons').delete().eq('id', id)
-    navigateTo('/admin/complementos')
+  if (await confirm({ message: '¿Seguro que deseas eliminar este add-on?' })) {
+    deleting.value = true
+    try {
+      await client.from('addons').delete().eq('id', id)
+      navigateTo('/admin/complementos')
+    } finally {
+      deleting.value = false
+    }
   }
 }
 </script>

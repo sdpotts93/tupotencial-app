@@ -79,7 +79,7 @@
 
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/hoy">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
     </div>
   </div>
 </template>
@@ -90,6 +90,7 @@ definePageMeta({ layout: 'default' })
 const route = useRoute()
 const client = useSupabaseClient()
 const dateParam = computed(() => route.params.date as string)
+const saving = ref(false)
 
 // ── Fetch existing daily plan for this date ──
 const { data: existingPlan } = await useAsyncData(`daily-plan-${dateParam.value}`, async () => {
@@ -154,33 +155,38 @@ function formatDate(iso: string) {
 }
 
 async function handleSave() {
-  const actionPayload: Record<string, any> = {
-    quote_text: form.phrase_text,
-    quote_author: form.phrase_author,
-  }
-  if (form.action_type === 'content' && form.content_id) {
-    actionPayload.content_id = form.content_id
-  }
-  if (form.action_type === 'form' && form.form_id) {
-    actionPayload.form_id = form.form_id
-  }
+  saving.value = true
+  try {
+    const actionPayload: Record<string, any> = {
+      quote_text: form.phrase_text,
+      quote_author: form.phrase_author,
+    }
+    if (form.action_type === 'content' && form.content_id) {
+      actionPayload.content_id = form.content_id
+    }
+    if (form.action_type === 'form' && form.form_id) {
+      actionPayload.form_id = form.form_id
+    }
 
-  const payload = {
-    date: dateParam.value,
-    title: form.badge_title,
-    message: form.badge_subtitle,
-    primary_action_type: form.action_type,
-    primary_action_payload: actionPayload,
-    badge_share_text: form.badge_title,
-    status: 'published',
-  }
+    const payload = {
+      date: dateParam.value,
+      title: form.badge_title,
+      message: form.badge_subtitle,
+      primary_action_type: form.action_type,
+      primary_action_payload: actionPayload,
+      badge_share_text: form.badge_title,
+      status: 'published',
+    }
 
-  if (existingPlan.value) {
-    await client.from('daily_plans').update(payload).eq('id', existingPlan.value.id)
-  } else {
-    await client.from('daily_plans').insert(payload)
+    if (existingPlan.value) {
+      await client.from('daily_plans').update(payload).eq('id', existingPlan.value.id)
+    } else {
+      await client.from('daily_plans').insert(payload)
+    }
+    navigateTo('/admin/hoy')
+  } finally {
+    saving.value = false
   }
-  navigateTo('/admin/hoy')
 }
 </script>
 

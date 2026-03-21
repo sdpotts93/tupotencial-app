@@ -83,9 +83,9 @@
     </div>
 
     <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/formularios">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
     </div>
   </div>
 </template>
@@ -97,6 +97,8 @@ const route = useRoute()
 const client = useSupabaseClient()
 const id = route.params.id as string
 const isNew = id === 'new'
+const saving = ref(false)
+const deleting = ref(false)
 
 // ── Fetch existing form ──
 const { data: formRecord } = await useAsyncData(`form-${id}`, async () => {
@@ -167,25 +169,37 @@ function removeField(index: number) {
 }
 
 async function handleSave() {
-  const payload = {
-    title: form.title,
-    description: form.description || null,
-    fields: localFieldsToDb(fields.value),
-    status: form.status,
-  }
+  saving.value = true
+  try {
+    const payload = {
+      title: form.title,
+      description: form.description || null,
+      fields: localFieldsToDb(fields.value),
+      status: form.status,
+    }
 
-  if (isNew) {
-    await client.from('forms').insert(payload)
-  } else {
-    await client.from('forms').update(payload).eq('id', id)
+    if (isNew) {
+      await client.from('forms').insert(payload)
+    } else {
+      await client.from('forms').update(payload).eq('id', id)
+    }
+    navigateTo('/admin/formularios')
+  } finally {
+    saving.value = false
   }
-  navigateTo('/admin/formularios')
 }
 
+const confirm = useConfirm()
+
 async function handleDelete() {
-  if (confirm('¿Seguro que deseas eliminar este formulario?')) {
-    await client.from('forms').delete().eq('id', id)
-    navigateTo('/admin/formularios')
+  if (await confirm({ message: '¿Seguro que deseas eliminar este formulario?' })) {
+    deleting.value = true
+    try {
+      await client.from('forms').delete().eq('id', id)
+      navigateTo('/admin/formularios')
+    } finally {
+      deleting.value = false
+    }
   }
 }
 </script>

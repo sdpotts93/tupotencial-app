@@ -136,8 +136,10 @@ function authorAvatar(name: string) {
   return name === 'Carlotta' ? '/images/carlotta.png' : '/images/gabriel.png'
 }
 
+const confirm = useConfirm()
+
 async function handleDelete(row: Record<string, any>) {
-  if (confirm(`¿Seguro que deseas eliminar esta publicación de ${row.author}?`)) {
+  if (await confirm({ message: `¿Seguro que deseas eliminar esta publicación de ${row.author}?` })) {
     await client.from('posts').delete().eq('id', row.id)
     await refresh()
   }

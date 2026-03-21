@@ -74,6 +74,8 @@
         <slot />
       </main>
     </div>
+
+    <UiConfirmModal />
   </div>
 </template>
 

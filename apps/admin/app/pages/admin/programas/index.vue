@@ -174,8 +174,10 @@ async function handleDuplicate(row: Record<string, any>) {
   refresh()
 }
 
+const confirm = useConfirm()
+
 async function handleDelete(row: Record<string, any>) {
-  if (confirm(`¿Seguro que deseas eliminar "${row.title}"?`)) {
+  if (await confirm({ message: `¿Seguro que deseas eliminar "${row.title}"?` })) {
     await client.from('programs').delete().eq('id', row.id)
     refresh()
   }

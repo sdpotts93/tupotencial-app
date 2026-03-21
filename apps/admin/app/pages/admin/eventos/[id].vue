@@ -112,9 +112,9 @@
     </div>
 
     <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
     </div>
   </div>
 </template>
@@ -131,6 +131,8 @@ const isNew = id === 'new'
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
 const isDragging = ref(false)
+const saving = ref(false)
+const deleting = ref(false)
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -214,40 +216,52 @@ const statusOptions = [
 ]
 
 async function handleSave() {
-  const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
+  saving.value = true
+  try {
+    const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
 
-  if (isNew) {
-    await client.from('events').insert({
-      title: form.title,
-      description: form.description,
-      cover_url: form.cover_url || null,
-      start_at: startAt,
-      duration: form.duration || null,
-      vimeo_live_event_id: form.vimeo_live_event_id || null,
-      plan: form.plan,
-      entitlement_key: form.entitlement_key || null,
-      status: form.status,
-    })
-  } else {
-    await client.from('events').update({
-      title: form.title,
-      description: form.description,
-      cover_url: form.cover_url || null,
-      start_at: startAt,
-      duration: form.duration || null,
-      vimeo_live_event_id: form.vimeo_live_event_id || null,
-      plan: form.plan,
-      entitlement_key: form.entitlement_key || null,
-      status: form.status,
-    }).eq('id', id)
+    if (isNew) {
+      await client.from('events').insert({
+        title: form.title,
+        description: form.description,
+        cover_url: form.cover_url || null,
+        start_at: startAt,
+        duration: form.duration || null,
+        vimeo_live_event_id: form.vimeo_live_event_id || null,
+        plan: form.plan,
+        entitlement_key: form.entitlement_key || null,
+        status: form.status,
+      })
+    } else {
+      await client.from('events').update({
+        title: form.title,
+        description: form.description,
+        cover_url: form.cover_url || null,
+        start_at: startAt,
+        duration: form.duration || null,
+        vimeo_live_event_id: form.vimeo_live_event_id || null,
+        plan: form.plan,
+        entitlement_key: form.entitlement_key || null,
+        status: form.status,
+      }).eq('id', id)
+    }
+    navigateTo('/admin/eventos')
+  } finally {
+    saving.value = false
   }
-  navigateTo('/admin/eventos')
 }
 
+const confirm = useConfirm()
+
 async function handleDelete() {
-  if (confirm('¿Seguro que deseas eliminar este evento?')) {
-    await client.from('events').delete().eq('id', id)
-    navigateTo('/admin/eventos')
+  if (await confirm({ message: '¿Seguro que deseas eliminar este evento?' })) {
+    deleting.value = true
+    try {
+      await client.from('events').delete().eq('id', id)
+      navigateTo('/admin/eventos')
+    } finally {
+      deleting.value = false
+    }
   }
 }
 

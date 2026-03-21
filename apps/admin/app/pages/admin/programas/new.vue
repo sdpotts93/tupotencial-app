@@ -170,7 +170,7 @@
       <UiButton variant="soft" size="sm" to="/admin/programas">Cancelar</UiButton>
       <UiButton v-if="activeTab === 'days'" variant="soft" size="sm" @click="activeTab = 'info'">Atrás</UiButton>
       <UiButton v-if="activeTab === 'info'" variant="primary-outline" size="sm" @click="activeTab = 'days'">Siguiente</UiButton>
-      <UiButton v-if="activeTab === 'days'" variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
+      <UiButton v-if="activeTab === 'days'" variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
     </div>
   </div>
 </template>
@@ -181,6 +181,7 @@ definePageMeta({ layout: 'default' })
 const client = useSupabaseClient()
 
 const activeTab = ref('info')
+const saving = ref(false)
 
 const tabs = [
   { value: 'info', label: '1. Información' },
@@ -361,45 +362,50 @@ async function handleSave() {
     }
   }
 
-  const programPayload = {
-    title: form.title,
-    description: form.description || null,
-    type: form.program_type,
-    plan: form.plan,
-    entitlement_key: form.entitlement_key || null,
-    status: form.status,
-  }
-
-  const { data: inserted } = await client.from('programs').insert(programPayload).select('id').single()
-  if (!inserted) return
-
-  // Insert days + items
-  for (let i = 0; i < programDays.value.length; i++) {
-    const day = programDays.value[i]!
-    const { data: insertedDay } = await client
-      .from('program_days')
-      .insert({
-        program_id: inserted.id,
-        day_index: i,
-        title: day.title || null,
-        description: day.description || null,
-      })
-      .select('id')
-      .single()
-
-    if (insertedDay && day.activities.length) {
-      const items = day.activities.map((a, pos) => ({
-        program_day_id: insertedDay.id,
-        type: uiTypeToDb[a.type] ?? a.type,
-        content_item_id: a.type === 'contenido' && a.content_id ? a.content_id : null,
-        form_id: a.type === 'formulario' && a.form_id ? a.form_id : null,
-        position: pos,
-      }))
-      await client.from('program_day_items').insert(items)
+  saving.value = true
+  try {
+    const programPayload = {
+      title: form.title,
+      description: form.description || null,
+      type: form.program_type,
+      plan: form.plan,
+      entitlement_key: form.entitlement_key || null,
+      status: form.status,
     }
-  }
 
-  navigateTo('/admin/programas')
+    const { data: inserted } = await client.from('programs').insert(programPayload).select('id').single()
+    if (!inserted) { saving.value = false; return }
+
+    // Insert days + items
+    for (let i = 0; i < programDays.value.length; i++) {
+      const day = programDays.value[i]!
+      const { data: insertedDay } = await client
+        .from('program_days')
+        .insert({
+          program_id: inserted.id,
+          day_index: i,
+          title: day.title || null,
+          description: day.description || null,
+        })
+        .select('id')
+        .single()
+
+      if (insertedDay && day.activities.length) {
+        const items = day.activities.map((a, pos) => ({
+          program_day_id: insertedDay.id,
+          type: uiTypeToDb[a.type] ?? a.type,
+          content_item_id: a.type === 'contenido' && a.content_id ? a.content_id : null,
+          form_id: a.type === 'formulario' && a.form_id ? a.form_id : null,
+          position: pos,
+        }))
+        await client.from('program_day_items').insert(items)
+      }
+    }
+
+    navigateTo('/admin/programas')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 

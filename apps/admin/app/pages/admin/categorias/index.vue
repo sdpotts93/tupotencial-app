@@ -88,7 +88,7 @@
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showCreateModal = false">Cancelar</UiButton>
-          <UiButton variant="primary-outline" size="sm" @click="saveCategory">{{ editingCategory ? 'Guardar cambios' : 'Crear categoría' }}</UiButton>
+          <UiButton variant="primary-outline" size="sm" :loading="saving" @click="saveCategory">{{ editingCategory ? 'Guardar cambios' : 'Crear categoría' }}</UiButton>
         </div>
       </template>
     </UiModal>
@@ -102,6 +102,7 @@ const client = useSupabaseClient()
 
 const showCreateModal = ref(false)
 const editingCategory = ref<Record<string, any> | null>(null)
+const saving = ref(false)
 const search = ref('')
 
 const categoryForm = reactive({
@@ -199,30 +200,37 @@ function editCategory(row: Record<string, any>) {
 }
 
 async function saveCategory() {
-  const slug = slugify(categoryForm.name)
-  const isActive = categoryForm.is_active === 'true'
+  saving.value = true
+  try {
+    const slug = slugify(categoryForm.name)
+    const isActive = categoryForm.is_active === 'true'
 
-  if (editingCategory.value) {
-    await client
-      .from('content_categories')
-      .update({ title: categoryForm.name, slug, is_active: isActive })
-      .eq('id', editingCategory.value.id)
-  } else {
-    const maxOrder = (categories.value ?? []).reduce((max, c) => Math.max(max, c.sort_order ?? 0), 0)
-    await client
-      .from('content_categories')
-      .insert({ title: categoryForm.name, slug, is_active: isActive, sort_order: maxOrder + 1 })
+    if (editingCategory.value) {
+      await client
+        .from('content_categories')
+        .update({ title: categoryForm.name, slug, is_active: isActive })
+        .eq('id', editingCategory.value.id)
+    } else {
+      const maxOrder = (categories.value ?? []).reduce((max, c) => Math.max(max, c.sort_order ?? 0), 0)
+      await client
+        .from('content_categories')
+        .insert({ title: categoryForm.name, slug, is_active: isActive, sort_order: maxOrder + 1 })
+    }
+
+    await refresh()
+    showCreateModal.value = false
+    editingCategory.value = null
+    categoryForm.name = ''
+    categoryForm.is_active = 'true'
+  } finally {
+    saving.value = false
   }
-
-  await refresh()
-  showCreateModal.value = false
-  editingCategory.value = null
-  categoryForm.name = ''
-  categoryForm.is_active = 'true'
 }
 
+const confirm = useConfirm()
+
 async function handleDelete(row: Record<string, any>) {
-  if (confirm(`¿Seguro que deseas eliminar "${row.name}"?`)) {
+  if (await confirm({ message: `¿Seguro que deseas eliminar "${row.name}"?` })) {
     await client.from('content_categories').delete().eq('id', row.id)
     await refresh()
   }

@@ -55,7 +55,8 @@ const reflection = ref('')
 const loading = ref(false)
 const showSuccess = ref(false)
 
-const today = new Date().toISOString().split('T')[0]
+const _now = new Date()
+const today = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`
 
 // ── Fetch current streak ──
 const { data: streakData } = await useAsyncData('checkin-streak', async () => {

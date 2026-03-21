@@ -80,9 +80,9 @@
     </div>
 
     <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" @click="handleDelete">Eliminar</UiButton>
+      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/beneficios">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar cambios</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
     </div>
   </div>
 </template>
@@ -99,6 +99,8 @@ const isNew = id === 'new'
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
 const isDragging = ref(false)
+const saving = ref(false)
+const deleting = ref(false)
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -156,29 +158,41 @@ const statusOptions = [
 ]
 
 async function handleSave() {
-  const payload = {
-    title: form.title,
-    description: form.description || null,
-    cover_url: form.cover_url || null,
-    url: form.url,
-    utm_template: form.utm_template || null,
-    code: form.code || null,
-    plan: form.plan,
-    status: form.status,
-  }
+  saving.value = true
+  try {
+    const payload = {
+      title: form.title,
+      description: form.description || null,
+      cover_url: form.cover_url || null,
+      url: form.url,
+      utm_template: form.utm_template || null,
+      code: form.code || null,
+      plan: form.plan,
+      status: form.status,
+    }
 
-  if (isNew) {
-    await client.from('benefits').insert(payload)
-  } else {
-    await client.from('benefits').update(payload).eq('id', id)
+    if (isNew) {
+      await client.from('benefits').insert(payload)
+    } else {
+      await client.from('benefits').update(payload).eq('id', id)
+    }
+    navigateTo('/admin/beneficios')
+  } finally {
+    saving.value = false
   }
-  navigateTo('/admin/beneficios')
 }
 
+const confirm = useConfirm()
+
 async function handleDelete() {
-  if (confirm('¿Seguro que deseas eliminar este beneficio?')) {
-    await client.from('benefits').delete().eq('id', id)
-    navigateTo('/admin/beneficios')
+  if (await confirm({ message: '¿Seguro que deseas eliminar este beneficio?' })) {
+    deleting.value = true
+    try {
+      await client.from('benefits').delete().eq('id', id)
+      navigateTo('/admin/beneficios')
+    } finally {
+      deleting.value = false
+    }
   }
 }
 </script>

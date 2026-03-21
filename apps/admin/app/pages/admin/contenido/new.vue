@@ -132,17 +132,19 @@
               placeholder="Selecciona el estado"
             />
 
-            <UiInput
+            <UiDatePicker
               v-if="form.status === 'scheduled'"
               v-model="form.scheduled_at"
               label="Fecha de publicación programada"
-              type="datetime-local"
+              :enable-time="true"
+              placeholder="Selecciona fecha y hora"
             />
 
-            <UiInput
+            <UiDatePicker
               v-model="form.unpublished_at"
               label="Despublicar automáticamente (opcional)"
-              type="datetime-local"
+              :enable-time="true"
+              placeholder="Selecciona fecha y hora"
               hint="Fecha en que el contenido se archivará automáticamente"
             />
           </div>
@@ -152,7 +154,7 @@
 
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/contenido">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
     </div>
   </div>
 </template>
@@ -165,6 +167,7 @@ const client = useSupabaseClient()
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
+const saving = ref(false)
 
 const form = reactive({
   title: '',
@@ -177,8 +180,8 @@ const form = reactive({
   segment: 'free',
   entitlement_key: '',
   status: 'draft',
-  scheduled_at: '',
-  unpublished_at: '',
+  scheduled_at: null as Date | null,
+  unpublished_at: null as Date | null,
 })
 
 const typeOptions = [
@@ -290,26 +293,31 @@ function formatFileSize(bytes: number): string {
 }
 
 async function handleSave() {
-  const payload = {
-    title: form.title,
-    subtitle: form.introduction || null,
-    description: form.introduction || null,
-    body: form.body || null,
-    type: form.content_type,
-    plan: form.segment,
-    status: form.status,
-    published_at: form.status === 'published' ? new Date().toISOString() : null,
-    entitlement_key: form.entitlement_key || null,
-    objective_id: form.objective_id || null,
-    available_from: form.scheduled_at || null,
-    available_to: form.unpublished_at || null,
-  }
+  saving.value = true
+  try {
+    const payload = {
+      title: form.title,
+      subtitle: form.introduction || null,
+      description: form.introduction || null,
+      body: form.body || null,
+      type: form.content_type,
+      plan: form.segment,
+      status: form.status,
+      published_at: form.status === 'published' ? new Date().toISOString() : null,
+      entitlement_key: form.entitlement_key || null,
+      objective_id: form.objective_id || null,
+      available_from: form.scheduled_at ? form.scheduled_at.toISOString() : null,
+      available_to: form.unpublished_at ? form.unpublished_at.toISOString() : null,
+    }
 
-  const { data: inserted } = await client.from('content_items').insert(payload).select('id').single()
-  if (inserted && form.category_id) {
-    await client.from('content_item_categories').insert({ content_item_id: inserted.id, category_id: form.category_id })
+    const { data: inserted } = await client.from('content_items').insert(payload).select('id').single()
+    if (inserted && form.category_id) {
+      await client.from('content_item_categories').insert({ content_item_id: inserted.id, category_id: form.category_id })
+    }
+    navigateTo('/admin/contenido')
+  } finally {
+    saving.value = false
   }
-  navigateTo('/admin/contenido')
 }
 </script>
 
