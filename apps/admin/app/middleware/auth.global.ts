@@ -27,4 +27,18 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (!isAuthenticated.value) {
     return navigateTo('/iniciar-sesion')
   }
+
+  // ── Role-based route guards ──
+  const { canEdit, canManageRoles } = useAdminAuth()
+
+  // /admin/roles — admin only
+  if (to.path.startsWith('/admin/roles') && !canManageRoles.value) {
+    return navigateTo('/admin')
+  }
+
+  // /new and /[id] edit routes — editor or admin only
+  const isWriteRoute = to.path.match(/\/admin\/[^/]+\/(new|[0-9a-f-]{36})/)
+  if (isWriteRoute && !canEdit.value) {
+    return navigateTo(to.path.replace(/\/(new|[0-9a-f-]{36})$/, ''))
+  }
 })

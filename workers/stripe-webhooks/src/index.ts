@@ -98,6 +98,14 @@ export default {
       return handleCreateCheckout(request, env)
     }
 
+    if (url.pathname === '/create-addon-checkout') {
+      return handleCreateAddonCheckout(request, env)
+    }
+
+    if (url.pathname === '/create-portal-session') {
+      return handleCreatePortalSession(request, env)
+    }
+
     if (url.pathname === '/webhook') {
       return handleWebhook(request, env)
     }
@@ -164,6 +172,111 @@ async function handleCreateCheckout(request: Request, env: Env): Promise<Respons
   } catch (err: any) {
     console.error('Checkout error:', err)
     return jsonResponse({ error: err.message || 'Error creating checkout' }, 500)
+  }
+}
+
+// ── Addon checkout session creation ─────────────────────────────────────────
+
+async function handleCreateAddonCheckout(request: Request, env: Env): Promise<Response> {
+  try {
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return jsonResponse({ error: 'No autenticado' }, 401)
+    }
+
+    const token = authHeader.slice(7)
+    const userRes = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+      headers: { Authorization: `Bearer ${token}`, apikey: env.SUPABASE_SERVICE_ROLE_KEY },
+    })
+    if (!userRes.ok) return jsonResponse({ error: 'Token inválido' }, 401)
+
+    const user = (await userRes.json()) as { id: string; email: string }
+
+    const body = (await request.json().catch(() => ({}))) as {
+      addonId?: string
+      stripePriceId?: string
+      returnUrl?: string
+    }
+
+    if (!body.addonId || !body.stripePriceId) {
+      return jsonResponse({ error: 'addonId and stripePriceId required' }, 400)
+    }
+
+    const db = supabase(env)
+    const stripe = new Stripe(env.STRIPE_SECRET_KEY)
+
+    // Get or create Stripe customer
+    const subs = await db.select('subscriptions', `user_id=eq.${user.id}&select=stripe_customer_id`)
+    let customerId = subs?.[0]?.stripe_customer_id
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        metadata: { supabase_user_id: user.id },
+      })
+      customerId = customer.id
+    }
+
+    const returnUrl = body.returnUrl || 'https://app.tupotencial.com/cuenta/complementos'
+
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      mode: 'payment',
+      line_items: [{ price: body.stripePriceId, quantity: 1 }],
+      success_url: `${returnUrl}/${body.addonId}?checkout=success`,
+      cancel_url: `${returnUrl}/${body.addonId}?checkout=canceled`,
+      metadata: {
+        supabase_user_id: user.id,
+        addon_id: body.addonId,
+        type: 'addon_purchase',
+      },
+    })
+
+    return jsonResponse({ url: session.url })
+  } catch (err: any) {
+    console.error('Addon checkout error:', err)
+    return jsonResponse({ error: err.message || 'Error creating checkout' }, 500)
+  }
+}
+
+// ── Stripe Customer Portal session ──────────────────────────────────────────
+
+async function handleCreatePortalSession(request: Request, env: Env): Promise<Response> {
+  try {
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return jsonResponse({ error: 'No autenticado' }, 401)
+    }
+
+    const token = authHeader.slice(7)
+    const userRes = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+      headers: { Authorization: `Bearer ${token}`, apikey: env.SUPABASE_SERVICE_ROLE_KEY },
+    })
+    if (!userRes.ok) return jsonResponse({ error: 'Token inválido' }, 401)
+
+    const user = (await userRes.json()) as { id: string; email: string }
+
+    const db = supabase(env)
+    const subs = await db.select('subscriptions', `user_id=eq.${user.id}&select=stripe_customer_id`)
+    const customerId = subs?.[0]?.stripe_customer_id
+
+    if (!customerId) {
+      return jsonResponse({ error: 'No subscription found' }, 404)
+    }
+
+    const body = (await request.json().catch(() => ({}))) as { returnUrl?: string }
+    const returnUrl = body.returnUrl || 'https://app.tupotencial.com/cuenta/mas'
+
+    const stripe = new Stripe(env.STRIPE_SECRET_KEY)
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: returnUrl,
+    })
+
+    return jsonResponse({ url: portalSession.url })
+  } catch (err: any) {
+    console.error('Portal session error:', err)
+    return jsonResponse({ error: err.message || 'Error creating portal session' }, 500)
   }
 }
 
@@ -239,6 +352,44 @@ async function handleCheckoutCompleted(
   const userId = session.metadata?.supabase_user_id
   if (!userId) return
 
+  // ── Addon purchase (one-time payment) ──
+  if (session.metadata?.type === 'addon_purchase') {
+    const addonId = session.metadata.addon_id
+    if (!addonId) return
+
+    // Insert addon_purchases record
+    await db.insert('addon_purchases', {
+      user_id: userId,
+      addon_id: addonId,
+      amount: session.amount_total,
+      stripe_session_id: session.id,
+    })
+
+    // Fetch addon entitlements from junction table and grant them
+    const entitlements = await db.select('addon_entitlements', `addon_id=eq.${addonId}&select=entitlement_key`)
+    for (const ent of entitlements ?? []) {
+      await db.upsert('user_entitlements', {
+        user_id: userId,
+        entitlement_key: ent.entitlement_key,
+        source: 'addon',
+        source_ref: addonId,
+      }, 'user_id,entitlement_key')
+    }
+
+    // Log payment
+    await db.insert('payments', {
+      user_id: userId,
+      stripe_event_id: eventId,
+      stripe_object_id: session.id,
+      type: 'addon_purchase',
+      amount: session.amount_total,
+      currency: session.currency,
+      meta: JSON.stringify({ addon_id: addonId }),
+    })
+    return
+  }
+
+  // ── Subscription checkout ──
   const subscriptionId = session.subscription as string
   if (!subscriptionId) return
 

@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Eventos</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/eventos/new">+ Nuevo evento</UiButton>
+        <UiButton v-if="canEdit" variant="primary-outline" size="sm" to="/admin/eventos/new">+ Nuevo evento</UiButton>
       </div>
     </div>
 
@@ -76,6 +76,7 @@ const columns = [
 ]
 
 const client = useSupabaseClient()
+const { canEdit } = useAdminAuth()
 const { data: rows, refresh } = await useAsyncData('admin-events', async () => {
   const { data } = await client.from('events').select('*, event_registrations(count)').order('start_at', { ascending: false })
   return (data ?? []).map(e => ({

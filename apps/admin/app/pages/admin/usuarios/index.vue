@@ -4,7 +4,7 @@
       <h1 class="page-header__title">Usuarios</h1>
     </div>
 
-    <UiDataTable fill :columns="columns" :rows="filteredRows">
+    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToUser">
       <template #toolbar>
         <UiInput
           v-model="search"
@@ -165,6 +165,10 @@ function segmentLabel(segment: string) {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function goToUser(row: any) {
+  navigateTo(`/admin/usuarios/${row.id}`)
 }
 
 </script>

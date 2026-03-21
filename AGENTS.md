@@ -1,6 +1,7 @@
 # AGENTS.md — Tu Potencial (Monorepo) — Nuxt 4 + Capacitor + Supabase
 
-Source of truth for MVP scope: `docs/proposal/tu-potencial.pdf`. 
+Source of truth for MVP scope: `docs/proposal/tu-potencial.pdf`.
+Current status tracked in: `PENDING.md`.
 
 This document is written for coding agents. It defines:
 - Ways of working (workflow)
@@ -14,13 +15,11 @@ This document is written for coding agents. It defines:
 
 ---
 
-## 0.0 Early development mode (mandatory)
+## 0.0 Development status
 
-At project start, prioritize route-first testing and mock integrations:
-- All defined routes must be directly accessible (deep-linkable) for QA and development without requiring completion of previous screens/flows.
-- Start with mock data for all major screens/features, but shape the mocks to simulate Supabase usage (table-like records, async loading states, and error states).
-- Keep data-access interfaces compatible with Supabase (same payload/field expectations) so replacing mocks with real Supabase queries is a low-risk swap.
-- During this phase, avoid hard-blocking unfinished routes behind incomplete auth/billing logic; use explicit development guards/flags where needed.
+**Current phase: Web app complete.** All admin + mobile screens are built and wired to Supabase. Mock data has been replaced with real database queries. Stripe payment flows (subscriptions + add-ons + customer portal) are wired. Role-based authorization is enforced. Full-text search is implemented.
+
+**Next phase: Capacitor integration** (wrapping the web app for iOS/Android native builds), push notifications, Firebase Analytics, orientation lock, and release to stores. See §14 for post-MVP items.
 
 ---
 
@@ -30,13 +29,14 @@ At project start, prioritize route-first testing and mock integrations:
 - Customer app (web + iOS/Android): **Nuxt 4** + **Capacitor** (single codebase)
 - Admin web: **Nuxt 4**
 - Backend/Auth/DB/Storage: **Supabase** (Postgres + Auth + RLS + Storage)
-- Payments: **Stripe** (Checkout + webhooks) — web-only for subscriptions/add-ons (no native in-app payments)
+- Payments: **Stripe** (Checkout + webhooks + Customer Portal) — web-only for subscriptions/add-ons (no native in-app payments)
 - Video/Lives: **Vimeo** embeds
-- Notifications: push + in-app
+- Notifications: push + in-app (Capacitor + FCM/APNs)
 - Analytics: Firebase Analytics + App Store Connect + Google Play Console
-- Webhooks/API: Cloudflare Worker (recommended) or Nuxt server routes (allowed)
+- Webhooks/API: Cloudflare Workers (stripe-webhooks)
 - Language/locale: Spanish (Mexico) (`es-MX`)
 
+c 1
 ---
 
 ## 0.1 Payments & app store constraints (mandatory)
@@ -89,8 +89,8 @@ References:
 - The app must be **locked to portrait** on all screens **except** media playback routes (e.g. `/content/[id]/play`).
 - Media playback routes should allow **both portrait and landscape** so users can rotate for fullscreen video.
 - Implementation plan:
-  1. **Phase 1 (now — web only):** Use a CSS overlay ("please rotate your device") on landscape for non-media routes as a universal fallback. On media routes, hide the overlay and let the user rotate freely.
-  2. **Phase 2 (Capacitor):** When Capacitor is added, use `@capacitor/screen-orientation` plugin to natively lock portrait on app launch and unlock on media routes. Remove the CSS overlay fallback once native orientation control is in place.
+  1. **Phase 1 (current — web only):** CSS overlay ("please rotate your device") on landscape for non-media routes. On media routes, hide the overlay and let the user rotate freely.
+  2. **Phase 2 (Capacitor):** Use `@capacitor/screen-orientation` plugin to natively lock portrait on app launch and unlock on media routes. Remove the CSS overlay fallback once native orientation control is in place.
 
 ## 1) Monorepo layout (canonical)
 
@@ -777,7 +777,7 @@ All components must consume CSS variables (no hardcoded colors/sizes).
 - Remember me:
   - Default: checked.
   - If unchecked: do not persist the Supabase session across app restarts/browser relaunch (session-only storage).
-- Biometric sign-in (native only):
+- Biometric sign-in [POST-MVP — requires Capacitor]:
   - Support Face ID / Touch ID (iOS) and biometrics (Android) as a convenience sign-in after the user has successfully logged in once with email/password.
   - Store the Supabase `refresh_token` in secure storage (Keychain/Keystore) only when the user explicitly enables biometric sign-in.
   - Next launch: if biometry is available and a refresh token is present, show “Iniciar sesión con Face ID/biometría” button; on success, refresh the session and continue.
@@ -817,10 +817,10 @@ All components must consume CSS variables (no hardcoded colors/sizes).
 8) Library Home — `/library`
 - Categories (ordered) + featured items (optional)
 - Free tier shows a limited library; Core unlocks full library (see 8.0)
-- Search CTA → `/library/search`
+- Search is inline on the same page (no separate route) — uses Postgres full-text search
 
-9) Library Search — `/library/search`
-- Search across published `content_items` permitted by segment
+~~9) Library Search — `/library/search`~~
+- **Not needed.** Search is inline on the library page (confirmed decision).
 
 10) Category Listing — `/library/c/[slug]`
 - Items in category (ordered) + filters (optional)
@@ -848,9 +848,8 @@ All components must consume CSS variables (no hardcoded colors/sizes).
 - Show ordered content for the day
 - CTA to check-in → `/retos/[id]/day/[dayIndex]/checkin`
 
-16) Program Check-in — `/retos/[id]/day/[dayIndex]/checkin`
-- Submit `program_checkins` payload
-- Success → back to day view or program detail
+~~16) Program Check-in — `/retos/[id]/day/[dayIndex]/checkin`~~
+- **Not needed.** Check-in is done inline within the day page (confirmed decision).
 
 #### Community
 17) Community Feed — `/community`
@@ -862,8 +861,8 @@ All components must consume CSS variables (no hardcoded colors/sizes).
 - Post content + comments
 - Add comment (MVP)
 
-19) Create Post (optional) — `/community/new`
-- Create user post (text + optional media)
+~~19) Create Post (optional) — `/community/new`~~
+- **Not needed.** Community post creation is admin-only (confirmed decision).
 
 #### Events / Lives
 20) Events List — `/events`
@@ -900,8 +899,8 @@ All components must consume CSS variables (no hardcoded colors/sizes).
   - success → `/profile` or `/addons`
   - failure → `/addons/[id]`
 
-28) Unlocked Section(s) — `/vip` (or `/addons/unlocked`)
-- Content/features gated by `user_entitlements`
+~~28) Unlocked Section(s) — `/vip` (or `/addons/unlocked`)~~
+- **Not needed.** Entitlement gating is applied on existing pages; no separate VIP route needed (confirmed decision).
 
 #### Badge (“Show you trained”)
 - Badge preview + share live inside `/hoy` as a section (no dedicated routes).
@@ -949,8 +948,8 @@ All components must consume CSS variables (no hardcoded colors/sizes).
 - Show subscription status + entitlements
 
 34) Settings — `/settings`
-- Notifications toggles/permissions deep link
 - Logout action
+- [POST-MVP] Notifications toggles/permissions deep link (depends on push notifications)
 
 ---
 
@@ -996,7 +995,8 @@ Web-only behaviors (Stripe):
 - Add-ons/VIP — `/admin/addons`
 - Users — `/admin/users`
 - Roles (admins) — `/admin/roles`
-- Settings (optional) — `/admin/settings`
+- Forms — `/admin/formularios`
+- Settings (optional) — `/admin/settings` [POST-MVP]
 
 ---
 
@@ -1091,7 +1091,7 @@ Web-only behaviors (Stripe):
 - Manage `admin_users` entries
 - Assign roles: admin/editor/read_only
 
-27) Settings (optional) — `/admin/settings`
+27) Settings (optional) — `/admin/settings` [POST-MVP — not needed for MVP]
 - Global config (support contact, AI limits, app copy snippets)
 
 ## 9.6 Route protection rules (required)
@@ -1122,15 +1122,13 @@ Core app area:
 - `/hoy`
 - `/hoy/checkin`
 - `/hoy/progress`
-- `/library`
-- `/library/search`
+- `/library` (search is inline, no separate route)
 - `/library/c/[slug]`
 - `/content/[id]`
 - `/content/[id]/play`
 - `/retos`
 - `/retos/[id]`
-- `/retos/[id]/day/[dayIndex]`
-- `/retos/[id]/day/[dayIndex]/checkin`
+- `/retos/[id]/day/[dayIndex]` (check-in is inline, no separate route)
 - `/benefits`
 - `/benefits/[id]`
 - `/addons`
@@ -1155,20 +1153,11 @@ Core app area:
   - Require `subscriptions.status = active|trialing`
   - If not subscriber → redirect to `/events/[id]` (locked state)
 
-### Entitlement-only routes (examples)
-Choose a canonical route for VIP gated content:
-- `/vip`
-  - Require `Entitled(vip)` (or another agreed entitlement_key)
+### Entitlement gating (no dedicated routes)
+Entitlement gating is applied at the content/addon level on existing pages. No separate `/vip` or `/addons/unlocked` routes needed (confirmed decision).
 
-If you gate any specific section:
-- `/addons/unlocked/<key>` (optional)
-  - Require `Entitled(<key>)`
-
-### Optional: Community posting
-If user-generated posting is included:
-- `/community/new`
-  - Subscriber
-Otherwise do not create this route.
+### Community posting
+Admin-only. No `/community/new` route for users (confirmed decision).
 
 ---
 
@@ -1203,7 +1192,10 @@ Otherwise do not create this route.
 - `/admin/users`
 - `/admin/users/[id]`
 - `/admin/roles`
-- `/admin/settings` (optional)
+- `/admin/formularios`
+- `/admin/formularios/new`
+- `/admin/formularios/[id]`
+- `/admin/settings` [POST-MVP]
 
 ### Admin role capabilities (authorization)
 Even within Admin routes, enforce capabilities by role:
@@ -1231,44 +1223,58 @@ Admin:
 
 ## 10) Feature checklist (track completion)
 
+Legend: `[x]` = built, `[ ]` = MVP but not yet built, `[~]` = partially built, `[POST]` = post-MVP
+
 ### Mobile (MVP)
-- [ ] Auth: register/login/profile (Core subscription purchase on web)
-- [ ] Segment selection (Gabriel/Carlotta/Combined (`conjunta`))
-- [ ] Today: daily plan + check-in + progress
-- [ ] Library: categories + content detail + playback/reader
-- [ ] Programs/Challenges/Bootcamps: list/detail/day/check-in/progress
-- [ ] Community: feed + comments + reactions (segmented)
-- [ ] Events/Lives: list/detail/embed + subscriber gating
-- [ ] Benefits: list + click tracking
-- [ ] Add-ons/VIP: list/detail (purchase on web) + unlock gating
-- [ ] Badge: generate + share/download
-- [ ] Notifications: push + in-app (basic)
-- [ ] Analytics: Firebase events
-- [ ] AI Coach: chat + tone variants + limits + redirect
+- [x] Auth: login/register/profile-setup/segment-selection
+- [x] Segment selection (Gabriel/Carlotta/Combined (`conjunta`))
+- [x] Today: daily plan + check-in + progress + streak
+- [x] Library: categories + content detail + search (database full-text search)
+- [x] Programs/Challenges/Bootcamps: list/detail/day view
+- [x] Community: feed + comments + reactions (segmented, subscriber-only)
+- [x] Events/Lives: list/detail + subscriber gating
+- [x] Benefits: list/detail + click tracking
+- [x] Add-ons/VIP: list/detail + purchase flow (Stripe Checkout) + entitlement gating
+- [x] AI Coach: chat + tone variants (carlotta/gabriel) + limits + safety
+- [x] Stripe customer portal: "Gestionar suscripción" link on /cuenta/mas
+- [~] Badge: share badge section in Hoy (share via Web Share API; direct Instagram Stories requires Capacitor)
+- [ ] Notifications: push + in-app (Capacitor + FCM/APNs)
+- [ ] Analytics: Firebase events (Capacitor plugin)
+- [ ] Portrait orientation lock: native lock (Capacitor `@capacitor/screen-orientation`)
+- [ ] Content playback: `/content/[id]/play` dedicated player route (currently inline)
+- [POST] Biometric sign-in: Face ID / Touch ID (requires Capacitor + secure storage)
+- [POST] Direct Instagram Stories sharing (requires Capacitor native bridge)
 
 ### Customer web (MVP)
-- [ ] Pricing + signup/subscribe (Stripe Checkout)
-- [ ] Add-ons purchase + entitlement refresh (`/billing/return`)
-- [ ] Account/billing management (subscription status + entitlements)
+- [x] Pricing + signup/subscribe (Stripe Checkout via worker)
+- [x] Add-ons purchase + entitlement refresh
+- [x] Billing return handler (`/billing/return`)
+- [x] Stripe customer portal for subscription management
 
 ### Admin (MVP)
-- [ ] Admin auth + role guards
-- [ ] Content CRUD + categories + ordering + scheduling/unpublish
-- [ ] Programs CRUD + days + attach content + duplicate + activate/deactivate
-- [ ] Today scheduler + daily plan editor
-- [ ] Community: official posts + light hide/unhide
-- [ ] Events/Lives: CRUD + gating + segment
-- [ ] Benefits: CRUD + ordering + tracking fields
-- [ ] Add-ons: CRUD + entitlement mapping
-- [ ] Users: list + subscription status + entitlements view
+- [x] Admin auth + role guards (admin/editor/read_only with route + UI guards)
+- [x] Content CRUD + categories + ordering + scheduling
+- [x] Programs CRUD + days + attach content + wizard
+- [x] Today scheduler + daily plan editor (calendar + day editor)
+- [x] Community: official posts + edit/delete
+- [x] Events/Lives: CRUD + gating + segment
+- [x] Benefits: CRUD + ordering + drag-and-drop
+- [x] Add-ons: CRUD + entitlement mapping + Stripe Price ID
+- [x] Users: list (search/filters) + detail page (profile/subscription/entitlements/activity)
+- [x] Roles: manage admin_users + invite + assign roles
+- [x] Forms: CRUD + dynamic field builder
+- [x] Dashboard: KPIs + quick actions + recent activity
 - [ ] Analytics read guidance (links/documentation for Firebase/Stores)
+- [POST] Admin settings page (global config — support contact, AI limits, app copy snippets; not needed for MVP)
 
 ### Backend/Infra
-- [ ] Supabase migrations + RLS baseline
-- [ ] Stripe worker: create checkout + webhook verify + idempotency
-- [ ] Vimeo embed support
+- [x] Supabase migrations + RLS baseline (28 tables, 90 policies, 16 indexes)
+- [x] Stripe worker: subscription checkout + addon checkout + webhook verify + idempotency + customer portal
+- [x] Full-text search: Spanish tsvector + GIN index + search_content RPC
+- [x] docs/summary.md logging
+- [ ] Capacitor integration (iOS/Android native builds)
 - [ ] Release checklist (TestFlight + Play testing + store submission)
-- [ ] docs/summary.md logging
+- [POST] Vimeo live-to-content auto-conversion (requires Vimeo Premium API)
 
 ---
 
@@ -1311,18 +1317,43 @@ Must implement:
 
 ## 13) Deployment notes (MVP expectation)
 
-- Customer web deployed (public signup + billing)
+- Customer web deployed (public signup + billing + Stripe customer portal)
 - Admin deployed (e.g., Cloudflare Pages)
-- Worker deployed (Cloudflare Workers)
-- Mobile published to App Store + Google Play (not just internal builds)
+- Worker deployed (Cloudflare Workers — subscription + addon checkout + webhooks + portal)
+- Mobile published to App Store + Google Play (Capacitor integration)
 - Ensure client owns accounts and has at least 2 admin users provisioned
 
 ---
 
-## 14) Future enhancements (post-MVP)
+## 14) Remaining MVP work (not yet built)
+
+### ~~Capacitor integration~~ ✅
+Completed. Config, iOS, Android projects, SPA build pipeline, composable, plugin.
+
+### ~~Push notifications~~ ✅
+Completed. `push_tokens` table + RLS, `usePushNotifications` composable, auto-register plugin, token cleanup on logout, `send-push` Supabase Edge Function (FCM v1 API), iOS AppDelegate wiring. Remaining setup: add `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) from Firebase Console, enable Push Notifications capability in Xcode.
+
+### ~~Firebase Analytics~~ ✅
+Completed. `@capacitor-firebase/analytics` plugin, `useAnalytics` composable (logEvent, setUserId, setScreen, setUserProperty), auto-init plugin (user ID sync, screen tracking, app_open event). Remaining setup: add `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) from Firebase Console.
+
+### ~~Portrait orientation lock~~ ✅
+Completed as part of Capacitor integration. `capacitor.client.ts` plugin locks to portrait via `@capacitor/screen-orientation`.
+
+### ~~Platform guards~~ ✅
+Completed. Stripe purchase CTAs (subscription checkout, addon purchase, portal link) hidden on native with `isNative` guard. Native users see a note directing them to tupotencial.com for purchases. Complies with MX App Store / Play Store rules.
+
+### Release checklist
+TestFlight + Play testing + store submission + App Store compliance review for MX storefront (see §0.1).
+
+---
+
+## 15) Future enhancements (post-MVP)
+
+### Biometric sign-in
+Face ID / Touch ID via Capacitor secure storage. See login screen spec for implementation details.
 
 ### Direct Instagram Stories sharing
-The ShareBadge currently uses the Web Share API (`navigator.share`) which opens the OS share sheet — the user picks Instagram from there. For a **direct-to-Instagram-Stories** flow, Instagram provides a URL scheme (`instagram-stories://share`) that accepts a background image via the pasteboard (iOS) or Intent (Android). This requires a native bridge (Capacitor plugin), not just the browser. Implement when the app ships with Capacitor.
+The ShareBadge currently uses the Web Share API (`navigator.share`) which opens the OS share sheet — the user picks Instagram from there. For a **direct-to-Instagram-Stories** flow, Instagram provides a URL scheme (`instagram-stories://share`) that accepts a background image via the pasteboard (iOS) or Intent (Android). This requires a native bridge (Capacitor plugin), not just the browser.
 
 ### Auto-convert Vimeo Live recordings to content items
 When a Vimeo Live event ends, Vimeo automatically saves the recording. Currently the admin must manually create a `content_items` entry from it. Automate this with a **Vimeo webhook**:
@@ -1331,3 +1362,9 @@ When a Vimeo Live event ends, Vimeo automatically saves the recording. Currently
 3. Set `events.recording_content_item_id` to the new content item's ID.
 4. Remove the manual "Convertir en contenido" button from `/admin/eventos/[id]` once this is live.
 Requires: Vimeo Premium API access + webhook secret stored in Supabase secrets.
+
+### Admin settings page
+Global config (support contact, AI limits, app copy snippets). Not necessary for MVP.
+
+### Notification settings page
+`/settings` notification toggles/permissions deep link. Depends on push notifications being implemented first.

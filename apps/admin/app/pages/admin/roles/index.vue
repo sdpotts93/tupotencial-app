@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Roles de administración</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" @click="showInviteModal = true">+ Invitar administrador</UiButton>
+        <UiButton v-if="canManageRoles" variant="primary-outline" size="sm" @click="showInviteModal = true">+ Invitar administrador</UiButton>
       </div>
     </div>
 
@@ -56,11 +56,11 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" @click="editAdmin(row)">
+        <UiButton v-if="canManageRoles" variant="soft" size="sm" @click="editAdmin(row)">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
-        <UiButton variant="danger-ghost" size="sm" @click="deleteAdmin(row)">
+        <UiButton v-if="canManageRoles" variant="danger-ghost" size="sm" @click="deleteAdmin(row)">
           <template #icon><Icon name="lucide:trash-2" size="16" /></template>
           Eliminar
         </UiButton>
@@ -131,6 +131,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const { canManageRoles } = useAdminAuth()
 
 const showInviteModal = ref(false)
 const showEditModal = ref(false)
@@ -165,7 +166,7 @@ const { data: adminUsers, refresh } = await useAsyncData('admin-roles', async ()
     status: 'active',
     last_login: null as string | null,
   }))
-})
+}, { server: false })
 
 // ── Computed role summary cards ──
 const roles = computed(() => {

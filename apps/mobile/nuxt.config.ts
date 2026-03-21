@@ -1,4 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+// When building for Capacitor (native), use SPA mode (no SSR).
+// Set CAPACITOR=true in env to trigger this.
+const isCapacitor = process.env.CAPACITOR === 'true'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
 
@@ -6,7 +11,11 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
-  devtools: { enabled: true },
+  // Capacitor requires a static SPA build; web uses SSR
+  ssr: !isCapacitor,
+  ...(isCapacitor ? { nitro: { preset: 'static' } } : {}),
+
+  devtools: { enabled: !isCapacitor },
 
   app: {
     head: {
@@ -47,7 +56,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     openaiApiKey: process.env.OPENAI_API_KEY,
     public: {
-      isNative: false,
+      isNative: isCapacitor,
       stripeWorkerUrl: process.env.STRIPE_WORKER_URL || '',
     },
   },

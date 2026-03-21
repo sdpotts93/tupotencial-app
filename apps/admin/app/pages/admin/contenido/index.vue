@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Contenido</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/contenido/new">+ Crear contenido</UiButton>
+        <UiButton v-if="canEdit" variant="primary-outline" size="sm" to="/admin/contenido/new">+ Crear contenido</UiButton>
       </div>
     </div>
 
@@ -114,6 +114,7 @@ const segmentOptions = [
 ]
 
 const client = useSupabaseClient()
+const { canEdit } = useAdminAuth()
 
 const { data: categories } = await useAsyncData('admin-content-categories', async () => {
   const { data } = await client.from('content_categories').select('id, title').order('sort_order')

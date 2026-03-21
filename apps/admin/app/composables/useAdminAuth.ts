@@ -120,10 +120,25 @@ export function useAdminAuth() {
     }
   }
 
+  // ── Role-based permission helpers ──
+  // admin: full access
+  // editor: CRUD content, programs, events, etc. — but NOT roles/admin management
+  // read_only: view only, no create/edit/delete
+  const canEdit = computed(() => {
+    const role = adminUser.value?.role
+    return role === 'admin' || role === 'editor'
+  })
+
+  const canManageRoles = computed(() => {
+    return adminUser.value?.role === 'admin'
+  })
+
   return {
     adminUser: readonly(adminUser),
     isAuthenticated: readonly(isAuthenticated),
     isLoading: readonly(isLoading),
+    canEdit,
+    canManageRoles,
     login,
     logout,
     restore,

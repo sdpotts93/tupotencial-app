@@ -113,6 +113,12 @@ export function useAuth() {
   }
 
   async function logout() {
+    // Clean up push tokens before signing out (native only)
+    try {
+      const { unregister } = usePushNotifications()
+      await unregister()
+    } catch { /* non-critical */ }
+
     await client.auth.signOut()
     user.value = null
     navigateTo('/iniciar-sesion')

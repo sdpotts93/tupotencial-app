@@ -12,6 +12,9 @@
     "build:mobile": "npm -w apps/mobile run build",
     "build:admin": "npm -w apps/admin run build",
     "dev": "npm run dev:mobile",
+    "cap:sync": "npm -w apps/mobile run cap:sync",
+    "cap:ios": "npm -w apps/mobile run cap:ios",
+    "cap:android": "npm -w apps/mobile run cap:android",
     "lint": "npm run lint --workspaces --if-present"
   },
   "engines": {

@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Comunidad</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/comunidad/new">+ Nueva publicación</UiButton>
+        <UiButton v-if="canEdit" variant="primary-outline" size="sm" to="/admin/comunidad/new">+ Nueva publicación</UiButton>
       </div>
     </div>
 
@@ -88,6 +88,7 @@ const columns = [
 ]
 
 const client = useSupabaseClient()
+const { canEdit } = useAdminAuth()
 const { data: rows, refresh } = await useAsyncData('admin-posts', async () => {
   const { data } = await client
     .from('posts')

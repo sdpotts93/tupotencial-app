@@ -33,9 +33,10 @@
           </div>
           <p class="pricing__plan-price">$399 <span>MXN/mes</span></p>
           <p class="pricing__plan-desc">Acceso completo a programas, comunidad y herramientas de cambio.</p>
-          <UiButton block class="pricing__cta-core" :disabled="checkoutLoading" @click="startCheckout">
+          <UiButton v-if="!isNative" block class="pricing__cta-core" :disabled="checkoutLoading" @click="startCheckout">
             {{ checkoutLoading ? 'Redirigiendo...' : 'Empezar Core' }}
           </UiButton>
+          <p v-else class="pricing__native-note">Suscríbete desde tupotencial.com para acceder al plan Core.</p>
           <div class="pricing__divider" />
           <ul class="pricing__features">
             <li>Todo lo del plan gratuito</li>
@@ -48,7 +49,7 @@
         </div>
       </div>
 
-      <p class="pricing__note">
+      <p v-if="!isNative" class="pricing__note">
         Pago seguro con Stripe. Cancela en cualquier momento. Los add-ons y experiencias se adquieren por separado.
       </p>
     </div>
@@ -60,6 +61,7 @@ definePageMeta({ layout: false })
 
 const supabase = useSupabaseClient()
 const config = useRuntimeConfig()
+const { isNative } = useNativePlatform()
 const checkoutLoading = ref(false)
 
 async function startCheckout() {

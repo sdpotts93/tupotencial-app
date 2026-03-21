@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Formularios</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/formularios/new">+ Crear formulario</UiButton>
+        <UiButton v-if="canEdit" variant="primary-outline" size="sm" to="/admin/formularios/new">+ Crear formulario</UiButton>
       </div>
     </div>
 
@@ -71,6 +71,7 @@ const columns = [
 ]
 
 const client = useSupabaseClient()
+const { canEdit } = useAdminAuth()
 const { data: rows, refresh } = await useAsyncData('admin-forms', async () => {
   const { data } = await client.from('forms').select('*').order('created_at', { ascending: false })
   return (data ?? []).map(f => ({

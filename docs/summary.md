@@ -55,3 +55,16 @@ Append one line per completed task:
 2026-02-24 15:55 America/Mexico_City — Admin app (login, dashboard, 25+ CRUD screens with sidebar navigation)
 2026-02-24 16:00 America/Mexico_City — Feature spec files created for all MVP features
 2026-03-11 20:42 America/Mexico_City — Corrige alias de importación en API de AI del app mobile
+2026-03-20 20:00 America/Mexico_City — Add custom useConfirm() composable + UiConfirmModal with bottom-sheet (mobile) / centered (desktop) pattern
+2026-03-20 20:30 America/Mexico_City — Add :loading prop to all async action buttons across 14 admin pages (saving/deleting refs + try/finally)
+2026-03-20 21:00 America/Mexico_City — Replace all datetime-local inputs with UiDatePicker component (contenido new/edit)
+2026-03-20 21:30 America/Mexico_City — Full CRUD E2E test via Playwright: all admin sections + mobile actions passing
+2026-03-20 22:00 America/Mexico_City — Fix UTC date bug: toISOString().split('T')[0] → local date for daily plan queries (4 files)
+2026-03-20 23:00 America/Mexico_City — Full E2E smoke test: all 15 admin pages + 8 mobile views rendering with 0 errors
+2026-03-20 23:30 America/Mexico_City — MVP gap analysis vs AGENTS.md: documented roadmap in PENDING.md (phases 1–5)
+2026-03-20 23:45 America/Mexico_City — Fix admin roles empty table: add { server: false } to useAsyncData for admin_users query
+2026-03-20 23:50 America/Mexico_City — Build admin user detail page /admin/usuarios/[id] (profile, subscription, entitlements, streaks, check-ins, enrollments, addons, community)
+2026-03-20 23:55 America/Mexico_City — Role-based authorization: canEdit/canManageRoles in useAdminAuth, route guards in middleware, UI guards on action buttons
+2026-03-21 00:00 America/Mexico_City — Database-level library search: Postgres full-text search (Spanish tsvector + GIN index + search_content RPC + debounced frontend)
+2026-03-21 00:10 America/Mexico_City — Wire addon purchase flow: /create-addon-checkout worker endpoint + webhook handler for addon_purchases + entitlements + Comprar button
+2026-03-21 00:15 America/Mexico_City — Stripe customer portal: /create-portal-session worker endpoint + "Gestionar suscripción" link on /cuenta/mas

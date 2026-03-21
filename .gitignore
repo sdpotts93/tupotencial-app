@@ -40,6 +40,20 @@ supabase/.branches/
 .wrangler/
 .dev.vars
 
+# Firebase config (contains API keys — add manually per environment)
+apps/mobile/android/app/google-services.json
+apps/mobile/ios/App/App/GoogleService-Info.plist
+
+# Capacitor native build artifacts (keep project files, ignore build outputs)
+apps/mobile/ios/App/Pods/
+apps/mobile/ios/App/App/public/
+apps/mobile/ios/App/output/
+apps/mobile/android/app/src/main/assets/public/
+apps/mobile/android/.gradle/
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+apps/mobile/android/local.properties
+
 # Misc
 *.tsbuildinfo
 dist/

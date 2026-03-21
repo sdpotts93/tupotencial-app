@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Beneficios</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/beneficios/new">+ Nuevo beneficio</UiButton>
+        <UiButton v-if="canEdit" variant="primary-outline" size="sm" to="/admin/beneficios/new">+ Nuevo beneficio</UiButton>
       </div>
     </div>
 
@@ -82,6 +82,7 @@ const router = useRouter()
 const search = ref('')
 
 const client = useSupabaseClient()
+const { canEdit } = useAdminAuth()
 const { data: benefits, refresh } = await useAsyncData('admin-benefits', async () => {
   const { data } = await client.from('benefits').select('*').order('position')
   return (data ?? []).map(b => ({

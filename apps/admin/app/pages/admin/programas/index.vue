@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">Programas</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/programas/new">+ Nuevo programa</UiButton>
+        <UiButton v-if="canEdit" variant="primary-outline" size="sm" to="/admin/programas/new">+ Nuevo programa</UiButton>
       </div>
     </div>
 
@@ -120,6 +120,7 @@ const columns = [
 ]
 
 const client = useSupabaseClient()
+const { canEdit } = useAdminAuth()
 const { data: rows, refresh } = await useAsyncData('admin-programs', async () => {
   const { data } = await client.from('programs').select('*').order('created_at', { ascending: false })
   return (data ?? []).map(p => ({

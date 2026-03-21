@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-header__title">VIP</h1>
       <div class="page-header__actions">
-        <UiButton variant="primary-outline" size="sm" to="/admin/complementos/new">+ Nuevo add-on</UiButton>
+        <UiButton v-if="canEdit" variant="primary-outline" size="sm" to="/admin/complementos/new">+ Nuevo add-on</UiButton>
       </div>
     </div>
 
@@ -52,6 +52,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const { canEdit } = useAdminAuth()
 const router = useRouter()
 const search = ref('')
 

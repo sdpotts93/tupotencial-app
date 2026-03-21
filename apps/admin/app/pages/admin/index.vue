@@ -18,8 +18,8 @@
     </div>
 
     <!-- Quick Actions -->
-    <h2 class="dashboard__section-title">Acciones rápidas</h2>
-    <div class="dashboard__actions-grid">
+    <h2 v-if="canEdit" class="dashboard__section-title">Acciones rápidas</h2>
+    <div v-if="canEdit" class="dashboard__actions-grid">
       <NuxtLink
         v-for="action in quickActions"
         :key="action.to"
@@ -56,6 +56,7 @@ definePageMeta({
 })
 
 const client = useSupabaseClient()
+const { canEdit } = useAdminAuth()
 
 // ── KPIs from Supabase aggregate queries ──
 const { data: kpis } = await useAsyncData('admin-dashboard-kpis', async () => {

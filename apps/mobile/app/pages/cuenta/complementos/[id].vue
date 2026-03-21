@@ -32,13 +32,20 @@
         </div>
 
         <div class="addon__actions">
-          <UiButton v-if="!addon.owned" variant="outline" block>
-            Comprar
-          </UiButton>
-          <div v-else class="addon__owned">
-            <UiTag variant="success">Desbloqueado</UiTag>
-            <p>Ya tienes acceso a este contenido.</p>
-          </div>
+          <template v-if="addon.owned">
+            <div class="addon__owned">
+              <UiTag variant="success">Desbloqueado</UiTag>
+              <p>Ya tienes acceso a este contenido.</p>
+            </div>
+          </template>
+          <template v-else-if="isNative">
+            <p class="addon__native-note">Las compras se realizan desde la versión web en tupotencial.com</p>
+          </template>
+          <template v-else>
+            <UiButton variant="outline" block :loading="purchasing" @click="handlePurchase">
+              Comprar
+            </UiButton>
+          </template>
         </div>
 
       </div>
@@ -52,6 +59,7 @@ definePageMeta({ layout: 'blank' })
 const route = useRoute()
 const client = useSupabaseClient()
 const { user } = useAuth()
+const { isNative } = useNativePlatform()
 
 function formatPrice(cents: number) {
   return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
@@ -74,7 +82,58 @@ const addon = computed(() => ({
   priceLabel: formatPrice(rawAddon.value?.price ?? 0),
   img: rawAddon.value?.cover_url ?? '/images/lib-4.jpg',
   owned: isOwned.value ?? false,
+  stripePriceId: rawAddon.value?.stripe_price_id ?? null,
 }))
+
+// ── Purchase flow ──
+const config = useRuntimeConfig()
+const purchasing = ref(false)
+
+async function handlePurchase() {
+  const { data: { session } } = await client.auth.getSession()
+  if (!session) {
+    navigateTo('/iniciar-sesion?redirect=' + route.fullPath)
+    return
+  }
+
+  const workerUrl = config.public.stripeWorkerUrl
+  if (!workerUrl) {
+    console.error('STRIPE_WORKER_URL not configured')
+    return
+  }
+
+  if (!addon.value.stripePriceId) {
+    console.error('Addon has no Stripe Price ID configured')
+    return
+  }
+
+  purchasing.value = true
+  try {
+    const res = await fetch(`${workerUrl}/create-addon-checkout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        addonId: route.params.id,
+        stripePriceId: addon.value.stripePriceId,
+        returnUrl: window.location.origin + '/cuenta/complementos',
+      }),
+    })
+
+    const data = await res.json()
+    if (data.url) {
+      window.location.href = data.url
+    } else {
+      console.error('Addon checkout error:', data.error)
+    }
+  } catch (err) {
+    console.error('Addon checkout error:', err)
+  } finally {
+    purchasing.value = false
+  }
+}
 </script>
 
 <style scoped>

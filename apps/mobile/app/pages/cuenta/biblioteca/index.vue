@@ -230,30 +230,32 @@ function formatDuration(seconds: number | null) {
   return `${m} min`
 }
 
-// ─── Search data (all published content) ───
-const { data: allContent } = await useAsyncData('mobile-library-search', async () => {
-  const { data } = await client
-    .from('content_items')
-    .select('id, title, type, duration_seconds, thumbnail_url, entitlement_key, content_item_categories(category_id, content_categories(title))')
-    .eq('status', 'published')
-    .order('created_at', { ascending: false })
-  return (data ?? []).map(c => ({
-    id: c.id,
-    title: c.title,
-    meta: `${formatDuration(c.duration_seconds) ?? ''} ${c.type ? `\u2022 ${c.type.charAt(0).toUpperCase() + c.type.slice(1)}` : ''}`.trim(),
-    category: ((c.content_item_categories as any)?.[0]?.content_categories as any)?.title ?? '',
-    thumbnail: c.thumbnail_url ?? '/images/lib-1.jpg',
-  }))
+// ─── Database-powered search via Postgres full-text search ───
+const searchResults = ref<{ id: string; title: string; meta: string; category: string; thumbnail: string }[]>([])
+const searchLoading = ref(false)
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(query, (q) => {
+  if (searchTimer) clearTimeout(searchTimer)
+  if (!q || q.length < 2) {
+    searchResults.value = []
+    return
+  }
+  searchLoading.value = true
+  searchTimer = setTimeout(async () => {
+    const { data } = await client.rpc('search_content', { search_query: q, max_results: 20 })
+    searchResults.value = (data ?? []).map((c: any) => ({
+      id: c.id,
+      title: c.title,
+      meta: `${formatDuration(c.duration_seconds) ?? ''} ${c.type ? `\u2022 ${c.type.charAt(0).toUpperCase() + c.type.slice(1)}` : ''}`.trim(),
+      category: c.category_title ?? '',
+      thumbnail: c.thumbnail_url ?? '/images/lib-1.jpg',
+    }))
+    searchLoading.value = false
+  }, 300)
 })
 
-const filteredResults = computed(() => {
-  const q = query.value.toLowerCase()
-  return (allContent.value ?? []).filter(c =>
-    c.title.toLowerCase().includes(q)
-    || c.meta.toLowerCase().includes(q)
-    || c.category.toLowerCase().includes(q),
-  )
-})
+const filteredResults = computed(() => searchResults.value)
 
 // ─── Tab: Categorías ───
 const { data: categoriesData } = await useAsyncData('mobile-library-categories', async () => {
