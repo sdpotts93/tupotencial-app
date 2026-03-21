@@ -62,8 +62,10 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   type: 'text',
   disabled: false,
-  id: () => `input-${Math.random().toString(36).slice(2, 8)}`,
+  id: undefined,
 })
+
+const id = props.id ?? useId()
 
 defineEmits<{ 'update:modelValue': [value: string] }>()
 

@@ -42,13 +42,15 @@ interface Props {
   id?: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   modelValue: undefined,
   enableTime: true,
   disabled: false,
   placeholder: 'Selecciona fecha y hora',
-  id: () => `dp-${Math.random().toString(36).slice(2, 8)}`,
+  id: undefined,
 })
+
+const id = props.id ?? useId()
 
 const locale = es
 

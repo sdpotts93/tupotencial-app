@@ -44,19 +44,31 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'blank' })
 
-const benefit = ref({
-  title: 'Descuento en retiros',
-  description: 'Obtén un 15% de descuento en todos los retiros presenciales de Tu Potencial. Este beneficio es exclusivo para miembros activos con suscripción Core.',
-  code: 'TPRETIRO15',
-  url: 'https://example.com/retiros',
-  icon: 'lucide:mountain',
-  color: 'var(--color-mood-great)',
-  bgColor: 'rgba(var(--color-mood-great-rgb), 0.15)',
-  bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))',
+const route = useRoute()
+const id = route.params.id as string
+const client = useSupabaseClient()
+
+const { data: benefitData } = await useAsyncData(`benefit-${id}`, async () => {
+  const { data } = await client.from('benefits').select('*').eq('id', id).single()
+  return data
+})
+
+const benefit = computed(() => {
+  const b = benefitData.value
+  if (!b) return { title: '', description: '', code: null, url: null, icon: 'lucide:gift', color: 'var(--color-mood-great)', bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))' }
+  return {
+    title: b.title,
+    description: b.description ?? '',
+    code: b.code,
+    url: b.url,
+    icon: 'lucide:gift',
+    color: 'var(--color-mood-great)',
+    bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))',
+  }
 })
 
 function handleOpen() {
-  window.open(benefit.value.url, '_blank')
+  if (benefit.value.url) window.open(benefit.value.url, '_blank')
 }
 </script>
 

@@ -65,21 +65,23 @@ const tabs = [
 ]
 
 const { data: programs } = await useAsyncData('mobile-programs', async () => {
-  if (!user.value?.id) return []
   const { data: progs } = await client.from('programs').select('*').eq('is_active', true).order('created_at')
-  const { data: enrollments } = await client.from('program_enrollments').select('program_id, status').eq('user_id', user.value.id)
-  const enrollMap = new Map((enrollments ?? []).map(e => [e.program_id, e]))
-  // Get checkin progress
-  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value.id)
-  const checkinMap = new Map<string, number>()
-  for (const c of checkins ?? []) {
-    checkinMap.set(c.program_id, Math.max(checkinMap.get(c.program_id) ?? 0, c.day_index))
-  }
-  // Get program total days
+  // Get program total days (no user needed)
   const { data: days } = await client.from('program_days').select('program_id, day_index')
   const totalDaysMap = new Map<string, number>()
   for (const d of days ?? []) {
     totalDaysMap.set(d.program_id, Math.max(totalDaysMap.get(d.program_id) ?? 0, d.day_index))
+  }
+  // User-specific data (enrollments, checkins)
+  let enrollMap = new Map<string, any>()
+  const checkinMap = new Map<string, number>()
+  if (user.value?.id) {
+    const { data: enrollments } = await client.from('program_enrollments').select('program_id, status').eq('user_id', user.value.id)
+    enrollMap = new Map((enrollments ?? []).map(e => [e.program_id, e]))
+    const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value.id)
+    for (const c of checkins ?? []) {
+      checkinMap.set(c.program_id, Math.max(checkinMap.get(c.program_id) ?? 0, c.day_index))
+    }
   }
   return (progs ?? []).map(p => {
     const enrollment = enrollMap.get(p.id)

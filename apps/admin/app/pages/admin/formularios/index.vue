@@ -73,7 +73,10 @@ const columns = [
 const client = useSupabaseClient()
 const { data: rows, refresh } = await useAsyncData('admin-forms', async () => {
   const { data } = await client.from('forms').select('*').order('created_at', { ascending: false })
-  return data ?? []
+  return (data ?? []).map(f => ({
+    ...f,
+    fields_count: Array.isArray(f.fields) ? f.fields.length : 0,
+  }))
 })
 
 const filteredRows = computed(() => {

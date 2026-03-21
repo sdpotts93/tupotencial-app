@@ -100,20 +100,33 @@ const columns = [
 
 // ── Fetch users from Supabase ──
 const { data: rows, refresh } = await useAsyncData('admin-users', async () => {
-  const { data: profiles } = await client
-    .from('profiles')
-    .select('*, subscriptions(status), user_entitlements(entitlement_key)')
-    .order('created_at', { ascending: false })
-  return (profiles ?? []).map(p => ({
-    ...p,
-    full_name: (p as any).display_name ?? 'Sin nombre',
-    email: '\u2014',
-    segment: (p as any).community_segment ?? '',
-    plan: (p.subscriptions as any)?.[0]?.status === 'active' ? 'core' : 'free',
-    subscription_status: (p.subscriptions as any)?.[0]?.status ?? null,
-    status: (p.subscriptions as any)?.[0]?.status === 'active' ? 'active' : 'inactive',
-    entitlements: ((p.user_entitlements as any) ?? []).map((e: any) => e.entitlement_key),
-  }))
+  // profiles, subscriptions, and user_entitlements all FK to auth.users (not to each other),
+  // so we query them separately and join in JS.
+  const [{ data: profiles }, { data: subs }, { data: entitlements }] = await Promise.all([
+    client.from('profiles').select('*').order('created_at', { ascending: false }),
+    client.from('subscriptions').select('user_id, status'),
+    client.from('user_entitlements').select('user_id, entitlement_key'),
+  ])
+  const subsMap = new Map((subs ?? []).map(s => [s.user_id, s.status]))
+  const entMap = new Map<string, string[]>()
+  for (const e of entitlements ?? []) {
+    const list = entMap.get(e.user_id) ?? []
+    list.push(e.entitlement_key)
+    entMap.set(e.user_id, list)
+  }
+  return (profiles ?? []).map(p => {
+    const subStatus = subsMap.get(p.id) ?? null
+    return {
+      ...p,
+      full_name: p.display_name ?? 'Sin nombre',
+      email: '\u2014',
+      segment: p.community_segment ?? '',
+      plan: subStatus === 'active' ? 'core' : 'free',
+      subscription_status: subStatus,
+      status: subStatus === 'active' ? 'active' : 'inactive',
+      entitlements: entMap.get(p.id) ?? [],
+    }
+  })
 })
 
 const filteredRows = computed(() => {

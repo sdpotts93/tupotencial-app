@@ -91,13 +91,15 @@ const client = useSupabaseClient()
 const { data: rows, refresh } = await useAsyncData('admin-posts', async () => {
   const { data } = await client
     .from('posts')
-    .select('*, profiles:author_user_id(display_name, avatar_url)')
+    .select('*, profiles:author_user_id(display_name, avatar_url), post_reactions(count), post_comments(count)')
     .order('created_at', { ascending: false })
   return (data ?? []).map(p => ({
     ...p,
     author: (p.profiles as any)?.display_name ?? 'Anónimo',
     author_name: (p.profiles as any)?.display_name ?? 'Anónimo',
     author_avatar: (p.profiles as any)?.avatar_url ?? null,
+    likes_count: (p.post_reactions as any)?.[0]?.count ?? 0,
+    comments_count: (p.post_comments as any)?.[0]?.count ?? 0,
   }))
 })
 

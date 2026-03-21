@@ -38,11 +38,13 @@ interface Props {
   id?: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   disabled: false,
-  id: () => `sel-${Math.random().toString(36).slice(2, 8)}`,
+  id: undefined,
 })
+
+const id = props.id ?? useId()
 
 defineEmits<{ 'update:modelValue': [value: string] }>()
 </script>

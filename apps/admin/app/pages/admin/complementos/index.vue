@@ -35,7 +35,7 @@
       </template>
 
       <template #cell-compras="{ row }">
-        {{ purchaseCount(row.id) }}
+        {{ row.purchases }}
       </template>
 
       <template #actions="{ row }">

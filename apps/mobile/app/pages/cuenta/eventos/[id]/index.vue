@@ -47,15 +47,41 @@ definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
 const id = route.params.id as string
+const client = useSupabaseClient()
 
-const event = ref({
-  title: 'Live: Meditación grupal',
-  description: 'Únete a esta sesión guiada de meditación con Carlotta. Exploraremos técnicas de respiración y visualización para calmar la mente y encontrar claridad interior.',
-  dateLabel: 'JUEVES 28 FEB · 19:00 CDMX',
-  img: '/images/lib-4.jpg',
-  requiresSub: true,
-  status: 'Publicado',
-  isLive: false,
+const dayTimeFmt = new Intl.DateTimeFormat('es-MX', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'America/Mexico_City',
+})
+
+const statusLabels: Record<string, string> = {
+  published: 'Publicado',
+  draft: 'Borrador',
+  cancelled: 'Cancelado',
+}
+
+const { data: eventData } = await useAsyncData(`event-${id}`, async () => {
+  const { data } = await client.from('events').select('*').eq('id', id).single()
+  return data
+})
+
+const event = computed(() => {
+  const e = eventData.value
+  if (!e) return { title: '', description: '', dateLabel: '', img: '/images/lib-4.jpg', requiresSub: false, status: '', isLive: false }
+  const startDate = new Date(e.start_at)
+  return {
+    title: e.title,
+    description: e.description ?? '',
+    dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
+    img: e.cover_url ?? '/images/lib-4.jpg',
+    requiresSub: e.requires_subscription,
+    status: statusLabels[e.status] ?? e.status,
+    isLive: startDate > new Date() && e.status === 'published',
+  }
 })
 </script>
 

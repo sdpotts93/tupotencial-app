@@ -5,7 +5,7 @@
       <div class="more__profile">
         <div class="more__avatar"><span>{{ initials }}</span></div>
         <div class="more__info">
-          <h2 class="more__name">{{ user?.display_name }}</h2>
+          <h2 class="more__name">{{ user?.display_name || user?.email?.split('@')[0] || 'Sin nombre' }}</h2>
           <UiTag v-if="isSubscriber" variant="accent" size="md">Core</UiTag>
           <UiTag v-else variant="default" size="md">Gratis</UiTag>
         </div>
@@ -63,7 +63,7 @@
 const { user, isSubscriber, logout } = useAuth()
 
 const initials = computed(() => {
-  const name = user.value?.display_name || '?'
+  const name = user.value?.display_name || user.value?.email?.split('@')[0] || '?'
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 })
 
