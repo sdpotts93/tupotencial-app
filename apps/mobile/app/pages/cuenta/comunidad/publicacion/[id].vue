@@ -98,17 +98,20 @@ function isVideo(url: string) {
 }
 
 // Load post data
+const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
+const segmentAvatar: Record<string, string> = { gabriel: '/images/gabriel.png', carlotta: '/images/carlotta.png' }
+
 const { data: postData, refresh: refreshPost } = await useAsyncData(`post-${postId}`, async () => {
   const { data } = await client
     .from('posts')
-    .select('*, profiles:author_user_id(display_name, avatar_url), post_reactions(user_id, reaction)')
+    .select('*, post_reactions(user_id, reaction)')
     .eq('id', postId)
     .single()
   if (!data) return null
   return {
     ...data,
-    author: (data.profiles as any)?.display_name ?? 'Anónimo',
-    avatar: (data.profiles as any)?.avatar_url ?? '/images/gabriel.png',
+    author: segmentAuthor[data.community_segment ?? ''] ?? 'Gabriel',
+    avatar: segmentAvatar[data.community_segment ?? ''] ?? '/images/gabriel.png',
     reactions: ((data.post_reactions as any) ?? []).length,
     liked: ((data.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
     timeAgo: formatTimeAgo(data.created_at),

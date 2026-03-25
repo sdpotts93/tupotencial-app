@@ -161,16 +161,19 @@ function formatTimeAgo(dateStr: string) {
   return `Hace ${days} ${days === 1 ? 'día' : 'días'}`
 }
 
+const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
+const segmentAvatar: Record<string, string> = { gabriel: '/images/gabriel.png', carlotta: '/images/carlotta.png' }
+
 const { data: posts, refresh } = await useAsyncData('mobile-posts', async () => {
   const { data } = await client
     .from('posts')
-    .select('*, profiles:author_user_id(display_name, avatar_url), post_reactions(user_id, reaction), post_comments(count)')
+    .select('*, post_reactions(user_id, reaction), post_comments(count)')
     .eq('status', 'published')
     .order('created_at', { ascending: false })
   return (data ?? []).map(p => ({
     ...p,
-    author: (p.profiles as any)?.display_name ?? 'Anónimo',
-    avatar: (p.profiles as any)?.avatar_url ?? '/images/gabriel.png',
+    author: segmentAuthor[p.community_segment ?? ''] ?? 'Gabriel',
+    avatar: segmentAvatar[p.community_segment ?? ''] ?? '/images/gabriel.png',
     reactions: ((p.post_reactions as any) ?? []).length,
     liked: ((p.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
     comments: (p.post_comments as any)?.[0]?.count ?? 0,

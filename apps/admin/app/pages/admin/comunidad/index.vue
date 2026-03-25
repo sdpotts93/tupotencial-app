@@ -89,16 +89,16 @@ const columns = [
 
 const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
+const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
+
 const { data: rows, refresh } = await useAsyncData('admin-posts', async () => {
   const { data } = await client
     .from('posts')
-    .select('*, profiles:author_user_id(display_name, avatar_url), post_reactions(count), post_comments(count)')
+    .select('*, post_reactions(count), post_comments(count)')
     .order('created_at', { ascending: false })
   return (data ?? []).map(p => ({
     ...p,
-    author: (p.profiles as any)?.display_name ?? 'Anónimo',
-    author_name: (p.profiles as any)?.display_name ?? 'Anónimo',
-    author_avatar: (p.profiles as any)?.avatar_url ?? null,
+    author: segmentAuthor[p.community_segment ?? ''] ?? 'Anónimo',
     likes_count: (p.post_reactions as any)?.[0]?.count ?? 0,
     comments_count: (p.post_comments as any)?.[0]?.count ?? 0,
   }))

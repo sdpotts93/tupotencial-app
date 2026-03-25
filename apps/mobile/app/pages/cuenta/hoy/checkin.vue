@@ -81,6 +81,7 @@ async function handleSubmit() {
     await client.from('daily_checkins').insert({
       date: today,
       user_id: user.value!.id,
+      type: 'checkin',
       payload: { mood: selectedMood.value, reflection: reflection.value },
     })
     showSuccess.value = true

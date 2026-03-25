@@ -362,16 +362,15 @@ const mensajeDelDia = computed(() => {
 // ─── Today's checkin (to know if already completed) ───
 const { data: todayCheckin, refresh: refreshCheckin } = await useAsyncData('hoy-checkin', async () => {
   if (!user.value?.id) return null
-  const { data } = await client.from('daily_checkins').select('id').eq('date', today).eq('user_id', user.value.id).maybeSingle()
+  const { data } = await client.from('daily_checkins').select('id').eq('date', today).eq('user_id', user.value.id).eq('type', 'checkin').maybeSingle()
   return data
 }, { watch: [() => user.value?.id] })
 
-// ─── Today's accion completion (tracked as a daily_checkins row with type=accion in payload) ───
+// ─── Today's accion completion ───
 const { data: todayAccion, refresh: refreshAccion } = await useAsyncData('hoy-accion', async () => {
   if (!user.value?.id) return null
-  const { data } = await client.from('daily_checkins').select('id, payload').eq('date', today).eq('user_id', user.value.id)
-  const accion = (data ?? []).find(row => (row.payload as any)?.type === 'accion')
-  return accion ?? null
+  const { data } = await client.from('daily_checkins').select('id, payload').eq('date', today).eq('user_id', user.value.id).eq('type', 'accion').maybeSingle()
+  return data
 }, { watch: [() => user.value?.id] })
 
 // ─── Daily retos queue (2 items: check-in + admin-configurable action) ───
@@ -457,11 +456,11 @@ const { data: latestContent } = await useAsyncData('hoy-content', async () => {
   return (data ?? []).map(item => ({
     id: item.id,
     type: item.type,
-    typeLabel: item.type === 'video' ? 'Video' : item.type === 'audio' ? 'Audio' : 'Artículo',
+    typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[item.type] ?? item.type,
     title: item.title,
     thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
     duration: item.duration_seconds ? `${Math.round(item.duration_seconds / 60)} min` : '',
-    to: `/cuenta/biblioteca/${item.id}`,
+    to: `/cuenta/contenido/${item.id}`,
   }))
 })
 
@@ -530,6 +529,7 @@ async function handleCheckin() {
     await client.from('daily_checkins').insert({
       date: today,
       user_id: user.value!.id,
+      type: 'checkin',
       payload: { mood: selectedMood.value, reflection: checkinReflection.value },
     })
     checkinSuccess.value = true
@@ -562,7 +562,8 @@ async function handleAccion() {
     await client.from('daily_checkins').insert({
       date: today,
       user_id: user.value!.id,
-      payload: { type: 'accion', outcome: accionChoice.value, daily_plan_id: dailyPlanData.value?.id ?? null },
+      type: 'accion',
+      payload: { outcome: accionChoice.value, daily_plan_id: dailyPlanData.value?.id ?? null },
     })
     accionSuccess.value = true
     await refreshAccion()

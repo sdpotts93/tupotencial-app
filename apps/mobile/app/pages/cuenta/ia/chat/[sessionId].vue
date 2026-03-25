@@ -127,6 +127,48 @@ const inputText = ref('')
 const error = ref(false)
 const lastFailedMessage = ref('')
 
+// ─── Typewriter effect ───
+const typewriterBuffer = ref('')
+const typewriterTarget = ref<ChatMessage | null>(null)
+let typewriterTimer: ReturnType<typeof setTimeout> | null = null
+const TYPE_SPEED = 18 // ms per character — feels natural
+
+function startTypewriter(msg: ChatMessage) {
+  typewriterTarget.value = msg
+  if (!typewriterTimer) drainTypewriter()
+}
+
+function drainTypewriter() {
+  if (!typewriterBuffer.value.length) {
+    typewriterTimer = null
+    return
+  }
+  // Type 1-2 chars per tick for natural rhythm
+  const chars = typewriterBuffer.value.length > 50 ? 3 : typewriterBuffer.value.length > 20 ? 2 : 1
+  const chunk = typewriterBuffer.value.slice(0, chars)
+  typewriterBuffer.value = typewriterBuffer.value.slice(chars)
+  if (typewriterTarget.value) {
+    typewriterTarget.value.content += chunk
+  }
+  typewriterTimer = setTimeout(drainTypewriter, TYPE_SPEED)
+}
+
+function flushTypewriter() {
+  if (typewriterTimer) {
+    clearTimeout(typewriterTimer)
+    typewriterTimer = null
+  }
+  if (typewriterTarget.value && typewriterBuffer.value) {
+    typewriterTarget.value.content += typewriterBuffer.value
+    typewriterBuffer.value = ''
+  }
+  typewriterTarget.value = null
+}
+
+onBeforeUnmount(() => {
+  if (typewriterTimer) clearTimeout(typewriterTimer)
+})
+
 const quickPrompts = ['¿Qué hago hoy?', 'Ayúdame a reflexionar', 'Plan de 5 minutos']
 
 interface ChatMessage {
@@ -243,8 +285,9 @@ async function sendMessage(text?: string) {
             if (!streamingStarted.value) {
               streamingStarted.value = true
               messages.value.push(assistantMsg)
+              startTypewriter(assistantMsg)
             }
-            assistantMsg.content += data.content
+            typewriterBuffer.value += data.content
           } else if (data.type === 'done') {
             assistantMsg.id = data.messageId ?? assistantMsg.id
             if (data.sessionId && isNewSession.value) {
@@ -258,6 +301,7 @@ async function sendMessage(text?: string) {
       }
     }
   } catch {
+    flushTypewriter()
     error.value = true
     lastFailedMessage.value = content
     // Remove empty assistant placeholder if streaming never started
@@ -265,9 +309,24 @@ async function sendMessage(text?: string) {
       const idx = messages.value.indexOf(assistantMsg)
       if (idx !== -1) messages.value.splice(idx, 1)
     }
-  } finally {
     generating.value = false
+    return
   }
+
+  // Stream ended — wait for typewriter to finish draining
+  const waitForTypewriter = () => new Promise<void>((resolve) => {
+    const check = () => {
+      if (!typewriterBuffer.value.length) {
+        typewriterTarget.value = null
+        resolve()
+      } else {
+        setTimeout(check, 50)
+      }
+    }
+    check()
+  })
+  await waitForTypewriter()
+  generating.value = false
 }
 
 async function retry() {

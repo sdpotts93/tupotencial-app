@@ -422,13 +422,51 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
   -- ci-010: Ciencia hábitos (link, free)
   (
     'c2000000-0000-4000-8000-000000000010',
-    'link',
-    'Artículo: La ciencia detrás de los hábitos',
-    'Lectura recomendada externa',
-    'Un artículo fascinante sobre cómo se forman los hábitos y cómo puedes diseñar los tuyos de forma consciente.',
+    'article',
+    'La ciencia detrás de los hábitos',
+    'Cómo se forman, cómo se rompen y cómo diseñar los tuyos',
+    'Un recorrido por la neurociencia de los hábitos y estrategias prácticas para construir rutinas que perduren.',
+    $$<h2>¿Por qué es tan difícil cambiar?</h2>
+<p>Cada hábito sigue un ciclo de tres pasos que los neurocientíficos llaman el <strong>loop del hábito</strong>: señal, rutina y recompensa. Cuando entiendes este ciclo, dejas de luchar contra ti mismo y empiezas a diseñar a tu favor.</p>
+
+<h3>1. La señal</h3>
+<p>Es el disparador que le dice a tu cerebro que entre en modo automático. Puede ser una hora del día, una emoción, una ubicación o incluso una persona. Por ejemplo, si cada mañana al despertar revisas tu teléfono, el simple hecho de abrir los ojos ya es tu señal.</p>
+
+<blockquote>El truco no es eliminar señales, sino asociarlas a rutinas que te acerquen a quien quieres ser.</blockquote>
+
+<h3>2. La rutina</h3>
+<p>Es la acción en sí — el comportamiento que quieres instalar o reemplazar. Aquí es donde la mayoría de la gente se enfoca, pero sin entender la señal y la recompensa, la fuerza de voluntad se agota rápidamente.</p>
+<p>Las investigaciones del MIT muestran que los ganglios basales — una estructura profunda del cerebro — almacenan las rutinas repetidas para que se ejecuten con mínimo esfuerzo consciente. Esto es una ventaja: significa que una vez que un hábito se consolida, ya no requiere motivación.</p>
+
+<h3>3. La recompensa</h3>
+<p>Es lo que le enseña a tu cerebro que vale la pena repetir el ciclo. No tiene que ser grande: puede ser la satisfacción de tachar algo de tu lista, un momento de calma después de meditar o simplemente notar cómo te sientes.</p>
+
+<h2>La regla de los 2 minutos</h2>
+<p>James Clear, autor de <em>Atomic Habits</em>, propone una estrategia brillante: reduce cualquier hábito nuevo a una versión de 2 minutos.</p>
+<ul>
+  <li><strong>Quiero meditar 20 minutos</strong> → Siéntate y cierra los ojos por 2 minutos</li>
+  <li><strong>Quiero leer 30 páginas</strong> → Lee una página</li>
+  <li><strong>Quiero correr 5 km</strong> → Ponte los tenis y sal a la puerta</li>
+</ul>
+<p>El objetivo no es hacer poco, es <strong>comenzar</strong>. Una vez que estás en movimiento, la fricción desaparece. Lo que importa es que la identidad de "persona que medita" o "persona que lee" se refuerce cada día, aunque sea con un gesto mínimo.</p>
+
+<h2>Apilamiento de hábitos</h2>
+<p>Otra técnica respaldada por la ciencia es vincular un hábito nuevo a uno que ya tienes consolidado:</p>
+<ol>
+  <li>Después de servirme el café (hábito existente), escribiré 3 cosas por las que estoy agradecido (hábito nuevo).</li>
+  <li>Después de lavarme los dientes (hábito existente), haré 2 minutos de respiración consciente (hábito nuevo).</li>
+  <li>Después de llegar a casa del trabajo (hábito existente), dejaré el teléfono en otra habitación (hábito nuevo).</li>
+</ol>
+<p>Al "apilar" hábitos, aprovechas las conexiones neuronales que ya existen en lugar de crear unas desde cero.</p>
+
+<h2>Lo que dice la evidencia</h2>
+<p>Un estudio de la University College London encontró que, en promedio, un nuevo hábito tarda <strong>66 días</strong> en automatizarse — no 21, como se creía. Pero la variación es enorme: desde 18 hasta 254 días dependiendo de la persona y la complejidad del hábito.</p>
+<p>La buena noticia es que <strong>saltarte un día no arruina el progreso</strong>. Lo que importa es la consistencia general, no la perfección. Los investigadores encontraron que fallar un día no afectó significativamente la formación del hábito a largo plazo.</p>
+
+<h2>Tu siguiente paso</h2>
+<p>Elige <strong>un solo hábito</strong> que quieras incorporar esta semana. Identifica tu señal, define la versión de 2 minutos y decide cuál será tu recompensa. Escríbelo y compártelo con la comunidad — el compromiso social es uno de los aceleradores más poderosos que existen.</p>$$,
     NULL,
     NULL,
-    'https://example.com/articulo-habitos',
     'https://picsum.photos/seed/habits-article/640/360',
     NULL,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000003',
@@ -780,7 +818,7 @@ INSERT INTO public.posts (id, author_user_id, is_official, community_segment, ti
 VALUES
   (
     'f0000000-0000-4000-8000-000000000001',
-    NULL, true, NULL,
+    NULL, true, 'gabriel',
     'Bienvenidos a la comunidad Tu Potencial',
     $$Este es un espacio seguro para crecer juntos. Comparte tus experiencias, aprendizajes y reflexiones. Recuerda: todos estamos en un camino de transformación. No hay respuestas correctas ni incorrectas, solo honestidad y apoyo mutuo.
 
@@ -791,7 +829,7 @@ VALUES
   ),
   (
     'f0000000-0000-4000-8000-000000000002',
-    'a0000000-0000-4000-8000-000000000003', false, 'conjunta',
+    'a0000000-0000-4000-8000-000000000003', false, 'carlotta',
     NULL,
     'Llevo 5 días seguidos haciendo mi check-in matutino y no puedo creer la diferencia. Me siento más centrada y con más energía para enfrentar el día. ¿A alguien más le ha pasado que al principio cuesta pero luego se vuelve algo que necesitas?',
     NULL,
@@ -829,7 +867,7 @@ Inscríbete desde la sección de Retos. ¡Empezamos el lunes!$$,
   ),
   (
     'f0000000-0000-4000-8000-000000000006',
-    'a0000000-0000-4000-8000-000000000004', false, NULL,
+    'a0000000-0000-4000-8000-000000000004', false, 'gabriel',
     'Pregunta para la comunidad',
     '¿Alguien más siente que le cuesta mantener la constancia? Empiezo muy motivado pero a la semana ya se me olvidó. ¿Qué trucos les han funcionado para no perder el hábito?',
     NULL,
@@ -838,7 +876,7 @@ Inscríbete desde la sección de Retos. ¡Empezamos el lunes!$$,
   ),
   (
     'f0000000-0000-4000-8000-000000000007',
-    'a0000000-0000-4000-8000-000000000001', false, NULL,
+    'a0000000-0000-4000-8000-000000000001', false, 'carlotta',
     NULL,
     'Hoy descubrí que la meditación nocturna también funciona increíble por la mañana. Soltar antes de empezar el día es una sensación diferente pero muy poderosa. ¿Alguien más ha experimentado con cambiar el horario de las prácticas?',
     NULL,
@@ -1448,6 +1486,140 @@ VALUES
     '{"nombre": "Mariana López", "email": "mariana.lopez@example.com", "restriccion": "Vegetariano", "notas": "Llego el viernes por la noche"}'::jsonb,
     '2026-02-22T12:00:00.000Z'
   );
+
+
+-- ── 32b. Bulk seed users (69 more → 74 total, 63 active) ────────────────────
+-- Users 6–74 generated via generate_series. IDs: a0000000-0000-4000-8000-0000000000XX
+-- Of the 74 total: 63 active subscribers, 5 trialing, 3 canceled, 3 free (no subscription)
+
+DO $$
+DECLARE
+  i int;
+  uid uuid;
+  email text;
+  fname text;
+  segment text;
+  created_ts timestamptz;
+  pwd text := '$2a$10$QSmHMywaHs4u/afgW18.reSnbjELxDFUhW2y3dm8yFq0sM..8coai'; -- admin123
+
+  -- Mexican first names pool
+  first_names text[] := ARRAY[
+    'Alejandra','Andrés','Ana','Antonio','Beatriz','Bruno','Camila','Carolina',
+    'Daniel','Diana','Eduardo','Elena','Emilio','Fernanda','Francisco','Gabriela',
+    'Gustavo','Hugo','Isabel','Javier','Julia','Leonardo','Lucía','Luis',
+    'Manuel','María','Martín','Miguel','Natalia','Óscar','Pablo','Patricia',
+    'Rafael','Renata','Ricardo','Roberto','Rosa','Santiago','Sara','Sergio',
+    'Teresa','Tomás','Valeria','Vanessa','Vicente','Ximena','Yolanda','Adriana',
+    'Arturo','Claudia','Cristina','Daniela','Enrique','Esteban','Fabiola','Fernando',
+    'Gloria','Héctor','Irma','Jaime','Jorge','Karen','Laura','Leticia',
+    'Lorena','Marco','Mauricio','Mónica','Norma','Octavio'
+  ];
+  -- Mexican last names pool
+  last_names text[] := ARRAY[
+    'García','Hernández','López','Martínez','González','Rodríguez','Pérez','Sánchez',
+    'Ramírez','Cruz','Flores','Gómez','Morales','Reyes','Gutiérrez','Ortiz',
+    'Ruiz','Díaz','Torres','Vargas','Castillo','Mendoza','Aguilar','Romero',
+    'Álvarez','Chávez','Rivera','Delgado','Vega','Campos','Fuentes','Guerrero',
+    'Santos','Ramos','Herrera','Medina','Castro','Jiménez','Navarro','Salazar',
+    'Domínguez','Moreno','Cervantes','Cortés','Pacheco','Estrada','Ibarra','Solís',
+    'Villarreal','Contreras','Espinoza','Lara','Mejía','Ávila','Orozco','Figueroa',
+    'Bautista','Luna','León','Velázquez','Rojas','Miranda','Ríos','Cabrera',
+    'Ponce','Acosta','Núñez','Trejo','Padilla','Mora'
+  ];
+  segments text[] := ARRAY['gabriel','carlotta','conjunta'];
+BEGIN
+  FOR i IN 6..74 LOOP
+    uid := ('a0000000-0000-4000-8000-0000000000' || lpad(i::text, 2, '0'))::uuid;
+    fname := first_names[((i - 6) % array_length(first_names, 1)) + 1];
+    email := lower(replace(fname, ' ', '')) || '.' || lower(replace(last_names[((i - 6) % array_length(last_names, 1)) + 1], ' ', '')) || i || '@example.com';
+    segment := segments[((i - 1) % 3) + 1];
+    created_ts := '2025-10-01'::timestamptz + ((i - 6) * interval '2 days') + (random() * interval '12 hours');
+
+    -- auth.users
+    INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data)
+    VALUES (
+      '00000000-0000-0000-0000-000000000000', uid, 'authenticated', 'authenticated',
+      email, pwd, created_ts + interval '2 minutes', created_ts, created_ts + interval '30 days',
+      '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb
+    ) ON CONFLICT (id) DO NOTHING;
+
+    -- Coerce NULLs
+    UPDATE auth.users SET
+      confirmation_token = COALESCE(confirmation_token, ''),
+      recovery_token = COALESCE(recovery_token, ''),
+      email_change_token_new = COALESCE(email_change_token_new, ''),
+      email_change = COALESCE(email_change, ''),
+      email_change_token_current = COALESCE(email_change_token_current, ''),
+      phone_change_token = COALESCE(phone_change_token, ''),
+      reauthentication_token = COALESCE(reauthentication_token, '')
+    WHERE id = uid;
+
+    -- auth.identities
+    INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+    VALUES (
+      uid, uid, uid::text,
+      jsonb_build_object('sub', uid::text, 'email', email),
+      'email', created_ts + interval '2 minutes', created_ts, created_ts
+    ) ON CONFLICT DO NOTHING;
+
+    -- profiles
+    INSERT INTO public.profiles (id, display_name, avatar_url, community_segment, created_at)
+    VALUES (
+      uid,
+      fname || ' ' || last_names[((i - 6) % array_length(last_names, 1)) + 1],
+      'https://i.pravatar.cc/150?u=user' || i,
+      segment,
+      created_ts
+    ) ON CONFLICT (id) DO NOTHING;
+
+    -- subscriptions: 63 active (users 6-68), 5 trialing (69-73), 3 canceled (74), rest free
+    -- Combined with existing 5 users: total active = 3 existing + 63 new = 66...
+    -- Actually: existing has 3 active + 1 canceled + 1 trialing = 5
+    -- We need total 63 active out of 74. So from new users: 60 active, plus existing 3 = 63 active
+    IF i <= 65 THEN
+      -- 60 new active subscribers (users 6-65) + 3 existing = 63 active total
+      INSERT INTO public.subscriptions (id, user_id, status, stripe_customer_id, stripe_subscription_id, current_period_end, updated_at)
+      VALUES (
+        gen_random_uuid(), uid, 'active',
+        'cus_mock_user' || i, 'sub_mock_user' || i,
+        '2026-04-15'::timestamptz + (i * interval '1 day'),
+        created_ts + interval '30 days'
+      ) ON CONFLICT DO NOTHING;
+    ELSIF i <= 68 THEN
+      -- 3 trialing
+      INSERT INTO public.subscriptions (id, user_id, status, stripe_customer_id, stripe_subscription_id, current_period_end, updated_at)
+      VALUES (
+        gen_random_uuid(), uid, 'trialing',
+        'cus_mock_user' || i, 'sub_mock_user' || i,
+        '2026-04-01'::timestamptz + (i * interval '1 day'),
+        created_ts + interval '10 days'
+      ) ON CONFLICT DO NOTHING;
+    ELSIF i <= 71 THEN
+      -- 3 canceled
+      INSERT INTO public.subscriptions (id, user_id, status, stripe_customer_id, stripe_subscription_id, current_period_end, updated_at)
+      VALUES (
+        gen_random_uuid(), uid, 'canceled',
+        'cus_mock_user' || i, 'sub_mock_user' || i,
+        '2026-02-28'::timestamptz,
+        created_ts + interval '20 days'
+      ) ON CONFLICT DO NOTHING;
+    END IF;
+    -- Users 72-74: no subscription (free)
+
+    -- user_streaks for active/trialing users
+    IF i <= 68 THEN
+      INSERT INTO public.user_streaks (user_id, current_streak, best_streak, last_checkin_date, updated_at)
+      VALUES (
+        uid,
+        greatest(0, (random() * 15)::int),
+        (random() * 30)::int + 1,
+        CASE WHEN random() > 0.3 THEN '2026-03-25'::date - ((random() * 3)::int) ELSE '2026-03-10'::date END,
+        now()
+      ) ON CONFLICT (user_id) DO NOTHING;
+    END IF;
+
+  END LOOP;
+END $$;
 
 
 -- ── 32. App settings ─────────────────────────────────────────────────────────

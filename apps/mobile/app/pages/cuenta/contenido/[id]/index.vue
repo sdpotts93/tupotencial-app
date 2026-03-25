@@ -1,7 +1,7 @@
 <template>
   <div class="screen">
     <div class="detail">
-      <!-- Media -->
+      <!-- Media hero (video/audio show play button, article/link show static image) -->
       <div class="detail__media">
         <img :src="content.thumbnail" alt="" class="detail__img" />
         <div class="detail__overlay" />
@@ -12,7 +12,8 @@
             </svg>
           </button>
         </div>
-        <button class="detail__play-btn" aria-label="Reproducir" @click="navigateTo(`/cuenta/contenido/${id}/reproducir`)">
+        <!-- Play button: only for video/audio -->
+        <button v-if="isPlayable" class="detail__play-btn" aria-label="Reproducir" @click="navigateTo(`/cuenta/contenido/${id}/reproducir`)">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
         </button>
       </div>
@@ -29,17 +30,27 @@
         <h1 class="title title--lg detail__title">{{ content.title }}</h1>
         <p v-if="content.subtitle" class="detail__subtitle">{{ content.subtitle }}</p>
 
+        <!-- Actions: type-specific -->
         <div class="detail__actions">
-          <UiButton variant="outline" block @click="navigateTo(`/cuenta/contenido/${id}/reproducir`)">
-            {{ content.type === 'text' ? 'Leer' : 'Reproducir' }}
+          <!-- Video / Audio → Reproducir -->
+          <UiButton v-if="isPlayable" variant="outline" block @click="navigateTo(`/cuenta/contenido/${id}/reproducir`)">
+            Reproducir
           </UiButton>
+          <!-- Link → Abrir enlace -->
+          <UiButton v-else-if="content.type === 'link' && content.externalUrl" variant="outline" block @click="openLink">
+            Abrir enlace
+          </UiButton>
+          <!-- Article has no action button — body renders below -->
         </div>
 
-        <p class="detail__description">{{ content.description }}</p>
+        <p v-if="content.description" class="detail__description">{{ content.description }}</p>
 
         <div class="detail__meta">
           <UiTag v-if="content.duration">{{ content.duration }}</UiTag>
         </div>
+
+        <!-- Article body: rendered HTML from Tiptap WYSIWYG -->
+        <div v-if="content.type === 'article' && content.body" class="detail__body" v-html="content.body" />
       </div>
     </div>
   </div>
@@ -58,19 +69,28 @@ function formatDuration(seconds: number | null) {
   return `${m} min`
 }
 
+const typeLabels: Record<string, string> = {
+  video: 'Video',
+  audio: 'Audio',
+  article: 'Artículo',
+  link: 'Enlace',
+}
+
 const { data: contentData } = await useAsyncData(`content-detail-${id}`, async () => {
   const { data } = await client
     .from('content_items')
-    .select('id, title, subtitle, type, description, duration_seconds, thumbnail_url')
+    .select('id, title, subtitle, type, description, body, external_url, duration_seconds, thumbnail_url')
     .eq('id', id)
     .single()
   if (!data) return null
   return {
     title: data.title,
     subtitle: data.subtitle ?? '',
-    typeLabel: data.type ? data.type.toUpperCase() : '',
+    typeLabel: typeLabels[data.type] ?? data.type,
     type: data.type,
     description: data.description ?? '',
+    body: data.body ?? '',
+    externalUrl: data.external_url ?? '',
     duration: formatDuration(data.duration_seconds),
     thumbnail: data.thumbnail_url ?? '/images/lib-1.jpg',
   }
@@ -82,9 +102,19 @@ const content = computed(() => contentData.value ?? {
   typeLabel: '',
   type: 'video',
   description: '',
+  body: '',
+  externalUrl: '',
   duration: null,
   thumbnail: '/images/lib-1.jpg',
 })
+
+const isPlayable = computed(() => content.value.type === 'video' || content.value.type === 'audio')
+
+function openLink() {
+  if (content.value.externalUrl) {
+    window.open(content.value.externalUrl, '_blank', 'noopener')
+  }
+}
 </script>
 
 <style scoped>
@@ -208,6 +238,65 @@ const content = computed(() => contentData.value ?? {
 .detail__meta :deep(.tag) {
   background: var(--color-sand);
   color: var(--color-white);
+}
+
+/* ─── Article body (Tiptap HTML) ─── */
+.detail__body {
+  margin-top: var(--space-5);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  line-height: var(--leading-relaxed);
+}
+
+.detail__body :deep(h2) {
+  font-family: var(--font-title);
+  font-size: var(--title-sm);
+  font-weight: var(--weight-semibold);
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.detail__body :deep(h3) {
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.detail__body :deep(p) {
+  margin: var(--space-3) 0;
+}
+
+.detail__body :deep(ul),
+.detail__body :deep(ol) {
+  padding-left: var(--space-6);
+  margin: var(--space-3) 0;
+}
+
+.detail__body :deep(li) {
+  margin: var(--space-1) 0;
+}
+
+.detail__body :deep(blockquote) {
+  border-left: 3px solid var(--color-border);
+  padding-left: var(--space-4);
+  color: var(--color-muted);
+  font-style: italic;
+  margin: var(--space-4) 0;
+}
+
+.detail__body :deep(a) {
+  color: var(--color-tint);
+  text-decoration: underline;
+}
+
+.detail__body :deep(strong) {
+  font-weight: var(--weight-semibold);
+}
+
+.detail__body :deep(img) {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  margin: var(--space-4) 0;
 }
 
 /* ─── Tablet ─── */

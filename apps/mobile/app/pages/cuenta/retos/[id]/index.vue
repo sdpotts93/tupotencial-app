@@ -37,7 +37,7 @@
             </UiButton>
           </template>
           <template v-else>
-            <UiButton v-if="!program.enrolled" block @click="enroll">Inscribirme</UiButton>
+            <UiButton v-if="!program.enrolled" variant="outline" block @click="enroll">Inscribirme</UiButton>
             <UiButton variant="outline" v-else block :to="`/cuenta/retos/${id}/dia/${program.currentDay}`">
               Continuar — Día {{ program.currentDay }}
             </UiButton>
