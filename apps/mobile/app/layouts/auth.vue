@@ -68,9 +68,36 @@
   }
 
   .auth-layout__branding-logo {
+    width: 200px;
     height: 200px;
-    width: auto;
-    border-radius: var(--radius-xl);
+    object-fit: cover;
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    animation:
+      blob-shape-desk 23s ease-in-out infinite,
+      blob-drift-desk 19s ease-in-out infinite;
+  }
+
+  @keyframes blob-shape-desk {
+    0%       { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    8%       { border-radius: 45% 55% 60% 40% / 40% 55% 45% 60%; }
+    16%      { border-radius: 55% 45% 45% 55% / 65% 38% 62% 42%; }
+    25%      { border-radius: 38% 62% 55% 45% / 50% 60% 40% 55%; }
+    33%      { border-radius: 62% 38% 40% 60% / 42% 52% 58% 48%; }
+    42%      { border-radius: 48% 52% 58% 42% / 58% 42% 48% 52%; }
+    50%      { border-radius: 42% 58% 48% 52% / 35% 65% 55% 45%; }
+    58%      { border-radius: 55% 45% 38% 62% / 52% 48% 42% 58%; }
+    67%      { border-radius: 40% 60% 65% 35% / 48% 55% 50% 45%; }
+    75%      { border-radius: 58% 42% 42% 58% / 55% 40% 60% 45%; }
+    83%      { border-radius: 45% 55% 50% 50% / 42% 62% 38% 58%; }
+    92%      { border-radius: 52% 48% 38% 62% / 58% 35% 65% 42%; }
+    100%     { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  }
+
+  @keyframes blob-drift-desk {
+    0%, 100% { transform: rotate(0deg)   scale(1); }
+    25%      { transform: rotate(3deg)   scale(1.02); }
+    50%      { transform: rotate(-2deg)  scale(0.98); }
+    75%      { transform: rotate(2deg)   scale(1.01); }
   }
 
   .auth-layout__branding-tagline {

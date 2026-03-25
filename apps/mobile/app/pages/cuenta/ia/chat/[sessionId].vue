@@ -241,8 +241,8 @@ async function sendMessage(text?: string) {
   generating.value = true
   streamingStarted.value = false
 
-  // Placeholder for streaming assistant response
-  const assistantMsg: ChatMessage = { id: '', role: 'assistant', content: '', time: formatTime() }
+  // Placeholder for streaming assistant response — must be reactive for Vue to track content mutations
+  const assistantMsg = reactive<ChatMessage>({ id: '', role: 'assistant', content: '', time: formatTime() })
 
   try {
     const response = await fetch('/api/ai/chat', {
@@ -282,12 +282,12 @@ async function sendMessage(text?: string) {
         try {
           const data = JSON.parse(line.slice(6))
           if (data.type === 'chunk') {
+            typewriterBuffer.value += data.content
             if (!streamingStarted.value) {
               streamingStarted.value = true
               messages.value.push(assistantMsg)
               startTypewriter(assistantMsg)
             }
-            typewriterBuffer.value += data.content
           } else if (data.type === 'done') {
             assistantMsg.id = data.messageId ?? assistantMsg.id
             if (data.sessionId && isNewSession.value) {

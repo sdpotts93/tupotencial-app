@@ -182,14 +182,68 @@ async function handleRegister() {
 
 .register__logo {
   margin-bottom: var(--space-8);
-  border-radius: 1rem;
+  width: 170px;
+  height: 170px;
+  overflow: hidden;
+  animation:
+    blob-shape 23s ease-in-out infinite,
+    blob-drift 19s ease-in-out infinite,
+    blob-reveal 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  flex-shrink: 0;
 }
 
 .register__logo-img {
-  height: 160px;
-  width: auto;
-  border-radius: var(--radius-xl);
-  opacity: 0.75;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+  animation: blob-img-reveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+@keyframes blob-shape {
+  0%       { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  8%       { border-radius: 45% 55% 60% 40% / 40% 55% 45% 60%; }
+  16%      { border-radius: 55% 45% 45% 55% / 65% 38% 62% 42%; }
+  25%      { border-radius: 38% 62% 55% 45% / 50% 60% 40% 55%; }
+  33%      { border-radius: 62% 38% 40% 60% / 42% 52% 58% 48%; }
+  42%      { border-radius: 48% 52% 58% 42% / 58% 42% 48% 52%; }
+  50%      { border-radius: 42% 58% 48% 52% / 35% 65% 55% 45%; }
+  58%      { border-radius: 55% 45% 38% 62% / 52% 48% 42% 58%; }
+  67%      { border-radius: 40% 60% 65% 35% / 48% 55% 50% 45%; }
+  75%      { border-radius: 58% 42% 42% 58% / 55% 40% 60% 45%; }
+  83%      { border-radius: 45% 55% 50% 50% / 42% 62% 38% 58%; }
+  92%      { border-radius: 52% 48% 38% 62% / 58% 35% 65% 42%; }
+  100%     { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+}
+
+@keyframes blob-drift {
+  0%, 100% { transform: rotate(0deg)   scale(1); }
+  25%      { transform: rotate(3deg)   scale(1.02); }
+  50%      { transform: rotate(-2deg)  scale(0.98); }
+  75%      { transform: rotate(2deg)   scale(1.01); }
+}
+
+@keyframes blob-reveal {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blob-img-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
 }
 
 .register__wordmark {

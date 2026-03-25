@@ -12,13 +12,14 @@
 
     <!-- Body -->
     <div class="onboarding__body">
-      <h1 class="title title--md onboarding__question">{{ currentStep.question }}</h1>
+      <h1 :key="`q-${step}`" class="title title--md onboarding__question onboarding__fade-in">{{ currentStep.question }}</h1>
 
       <div class="onboarding__options">
         <button
-          v-for="opt in currentStep!.options"
-          :key="opt.value"
+          v-for="(opt, i) in currentStep!.options"
+          :key="`${step}-${opt.value}`"
           :class="['onboarding-opt', { 'onboarding-opt--selected': isSelected(opt.value) }]"
+          :style="{ animationDelay: `${i * 70}ms` }"
           @click="toggleOption(opt.value)"
         >
           <span class="onboarding-opt__icon"><Icon :name="opt.icon" size="20" /></span>
@@ -28,10 +29,11 @@
 
       <!-- Desktop: button inside card -->
       <UiButton
+        :key="`desk-${step}`"
         block
         variant="secondary"
         :disabled="!hasAnswer()"
-        class="onboarding__desktop-btn"
+        class="onboarding__desktop-btn onboarding__btn-fade"
         @click="handleContinue"
       >
         Continuar
@@ -39,7 +41,7 @@
     </div>
 
     <!-- Mobile: bottom-pinned button -->
-    <div class="onboarding__footer">
+    <div :key="`foot-${step}`" class="onboarding__footer onboarding__btn-fade">
       <UiButton block variant="secondary" :disabled="!hasAnswer()" @click="handleContinue">
         Continuar
       </UiButton>
@@ -48,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'auth' })
+definePageMeta({ layout: 'auth', pageTransition: { name: 'slide-left', mode: 'out-in' } })
 
 const { setSegment, user } = useAuth()
 const supabase = useSupabaseClient()
@@ -234,6 +236,51 @@ async function handleContinue() {
   gap: var(--space-3);
 }
 
+/* ─── Staggered elastic entrance for options ─── */
+@keyframes slide-in-elastic {
+  0% {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ─── Fade-in for question title ─── */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Fade-in for buttons ─── */
+@keyframes btn-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.onboarding__fade-in {
+  animation: fade-in-up 0.4s ease-out both;
+}
+
+.onboarding__btn-fade {
+  animation: btn-fade-in 0.5s ease-out 0.35s both;
+}
+
 /* ─── Option items ─── */
 .onboarding-opt {
   display: flex;
@@ -247,6 +294,7 @@ async function handleContinue() {
   cursor: pointer;
   text-align: left;
   transition: border-color var(--transition-fast), background var(--transition-fast);
+  animation: slide-in-elastic 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 
