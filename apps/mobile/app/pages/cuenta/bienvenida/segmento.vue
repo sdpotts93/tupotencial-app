@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'auth', pageTransition: { name: 'slide-left', mode: 'out-in' } })
+definePageMeta({ layout: 'auth' })
 
 const { setSegment, user } = useAuth()
 const supabase = useSupabaseClient()

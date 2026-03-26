@@ -202,3 +202,7 @@ img, video {
   opacity: 0;
   transform: translateX(-30px);
 }
+
+#nuxt-devtools-container {
+  display: none;
+}

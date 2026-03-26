@@ -2,40 +2,6 @@
    Tu Potencial — Page & layout transitions
    ============================================ */
 
-/* ---- Page transition (horizontal slide + scale down) ---- */
-.page-slide-leave-active,
-.page-slide-enter-active {
-  transition: transform 1s cubic-bezier(.25, .74, .22, .99);
-  transform-origin: center;
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-.page-slide-leave-active {
-  z-index: 1;
-}
-
-.page-slide-enter-active {
-  z-index: 2;
-}
-
-/* Entering page: slides in from right, starts scaled down, scales back to 1 */
-.page-slide-enter-from {
-  transform: translateX(100%) scale(0.85);
-}
-
-.page-slide-enter-to {
-  transform: translateX(0) scale(1);
-}
-
-/* Leaving page: slides out to left, scales down */
-.page-slide-leave-to {
-  transform: translateX(-100%) scale(0.85);
-}
-
 /* ---- Layout transition ---- */
 .layout-enter-active,
 .layout-leave-active {
@@ -92,8 +58,6 @@
 
 /* ---- Respect reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
-  .page-slide-enter-active,
-  .page-slide-leave-active,
   .layout-enter-active,
   .layout-leave-active,
   .slide-up-enter-active,
@@ -105,8 +69,6 @@
     transition: none;
   }
 
-  .page-slide-enter-from,
-  .page-slide-leave-to,
   .slide-up-enter-from,
   .slide-up-leave-to,
   .scale-fade-enter-from,
