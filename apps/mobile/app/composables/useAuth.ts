@@ -72,9 +72,14 @@ export function useAuth() {
       if (user.value?.id === uid) return // already loaded
       loading.value = true
       try {
-        await fetchProfile(uid)
-        // If fetchProfile fails, leave the session intact.
-        // It's likely a transient network/DB error, not a missing profile.
+        const ok = await fetchProfile(uid)
+        if (!ok) {
+          // No profile row for this user — stale session after DB reset
+          // or deleted account. Sign out to force a clean login.
+          await client.auth.signOut()
+          user.value = null
+          navigateTo('/iniciar-sesion')
+        }
       } finally {
         loading.value = false
       }

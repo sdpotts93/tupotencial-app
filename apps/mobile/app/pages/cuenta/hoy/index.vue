@@ -38,7 +38,7 @@
             </div>
             <div class="hoy__celebration-text">
               <p class="hoy__celebration-title">Día completado</p>
-              <p class="hoy__celebration-sub">Racha de {{ streak + 1 }} días</p>
+              <p class="hoy__celebration-sub">Racha de {{ streak }} días</p>
             </div>
             <span class="hoy__celebration-cta">Ver progreso <Icon name="lucide:chevron-right" size="14" /></span>
           </NuxtLink>
@@ -153,14 +153,14 @@
           <template v-for="activity in activities" :key="activity.id">
             <NuxtLink
               :to="activity.to"
-              :class="['hoy__activity', { 'hoy__activity--wide': activity.id === 'ai-coach' }]"
+              :class="['hoy__activity', { 'hoy__activity--wide': activity.featured }]"
               :style="{ '--activity-accent': activity.accent }"
             >
               <div class="hoy__activity-thumb">
                 <Icon :name="activity.icon" size="28" />
               </div>
               <div class="hoy__activity-info">
-                <h3 class="hoy__activity-name">{{ activity.title }}<Icon v-if="activity.id === 'ai-coach'" name="lucide:star" size="16" class="hoy__activity-star" /></h3>
+                <h3 class="hoy__activity-name">{{ activity.title }}<Icon v-if="activity.featured" name="lucide:star" size="16" class="hoy__activity-star" /></h3>
                 <p class="hoy__activity-meta">{{ activity.meta }}</p>
               </div>
               <svg class="hoy__activity-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -193,7 +193,7 @@
           <!-- Success state -->
           <div v-if="checkinSuccess" key="success" class="hoy__checkin-success">
             <div class="hoy__checkin-success-badge"><Icon name="lucide:trophy" size="48" /></div>
-            <p class="hoy__checkin-success-streak">{{ streak + 1 }} días</p>
+            <p class="hoy__checkin-success-streak">{{ streak }} días</p>
             <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
             <UiButton block variant="secondary" @click="closeCheckinSheet">Listo</UiButton>
           </div>
@@ -265,7 +265,7 @@
               v-model="showShareBadge"
               :eyebrow="dailyPlan.eyebrow"
               :action-title="dailyPlan.title"
-              :streak-count="streak + 1"
+              :streak-count="streak"
               :share-text="dailyPlan.badgeShareText"
               :outcome="accionChoice!"
             />
@@ -321,7 +321,7 @@ const greeting = computed(() => {
 })
 
 // ─── Streak ───
-const { data: streakData } = await useAsyncData('hoy-streak', async () => {
+const { data: streakData, refresh: refreshStreak } = await useAsyncData('hoy-streak', async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value.id).maybeSingle()
   return data?.current_streak ?? 0
@@ -329,7 +329,7 @@ const { data: streakData } = await useAsyncData('hoy-streak', async () => {
 const streak = computed(() => streakData.value ?? 0)
 
 const streakMessage = computed(() => {
-  const next = streak.value + 1
+  const next = streak.value
   if (next >= 30) return '¡Increíble disciplina! Un mes completo.'
   if (next >= 14) return '¡Dos semanas seguidas! Vas imparable.'
   if (next >= 7) return '¡Una semana completa! Sigue así.'
@@ -337,16 +337,19 @@ const streakMessage = computed(() => {
   return '¡Sigue así!'
 })
 
-// ─── Today's daily plan for user's segment ───
-const { data: dailyPlanData } = await useAsyncData('hoy-plan', async () => {
-  const { data } = await client.from('daily_plans').select('*').eq('date', today).eq('status', 'published').order('created_at', { ascending: false }).limit(1).maybeSingle()
-  return data
+// ─── Hoy page data (single RPC: settings + daily plan + content) ───
+const { data: hoyPage } = await useAsyncData('hoy-page', async () => {
+  const { data } = await client.rpc('get_hoy_page', { p_date: today })
+  return data as { settings: Record<string, any>; daily_plan: Record<string, any> | null; content: any[] } | null
 })
+
+const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
+const dailyPlanData = computed(() => hoyPage.value?.daily_plan)
 
 const dailyPlan = computed(() => ({
   eyebrow: 'Acción del día',
-  title: dailyPlanData.value?.title ?? 'Acción del día',
-  message: dailyPlanData.value?.message ?? '',
+  title: dailyPlanData.value?.title ?? hoyDefaults.value.badge_title,
+  message: dailyPlanData.value?.message ?? hoyDefaults.value.badge_subtitle,
   badgeShareText: dailyPlanData.value?.badge_share_text ?? null,
 }))
 
@@ -354,8 +357,8 @@ const dailyPlan = computed(() => ({
 const mensajeDelDia = computed(() => {
   const payload = dailyPlanData.value?.primary_action_payload as Record<string, any> | null
   return {
-    text: payload?.quote_text ?? 'El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.',
-    author: (payload?.quote_author ?? dailyPlanData.value?.community_segment ?? 'gabriel') as 'gabriel' | 'carlotta',
+    text: payload?.quote_text ?? hoyDefaults.value.phrase_text,
+    author: (payload?.quote_author ?? hoyDefaults.value.phrase_author) as 'gabriel' | 'carlotta',
   }
 })
 
@@ -450,10 +453,9 @@ const activePrograms = computed(() =>
   })),
 )
 
-// ─── Latest from biblioteca (most recent published) ───
-const { data: latestContent } = await useAsyncData('hoy-content', async () => {
-  const { data } = await client.from('content_items').select('id, type, title, thumbnail_url, duration_seconds').eq('status', 'published').order('published_at', { ascending: false }).limit(3)
-  return (data ?? []).map(item => ({
+// ─── Latest from biblioteca (resolved by RPC based on admin config) ───
+const latestContent = computed(() =>
+  (hoyPage.value?.content ?? []).map((item: any) => ({
     id: item.id,
     type: item.type,
     typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[item.type] ?? item.type,
@@ -461,8 +463,8 @@ const { data: latestContent } = await useAsyncData('hoy-content', async () => {
     thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
     duration: item.duration_seconds ? `${Math.round(item.duration_seconds / 60)} min` : '',
     to: `/cuenta/contenido/${item.id}`,
-  }))
-})
+  })),
+)
 
 function contentTypeIcon(type: string) {
   switch (type) {
@@ -474,36 +476,27 @@ function contentTypeIcon(type: string) {
   }
 }
 
-// ─── App sections ───
-const activities = ref([
-  {
-    id: 'ai-coach',
-    title: 'Mi Coach IA',
-    meta: 'Conversaciones guiadas para tu crecimiento',
-    icon: 'lucide:bot',
-    accent: 'var(--color-ai-cool)',
-    to: '/cuenta/ia',
-    featured: true,
-  },
-  {
-    id: 'eventos',
-    title: 'Eventos',
-    meta: 'Talleres en vivo y grabaciones',
-    icon: 'lucide:calendar',
-    accent: 'var(--color-ai-warm)',
-    to: '/cuenta/eventos',
-    featured: false,
-  },
-  {
-    id: 'vip',
-    title: 'VIP',
-    meta: 'Contenido exclusivo y beneficios',
-    icon: 'lucide:star',
-    accent: 'var(--color-ai-earth)',
-    to: '/cuenta/complementos',
-    featured: false,
-  },
-])
+// ─── App sections (admin-configurable) ───
+const allAppSections: Record<string, { title: string; meta: string; icon: string; accent: string; to: string }> = {
+  'ai-coach': { title: 'Mi Coach IA', meta: 'Conversaciones guiadas para tu crecimiento', icon: 'lucide:bot', accent: 'var(--color-ai-cool)', to: '/cuenta/ia' },
+  'eventos': { title: 'Eventos', meta: 'Talleres en vivo y grabaciones', icon: 'lucide:calendar', accent: 'var(--color-ai-warm)', to: '/cuenta/eventos' },
+  'vip': { title: 'VIP', meta: 'Contenido exclusivo y beneficios', icon: 'lucide:star', accent: 'var(--color-ai-earth)', to: '/cuenta/complementos' },
+  'biblioteca': { title: 'Biblioteca', meta: 'Todo el contenido disponible', icon: 'lucide:book', accent: 'var(--color-ai-cool)', to: '/cuenta/biblioteca' },
+  'comunidad': { title: 'Comunidad', meta: 'Comparte con otros miembros', icon: 'lucide:users', accent: 'var(--color-ai-warm)', to: '/cuenta/comunidad' },
+  'beneficios': { title: 'Beneficios', meta: 'Descuentos y alianzas exclusivas', icon: 'lucide:tag', accent: 'var(--color-ai-earth)', to: '/cuenta/beneficios' },
+  'retos': { title: 'Programas', meta: 'Programas y retos activos', icon: 'lucide:flag', accent: 'var(--color-ai-cool)', to: '/cuenta/retos' },
+}
+
+const activities = computed(() => {
+  const savedSections = hoyPage.value?.settings?.hoy_explore_sections?.sections ?? []
+  return savedSections
+    .map((s: { id: string; featured: boolean }) => {
+      const source = allAppSections[s.id]
+      if (!source) return null
+      return { id: s.id, ...source, featured: s.featured }
+    })
+    .filter(Boolean)
+})
 
 // ─── Sheet state ───
 const activeSheet = ref<'none' | 'checkin' | 'accion'>('none')
@@ -532,8 +525,22 @@ async function handleCheckin() {
       type: 'checkin',
       payload: { mood: selectedMood.value, reflection: checkinReflection.value },
     })
+
+    // Update streak: if last check-in was yesterday, increment; otherwise reset to 1
+    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
+    const isConsecutive = streakData.value != null && streakData.value > 0
+      && (await client.from('daily_checkins').select('id').eq('user_id', user.value!.id).eq('date', yesterday).eq('type', 'checkin').maybeSingle()).data !== null
+    const newStreak = isConsecutive ? streak.value + 1 : 1
+    const newBest = Math.max(newStreak, streak.value)
+    await client.from('user_streaks').upsert({
+      user_id: user.value!.id,
+      current_streak: newStreak,
+      best_streak: newBest,
+      last_checkin_date: today,
+    }, { onConflict: 'user_id' })
+
     checkinSuccess.value = true
-    await refreshCheckin()
+    await Promise.all([refreshCheckin(), refreshStreak()])
   } finally {
     checkinLoading.value = false
   }

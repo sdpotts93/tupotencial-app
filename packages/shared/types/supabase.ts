@@ -1,4 +1,3 @@
-Connecting to db 5432
 export type Json =
   | string
   | number
@@ -1229,6 +1228,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_hoy_page: {
+        Args: { p_date?: string }
+        Returns: Json
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

@@ -1628,13 +1628,13 @@ INSERT INTO public.app_settings (key, value)
 VALUES
   (
     'hoy_defaults',
-    '{"default_badge_title": "¡Lo lograste!", "default_badge_subtitle": "Completaste tu práctica de hoy", "checkin_enabled": true}'::jsonb
+    '{"phrase_text": "Cada día es una nueva oportunidad para cuidar de ti.", "phrase_author": "gabriel", "action_type": "talk_to_ai", "content_id": "", "form_id": "", "badge_title": "Día completado", "badge_subtitle": "Sigue así, vas genial"}'::jsonb
   ),
   (
     'hoy_recent_content',
-    '{"max_items": 5, "days_lookback": 7}'::jsonb
+    '{"mode": "automatic", "selected_ids": []}'::jsonb
   ),
   (
     'hoy_explore_sections',
-    '{"sections": ["meditaciones", "rutinas-de-manana", "mindfulness", "crecimiento-personal"]}'::jsonb
+    '{"sections": [{"id": "ai-coach", "featured": true}, {"id": "eventos", "featured": false}, {"id": "vip", "featured": false}]}'::jsonb
   );

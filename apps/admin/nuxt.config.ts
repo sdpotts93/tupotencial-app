@@ -38,6 +38,7 @@ export default defineNuxtConfig({
 
   supabase: {
     redirect: false,
+    cookiePrefix: 'sb-admin',
     cookieOptions: {
       maxAge: 60 * 60 * 24 * 30, // 30 days
       sameSite: 'lax' as const,

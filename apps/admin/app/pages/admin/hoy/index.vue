@@ -261,6 +261,12 @@
         </div>
       </UiCard>
     </section>
+
+    <div class="page-actions">
+      <UiButton variant="primary-outline" size="sm" :loading="savingConfig" @click="handleSaveConfig">Guardar configuración</UiButton>
+    </div>
+
+    <UiToast ref="toastRef" />
   </div>
 </template>
 
@@ -389,15 +395,64 @@ const yearMonths = computed(() => {
   })
 })
 
-// ── Defaults config ──
+// ── Save all config ──
+const savingConfig = ref(false)
+const toastRef = ref<{ show: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void } | null>(null)
+
+async function handleSaveConfig() {
+  savingConfig.value = true
+  try {
+    const now = new Date().toISOString()
+    const { error } = await client.from('app_settings').upsert([
+      { key: 'hoy_defaults', value: { ...defaults }, updated_at: now },
+      {
+        key: 'hoy_recent_content',
+        value: {
+          mode: recentContentMode.value,
+          selected_ids: selectedContent.value.map(c => c.id),
+        },
+        updated_at: now,
+      },
+      {
+        key: 'hoy_explore_sections',
+        value: {
+          sections: exploreSections.value.map(s => ({ id: s.id, featured: s.featured })),
+        },
+        updated_at: now,
+      },
+    ])
+    if (error) throw error
+    toastRef.value?.show('Configuración guardada correctamente', 'success')
+  } catch {
+    toastRef.value?.show('Error al guardar la configuración', 'error')
+  } finally {
+    savingConfig.value = false
+  }
+}
+
+// ── Load saved config from app_settings ──
+const { data: savedConfig } = await useAsyncData('hoy-config', async () => {
+  const { data } = await client
+    .from('app_settings')
+    .select('key, value')
+    .in('key', ['hoy_defaults', 'hoy_recent_content', 'hoy_explore_sections'])
+  const map: Record<string, any> = {}
+  for (const row of data ?? []) {
+    map[row.key] = row.value
+  }
+  return map
+})
+
+// ── Defaults config (loaded from DB, seed guarantees values exist) ──
 const defaults = reactive({
-  phrase_text: 'Cada día es una nueva oportunidad para cuidar de ti.',
-  phrase_author: 'gabriel',
-  action_type: 'talk_to_ai',
+  phrase_text: '',
+  phrase_author: '',
+  action_type: '',
   content_id: '',
   form_id: '',
-  badge_title: 'Día completado',
-  badge_subtitle: 'Sigue así, vas genial',
+  badge_title: '',
+  badge_subtitle: '',
+  ...savedConfig.value?.hoy_defaults,
 })
 
 const defaultAuthorOptions = [
@@ -448,7 +503,9 @@ function onClickOutside(e: MouseEvent) {
 onMounted(() => document.addEventListener('click', onClickOutside))
 onUnmounted(() => document.removeEventListener('click', onClickOutside))
 
-const recentContentMode = ref<'automatic' | 'manual'>('automatic')
+const recentContentMode = ref<'automatic' | 'manual'>(
+  savedConfig.value?.hoy_recent_content?.mode ?? 'automatic' as const,
+)
 
 const recentContentModeOptions = [
   { value: 'automatic', label: 'Automático (contenido más reciente)' },
@@ -468,10 +525,10 @@ const allContentItems = ref([
   { id: 'cnt-008', type: 'video', title: 'Alimentación para la energía diaria', duration: '14 min' },
 ])
 
-const selectedContent = ref([
-  { id: 'cnt-001', type: 'video', title: '5 pasos para el bienestar emocional', duration: '15 min' },
-  { id: 'cnt-002', type: 'audio', title: 'Meditación guiada para la mañana', duration: '10 min' },
-])
+const savedSelectedIds = new Set(savedConfig.value?.hoy_recent_content?.selected_ids ?? [])
+const selectedContent = ref(
+  allContentItems.value.filter(c => savedSelectedIds.has(c.id)),
+)
 
 watch(contentSearch, () => { contentDropdownOpen.value = true })
 
@@ -511,11 +568,15 @@ const allAppSections: AppSection[] = [
   { id: 'retos', title: 'Programas', meta: 'Programas y retos activos', icon: 'lucide:flag', route: '/cuenta/retos' },
 ]
 
-const exploreSections = ref<(AppSection & { featured: boolean })[]>([
-  { ...allAppSections[0]!, featured: true },
-  { ...allAppSections[1]!, featured: false },
-  { ...allAppSections[2]!, featured: false },
-])
+const savedExploreSections = (savedConfig.value?.hoy_explore_sections?.sections ?? []) as { id: string; featured: boolean }[]
+const exploreSections = ref<(AppSection & { featured: boolean })[]>(
+  savedExploreSections
+    .map(s => {
+      const source = allAppSections.find(a => a.id === s.id)
+      return source ? { ...source, featured: s.featured } : null
+    })
+    .filter((s): s is AppSection & { featured: boolean } => s !== null),
+)
 
 const sectionToAdd = ref('')
 

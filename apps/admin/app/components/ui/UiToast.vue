@@ -46,14 +46,20 @@ defineExpose({ show })
 <style scoped>
 .toast-container {
   position: fixed;
-  top: calc(var(--safe-area-top) + var(--space-4));
-  left: var(--space-4);
+  top: calc(var(--space-4));
+  left: calc(var(--sidebar-width, 0px) + var(--space-4));
   right: var(--space-4);
   z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   pointer-events: none;
+}
+
+@media (max-width: 1023px) {
+  .toast-container {
+    left: var(--space-4);
+  }
 }
 
 .toast {
