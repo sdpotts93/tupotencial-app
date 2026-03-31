@@ -1,5 +1,5 @@
 <template>
-  <div class="player" :class="{ 'player--audio': isAudio }" @click="toggleControls">
+  <div class="player" :class="{ 'player--audio': isAudio, 'player--vimeo': isVimeo }" @click="toggleControls">
     <!-- Audio mode: cover image + hidden audio element -->
     <template v-if="isAudio">
       <img :src="content.thumbnail" alt="" class="player__cover" />
@@ -16,7 +16,17 @@
         @pause="isPlaying = false"
       />
     </template>
-    <!-- Video mode -->
+    <!-- Vimeo embed (chromeless — our controls handle UI) -->
+    <iframe
+      v-else-if="content.vimeoId"
+      ref="vimeoIframe"
+      class="player__video"
+      :src="`https://player.vimeo.com/video/${content.vimeoId}?controls=0&autoplay=1&title=0&byline=0&portrait=0&transparent=1`"
+      frameborder="0"
+      allow="autoplay; fullscreen; picture-in-picture"
+      allowfullscreen
+    />
+    <!-- Fallback: native video -->
     <video
       v-else
       ref="videoRef"
@@ -50,7 +60,7 @@
       </div>
     </Transition>
 
-    <!-- Center: buffering spinner only (play/pause lives in bottom controls) -->
+    <!-- Center: buffering spinner -->
     <Transition name="fade">
       <div v-show="isBuffering" class="player__center-spinner">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="player__spinner">
@@ -107,17 +117,20 @@
 </template>
 
 <script setup lang="ts">
+import Player from '@vimeo/player'
+
 definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
 const contentId = route.params.id as string
 const client = useSupabaseClient()
 
-// ── Video refs ──
+// ── Refs ──
 const videoRef = ref<HTMLVideoElement | null>(null)
+const vimeoIframe = ref<HTMLIFrameElement | null>(null)
 const progressRef = ref<HTMLElement | null>(null)
 
-// ── Video state ──
+// ── Playback state ──
 const isPlaying = ref(false)
 const isBuffering = ref(false)
 const currentTime = ref(0)
@@ -128,11 +141,13 @@ const isScrubbing = ref(false)
 const controlsVisible = ref(true)
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 
+// ── Vimeo SDK instance ──
+let vimeoPlayer: Player | null = null
+
 // ── Content from DB ──
 const { data: contentData } = await useAsyncData(`content-player-${contentId}`, async () => {
   const { data } = await client.rpc('get_secure_content', { p_content_id: contentId })
   if (!data) return null
-  // If access denied, redirect back to detail page
   if (!data.access_granted) {
     navigateTo(`/cuenta/contenido/${contentId}`)
     return null
@@ -141,23 +156,35 @@ const { data: contentData } = await useAsyncData(`content-player-${contentId}`, 
     ? `${Math.round(data.duration_seconds / 60)} min`
     : ''
   const typeLabel = data.type ? data.type.charAt(0).toUpperCase() + data.type.slice(1) : ''
+
   return {
     title: data.title,
     subtitle: [typeLabel, durationLabel].filter(Boolean).join(' \u2022 '),
-    mediaUrl: data.media_url ?? '/videos/helmet-short-coded.mp4',
+    vimeoId: data.vimeo_id ?? null,
+    mediaPath: data.media_url ?? null,
     type: data.type as 'video' | 'audio',
     thumbnail: data.thumbnail_url ?? '/images/lib-1.jpg',
   }
 })
 
-const content = computed(() => contentData.value ?? {
+const contentBase = computed(() => contentData.value ?? {
   title: '',
   subtitle: '',
-  mediaUrl: '/videos/helmet-short-coded.mp4',
+  vimeoId: null as string | null,
+  mediaPath: null as string | null,
   type: 'video' as const,
   thumbnail: '/images/lib-1.jpg',
 })
 
+// Resolve storage path to signed URL on client side
+const mediaUrl = ref('/videos/helmet-short-coded.mp4')
+
+const content = computed(() => ({
+  ...contentBase.value,
+  mediaUrl: mediaUrl.value,
+}))
+
+const isVimeo = computed(() => !!content.value.vimeoId)
 const isAudio = computed(() => content.value.type === 'audio')
 
 // ── Computed ──
@@ -168,7 +195,6 @@ const progressPercent = computed(() =>
 const formattedCurrentTime = computed(() => formatTime(currentTime.value))
 const formattedDuration = computed(() => formatTime(duration.value))
 
-// ── Time formatter ──
 function formatTime(seconds: number): string {
   if (!isFinite(seconds) || seconds < 0) return '0:00'
   const m = Math.floor(seconds / 60)
@@ -176,27 +202,34 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-// ── Play / Pause ──
-function togglePlayPause() {
-  const video = videoRef.value
-  if (!video) return
-  if (video.paused) {
-    video.play()
+// ── Play / Pause (works for all modes) ──
+async function togglePlayPause() {
+  if (isVimeo.value && vimeoPlayer) {
+    const paused = await vimeoPlayer.getPaused()
+    paused ? vimeoPlayer.play() : vimeoPlayer.pause()
   } else {
-    video.pause()
+    const video = videoRef.value
+    if (!video) return
+    video.paused ? video.play() : video.pause()
   }
   resetHideTimer()
 }
 
 // ── Skip ±15s ──
-function skip(seconds: number) {
-  const video = videoRef.value
-  if (!video) return
-  video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, video.duration || 0))
+async function skip(seconds: number) {
+  if (isVimeo.value && vimeoPlayer) {
+    const time = await vimeoPlayer.getCurrentTime()
+    const dur = await vimeoPlayer.getDuration()
+    vimeoPlayer.setCurrentTime(Math.max(0, Math.min(time + seconds, dur)))
+  } else {
+    const video = videoRef.value
+    if (!video) return
+    video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, video.duration || 0))
+  }
   resetHideTimer()
 }
 
-// ── Video events ──
+// ── Native video events ──
 function onLoadedMetadata() {
   const video = videoRef.value
   if (!video) return
@@ -228,7 +261,6 @@ function resetHideTimer() {
 }
 
 function toggleControls() {
-  // Audio mode: controls always visible
   if (isAudio.value) return
   if (controlsVisible.value) {
     controlsVisible.value = false
@@ -247,10 +279,15 @@ function calcProgressFromX(clientX: number): number {
 }
 
 function seekToRatio(ratio: number) {
-  const video = videoRef.value
-  if (!video || !duration.value) return
-  video.currentTime = ratio * duration.value
-  currentTime.value = video.currentTime
+  if (isVimeo.value && vimeoPlayer) {
+    vimeoPlayer.setCurrentTime(ratio * duration.value)
+    currentTime.value = ratio * duration.value
+  } else {
+    const video = videoRef.value
+    if (!video || !duration.value) return
+    video.currentTime = ratio * duration.value
+    currentTime.value = video.currentTime
+  }
 }
 
 function onProgressClick(e: MouseEvent) {
@@ -277,35 +314,73 @@ function onProgressTouchEnd() {
 }
 
 // ── Lifecycle ──
-onMounted(() => {
-  // Flag content as played for Hoy acción auto-complete
+onMounted(async () => {
   const today = new Date().toISOString().slice(0, 10)
   localStorage.setItem(`hoy-content-done-${today}`, contentId)
 
-  const video = videoRef.value
-  if (!video) return
-
-  // Metadata may already be loaded (SSR hydration / fast cache)
-  if (video.readyState >= 1) {
-    duration.value = video.duration
+  // Resolve storage path to signed URL
+  const path = contentBase.value.mediaPath
+  if (path && !path.startsWith('http')) {
+    const { data: signed } = await client.storage
+      .from('content-media')
+      .createSignedUrl(path, 3600)
+    if (signed?.signedUrl) mediaUrl.value = signed.signedUrl
+  } else if (path) {
+    mediaUrl.value = path
   }
 
-  // Audio mode: keep controls always visible
-  if (isAudio.value) {
-    controlsVisible.value = true
-  }
+  // Wait a tick for the media element to update its src
+  await nextTick()
 
-  video.play()
-    .then(() => { if (!isAudio.value) resetHideTimer() })
-    .catch(() => {
-      // Autoplay blocked — keep controls visible
-      isPlaying.value = false
-      controlsVisible.value = true
+  if (isVimeo.value && vimeoIframe.value) {
+    // ── Init Vimeo SDK ──
+    vimeoPlayer = new Player(vimeoIframe.value)
+
+    vimeoPlayer.getDuration().then((d) => { duration.value = d })
+
+    vimeoPlayer.on('play', () => {
+      isPlaying.value = true
+      isBuffering.value = false
+      resetHideTimer()
     })
+    vimeoPlayer.on('pause', () => { isPlaying.value = false })
+    vimeoPlayer.on('ended', () => onEnded())
+    vimeoPlayer.on('bufferstart', () => { isBuffering.value = true })
+    vimeoPlayer.on('bufferend', () => { isBuffering.value = false })
+    vimeoPlayer.on('timeupdate', (e: { seconds: number; duration: number }) => {
+      if (!isScrubbing.value) {
+        currentTime.value = e.seconds
+        duration.value = e.duration
+      }
+    })
+  } else {
+    // ── Native audio/video ──
+    const video = videoRef.value
+    if (!video) return
+
+    if (video.readyState >= 1) {
+      duration.value = video.duration
+    }
+
+    if (isAudio.value) {
+      controlsVisible.value = true
+    }
+
+    video.play()
+      .then(() => { if (!isAudio.value) resetHideTimer() })
+      .catch(() => {
+        isPlaying.value = false
+        controlsVisible.value = true
+      })
+  }
 })
 
 onBeforeUnmount(() => {
   if (hideTimer) clearTimeout(hideTimer)
+  if (vimeoPlayer) {
+    vimeoPlayer.destroy()
+    vimeoPlayer = null
+  }
 })
 </script>
 
@@ -330,6 +405,9 @@ onBeforeUnmount(() => {
   max-width: none;
   object-fit: contain;
 }
+
+/* ─── Vimeo: iframe is display-only, controls overlay handles interaction ─── */
+.player--vimeo iframe { pointer-events: none; }
 
 /* ─── Audio mode: cover image ─── */
 .player__cover {

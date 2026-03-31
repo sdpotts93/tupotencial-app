@@ -35,8 +35,17 @@
               :rows="10"
             />
 
-            <!-- File upload -->
-            <div class="upload">
+            <!-- Vimeo URL for video content -->
+            <UiInput
+              v-if="form.content_type === 'video'"
+              v-model="form.vimeo_url"
+              label="URL de Vimeo"
+              placeholder="https://vimeo.com/123456789"
+              hint="Sube el video a Vimeo y pega la URL aquí"
+            />
+
+            <!-- File upload for audio / article -->
+            <div v-else class="upload">
               <label class="upload__label">{{ uploadLabel }}</label>
               <div
                 class="upload__dropzone"
@@ -55,10 +64,7 @@
                 />
                 <template v-if="!uploadedFile">
                   <div class="upload__icon">
-                    <svg v-if="form.content_type === 'video'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                    </svg>
-                    <svg v-else-if="form.content_type === 'audio'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg v-if="form.content_type === 'audio'" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
                     </svg>
                     <svg v-else width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -107,8 +113,8 @@
 
             <UiInput
               v-model="form.duration"
-              label="Duración"
-              placeholder="Ej: 10 min"
+              label="Duración (segundos)"
+              placeholder="Ej: 480"
             />
 
             <UiSelect
@@ -177,6 +183,7 @@ const form = reactive({
   introduction: '',
   body: '',
   content_type: 'video',
+  vimeo_url: '',
   category_id: '',
   objective_id: '',
   duration: '',
@@ -235,7 +242,6 @@ const statusOptions = [
 
 const uploadLabel = computed(() => {
   const labels: Record<string, string> = {
-    video: 'Subir video',
     audio: 'Subir audio',
     article: 'Imagen del artículo',
   }
@@ -244,8 +250,7 @@ const uploadLabel = computed(() => {
 
 const acceptType = computed(() => {
   const types: Record<string, string> = {
-    video: 'video/*',
-    audio: 'audio/*',
+    audio: '.mp3',
     article: 'image/*',
   }
   return types[form.content_type] || '*/*'
@@ -253,16 +258,16 @@ const acceptType = computed(() => {
 
 const acceptHint = computed(() => {
   const hints: Record<string, string> = {
-    video: 'MP4, MOV, WebM — max 500 MB',
-    audio: 'MP3, WAV, M4A — max 100 MB',
+    audio: 'MP3 — max 50 MB',
     article: 'JPG, PNG, WebP — max 10 MB',
   }
   return hints[form.content_type] || ''
 })
 
-// Reset file when content type changes
+// Reset file / vimeo URL when content type changes
 watch(() => form.content_type, () => {
   uploadedFile.value = null
+  form.vimeo_url = ''
   if (fileInput.value) fileInput.value.value = ''
 })
 
@@ -289,22 +294,56 @@ function removeFile() {
   if (fileInput.value) fileInput.value.value = ''
 }
 
+function extractVimeoId(input: string): string | null {
+  const trimmed = input.trim()
+  if (/^\d+$/.test(trimmed)) return trimmed
+  const match = trimmed.match(/vimeo\.com\/(?:video\/|manage\/videos\/|event\/)?(\d+)/)
+  return match?.[1] ?? null
+}
+
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+function parseDuration(input: string): number | null {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+  const match = trimmed.match(/^(\d+)\s*(.*)?$/)
+  if (!match) return null
+  const num = parseInt(match[1], 10)
+  const unit = (match[2] || '').trim().toLowerCase()
+  if (['m', 'min', 'mins', 'minuto', 'minutos'].includes(unit)) return num * 60
+  // default to seconds for: s, seg, segundo, segundos, or no unit
+  return num
+}
+
+async function uploadFile(file: File, contentId: string): Promise<string> {
+  const path = `${contentId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-media').upload(path, file, { upsert: true })
+  if (error) throw error
+  return path
+}
+
 async function handleSave() {
   saving.value = true
   formError.value = ''
   try {
+    const targetId = crypto.randomUUID()
+    let mediaUrl: string | null = null
+    if (uploadedFile.value) {
+      mediaUrl = await uploadFile(uploadedFile.value, targetId)
+    }
+
     const payload = {
       title: form.title,
       subtitle: form.introduction || null,
-      description: form.introduction || null,
-      body: form.body || null,
+      description: form.content_type !== 'article' ? (form.body || null) : null,
+      body: form.content_type === 'article' ? (form.body || null) : null,
       type: form.content_type,
+      vimeo_id: form.content_type === 'video' ? extractVimeoId(form.vimeo_url) : null,
+      media_url: form.content_type !== 'video' ? mediaUrl : null,
       plan: form.segment,
       status: form.status,
       published_at: form.status === 'published' ? new Date().toISOString() : null,
@@ -312,6 +351,7 @@ async function handleSave() {
       objective_id: form.objective_id || null,
       available_from: form.scheduled_at ? form.scheduled_at.toISOString() : null,
       available_to: form.unpublished_at ? form.unpublished_at.toISOString() : null,
+      duration_seconds: parseDuration(form.duration),
     }
 
     const { data: inserted } = await client.from('content_items').insert(payload).select('id').single()

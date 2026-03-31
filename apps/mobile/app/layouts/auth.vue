@@ -74,8 +74,7 @@
     object-fit: cover;
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
     animation:
-      blob-shape-desk 23s ease-in-out infinite,
-      blob-drift-desk 19s ease-in-out infinite;
+      blob-shape-desk 23s ease-in-out infinite;
   }
 
   @keyframes blob-shape-desk {
