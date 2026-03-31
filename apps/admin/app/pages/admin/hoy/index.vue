@@ -560,6 +560,7 @@ interface AppSection { id: string; title: string; meta: string; icon: string; ro
 const allAppSections: AppSection[] = [
   { id: 'ai-coach', title: 'Mi Coach IA', meta: 'Conversaciones guiadas para tu crecimiento', icon: 'lucide:bot', route: '/cuenta/ia' },
   { id: 'eventos', title: 'Eventos', meta: 'Talleres en vivo y grabaciones', icon: 'lucide:calendar', route: '/cuenta/eventos' },
+  { id: 'suscripcion', title: 'Suscripción', meta: 'Tu plan y opciones de upgrade', icon: 'lucide:wallet', route: '/cuenta/suscripcion' },
   { id: 'vip', title: 'VIP', meta: 'Contenido exclusivo y beneficios', icon: 'lucide:star', route: '/cuenta/complementos' },
   { id: 'biblioteca', title: 'Biblioteca', meta: 'Todo el contenido disponible', icon: 'lucide:book', route: '/cuenta/biblioteca' },
   { id: 'comunidad', title: 'Comunidad', meta: 'Comparte con otros miembros', icon: 'lucide:users', route: '/cuenta/comunidad' },

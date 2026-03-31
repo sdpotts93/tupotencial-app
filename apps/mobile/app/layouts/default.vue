@@ -42,6 +42,7 @@ const pageTitle = computed(() => {
   if (path.startsWith('/cuenta/comunidad')) return 'Comunidad'
   if (path.startsWith('/cuenta/ia')) return 'Coach IA'
   if (path.startsWith('/cuenta/eventos')) return 'Eventos'
+  if (path.startsWith('/cuenta/suscripcion')) return 'Suscripción'
   if (path.startsWith('/cuenta/complementos')) return 'VIP'
   if (path.startsWith('/cuenta/beneficios')) return 'Beneficios'
   if (path.startsWith('/cuenta/perfil')) return 'Mi Perfil'
@@ -99,6 +100,11 @@ const desktopSections = [
   {
     title: 'Premium',
     items: [
+      {
+        label: 'Suscripción',
+        to: '/cuenta/suscripcion',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4h4v-4z"/></svg>',
+      },
       {
         label: 'VIP',
         to: '/cuenta/complementos',

@@ -694,6 +694,7 @@ function contentTypeIcon(type: string) {
 const allAppSections: Record<string, { title: string; meta: string; icon: string; accent: string; to: string }> = {
   'ai-coach': { title: 'Mi Coach IA', meta: 'Conversaciones guiadas para tu crecimiento', icon: 'lucide:bot', accent: 'var(--color-ai-cool)', to: '/cuenta/ia' },
   'eventos': { title: 'Eventos', meta: 'Talleres en vivo y grabaciones', icon: 'lucide:calendar', accent: 'var(--color-ai-warm)', to: '/cuenta/eventos' },
+  'suscripcion': { title: 'Suscripción', meta: 'Tu plan y opciones de upgrade', icon: 'lucide:wallet', accent: 'var(--color-ai-warm)', to: '/cuenta/suscripcion' },
   'vip': { title: 'VIP', meta: 'Contenido exclusivo y beneficios', icon: 'lucide:star', accent: 'var(--color-ai-earth)', to: '/cuenta/complementos' },
   'biblioteca': { title: 'Biblioteca', meta: 'Todo el contenido disponible', icon: 'lucide:book', accent: 'var(--color-ai-cool)', to: '/cuenta/biblioteca' },
   'comunidad': { title: 'Comunidad', meta: 'Comparte con otros miembros', icon: 'lucide:users', accent: 'var(--color-ai-warm)', to: '/cuenta/comunidad' },
