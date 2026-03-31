@@ -2,9 +2,10 @@
 // Implements: Public / Authed / Onboarded / Subscriber / Entitled guards
 // Per AGENTS.md section 9.6
 
-export default defineNuxtRouteMiddleware((to) => {
-  const { isLoggedIn, isOnboarded, isSubscriber } = useAuth()
+export default defineNuxtRouteMiddleware(async (to) => {
+  const { isLoggedIn, isOnboarded, isSubscriber, hasEntitlement } = useAuth()
   const supaUser = useSupabaseUser()
+  const client = useSupabaseClient()
 
   const path = to.path
 
@@ -71,9 +72,47 @@ export default defineNuxtRouteMiddleware((to) => {
 
   // ---- Entitlement-gated routes ----
   if (path.startsWith('/cuenta/vip')) {
-    const { hasEntitlement } = useAuth()
     if (!hasEntitlement('vip')) {
       return navigateTo('/cuenta/complementos')
+    }
+  }
+
+  // ---- Content entitlement gate ----
+  // Block /cuenta/contenido/[id] routes if user lacks the required entitlement or plan
+  const contentMatch = path.match(/^\/cuenta\/contenido\/([^/]+)/)
+  if (contentMatch) {
+    const contentId = contentMatch[1]
+    const { data } = await client
+      .from('content_items')
+      .select('entitlement_key, plan')
+      .eq('id', contentId)
+      .single()
+    if (data?.entitlement_key && !hasEntitlement(data.entitlement_key)) {
+      return navigateTo('/cuenta/biblioteca')
+    }
+    if (data?.plan === 'core' && !isSubscriber.value) {
+      return navigateTo('/cuenta/biblioteca')
+    }
+  }
+
+  // ---- Event entitlement gate ----
+  // Block /cuenta/eventos/[id] routes if user lacks the required entitlement or plan
+  const eventMatch = path.match(/^\/cuenta\/eventos\/([^/]+)/)
+  if (eventMatch) {
+    const eventId = eventMatch[1]
+    const { data } = await client
+      .from('events')
+      .select('entitlement_key, plan, requires_subscription')
+      .eq('id', eventId)
+      .single()
+    if (data?.entitlement_key && !hasEntitlement(data.entitlement_key)) {
+      return navigateTo('/cuenta/biblioteca')
+    }
+    if (data?.plan === 'core' && !isSubscriber.value) {
+      return navigateTo('/cuenta/biblioteca')
+    }
+    if (data?.requires_subscription && !isSubscriber.value) {
+      return navigateTo('/cuenta/biblioteca')
     }
   }
 })

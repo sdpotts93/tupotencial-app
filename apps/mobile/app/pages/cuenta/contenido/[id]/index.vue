@@ -77,11 +77,7 @@ const typeLabels: Record<string, string> = {
 }
 
 const { data: contentData } = await useAsyncData(`content-detail-${id}`, async () => {
-  const { data } = await client
-    .from('content_items')
-    .select('id, title, subtitle, type, description, body, external_url, duration_seconds, thumbnail_url')
-    .eq('id', id)
-    .single()
+  const { data } = await client.rpc('get_secure_content', { p_content_id: id })
   if (!data) return null
   return {
     title: data.title,
@@ -93,6 +89,7 @@ const { data: contentData } = await useAsyncData(`content-detail-${id}`, async (
     externalUrl: data.external_url ?? '',
     duration: formatDuration(data.duration_seconds),
     thumbnail: data.thumbnail_url ?? '/images/lib-1.jpg',
+    accessGranted: data.access_granted,
   }
 })
 

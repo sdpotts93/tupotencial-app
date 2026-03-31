@@ -14,25 +14,26 @@
       <section class="events__section">
         <p class="eyebrow">PRÓXIMOS</p>
         <div class="events__list">
-          <NuxtLink
+          <div
             v-for="event in upcomingEvents"
             :key="event.id"
-            :to="`/cuenta/eventos/${event.id}`"
-            class="events__card"
+            :class="['events__card', { 'events__card--locked': isEventLocked(event) }]"
+            @click="handleEventClick(event)"
           >
             <div class="events__card-hero">
               <img :src="event.img" alt="" class="events__card-img" />
               <span class="events__card-date">{{ event.dateLabel }}</span>
+              <EntitlementLockBadge :locked="isEventLocked(event)" />
             </div>
             <div class="events__card-info">
               <span class="events__card-eyebrow">{{ event.timeLabel }}</span>
               <h3 class="events__card-name">{{ event.title }}</h3>
               <p class="events__card-desc">{{ event.description }}</p>
-              <div v-if="event.requiresSub" class="events__card-footer">
-                <span class="events__tag events__tag--member">Solo miembros</span>
+              <div v-if="event.requiresSub || isEventLocked(event)" class="events__card-footer">
+                <span v-if="event.requiresSub" class="events__tag events__tag--member">Solo miembros</span>
               </div>
             </div>
-          </NuxtLink>
+          </div>
         </div>
       </section>
 
@@ -40,13 +41,16 @@
       <section class="events__section">
         <p class="eyebrow">PASADOS</p>
         <div class="events__past-list">
-          <NuxtLink
+          <div
             v-for="event in pastEvents"
             :key="event.id"
-            :to="`/cuenta/eventos/${event.id}`"
-            class="events__past-card"
+            :class="['events__past-card', { 'events__past-card--locked': isEventLocked(event) }]"
+            @click="handleEventClick(event)"
           >
-            <img :src="event.img" alt="" class="events__past-img" />
+            <div class="events__past-img-wrap">
+              <img :src="event.img" alt="" class="events__past-img" />
+              <EntitlementLockBadge :locked="isEventLocked(event)" />
+            </div>
             <div class="events__past-body">
               <span class="events__past-title">{{ event.title }}</span>
               <span class="events__past-meta">GRABACIÓN · {{ event.dateLabel }}</span>
@@ -54,9 +58,11 @@
             <svg class="events__past-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-          </NuxtLink>
+          </div>
         </div>
       </section>
+
+      <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
     </div>
   </div>
 </template>
@@ -64,13 +70,19 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const router = useRouter()
 const client = useSupabaseClient()
+const { isSubscriber } = useAuth()
+const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+
+const showPurchaseModal = ref(false)
+const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 const dateFmt = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' })
 const dateFmtFull = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
 
 const { data: events } = await useAsyncData('mobile-events', async () => {
-  const { data } = await client.from('events').select('*').in('status', ['published']).order('start_at')
+  const { data } = await client.from('events').select('id, title, description, start_at, cover_url, requires_subscription, entitlement_key, plan, status').in('status', ['published']).order('start_at')
   return data ?? []
 })
 
@@ -85,6 +97,8 @@ const upcomingEvents = computed(() =>
       timeLabel: dayTimeFmt.format(new Date(e.start_at)).toUpperCase() + ' CDMX',
       img: e.cover_url ?? '/images/lib-4.jpg',
       requiresSub: e.requires_subscription,
+      entitlement_key: e.entitlement_key,
+      plan: e.plan,
     })),
 )
 
@@ -96,8 +110,32 @@ const pastEvents = computed(() =>
       title: e.title,
       dateLabel: dateFmtFull.format(new Date(e.start_at)),
       img: e.cover_url ?? '/images/lib-2.jpg',
+      entitlement_key: e.entitlement_key,
+      plan: e.plan,
+      requiresSub: e.requires_subscription,
     })),
 )
+
+function isEventLocked(event: { entitlement_key: string | null; plan?: string; requiresSub?: boolean }) {
+  if (isLocked(event.entitlement_key)) return true
+  if (event.plan === 'core' && !isSubscriber.value) return true
+  if (event.requiresSub && !isSubscriber.value) return true
+  return false
+}
+
+function handleEventClick(event: { id: string; entitlement_key: string | null; plan?: string; requiresSub?: boolean }) {
+  if (isLocked(event.entitlement_key)) {
+    selectedAddon.value = getAddonForEntitlement(event.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  if ((event.plan === 'core' || event.requiresSub) && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este evento.' }
+    showPurchaseModal.value = true
+    return
+  }
+  router.push(`/cuenta/eventos/${event.id}`)
+}
 </script>
 
 <style scoped>
@@ -160,6 +198,11 @@ const pastEvents = computed(() =>
 
 .events__card-hero {
   position: relative;
+}
+
+.events__card--locked .events__card-img {
+  opacity: 0.65;
+  filter: grayscale(20%);
 }
 
 .events__card-img {
@@ -260,12 +303,21 @@ const pastEvents = computed(() =>
 }
 .events__past-card:active { background: rgba(var(--tint-rgb), 0.08); }
 
+.events__past-img-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .events__past-img {
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
   object-fit: cover;
-  flex-shrink: 0;
+}
+
+.events__past-card--locked .events__past-img {
+  opacity: 0.65;
+  filter: grayscale(20%);
 }
 
 .events__past-body {

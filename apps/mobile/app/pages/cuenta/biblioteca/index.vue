@@ -35,19 +35,22 @@
           <p v-if="filteredResults.length" class="eyebrow library__search-results-label">RESULTADOS</p>
 
           <div class="library__search-list">
-            <NuxtLink
+            <div
               v-for="item in filteredResults"
               :key="item.id"
-              :to="`/cuenta/contenido/${item.id}`"
-              class="library__search-item"
+              :class="['library__search-item', { 'library__search-item--locked': isLocked(item.entitlement_key) }]"
+              @click="handleSearchClick(item)"
             >
-              <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__search-item-thumb" />
+              <div class="library__search-item-thumb-wrap">
+                <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__search-item-thumb" />
+                <EntitlementLockBadge :locked="isLocked(item.entitlement_key)" />
+              </div>
               <div class="library__search-item-body">
                 <h3 class="library__search-item-name">{{ item.title }}</h3>
                 <p class="library__search-item-meta">{{ item.meta }}</p>
                 <span class="library__search-item-category">{{ item.category }}</span>
               </div>
-            </NuxtLink>
+            </div>
           </div>
 
           <UiEmptyState v-if="!filteredResults.length" title="Sin resultados" description="Intenta con otros términos de búsqueda." />
@@ -113,20 +116,23 @@
               <NuxtLink to="/cuenta/eventos" class="library__see-all">Ver todo</NuxtLink>
             </div>
             <div class="library__scroll">
-              <NuxtLink
+              <div
                 v-for="ev in recordedEvents"
                 :key="ev.id"
-                :to="`/cuenta/eventos/${ev.id}`"
-                class="library__scroll-card"
+                :class="['library__scroll-card', { 'library__scroll-card--locked': isContentLocked(ev) }]"
+                @click="handleEventClick(ev)"
               >
-                <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
+                <div class="library__scroll-img-wrap">
+                  <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
+                  <EntitlementLockBadge :locked="isContentLocked(ev)" />
+                </div>
                 <div class="library__scroll-info">
                   <span class="library__scroll-title">{{ ev.title }}</span>
                   <span class="library__scroll-duration">
                     <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.dateLabel }}
                   </span>
                 </div>
-              </NuxtLink>
+              </div>
             </div>
           </section>
         </template>
@@ -234,7 +240,7 @@ function formatDuration(seconds: number | null) {
 }
 
 // ─── Database-powered search via Postgres full-text search ───
-const searchResults = ref<{ id: string; title: string; meta: string; category: string; thumbnail: string }[]>([])
+const searchResults = ref<{ id: string; title: string; meta: string; category: string; thumbnail: string; entitlement_key: string | null }[]>([])
 const searchLoading = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -253,6 +259,7 @@ watch(query, (q) => {
       meta: `${formatDuration(c.duration_seconds) ?? ''} ${c.type ? `\u2022 ${c.type.charAt(0).toUpperCase() + c.type.slice(1)}` : ''}`.trim(),
       category: c.category_title ?? '',
       thumbnail: c.thumbnail_url ?? '/images/lib-1.jpg',
+      entitlement_key: c.entitlement_key ?? null,
     }))
     searchLoading.value = false
   }, 300)
@@ -319,7 +326,7 @@ const featuredItem = computed(() => {
 const { data: recordedEvents } = await useAsyncData('mobile-library-recorded-events', async () => {
   const { data } = await client
     .from('events')
-    .select('id, title, start_at, cover_url')
+    .select('id, title, start_at, cover_url, entitlement_key, plan')
     .eq('status', 'published')
     .lt('start_at', new Date().toISOString())
     .order('start_at', { ascending: false })
@@ -329,6 +336,8 @@ const { data: recordedEvents } = await useAsyncData('mobile-library-recorded-eve
     title: e.title,
     dateLabel: new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(e.start_at)),
     img: e.cover_url ?? '/images/lib-2.jpg',
+    entitlement_key: e.entitlement_key,
+    plan: e.plan,
   }))
 })
 
@@ -350,6 +359,29 @@ function handleContentClick(item: { id: string; entitlement_key: string | null; 
     return
   }
   router.push(`/cuenta/contenido/${item.id}`)
+}
+
+function handleSearchClick(item: { id: string; entitlement_key: string | null }) {
+  if (isLocked(item.entitlement_key)) {
+    selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  router.push(`/cuenta/contenido/${item.id}`)
+}
+
+function handleEventClick(ev: { id: string; entitlement_key: string | null; plan?: string }) {
+  if (isLocked(ev.entitlement_key)) {
+    selectedAddon.value = getAddonForEntitlement(ev.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  if (ev.plan === 'core' && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este contenido.' }
+    showPurchaseModal.value = true
+    return
+  }
+  router.push(`/cuenta/eventos/${ev.id}`)
 }
 
 // ─── Tab: Programas ───
@@ -475,6 +507,12 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
   gap: var(--space-4);
   text-decoration: none;
   color: var(--color-text);
+  cursor: pointer;
+}
+
+.library__search-item-thumb-wrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .library__search-item-thumb {
@@ -482,7 +520,11 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
   height: 72px;
   border-radius: var(--radius-lg);
   object-fit: cover;
-  flex-shrink: 0;
+}
+
+.library__search-item--locked .library__search-item-thumb {
+  opacity: 0.65;
+  filter: grayscale(20%);
 }
 
 .library__search-item-body {

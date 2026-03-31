@@ -65,13 +65,13 @@ const statusLabels: Record<string, string> = {
 }
 
 const { data: eventData } = await useAsyncData(`event-${id}`, async () => {
-  const { data } = await client.from('events').select('*').eq('id', id).single()
+  const { data } = await client.rpc('get_secure_event', { p_event_id: id })
   return data
 })
 
 const event = computed(() => {
   const e = eventData.value
-  if (!e) return { title: '', description: '', dateLabel: '', img: '/images/lib-4.jpg', requiresSub: false, status: '', isLive: false }
+  if (!e) return { title: '', description: '', dateLabel: '', img: '/images/lib-4.jpg', requiresSub: false, status: '', isLive: false, accessGranted: false }
   const startDate = new Date(e.start_at)
   return {
     title: e.title,
@@ -81,6 +81,7 @@ const event = computed(() => {
     requiresSub: e.requires_subscription,
     status: statusLabels[e.status] ?? e.status,
     isLive: startDate > new Date() && e.status === 'published',
+    accessGranted: e.access_granted,
   }
 })
 </script>

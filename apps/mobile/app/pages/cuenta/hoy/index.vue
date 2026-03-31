@@ -130,18 +130,21 @@
           <NuxtLink to="/cuenta/biblioteca" class="hoy__latest-see-all">Ver todo</NuxtLink>
         </div>
         <div class="hoy__latest-scroll">
-          <NuxtLink
+          <div
             v-for="item in latestContent"
             :key="item.id"
-            :to="item.to"
-            class="hoy__latest-card"
+            :class="['hoy__latest-card', { 'hoy__latest-card--locked': isContentLocked(item) }]"
+            @click="handleContentClick(item)"
           >
-            <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="hoy__latest-img" />
+            <div class="hoy__latest-img-wrap">
+              <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="hoy__latest-img" />
+              <EntitlementLockBadge :locked="isContentLocked(item)" />
+            </div>
             <div class="hoy__latest-info">
               <span class="hoy__latest-title">{{ item.title }}</span>
               <span v-if="item.duration" class="hoy__latest-duration"><Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}</span>
             </div>
-          </NuxtLink>
+          </div>
         </div>
       </section>
 
@@ -356,12 +359,19 @@
         </Transition>
       </div>
     </div>
+
+    <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
   </div>
 </template>
 
 <script setup lang="ts">
 const client = useSupabaseClient()
-const { user } = useAuth()
+const router = useRouter()
+const { user, isSubscriber } = useAuth()
+const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+
+const showPurchaseModal = ref(false)
+const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 const toast = useToast()
 const now = new Date()
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
@@ -645,8 +655,30 @@ const latestContent = computed(() =>
     thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
     duration: item.duration_seconds ? `${Math.round(item.duration_seconds / 60)} min` : '',
     to: `/cuenta/contenido/${item.id}`,
+    entitlement_key: item.entitlement_key ?? null,
+    plan: item.plan ?? 'free',
   })),
 )
+
+function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
+  if (isLocked(item.entitlement_key)) return true
+  if (item.plan === 'core' && !isSubscriber.value) return true
+  return false
+}
+
+function handleContentClick(item: { id: string; entitlement_key: string | null; plan?: string }) {
+  if (isLocked(item.entitlement_key)) {
+    selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  if (item.plan === 'core' && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este contenido.' }
+    showPurchaseModal.value = true
+    return
+  }
+  router.push(`/cuenta/contenido/${item.id}`)
+}
 
 function contentTypeIcon(type: string) {
   switch (type) {
@@ -1351,6 +1383,11 @@ function closeAccionSheet() {
   flex-direction: column;
   border-radius: var(--radius-xl);
   overflow: hidden;
+  cursor: pointer;
+}
+
+.hoy__latest-img-wrap {
+  position: relative;
 }
 
 .hoy__latest-img {
@@ -1359,6 +1396,11 @@ function closeAccionSheet() {
   object-fit: cover;
   display: block;
   border-radius: var(--radius-xl);
+}
+
+.hoy__latest-card--locked .hoy__latest-img {
+  opacity: 0.65;
+  filter: grayscale(20%);
 }
 
 .hoy__latest-info {

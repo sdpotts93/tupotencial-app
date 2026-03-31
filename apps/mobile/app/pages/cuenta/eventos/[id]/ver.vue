@@ -34,11 +34,26 @@ definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
 const id = route.params.id as string
+const client = useSupabaseClient()
 
-const event = ref({
-  title: 'Meditación grupal',
-  subtitle: 'Con Carlotta · Jueves 28 Feb',
-  isLive: true,
+const { data: eventData } = await useAsyncData(`event-watch-${id}`, async () => {
+  const { data } = await client.rpc('get_secure_event', { p_event_id: id })
+  if (!data || !data.access_granted) {
+    navigateTo(`/cuenta/eventos/${id}`)
+    return null
+  }
+  return data
+})
+
+const event = computed(() => {
+  const e = eventData.value
+  if (!e) return { title: '', subtitle: '', isLive: false }
+  const startDate = new Date(e.start_at)
+  return {
+    title: e.title,
+    subtitle: e.description ?? '',
+    isLive: startDate > new Date() && e.status === 'published',
+  }
 })
 </script>
 

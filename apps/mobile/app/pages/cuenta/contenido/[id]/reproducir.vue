@@ -130,12 +130,13 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null
 
 // ── Content from DB ──
 const { data: contentData } = await useAsyncData(`content-player-${contentId}`, async () => {
-  const { data } = await client
-    .from('content_items')
-    .select('id, title, subtitle, type, duration_seconds, media_url, thumbnail_url')
-    .eq('id', contentId)
-    .single()
+  const { data } = await client.rpc('get_secure_content', { p_content_id: contentId })
   if (!data) return null
+  // If access denied, redirect back to detail page
+  if (!data.access_granted) {
+    navigateTo(`/cuenta/contenido/${contentId}`)
+    return null
+  }
   const durationLabel = data.duration_seconds
     ? `${Math.round(data.duration_seconds / 60)} min`
     : ''

@@ -67,7 +67,8 @@
       <template #cell-title="{ row, value }">
         <div class="title-cell">
           <button class="featured-star" :class="{ 'featured-star--active': row.id === featuredId, 'featured-star--disabled': row.status !== 'published' }" :disabled="row.status !== 'published'" @click.stop="toggleFeatured(row.id)">
-            <Icon name="lucide:star" size="16" />
+            <svg v-if="row.id === featuredId" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <Icon v-else name="lucide:star" size="16" />
           </button>
           <span>{{ value }}</span>
         </div>

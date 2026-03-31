@@ -13,28 +13,39 @@
       <p v-if="objective.description" class="obj__description">{{ objective.description }}</p>
 
       <div class="obj__list">
-        <NuxtLink
+        <div
           v-for="item in items"
           :key="item.id"
-          :to="`/cuenta/contenido/${item.id}`"
-          class="obj__item"
+          :class="['obj__item', { 'obj__item--locked': isContentLocked(item) }]"
+          @click="handleItemClick(item)"
         >
-          <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="obj__item-thumb" />
+          <div class="obj__item-thumb-wrap">
+            <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="obj__item-thumb" />
+            <EntitlementLockBadge :locked="isContentLocked(item)" />
+          </div>
           <div class="obj__item-body">
             <h3 class="obj__item-name">{{ item.title }}</h3>
             <p class="obj__item-meta">{{ item.meta }}</p>
             <span class="obj__item-tag">{{ objective.title }}</span>
           </div>
-        </NuxtLink>
+        </div>
       </div>
+
+      <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 const route = useRoute()
+const router = useRouter()
 const client = useSupabaseClient()
 const slug = route.params.slug as string
+const { isSubscriber } = useAuth()
+const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+
+const showPurchaseModal = ref(false)
+const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 
 // ── Fetch objective by slug ──
 const { data: objectiveData } = await useAsyncData(`objective-${slug}`, async () => {
@@ -63,7 +74,7 @@ const { data: items } = await useAsyncData(`objective-content-${slug}`, async ()
   if (!objectiveData.value) return []
   const { data } = await client
     .from('content_items')
-    .select('id, title, type, duration_seconds, thumbnail_url')
+    .select('id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan')
     .eq('objective_id', objectiveData.value.id)
     .eq('status', 'published')
     .order('created_at', { ascending: false })
@@ -72,8 +83,30 @@ const { data: items } = await useAsyncData(`objective-content-${slug}`, async ()
     title: item.title,
     meta: [formatDuration(item.duration_seconds), typeLabels[item.type] ?? item.type].filter(Boolean).join(' \u2022 '),
     thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+    entitlement_key: item.entitlement_key,
+    plan: item.plan,
   }))
 })
+
+function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
+  if (isLocked(item.entitlement_key)) return true
+  if (item.plan === 'core' && !isSubscriber.value) return true
+  return false
+}
+
+function handleItemClick(item: { id: string; entitlement_key: string | null; plan?: string }) {
+  if (isLocked(item.entitlement_key)) {
+    selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  if (item.plan === 'core' && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este contenido.' }
+    showPurchaseModal.value = true
+    return
+  }
+  router.push(`/cuenta/contenido/${item.id}`)
+}
 </script>
 
 <style scoped>
@@ -128,9 +161,15 @@ const { data: items } = await useAsyncData(`objective-content-${slug}`, async ()
   gap: var(--space-4);
   text-decoration: none;
   color: var(--color-text);
+  cursor: pointer;
 }
 @media (hover: hover) {
   .obj__item:hover { text-decoration: none; }
+}
+
+.obj__item-thumb-wrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .obj__item-thumb {
@@ -138,7 +177,11 @@ const { data: items } = await useAsyncData(`objective-content-${slug}`, async ()
   height: 72px;
   border-radius: var(--radius-lg);
   object-fit: cover;
-  flex-shrink: 0;
+}
+
+.obj__item--locked .obj__item-thumb {
+  opacity: 0.65;
+  filter: grayscale(20%);
 }
 
 .obj__item-body {
