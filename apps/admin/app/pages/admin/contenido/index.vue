@@ -50,6 +50,11 @@
         <UiTag :variant="value === 'core' ? 'gold' : 'default'">{{ value === 'core' ? 'Core' : 'Gratuito' }}</UiTag>
       </template>
 
+      <template #cell-category="{ value }">
+        <span v-if="categoryName(value)" style="white-space: nowrap;">{{ categoryName(value) }}</span>
+        <span v-else style="color: var(--color-muted);">—</span>
+      </template>
+
       <template #cell-entitlement_key="{ value }">
         <UiTag v-if="value" variant="accent">{{ entitlementLabels[value] ?? value }}</UiTag>
         <span v-else style="color: var(--color-muted);">—</span>
@@ -61,8 +66,8 @@
 
       <template #cell-title="{ row, value }">
         <div class="title-cell">
-          <button class="featured-star" :class="{ 'featured-star--active': row.id === featuredId }" @click.stop="toggleFeatured(row.id)">
-            <Icon :name="row.id === featuredId ? 'lucide:star' : 'lucide:star'" size="16" />
+          <button class="featured-star" :class="{ 'featured-star--active': row.id === featuredId, 'featured-star--disabled': row.status !== 'published' }" :disabled="row.status !== 'published'" @click.stop="toggleFeatured(row.id)">
+            <Icon name="lucide:star" size="16" />
           </button>
           <span>{{ value }}</span>
         </div>
@@ -137,6 +142,7 @@ const columns = [
   { key: 'title', label: 'Título', width: '210px' },
   { key: 'content_type', label: 'Tipo' },
   { key: 'segment', label: 'Plan' },
+  { key: 'category', label: 'Categoría' },
   { key: 'entitlement_key', label: 'Complemento' },
   { key: 'status', label: 'Estado' },
   { key: 'published_at', label: 'Publicación' },
@@ -181,6 +187,11 @@ function typeLabel(type: string) {
   return map[type] ?? type
 }
 
+function categoryName(id: string | null) {
+  if (!id) return null
+  return (categories.value ?? []).find(c => c.id === id)?.title ?? null
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 }
@@ -194,10 +205,23 @@ async function handleDelete(row: Record<string, any>) {
   }
 }
 
-const featuredId = ref<string | null>('cnt-001')
+const featuredId = ref<string | null>(null)
 
-function toggleFeatured(id: string) {
-  featuredId.value = featuredId.value === id ? null : id
+// Load featured content from app_settings
+const { data: featuredSetting } = await useAsyncData('admin-featured-content', async () => {
+  const { data } = await client.from('app_settings').select('value').eq('key', 'biblioteca_featured').single()
+  return (data?.value as any)?.content_id ?? null
+})
+watchEffect(() => { featuredId.value = featuredSetting.value })
+
+async function toggleFeatured(id: string) {
+  const newId = featuredId.value === id ? null : id
+  featuredId.value = newId
+  await client.from('app_settings').upsert({
+    key: 'biblioteca_featured',
+    value: { content_id: newId },
+    updated_at: new Date().toISOString(),
+  })
 }
 
 function goToEdit(row: Record<string, any>) {
@@ -230,5 +254,10 @@ function goToEdit(row: Record<string, any>) {
 
 .featured-star--active {
   color: var(--color-warning, #e0a500);
+}
+
+.featured-star--disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
 }
 </style>

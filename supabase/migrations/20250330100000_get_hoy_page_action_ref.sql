@@ -78,7 +78,7 @@ BEGIN
           FROM public.content_items ci
          WHERE ci.status = 'published'
          ORDER BY ci.published_at DESC
-         LIMIT 3
+         LIMIT 5
       ) ci;
   END IF;
 

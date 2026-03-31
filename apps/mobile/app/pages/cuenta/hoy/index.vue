@@ -536,11 +536,21 @@ async function checkAutoCompleteAccion() {
   let completed = false
 
   if (actionType.value === 'ai_prompt') {
-    // Check localStorage flag set by the chat page when user sends a message
-    completed = localStorage.getItem(`hoy-ai-done-${today}`) === 'true'
+    // Check localStorage flag AND verify a user message actually exists in DB today
+    if (localStorage.getItem(`hoy-ai-done-${today}`) === 'true') {
+      const { data } = await client.from('ai_messages')
+        .select('id')
+        .eq('user_id', user.value.id)
+        .eq('role', 'user')
+        .gte('created_at', `${today}T00:00:00`)
+        .lte('created_at', `${today}T23:59:59`)
+        .limit(1)
+        .maybeSingle()
+      completed = !!data
+      if (!data) localStorage.removeItem(`hoy-ai-done-${today}`)
+    }
   } else if (actionType.value === 'content' && actionPayload.value?.content_id) {
-    // Content actions are marked as done when user navigates to the content
-    // Check localStorage flag set by the content page
+    // Check localStorage flag for content viewed
     completed = localStorage.getItem(`hoy-content-done-${today}`) === actionPayload.value.content_id
   }
   // Form type is handled inline by handleFormSubmit, no auto-check needed
@@ -552,6 +562,8 @@ async function checkAutoCompleteAccion() {
       type: 'accion',
       payload: { outcome: 'done', daily_plan_id: dailyPlanData.value?.id ?? null },
     })
+    localStorage.removeItem(`hoy-ai-done-${today}`)
+    localStorage.removeItem(`hoy-content-done-${today}`)
     await refreshAccion()
     await maybeUpdateStreak()
   }

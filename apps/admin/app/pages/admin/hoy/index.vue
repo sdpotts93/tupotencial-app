@@ -209,7 +209,7 @@
 
           <p v-else class="meta-hint">
             <Icon name="lucide:info" size="14" style="vertical-align: -2px;" />
-            Se mostrará automáticamente el contenido más reciente publicado en la biblioteca.
+            Se mostrarán automáticamente los 5 contenidos más recientes publicados en la biblioteca.
           </p>
         </div>
       </UiCard>

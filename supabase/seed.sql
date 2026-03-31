@@ -193,14 +193,14 @@ VALUES
     'fb000000-0000-4000-8000-000000000001',
     'Encuesta de satisfacción',
     'Ayúdanos a mejorar tu experiencia en Tu Potencial',
-    '[{"type":"rating","label":"¿Qué tan satisfecho estás con la app?","required":true},{"type":"text","label":"¿Qué podríamos mejorar?","required":false},{"type":"select","label":"¿Qué funcionalidad usas más?","options":["Meditaciones","Programas","Comunidad","Coach IA"],"required":true}]'::jsonb,
+    '[{"type":"rating","question":"¿Qué tan satisfecho estás con la app?","required":true},{"type":"text","question":"¿Qué podríamos mejorar?","required":false},{"type":"select","question":"¿Qué funcionalidad usas más?","options":["Meditaciones","Programas","Comunidad","Coach IA"],"required":true}]'::jsonb,
     'active'
   ),
   (
     'fb000000-0000-4000-8000-000000000002',
     'Formulario de inscripción al retiro',
     'Completa este formulario para reservar tu lugar en el retiro de marzo 2026',
-    '[{"type":"text","label":"Nombre completo","required":true},{"type":"email","label":"Email de contacto","required":true},{"type":"select","label":"¿Tienes alguna restricción alimentaria?","options":["Ninguna","Vegetariano","Vegano","Otro"],"required":true},{"type":"textarea","label":"¿Hay algo que debamos saber?","required":false}]'::jsonb,
+    '[{"type":"text","question":"Nombre completo","required":true},{"type":"email","question":"Email de contacto","required":true},{"type":"select","question":"¿Tienes alguna restricción alimentaria?","options":["Ninguna","Vegetariano","Vegano","Otro"],"required":true},{"type":"textarea","question":"¿Hay algo que debamos saber?","required":false}]'::jsonb,
     'active'
   );
 
@@ -1637,4 +1637,8 @@ VALUES
   (
     'hoy_explore_sections',
     '{"sections": [{"id": "ai-coach", "featured": true}, {"id": "eventos", "featured": false}, {"id": "vip", "featured": false}]}'::jsonb
+  ),
+  (
+    'biblioteca_featured',
+    '{"content_id": "c2000000-0000-4000-8000-000000000003"}'::jsonb
   );

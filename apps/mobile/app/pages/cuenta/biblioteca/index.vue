@@ -64,8 +64,11 @@
           <!-- Featured / hero -->
           <section v-if="featuredItem" class="library__featured">
             <h2 class="library__section-title">Destacado</h2>
-            <NuxtLink :to="`/cuenta/contenido/${featuredItem.id}`" class="library__featured-card">
-              <img :src="featuredItem.thumbnail" alt="" class="library__featured-img" />
+            <div :class="['library__featured-card', { 'library__featured-card--locked': isContentLocked(featuredItem) }]" @click="handleContentClick(featuredItem)">
+              <div class="library__featured-img-wrap">
+                <img :src="featuredItem.thumbnail" alt="" class="library__featured-img" />
+                <EntitlementLockBadge :locked="isContentLocked(featuredItem)" />
+              </div>
               <div class="library__featured-info">
                 <div class="library__featured-eyebrow-row">
                   <span class="library__featured-eyebrow">{{ featuredItem.typeLabel }} {{ featuredItem.duration ? `\u2022 ${featuredItem.duration}` : '' }}</span>
@@ -73,7 +76,7 @@
                 </div>
                 <h3 class="library__featured-name">{{ featuredItem.title }}</h3>
               </div>
-            </NuxtLink>
+            </div>
           </section>
 
           <!-- Categories -->
@@ -195,7 +198,7 @@
 
 <script setup lang="ts">
 const router = useRouter()
-const { user } = useAuth()
+const { user, isSubscriber } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 const client = useSupabaseClient()
 
@@ -268,7 +271,7 @@ const { data: categoriesData } = await useAsyncData('mobile-library-categories',
   // Fetch content items with their category links
   const { data: itemCats } = await client
     .from('content_item_categories')
-    .select('category_id, position, content_items(id, title, type, duration_seconds, thumbnail_url, entitlement_key, status)')
+    .select('category_id, position, content_items(id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key, status)')
     .order('position')
   // Group items by category
   const catItemsMap = new Map<string, any[]>()
@@ -283,6 +286,7 @@ const { data: categoriesData } = await useAsyncData('mobile-library-categories',
       duration: formatDuration(item.duration_seconds),
       thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
       entitlement_key: item.entitlement_key,
+      plan: item.plan,
     })
     catItemsMap.set(ic.category_id, arr)
   }
@@ -294,8 +298,20 @@ const { data: categoriesData } = await useAsyncData('mobile-library-categories',
 })
 const categories = computed(() => categoriesData.value ?? [])
 
-// Featured content (first published item)
+// Featured content from app_settings
+const { data: featuredContentId } = await useAsyncData('biblioteca-featured', async () => {
+  const { data } = await client.from('app_settings').select('value').eq('key', 'biblioteca_featured').single()
+  return (data?.value as any)?.content_id ?? null
+})
 const featuredItem = computed(() => {
+  const fid = featuredContentId.value
+  if (fid) {
+    for (const cat of categories.value) {
+      const found = cat.items.find((i: any) => i.id === fid)
+      if (found) return found
+    }
+  }
+  // Fallback to first item if featured not found
   const firstCat = categories.value[0]
   return firstCat?.items?.[0] ?? null
 })
@@ -316,9 +332,20 @@ const { data: recordedEvents } = await useAsyncData('mobile-library-recorded-eve
   }))
 })
 
-function handleContentClick(item: { id: string; entitlement_key: string | null }) {
+function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
+  if (isLocked(item.entitlement_key)) return true
+  if (item.plan === 'core' && !isSubscriber.value) return true
+  return false
+}
+
+function handleContentClick(item: { id: string; entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) {
     selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  if (item.plan === 'core' && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este contenido.' }
     showPurchaseModal.value = true
     return
   }
@@ -522,6 +549,16 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
   border-radius: var(--radius-2xl);
   text-decoration: none;
   color: var(--color-text);
+  cursor: pointer;
+}
+
+.library__featured-img-wrap {
+  position: relative;
+}
+
+.library__featured-card--locked .library__featured-img {
+  opacity: 0.65;
+  filter: grayscale(20%);
 }
 
 .library__featured-img {
