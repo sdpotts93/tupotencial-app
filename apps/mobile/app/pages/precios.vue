@@ -87,7 +87,7 @@ async function startCheckout() {
         Authorization: `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({
-        returnUrl: window.location.origin + '/cuenta/perfil',
+        returnUrl: window.location.origin + '/cuenta/mis-datos',
       }),
     })
 

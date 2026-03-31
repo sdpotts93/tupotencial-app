@@ -52,9 +52,9 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </template>
         </UiListItem>
-        <UiListItem label="Mi perfil" description="Edita tu nombre, foto y segmento" to="/cuenta/perfil">
+        <UiListItem label="Mis datos" description="Edita tu nombre, foto y segmento" to="/cuenta/mis-datos">
           <template #icon>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </template>
         </UiListItem>
         <UiListItem label="Configuración" description="Notificaciones y preferencias" to="/cuenta/ajustes">
@@ -164,7 +164,7 @@ function handleLogout() {
 
 /* Plan tier tag colors */
 .more__info :deep(.tag--accent) { width: fit-content; background: var(--color-gold-bg); color: var(--color-gold); }
-.more__info :deep(.tag--default) {  background: var(--color-silver-bg); color: var(--color-silver-text); }
+.more__info :deep(.tag--default) {  background: var(--color-silver-bg); color: var(--color-text-secondary); }
 
 /* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {

@@ -233,6 +233,7 @@ async function hideComment(comment: any) {
   const newStatus = comment.is_hidden ? 'published' : 'hidden'
   await client.from('post_comments').update({ status: newStatus }).eq('id', comment.id)
   comment.is_hidden = !comment.is_hidden
+  toast.show(comment.is_hidden ? 'Comentario ocultado' : 'Comentario visible', 'success')
 }
 
 async function handleSave() {

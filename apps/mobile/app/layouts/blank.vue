@@ -12,7 +12,7 @@
           <Icon name="lucide:flame" size="14" class="blank-layout__streak-icon" />
           <span>{{ streak }}</span>
         </NuxtLink>
-        <div class="blank-layout__avatar" @click="navigateTo('/cuenta/perfil')">
+        <div class="blank-layout__avatar" @click="navigateTo('/cuenta/mis-datos')">
           {{ initials }}
         </div>
       </div>
@@ -44,7 +44,7 @@ const pageTitle = computed(() => {
   if (path.startsWith('/cuenta/eventos')) return 'Eventos'
   if (path.startsWith('/cuenta/complementos')) return 'VIP'
   if (path.startsWith('/cuenta/beneficios')) return 'Beneficios'
-  if (path.startsWith('/cuenta/perfil')) return 'Mi Perfil'
+  if (path.startsWith('/cuenta/mis-datos')) return 'Mis Datos'
   if (path.startsWith('/cuenta/ajustes')) return 'Configuración'
   if (path.startsWith('/cuenta/mas')) return 'Cuenta'
   if (path.startsWith('/cuenta/contenido')) return 'Contenido'

@@ -8,7 +8,7 @@
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <h1 class="profile__header-title">Mi Perfil</h1>
+        <h1 class="profile__header-title">Mis Datos</h1>
       </header>
 
       <!-- Desktop two-column layout wrapper -->

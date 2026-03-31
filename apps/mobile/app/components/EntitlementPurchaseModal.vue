@@ -35,8 +35,9 @@
           </template>
         </p>
 
-        <div v-if="addon" class="ent__addon-card">
-          <span class="ent__addon-name">{{ addon.title }}</span>
+        <div v-if="addon" class="ent__addon-tag">
+          <UiTag v-if="isSubscriptionGate" variant="accent" size="sm">Core</UiTag>
+          <UiTag v-else variant="default" size="sm">{{ addon.title }}</UiTag>
         </div>
 
         <UiButton block variant="secondary" @click="goToAddon">
@@ -189,21 +190,8 @@ function goToAddon() {
   margin-bottom: var(--space-6);
 }
 
-.ent__addon-card {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-surface-alt);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+.ent__addon-tag {
   margin-bottom: var(--space-6);
-}
-
-.ent__addon-name {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-text);
 }
 
 /* ─── Desktop: centered modal ─── */

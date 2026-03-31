@@ -1,9 +1,10 @@
 <template>
   <div class="screen">
     <div class="benefit">
-      <!-- Media (icon on gradient) -->
+      <!-- Media (cover image or icon fallback) -->
       <div class="benefit__media" :style="{ background: benefit.bgGradient }">
-        <div class="benefit__icon" :style="{ color: benefit.color }">
+        <img v-if="benefit.cover_url" :src="benefit.cover_url" :alt="benefit.title" class="benefit__cover" />
+        <div v-else class="benefit__icon" :style="{ color: benefit.color }">
           <Icon :name="benefit.icon" size="64" />
         </div>
         <div class="benefit__nav safe-top">
@@ -55,12 +56,13 @@ const { data: benefitData } = await useAsyncData(`benefit-${id}`, async () => {
 
 const benefit = computed(() => {
   const b = benefitData.value
-  if (!b) return { title: '', description: '', code: null, url: null, icon: 'lucide:gift', color: 'var(--color-mood-great)', bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))' }
+  if (!b) return { title: '', description: '', code: null, url: null, cover_url: null, icon: 'lucide:gift', color: 'var(--color-mood-great)', bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))' }
   return {
     title: b.title,
     description: b.description ?? '',
     code: b.code,
     url: b.url,
+    cover_url: b.cover_url,
     icon: 'lucide:gift',
     color: 'var(--color-mood-great)',
     bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))',
@@ -88,6 +90,12 @@ function handleOpen() {
   align-items: center;
   justify-content: center;
   background: var(--color-gray);
+}
+
+.benefit__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .benefit__icon {

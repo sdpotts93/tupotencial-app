@@ -80,6 +80,7 @@ const tabs = [
 
 const columns = [
   { key: 'author', label: 'Autor' },
+  { key: 'title', label: 'Título' },
   { key: 'body', label: 'Contenido', width: '30%' },
   { key: 'likes_count', label: 'Likes' },
   { key: 'comments_count', label: 'Comentarios' },

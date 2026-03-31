@@ -47,7 +47,7 @@
           <Icon name="lucide:flame" size="14" class="ai-layout__streak-icon" />
           <span>{{ streak }}</span>
         </NuxtLink>
-        <div class="ai-layout__avatar" @click="navigateTo('/cuenta/perfil')">
+        <div class="ai-layout__avatar" @click="navigateTo('/cuenta/mis-datos')">
           {{ initials }}
         </div>
       </div>
