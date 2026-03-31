@@ -71,10 +71,9 @@
             <div class="hoy__featured-info">
               <div class="hoy__featured-eyebrow-row">
                 <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
-                <Icon name="lucide:arrow-up-right" size="16" class="hoy__featured-arrow" />
+                <Icon v-if="!todayAccion" name="lucide:arrow-up-right" size="16" class="hoy__featured-arrow" />
               </div>
-              <h3 class="hoy__featured-name">{{ dailyPlan.title }}</h3>
-              <p class="hoy__featured-desc">{{ dailyPlan.message }}</p>
+              <h3 class="hoy__featured-name" :class="{ 'hoy__featured-name--done': !!todayAccion }">{{ dailyPlan.title }}</h3>
             </div>
           </button>
         </section>
@@ -192,9 +191,9 @@
         <Transition name="fade" mode="out-in">
           <!-- Success state -->
           <div v-if="checkinSuccess" key="success" class="hoy__checkin-success">
-            <div class="hoy__checkin-success-badge"><Icon name="lucide:trophy" size="48" /></div>
-            <p class="hoy__checkin-success-streak">{{ streak }} días</p>
-            <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
+            <div class="hoy__checkin-success-badge"><Icon name="lucide:check-circle" size="48" /></div>
+            <p class="hoy__checkin-success-streak">Check-in completado</p>
+            <p class="hoy__checkin-success-msg">Ahora completa tu acción del día para sumar a tu racha.</p>
             <UiButton block variant="secondary" @click="closeCheckinSheet">Listo</UiButton>
           </div>
 
@@ -252,9 +251,15 @@
         <Transition name="fade" mode="out-in">
           <!-- Success state -->
           <div v-if="accionSuccess" key="success" class="hoy__checkin-success">
-            <div class="hoy__checkin-success-badge"><Icon name="lucide:check-circle" size="48" /></div>
-            <p class="hoy__checkin-success-streak">{{ accionChoice === 'done' ? 'Acción completada' : 'Listo para mañana' }}</p>
-            <p class="hoy__checkin-success-msg">{{ accionChoice === 'done' ? 'Excelente trabajo hoy. Cada acción cuenta.' : 'No pasa nada. Mañana es una nueva oportunidad.' }}</p>
+            <div class="hoy__checkin-success-badge"><Icon :name="allRetosComplete ? 'lucide:trophy' : 'lucide:check-circle'" size="48" /></div>
+            <template v-if="allRetosComplete">
+              <p class="hoy__checkin-success-streak">{{ streak }} días</p>
+              <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
+            </template>
+            <template v-else>
+              <p class="hoy__checkin-success-streak">{{ accionChoice === 'done' ? 'Acción completada' : 'Listo para mañana' }}</p>
+              <p class="hoy__checkin-success-msg">{{ accionChoice === 'done' ? 'Excelente trabajo hoy. Cada acción cuenta.' : 'No pasa nada. Mañana es una nueva oportunidad.' }}</p>
+            </template>
 
             <UiButton block variant="outline" @click="showShareBadge = true">
               <template #icon><Icon name="lucide:share-2" size="18" /></template>
@@ -271,10 +276,60 @@
             />
           </div>
 
-          <!-- Form state -->
+          <!-- Form action type: render form fields -->
+          <div v-else-if="actionType === 'form' && actionRef" key="form-fields">
+            <h1 class="hoy__sheet-title">{{ actionRef.title }}</h1>
+            <p v-if="actionRef.description" class="hoy__sheet-subtitle">{{ actionRef.description }}</p>
+
+            <div class="hoy__form-fields">
+              <template v-for="(field, idx) in (actionRef.fields as any[])" :key="idx">
+                <UiInput
+                  v-if="field.type === 'text' || field.type === 'email'"
+                  :label="field.question || field.label"
+                  :type="field.type"
+                  :model-value="formAnswers[idx] ?? ''"
+                  @update:model-value="formAnswers[idx] = $event"
+                />
+                <UiTextarea
+                  v-else-if="field.type === 'textarea'"
+                  :label="field.question || field.label"
+                  :model-value="formAnswers[idx] ?? ''"
+                  :rows="3"
+                  @update:model-value="formAnswers[idx] = $event"
+                />
+                <UiSelect
+                  v-else-if="field.type === 'select'"
+                  :label="field.question || field.label"
+                  :model-value="formAnswers[idx] ?? ''"
+                  :options="(field.options ?? []).map((o: string) => ({ value: o, label: o }))"
+                  placeholder="Selecciona una opción"
+                  @update:model-value="formAnswers[idx] = $event"
+                />
+                <div v-else-if="field.type === 'rating'" class="hoy__form-rating">
+                  <label class="hoy__form-label">{{ field.question || field.label }}</label>
+                  <div class="hoy__form-rating-stars">
+                    <button
+                      v-for="star in 5"
+                      :key="star"
+                      class="hoy__form-rating-star"
+                      :class="{ 'hoy__form-rating-star--active': Number(formAnswers[idx] ?? 0) >= star }"
+                      @click="formAnswers[idx] = String(star)"
+                    >
+                      <Icon name="lucide:star" size="28" />
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <UiButton block variant="secondary" :loading="accionLoading" :disabled="!isFormValid" @click="handleFormSubmit">
+              Enviar
+            </UiButton>
+          </div>
+
+          <!-- Default: done/skip options -->
           <div v-else key="form">
             <h1 class="hoy__sheet-title">{{ dailyPlan.title }}</h1>
-            <p class="hoy__sheet-subtitle">{{ dailyPlan.message }}</p>
 
             <div class="hoy__accion-options">
               <button
@@ -307,6 +362,7 @@
 <script setup lang="ts">
 const client = useSupabaseClient()
 const { user } = useAuth()
+const toast = useToast()
 const now = new Date()
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
@@ -337,28 +393,88 @@ const streakMessage = computed(() => {
   return '¡Sigue así!'
 })
 
+// Update streak only when BOTH check-in and acción are completed for today
+async function maybeUpdateStreak() {
+  const uid = user.value!.id
+  // Check both retos exist for today
+  const [checkinRow, accionRow] = await Promise.all([
+    client.from('daily_checkins').select('id').eq('user_id', uid).eq('date', today).eq('type', 'checkin').maybeSingle(),
+    client.from('daily_checkins').select('id').eq('user_id', uid).eq('date', today).eq('type', 'accion').maybeSingle(),
+  ])
+  if (!checkinRow.data || !accionRow.data) return // not both done yet
+
+  // Check if yesterday both retos were also completed (consecutive)
+  const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
+  const [yCheckin, yAccion] = await Promise.all([
+    client.from('daily_checkins').select('id').eq('user_id', uid).eq('date', yesterday).eq('type', 'checkin').maybeSingle(),
+    client.from('daily_checkins').select('id').eq('user_id', uid).eq('date', yesterday).eq('type', 'accion').maybeSingle(),
+  ])
+  const isConsecutive = streak.value > 0 && !!yCheckin.data && !!yAccion.data
+  const newStreak = isConsecutive ? streak.value + 1 : 1
+  const newBest = Math.max(newStreak, streak.value)
+
+  await client.from('user_streaks').upsert({
+    user_id: uid,
+    current_streak: newStreak,
+    best_streak: newBest,
+    last_checkin_date: today,
+  }, { onConflict: 'user_id' })
+
+  await refreshStreak()
+}
+
 // ─── Hoy page data (single RPC: settings + daily plan + content) ───
 const { data: hoyPage } = await useAsyncData('hoy-page', async () => {
   const { data } = await client.rpc('get_hoy_page', { p_date: today })
-  return data as { settings: Record<string, any>; daily_plan: Record<string, any> | null; content: any[] } | null
+  return data as { settings: Record<string, any>; daily_plan: Record<string, any> | null; action_ref: Record<string, any> | null; content: any[] } | null
 })
 
 const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
 const dailyPlanData = computed(() => hoyPage.value?.daily_plan)
+// Resolve action type: daily plan overrides defaults; normalize default values to plan values
+const normalizeActionType = (t: string | undefined) => {
+  if (!t) return undefined
+  if (t === 'talk_to_ai') return 'ai_prompt'
+  if (t === 'contenido') return 'content'
+  if (t === 'formulario') return 'form'
+  return t
+}
+const actionType = computed(() => {
+  const planType = dailyPlanData.value?.primary_action_type as string | undefined
+  if (planType) return planType
+  return normalizeActionType(hoyDefaults.value.action_type as string | undefined)
+})
+const actionPayload = computed(() => dailyPlanData.value?.primary_action_payload as Record<string, any> | null)
+const actionRef = computed(() => hoyPage.value?.action_ref ?? null)
+
+// Dynamic featured card name based on action type + resolved reference
+const featuredName = computed(() => {
+  const ref = actionRef.value
+  const name = ref?.title ?? ''
+  if (actionType.value === 'ai_prompt') return 'Habla con tu Coach IA'
+  if (actionType.value === 'form' && name) return `Completa el cuestionario ${name}`
+  if (actionType.value === 'content' && ref) {
+    const contentType = ref.type as string
+    if (contentType === 'video') return `Ve el video ${name}`
+    if (contentType === 'article') return `Lee el artículo ${name}`
+    if (contentType === 'audio') return `Escucha ${name}`
+    return name
+  }
+  return dailyPlanData.value?.title || hoyDefaults.value.badge_title || 'Acción del día'
+})
 
 const dailyPlan = computed(() => ({
   eyebrow: 'Acción del día',
-  title: dailyPlanData.value?.title ?? hoyDefaults.value.badge_title,
-  message: dailyPlanData.value?.message ?? hoyDefaults.value.badge_subtitle,
-  badgeShareText: dailyPlanData.value?.badge_share_text ?? null,
+  title: featuredName.value,
+  badgeShareText: dailyPlanData.value?.message || hoyDefaults.value.badge_subtitle || null,
 }))
 
-// ─── Mensaje del día (derived from daily plan payload or fallback) ───
+// ─── Mensaje del día (derived from daily plan payload or fallback to defaults) ───
 const mensajeDelDia = computed(() => {
   const payload = dailyPlanData.value?.primary_action_payload as Record<string, any> | null
   return {
-    text: payload?.quote_text ?? hoyDefaults.value.phrase_text,
-    author: (payload?.quote_author ?? hoyDefaults.value.phrase_author) as 'gabriel' | 'carlotta',
+    text: payload?.quote_text || hoyDefaults.value.phrase_text,
+    author: (payload?.quote_author || hoyDefaults.value.phrase_author) as 'gabriel' | 'carlotta',
   }
 })
 
@@ -377,9 +493,15 @@ const { data: todayAccion, refresh: refreshAccion } = await useAsyncData('hoy-ac
 }, { watch: [() => user.value?.id] })
 
 // ─── Daily retos queue (2 items: check-in + admin-configurable action) ───
+const accionTitle = computed(() => {
+  if (actionType.value === 'ai_prompt') return 'Habla con tu Coach IA'
+  if (actionType.value === 'content') return 'Acción del día'
+  return 'Acción del día'
+})
+
 const dailyRetos = computed(() => [
   { id: 'checkin', type: 'checkin' as const, title: 'Completa tu check-in', completed: !!todayCheckin.value },
-  { id: 'accion', type: 'accion' as const, title: 'Acción del día', completed: !!todayAccion.value },
+  { id: 'accion', type: 'accion' as const, title: accionTitle.value, completed: !!todayAccion.value },
 ])
 
 const retosCompleted = computed(() => dailyRetos.value.filter(r => r.completed).length)
@@ -397,13 +519,51 @@ const retosProgressWidth = computed(() => {
 
 // Animate progress bar on mount
 const animatedProgressWidth = ref('0%')
-onMounted(() => {
+onMounted(async () => {
   requestAnimationFrame(() => {
     setTimeout(() => {
       animatedProgressWidth.value = retosProgressWidth.value
     }, 300)
   })
+
+  await checkAutoCompleteAccion()
 })
+
+// Auto-complete acción based on action type when user has performed the action
+async function checkAutoCompleteAccion() {
+  if (todayAccion.value || !user.value?.id) return
+
+  let completed = false
+
+  if (actionType.value === 'ai_prompt') {
+    // Check localStorage flag set by the chat page when user sends a message
+    completed = localStorage.getItem(`hoy-ai-done-${today}`) === 'true'
+  } else if (actionType.value === 'content' && actionPayload.value?.content_id) {
+    // Content actions are marked as done when user navigates to the content
+    // Check localStorage flag set by the content page
+    completed = localStorage.getItem(`hoy-content-done-${today}`) === actionPayload.value.content_id
+  }
+  // Form type is handled inline by handleFormSubmit, no auto-check needed
+
+  if (completed) {
+    await client.from('daily_checkins').insert({
+      date: today,
+      user_id: user.value.id,
+      type: 'accion',
+      payload: { outcome: 'done', daily_plan_id: dailyPlanData.value?.id ?? null },
+    })
+    await refreshAccion()
+    await maybeUpdateStreak()
+  }
+}
+
+// Re-check when user navigates back (e.g. returning from AI coach or content page)
+onActivated(() => checkAutoCompleteAccion())
+if (import.meta.client) {
+  const onVisChange = () => { if (document.visibilityState === 'visible') checkAutoCompleteAccion() }
+  onMounted(() => document.addEventListener('visibilitychange', onVisChange))
+  onUnmounted(() => document.removeEventListener('visibilitychange', onVisChange))
+}
 watch(retosProgressWidth, (val) => {
   animatedProgressWidth.value = val
 })
@@ -411,8 +571,18 @@ watch(retosProgressWidth, (val) => {
 function handleRetoTap(type: 'checkin' | 'accion') {
   const reto = dailyRetos.value.find(r => r.type === type)
   if (reto?.completed) return
-  if (type === 'checkin') activeSheet.value = 'checkin'
-  else activeSheet.value = 'accion'
+  if (type === 'checkin') {
+    activeSheet.value = 'checkin'
+    return
+  }
+  // Route based on admin-configured action type
+  if (actionType.value === 'ai_prompt') {
+    navigateTo('/cuenta/ia')
+  } else if (actionType.value === 'content' && actionPayload.value?.content_id) {
+    navigateTo(`/cuenta/contenido/${actionPayload.value.content_id}`)
+  } else {
+    activeSheet.value = 'accion'
+  }
 }
 
 // ─── Active programs ───
@@ -496,6 +666,7 @@ const activities = computed(() => {
       return { id: s.id, ...source, featured: s.featured }
     })
     .filter(Boolean)
+    .sort((a: any, b: any) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
 })
 
 // ─── Sheet state ───
@@ -526,21 +697,12 @@ async function handleCheckin() {
       payload: { mood: selectedMood.value, reflection: checkinReflection.value },
     })
 
-    // Update streak: if last check-in was yesterday, increment; otherwise reset to 1
-    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
-    const isConsecutive = streakData.value != null && streakData.value > 0
-      && (await client.from('daily_checkins').select('id').eq('user_id', user.value!.id).eq('date', yesterday).eq('type', 'checkin').maybeSingle()).data !== null
-    const newStreak = isConsecutive ? streak.value + 1 : 1
-    const newBest = Math.max(newStreak, streak.value)
-    await client.from('user_streaks').upsert({
-      user_id: user.value!.id,
-      current_streak: newStreak,
-      best_streak: newBest,
-      last_checkin_date: today,
-    }, { onConflict: 'user_id' })
-
     checkinSuccess.value = true
-    await Promise.all([refreshCheckin(), refreshStreak()])
+    await refreshCheckin()
+    // Update streak if both retos are now complete
+    await maybeUpdateStreak()
+  } catch {
+    toast.show('Error al guardar', 'error')
   } finally {
     checkinLoading.value = false
   }
@@ -574,6 +736,50 @@ async function handleAccion() {
     })
     accionSuccess.value = true
     await refreshAccion()
+    // Update streak if both retos are now complete
+    await maybeUpdateStreak()
+  } catch {
+    toast.show('Error al guardar', 'error')
+  } finally {
+    accionLoading.value = false
+  }
+}
+
+// ─── Form action state ───
+const formAnswers = reactive<Record<number, string>>({})
+
+const isFormValid = computed(() => {
+  const fields = (actionRef.value?.fields ?? []) as { type: string; label: string; required?: boolean }[]
+  return fields.every((f, idx) => !f.required || (formAnswers[idx] ?? '').trim() !== '')
+})
+
+async function handleFormSubmit() {
+  accionLoading.value = true
+  try {
+    const fields = (actionRef.value?.fields ?? []) as { label?: string; question?: string }[]
+    // Build answers keyed by question/label
+    const answers: Record<string, string> = {}
+    fields.forEach((f, idx) => { answers[f.question || f.label || `field_${idx}`] = formAnswers[idx] ?? '' })
+
+    // Save form submission
+    await client.from('form_submissions').insert({
+      form_id: actionPayload.value?.form_id,
+      user_id: user.value!.id,
+      answers,
+    })
+
+    // Mark acción as done
+    await client.from('daily_checkins').insert({
+      date: today,
+      user_id: user.value!.id,
+      type: 'accion',
+      payload: { outcome: 'done', daily_plan_id: dailyPlanData.value?.id ?? null },
+    })
+    accionSuccess.value = true
+    await refreshAccion()
+    await maybeUpdateStreak()
+  } catch {
+    toast.show('Error al guardar', 'error')
   } finally {
     accionLoading.value = false
   }
@@ -585,6 +791,8 @@ function closeAccionSheet() {
     accionChoice.value = null
     accionSuccess.value = false
     showShareBadge.value = false
+    // Reset form answers
+    Object.keys(formAnswers).forEach(k => delete formAnswers[Number(k)])
   }, 400)
 }
 </script>
@@ -973,6 +1181,10 @@ function closeAccionSheet() {
   color: var(--color-text);
   margin: 0 0 var(--space-1);
   line-height: var(--leading-snug);
+}
+.hoy__featured-name--done {
+  text-decoration: line-through;
+  opacity: 0.5;
 }
 
 .hoy__featured-desc {
@@ -1477,6 +1689,36 @@ function closeAccionSheet() {
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
   line-height: var(--leading-snug);
+}
+
+/* ─── Form fields ─── */
+.hoy__form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.hoy__form-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: rgba(var(--tint-inverse-rgb), 0.7);
+  margin-bottom: var(--space-2);
+  display: block;
+}
+.hoy__form-rating-stars {
+  display: flex;
+  gap: var(--space-2);
+}
+.hoy__form-rating-star {
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  color: rgba(var(--tint-inverse-rgb), 0.2);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.hoy__form-rating-star--active {
+  color: var(--color-sand);
 }
 
 /* ─── Transitions ─── */

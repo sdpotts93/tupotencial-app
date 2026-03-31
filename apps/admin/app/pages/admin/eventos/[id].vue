@@ -115,6 +115,7 @@
       <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -131,8 +132,10 @@ const isNew = id === 'new'
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
 const isDragging = ref(false)
+const toast = useToast()
 const saving = ref(false)
 const deleting = ref(false)
+const formError = ref('')
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -216,6 +219,7 @@ const statusOptions = [
 ]
 
 async function handleSave() {
+  formError.value = ''
   saving.value = true
   try {
     const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
@@ -246,6 +250,9 @@ async function handleSave() {
       }).eq('id', id)
     }
     navigateTo('/admin/eventos')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -259,6 +266,8 @@ async function handleDelete() {
     try {
       await client.from('events').delete().eq('id', id)
       navigateTo('/admin/eventos')
+    } catch {
+      toast.show('Error al eliminar', 'error')
     } finally {
       deleting.value = false
     }
@@ -428,5 +437,13 @@ async function handleDelete() {
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

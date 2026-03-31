@@ -19,28 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-interface Toast {
-  id: number
-  message: string
-  type: 'success' | 'error' | 'info' | 'warning'
-}
-
-const toasts = ref<Toast[]>([])
-let nextId = 0
-
-function show(message: string, type: Toast['type'] = 'info', duration = 3500) {
-  const id = nextId++
-  toasts.value.push({ id, message, type })
-  setTimeout(() => dismiss(id), duration)
-}
-
-function dismiss(id: number) {
-  toasts.value = toasts.value.filter(t => t.id !== id)
-}
-
-defineExpose({ show })
+const { toasts, dismiss } = useToast()
 </script>
 
 <style scoped>
@@ -52,8 +31,13 @@ defineExpose({ show })
   z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-2);
   pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .toast { max-width: 500px; }
 }
 
 @media (max-width: 1023px) {
@@ -79,7 +63,7 @@ defineExpose({ show })
 .toast--info { background: var(--color-primary); color: var(--color-primary-contrast); }
 .toast--warning { background: var(--color-warning); color: var(--color-white); }
 
-.toast__message { flex: 1; }
+.toast__message { flex: 1; text-align: center; }
 
 .toast__dismiss {
   display: flex;

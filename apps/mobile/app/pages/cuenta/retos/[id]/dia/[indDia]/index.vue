@@ -172,6 +172,7 @@ function formatDuration(seconds: number | null) {
 const route = useRoute()
 const { user } = useAuth()
 const client = useSupabaseClient()
+const toast = useToast()
 const programId = route.params.id as string
 const dayIndex = route.params.indDia as string
 
@@ -312,6 +313,8 @@ async function handleFormSubmit() {
 
     formSuccess.value = true
     if (formAct) formAct.done = true
+  } catch {
+    toast.show('Error al guardar', 'error')
   } finally {
     formLoading.value = false
   }

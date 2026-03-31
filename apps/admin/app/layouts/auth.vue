@@ -15,6 +15,7 @@
     <div class="auth-layout__content">
       <slot />
     </div>
+    <UiToast />
   </div>
 </template>
 

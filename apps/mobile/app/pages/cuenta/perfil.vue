@@ -32,6 +32,7 @@
           <form class="profile__form" @submit.prevent="handleSave">
             <UiInput v-model="displayName" label="Nombre" placeholder="Tu nombre" />
             <UiSelect v-model="segment" label="Comunidad" :options="segmentOptions" />
+            <p v-if="formError" class="form-error">{{ formError }}</p>
             <UiButton type="submit" block variant="secondary" :loading="saving">Guardar cambios</UiButton>
           </form>
         </div>
@@ -88,10 +89,12 @@ definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
 const { user, isSubscriber, updateProfile, setSegment } = useAuth()
+const toast = useToast()
 
 const displayName = ref(user.value?.display_name || '')
 const segment = ref(user.value?.community_segment || '')
 const saving = ref(false)
+const formError = ref('')
 
 const segmentOptions = [
   { value: 'gabriel', label: 'Gabriel' },
@@ -119,10 +122,15 @@ const { data: vipAccesos } = await useAsyncData('profile-vip-accesos', async () 
 }, { watch: [() => user.value?.id] })
 
 async function handleSave() {
+  formError.value = ''
   saving.value = true
   try {
     await updateProfile({ display_name: displayName.value })
     if (segment.value) await setSegment(segment.value as any)
+    toast.show('Perfil actualizado', 'success')
+  } catch (err) {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -134,6 +142,12 @@ function handleManageSub() {
 </script>
 
 <style scoped>
+.form-error {
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+}
+
 /* ─── Header (standard) ─── */
 .profile__header {
   display: flex;

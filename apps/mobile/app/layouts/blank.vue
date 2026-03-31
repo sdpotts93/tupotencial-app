@@ -19,6 +19,7 @@
     </header>
 
     <slot />
+    <UiToast />
   </div>
 </template>
 

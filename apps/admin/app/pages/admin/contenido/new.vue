@@ -155,6 +155,7 @@
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/contenido">Cancelar</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -163,11 +164,13 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const toast = useToast()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
 const saving = ref(false)
+const formError = ref('')
 
 const form = reactive({
   title: '',
@@ -294,6 +297,7 @@ function formatFileSize(bytes: number): string {
 
 async function handleSave() {
   saving.value = true
+  formError.value = ''
   try {
     const payload = {
       title: form.title,
@@ -315,6 +319,9 @@ async function handleSave() {
       await client.from('content_item_categories').insert({ content_item_id: inserted.id, category_id: form.category_id })
     }
     navigateTo('/admin/contenido')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -444,5 +451,13 @@ async function handleSave() {
   .form-layout {
     grid-template-columns: 1fr;
   }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

@@ -75,6 +75,7 @@ definePageMeta({ layout: 'blank' })
 const route = useRoute()
 const client = useSupabaseClient()
 const { user } = useAuth()
+const toast = useToast()
 const postId = route.params.id as string
 
 function formatTimeAgo(dateStr: string) {
@@ -167,6 +168,8 @@ async function submitComment() {
     })
     newComment.value = ''
     await refreshComments()
+  } catch {
+    toast.show('Error al publicar comentario', 'error')
   } finally {
     submitting.value = false
   }

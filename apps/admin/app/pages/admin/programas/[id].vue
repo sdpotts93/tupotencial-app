@@ -181,6 +181,7 @@
       <UiButton v-if="activeTab === 'info'" variant="soft" size="sm" @click="activeTab = 'days'">Siguiente</UiButton>
       <UiButton v-if="activeTab === 'days'" variant="soft" size="sm" @click="activeTab = 'info'">Atrás</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -190,11 +191,13 @@ definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const client = useSupabaseClient()
+const toast = useToast()
 const id = route.params.id as string
 const isNew = id === 'new'
 const activeTab = ref('info')
 const saving = ref(false)
 const deleting = ref(false)
+const formError = ref('')
 
 const tabs = [
   { value: 'info', label: '1. Información' },
@@ -414,11 +417,13 @@ async function handleSave() {
       day.activities.some(a => a.type === 'contenido' && contentEntitlementMap.value[a.content_id]),
     )
     if (hasConflict) {
-      alert('No se puede guardar: hay contenido que requiere un complemento pero el programa no tiene restricción. Asigna un complemento al programa o cambia el contenido.')
+      formError.value = 'No se puede guardar: hay contenido que requiere un complemento pero el programa no tiene restricción.'
+      toast.show('No se puede guardar: contenido requiere complemento', 'error')
       return
     }
   }
 
+  formError.value = ''
   saving.value = true
   try {
     const programPayload = {
@@ -474,6 +479,9 @@ async function handleSave() {
   }
 
     navigateTo('/admin/programas')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -492,6 +500,8 @@ async function handleDelete() {
       }
       await client.from('programs').delete().eq('id', id)
       navigateTo('/admin/programas')
+    } catch {
+      toast.show('Error al eliminar', 'error')
     } finally {
       deleting.value = false
     }
@@ -731,5 +741,13 @@ async function handleDelete() {
 
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

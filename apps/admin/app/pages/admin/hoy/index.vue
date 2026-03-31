@@ -266,7 +266,6 @@
       <UiButton variant="primary-outline" size="sm" :loading="savingConfig" @click="handleSaveConfig">Guardar configuración</UiButton>
     </div>
 
-    <UiToast ref="toastRef" />
   </div>
 </template>
 
@@ -397,7 +396,7 @@ const yearMonths = computed(() => {
 
 // ── Save all config ──
 const savingConfig = ref(false)
-const toastRef = ref<{ show: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void } | null>(null)
+const toast = useToast()
 
 async function handleSaveConfig() {
   savingConfig.value = true
@@ -422,9 +421,9 @@ async function handleSaveConfig() {
       },
     ])
     if (error) throw error
-    toastRef.value?.show('Configuración guardada correctamente', 'success')
+    toast.show('Configuración guardada correctamente', 'success')
   } catch {
-    toastRef.value?.show('Error al guardar la configuración', 'error')
+    toast.show('Error al guardar la configuración', 'error')
   } finally {
     savingConfig.value = false
   }

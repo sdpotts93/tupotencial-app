@@ -17,7 +17,7 @@
       <p class="chat__disclaimer">No es consejo médico/terapéutico.</p>
 
       <!-- Messages (comment-style) -->
-      <div class="chat__messages">
+      <div ref="messagesRef" class="chat__messages">
         <div
           v-for="msg in messages"
           :key="msg.id"
@@ -127,6 +127,37 @@ const inputText = ref('')
 const error = ref(false)
 const lastFailedMessage = ref('')
 
+// ─── Auto-scroll ───
+const messagesRef = ref<HTMLElement | null>(null)
+const userScrolledUp = ref(false)
+
+function scrollToBottom() {
+  if (userScrolledUp.value) return
+  nextTick(() => {
+    const el = messagesRef.value
+    if (!el) return
+    // Scroll the nearest scrollable parent (screen__content on desktop, window on mobile)
+    const scrollParent = el.closest('.screen__content') as HTMLElement | null
+    if (scrollParent && scrollParent.scrollHeight > scrollParent.clientHeight) {
+      scrollParent.scrollTop = scrollParent.scrollHeight
+    } else {
+      window.scrollTo({ top: document.body.scrollHeight })
+    }
+  })
+}
+
+function onMessagesScroll() {
+  if (!generating.value) return
+  const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
+  if (scrollParent && scrollParent.scrollHeight > scrollParent.clientHeight) {
+    const distFromBottom = scrollParent.scrollHeight - scrollParent.scrollTop - scrollParent.clientHeight
+    userScrolledUp.value = distFromBottom > 100
+  } else {
+    const distFromBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight
+    userScrolledUp.value = distFromBottom > 100
+  }
+}
+
 // ─── Typewriter effect ───
 const typewriterBuffer = ref('')
 const typewriterTarget = ref<ChatMessage | null>(null)
@@ -149,6 +180,7 @@ function drainTypewriter() {
   typewriterBuffer.value = typewriterBuffer.value.slice(chars)
   if (typewriterTarget.value) {
     typewriterTarget.value.content += chunk
+    scrollToBottom()
   }
   typewriterTimer = setTimeout(drainTypewriter, TYPE_SPEED)
 }
@@ -165,8 +197,22 @@ function flushTypewriter() {
   typewriterTarget.value = null
 }
 
+onMounted(() => {
+  // Listen for scroll to detect user scrolling up during streaming
+  const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
+  if (scrollParent && scrollParent.scrollHeight > scrollParent.clientHeight) {
+    scrollParent.addEventListener('scroll', onMessagesScroll, { passive: true })
+  } else {
+    window.addEventListener('scroll', onMessagesScroll, { passive: true })
+  }
+  scrollToBottom()
+})
+
 onBeforeUnmount(() => {
   if (typewriterTimer) clearTimeout(typewriterTimer)
+  const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
+  if (scrollParent) scrollParent.removeEventListener('scroll', onMessagesScroll)
+  window.removeEventListener('scroll', onMessagesScroll)
 })
 
 const quickPrompts = ['¿Qué hago hoy?', 'Ayúdame a reflexionar', 'Plan de 5 minutos']
@@ -230,6 +276,11 @@ async function sendMessage(text?: string) {
   error.value = false
   lastFailedMessage.value = ''
 
+  // Flag AI coach usage for Hoy acción auto-complete
+  const todayLocal = new Date()
+  const todayStr = `${todayLocal.getFullYear()}-${String(todayLocal.getMonth() + 1).padStart(2, '0')}-${String(todayLocal.getDate()).padStart(2, '0')}`
+  localStorage.setItem(`hoy-ai-done-${todayStr}`, 'true')
+
   // Add user message to UI immediately
   messages.value.push({
     id: `temp-${Date.now()}`,
@@ -240,6 +291,8 @@ async function sendMessage(text?: string) {
   inputText.value = ''
   generating.value = true
   streamingStarted.value = false
+  userScrolledUp.value = false
+  scrollToBottom()
 
   // Placeholder for streaming assistant response — must be reactive for Vue to track content mutations
   const assistantMsg = reactive<ChatMessage>({ id: '', role: 'assistant', content: '', time: formatTime() })

@@ -112,6 +112,7 @@
       <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/comunidad">Volver</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">{{ form.status === 'draft' ? 'Guardar' : 'Publicar' }}</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -123,8 +124,10 @@ const route = useRoute()
 const client = useSupabaseClient()
 const id = route.params.id as string
 const isNew = id === 'new'
+const toast = useToast()
 const saving = ref(false)
 const deleting = ref(false)
+const formError = ref('')
 
 // ── Fetch existing post ──
 const { data: post } = await useAsyncData(`post-${id}`, async () => {
@@ -233,6 +236,7 @@ async function hideComment(comment: any) {
 }
 
 async function handleSave() {
+  formError.value = ''
   saving.value = true
   try {
     const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
@@ -251,6 +255,9 @@ async function handleSave() {
       await client.from('posts').update(payload).eq('id', id)
     }
     navigateTo('/admin/comunidad')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -264,6 +271,8 @@ async function handleDelete() {
     try {
       await client.from('posts').delete().eq('id', id)
       navigateTo('/admin/comunidad')
+    } catch {
+      toast.show('Error al eliminar', 'error')
     } finally {
       deleting.value = false
     }
@@ -471,5 +480,13 @@ async function handleDelete() {
 
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

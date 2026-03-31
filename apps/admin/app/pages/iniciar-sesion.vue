@@ -86,6 +86,7 @@
 definePageMeta({ layout: 'auth' })
 
 const { login, isLoading, isAuthenticated } = useAdminAuth()
+const toast = useToast()
 
 const sheetOpen = ref(false)
 const email = ref('')
@@ -121,6 +122,7 @@ async function handleLogin() {
     navigateTo('/admin')
   } else {
     loginError.value = 'Credenciales incorrectas'
+    toast.show('Credenciales incorrectas', 'error')
   }
 }
 </script>

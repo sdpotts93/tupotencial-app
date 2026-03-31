@@ -81,6 +81,7 @@
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/formularios">Cancelar</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -89,7 +90,9 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const toast = useToast()
 const saving = ref(false)
+const formError = ref('')
 
 // ── Form state ──
 const form = reactive({
@@ -141,6 +144,7 @@ function localFieldsToDb(localFields: FormField[]) {
 }
 
 async function handleSave() {
+  formError.value = ''
   saving.value = true
   try {
     const payload = {
@@ -152,6 +156,9 @@ async function handleSave() {
 
     await client.from('forms').insert(payload)
     navigateTo('/admin/formularios')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -232,5 +239,13 @@ async function handleSave() {
 
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

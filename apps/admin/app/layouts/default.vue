@@ -76,6 +76,7 @@
     </div>
 
     <UiConfirmModal />
+    <UiToast />
   </div>
 </template>
 

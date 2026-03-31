@@ -78,6 +78,7 @@
     </div>
 
     <div class="page-actions">
+      <p v-if="formError" class="form-error">{{ formError }}</p>
       <UiButton variant="soft" size="sm" to="/admin/hoy">Cancelar</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
     </div>
@@ -89,8 +90,10 @@ definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const client = useSupabaseClient()
+const toast = useToast()
 const dateParam = computed(() => route.params.date as string)
 const saving = ref(false)
+const formError = ref('')
 
 // ── Fetch existing daily plan for this date ──
 const { data: existingPlan } = await useAsyncData(`daily-plan-${dateParam.value}`, async () => {
@@ -156,6 +159,7 @@ function formatDate(iso: string) {
 
 async function handleSave() {
   saving.value = true
+  formError.value = ''
   try {
     const actionPayload: Record<string, any> = {
       quote_text: form.phrase_text,
@@ -184,6 +188,9 @@ async function handleSave() {
       await client.from('daily_plans').insert(payload)
     }
     navigateTo('/admin/hoy')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -215,4 +222,11 @@ async function handleSave() {
   line-height: var(--leading-normal);
 }
 
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
+}
 </style>

@@ -105,7 +105,8 @@
 
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/complementos">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">Guardar</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -114,6 +115,9 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const toast = useToast()
+const formError = ref('')
+const saving = ref(false)
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -167,18 +171,27 @@ const statusOptions = [
 ]
 
 async function handleSave() {
-  const payload = {
-    title: form.title,
-    description: form.description || null,
-    price: Math.round(Number(form.price) * 100),
-    plan: form.plan,
-    grants_core_months: form.grants_core_months ? Number(form.grants_core_months) : null,
-    stripe_price_id: form.stripe_price_id || null,
-    status: form.status,
-  }
+  formError.value = ''
+  saving.value = true
+  try {
+    const payload = {
+      title: form.title,
+      description: form.description || null,
+      price: Math.round(Number(form.price) * 100),
+      plan: form.plan,
+      grants_core_months: form.grants_core_months ? Number(form.grants_core_months) : null,
+      stripe_price_id: form.stripe_price_id || null,
+      status: form.status,
+    }
 
-  await client.from('addons').insert(payload)
-  navigateTo('/admin/complementos')
+    await client.from('addons').insert(payload)
+    navigateTo('/admin/complementos')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 
@@ -301,5 +314,13 @@ async function handleSave() {
 
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

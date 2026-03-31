@@ -82,6 +82,7 @@ definePageMeta({ layout: 'auth' })
 
 const client = useSupabaseClient()
 const { updateProfile, user } = useAuth()
+const toast = useToast()
 
 const displayName = ref(user.value?.display_name || '')
 const avatarUrl = ref(user.value?.avatar_url || '')
@@ -131,6 +132,7 @@ async function handleFileSelect(e: Event) {
   } catch (err) {
     console.error('Avatar upload error:', err)
     error.value = 'No se pudo subir la imagen'
+    toast.show('Error al guardar', 'error')
   } finally {
     uploading.value = false
     // Reset input so the same file can be re-selected

@@ -115,6 +115,14 @@ function openLink() {
     window.open(content.value.externalUrl, '_blank', 'noopener')
   }
 }
+
+// Flag article as viewed for Hoy acción auto-complete (video/audio flagged on reproducir page)
+onMounted(() => {
+  if (content.value.type === 'article') {
+    const today = new Date().toISOString().slice(0, 10)
+    localStorage.setItem(`hoy-content-done-${today}`, id)
+  }
+})
 </script>
 
 <style scoped>

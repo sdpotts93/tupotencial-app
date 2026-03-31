@@ -101,6 +101,7 @@
 definePageMeta({ layout: 'auth' })
 
 const { register } = useAuth()
+const toast = useToast()
 
 const showSheet = ref(true)
 const email = ref('')
@@ -144,8 +145,10 @@ async function handleRegister() {
   try {
     await register(email.value, password.value)
     navigateTo('/configurar-perfil')
-  } catch {
-    errors.email = 'Error al crear la cuenta'
+  } catch (err: any) {
+    const msg = err?.code === 'user_already_exists' ? 'Tu usuario ya está registrado' : 'Error al crear la cuenta'
+    errors.email = msg
+    toast.show(msg, 'error')
   } finally {
     loading.value = false
   }

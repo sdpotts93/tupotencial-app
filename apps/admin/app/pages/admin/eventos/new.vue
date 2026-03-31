@@ -129,6 +129,7 @@
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -137,7 +138,9 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const toast = useToast()
 const saving = ref(false)
+const formError = ref('')
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -216,6 +219,7 @@ const statusOptions = [
 ]
 
 async function handleSave() {
+  formError.value = ''
   saving.value = true
   try {
     const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
@@ -231,6 +235,9 @@ async function handleSave() {
       status: form.status,
     })
     navigateTo('/admin/eventos')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -392,5 +399,13 @@ async function handleSave() {
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

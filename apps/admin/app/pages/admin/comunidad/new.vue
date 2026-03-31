@@ -91,7 +91,8 @@
 
     <div class="page-actions">
       <UiButton variant="soft" size="sm" to="/admin/comunidad">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" @click="handleSave">{{ form.status === 'draft' ? 'Guardar' : 'Publicar' }}</UiButton>
+      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">{{ form.status === 'draft' ? 'Guardar' : 'Publicar' }}</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -100,6 +101,9 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const toast = useToast()
+const saving = ref(false)
+const formError = ref('')
 
 const form = reactive({
   title: '',
@@ -157,17 +161,26 @@ function formatFileSize(bytes: number): string {
 }
 
 async function handleSave() {
-  const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
-  const payload = {
-    title: form.title || null,
-    body: form.body,
-    status: form.status,
-    community_segment: communitySegment,
-    is_official: true,
-  }
+  formError.value = ''
+  saving.value = true
+  try {
+    const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
+    const payload = {
+      title: form.title || null,
+      body: form.body,
+      status: form.status,
+      community_segment: communitySegment,
+      is_official: true,
+    }
 
-  await client.from('posts').insert(payload)
-  navigateTo('/admin/comunidad')
+    await client.from('posts').insert(payload)
+    navigateTo('/admin/comunidad')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 
@@ -316,5 +329,13 @@ async function handleSave() {
 
 @media (max-width: 768px) {
   .form-layout { grid-template-columns: 1fr; }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

@@ -22,6 +22,22 @@
         <p class="progress__hero-sub">Tu mejor racha: {{ bestStreak }} días</p>
       </div>
 
+      <!-- Share today's badge (when both retos completed) -->
+      <section v-if="dayComplete" class="progress__share">
+        <UiButton block variant="outline" @click="showShareBadge = true">
+          <template #icon><Icon name="lucide:share-2" size="18" /></template>
+          Compartir logro de hoy
+        </UiButton>
+        <ShareBadge
+          v-model="showShareBadge"
+          eyebrow="ACCIÓN DEL DÍA"
+          :action-title="badgeTitle"
+          :streak-count="currentStreak"
+          :share-text="badgeSubtitle"
+          outcome="done"
+        />
+      </section>
+
       <!-- Stats -->
       <section class="progress__stats">
         <div class="progress__stat">
@@ -80,7 +96,7 @@ const bestStreak = computed(() => streakData.value?.best_streak ?? 0)
 
 const { data: totalCheckins } = await useAsyncData('mobile-total-checkins', async () => {
   if (!user.value?.id) return 0
-  const { count } = await client.from('daily_checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.value.id)
+  const { count } = await client.from('daily_checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.value.id).eq('type', 'checkin')
   return count ?? 0
 }, { watch: [() => user.value?.id] })
 
@@ -121,6 +137,30 @@ const { data: activeEnrollments } = await useAsyncData('mobile-active-programs',
 const activeProgramsCount = computed(() => activeEnrollments.value?.length ?? 0)
 
 const activePrograms = computed(() => activeEnrollments.value ?? [])
+
+// ─── Today's completion check ───
+const now = new Date()
+const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+const { data: todayRetos } = await useAsyncData('mobile-today-retos', async () => {
+  if (!user.value?.id) return { checkin: false, accion: false }
+  const { data } = await client.from('daily_checkins').select('type').eq('user_id', user.value.id).eq('date', today)
+  const types = (data ?? []).map(r => r.type)
+  return { checkin: types.includes('checkin'), accion: types.includes('accion') }
+}, { watch: [() => user.value?.id] })
+
+const dayComplete = computed(() => todayRetos.value?.checkin && todayRetos.value?.accion)
+const showShareBadge = ref(false)
+
+// Badge info from hoy page data
+const { data: hoyPage } = await useAsyncData('progreso-hoy-page', async () => {
+  const { data } = await client.rpc('get_hoy_page', { p_date: today })
+  return data as { settings: Record<string, any>; daily_plan: Record<string, any> | null } | null
+})
+
+const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
+const badgeTitle = computed(() => hoyPage.value?.daily_plan?.title || hoyDefaults.value.badge_title || 'Día completado')
+const badgeSubtitle = computed(() => hoyPage.value?.daily_plan?.message || hoyDefaults.value.badge_subtitle || null)
 
 // Content viewed count (count content_item_categories or benefit_clicks as a proxy; fallback to 0)
 const { data: contentViewed } = await useAsyncData('mobile-content-viewed', async () => {
@@ -219,6 +259,11 @@ const { data: contentViewed } = await useAsyncData('mobile-content-viewed', asyn
   font-size: var(--text-sm);
   color: var(--color-muted);
   margin-top: var(--space-1);
+}
+
+/* ─── Share CTA ─── */
+.progress__share {
+  margin-bottom: var(--space-6);
 }
 
 /* ─── Stats ─── */
@@ -327,6 +372,14 @@ const { data: contentViewed } = await useAsyncData('mobile-content-viewed', asyn
 
 /* ─── Desktop ─── */
 @media (min-width: 1024px) {
+  .progress__share {
+    display: flex;
+    justify-content: center;
+  }
+  .progress__share :deep(.btn--block) {
+    width: fit-content;
+  }
+
   .progress__stats {
     gap: var(--space-4);
   }

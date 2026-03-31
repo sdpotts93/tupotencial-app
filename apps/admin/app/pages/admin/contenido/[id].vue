@@ -163,6 +163,7 @@
       <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
       <UiButton variant="soft" size="sm" to="/admin/contenido">Cancelar</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
     </div>
   </div>
 </template>
@@ -175,11 +176,14 @@ const client = useSupabaseClient()
 const id = route.params.id as string
 const isNew = id === 'new'
 
+const toast = useToast()
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
+const formError = ref('')
 
 // ── Fetch existing content item + junction category ──
 const { data: contentItem } = await useAsyncData(`content-${id}`, async () => {
@@ -327,6 +331,7 @@ function formatFileSize(bytes: number): string {
 
 async function handleSave() {
   saving.value = true
+  formError.value = ''
   try {
     const payload = {
       title: form.title,
@@ -358,6 +363,9 @@ async function handleSave() {
       }
     }
     navigateTo('/admin/contenido')
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -376,6 +384,8 @@ async function handleDelete() {
       await client.from('content_item_categories').delete().eq('content_item_id', id)
       await client.from('content_items').delete().eq('id', id)
       navigateTo('/admin/contenido')
+    } catch {
+      toast.show('Error al eliminar', 'error')
     } finally {
       deleting.value = false
     }
@@ -511,5 +521,13 @@ async function handleDelete() {
   .form-layout {
     grid-template-columns: 1fr;
   }
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

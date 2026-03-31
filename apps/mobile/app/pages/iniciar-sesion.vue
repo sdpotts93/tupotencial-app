@@ -170,6 +170,7 @@
 definePageMeta({ layout: 'auth' })
 
 const { login, register, user } = useAuth()
+const toast = useToast()
 
 // ─── Organic blob (noise-driven, never repeats) ───
 const blobRef = ref<HTMLElement | null>(null)
@@ -285,6 +286,7 @@ async function handleLogin() {
     }
   } catch {
     loginErrors.value.email = 'Correo o contraseña incorrectos'
+    toast.show('Correo o contraseña incorrectos', 'error')
   } finally {
     loginLoading.value = false
   }
@@ -301,9 +303,11 @@ async function handleRegister() {
     await register(regEmail.value, regPassword.value)
     console.log('Register success, navigating to /configurar-perfil')
     navigateTo('/configurar-perfil')
-  } catch (err) {
+  } catch (err: any) {
     console.error('Register error:', err)
-    regErrors.email = 'Error al crear la cuenta'
+    const msg = err?.code === 'user_already_exists' ? 'Tu usuario ya está registrado' : 'Error al crear la cuenta'
+    regErrors.email = msg
+    toast.show(msg, 'error')
   } finally {
     regLoading.value = false
   }

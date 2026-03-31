@@ -1,7 +1,24 @@
 <template>
-  <div class="player" @click="toggleControls">
-    <!-- Video element -->
+  <div class="player" :class="{ 'player--audio': isAudio }" @click="toggleControls">
+    <!-- Audio mode: cover image + hidden audio element -->
+    <template v-if="isAudio">
+      <img :src="content.thumbnail" alt="" class="player__cover" />
+      <audio
+        ref="videoRef"
+        :src="content.mediaUrl"
+        preload="metadata"
+        @loadedmetadata="onLoadedMetadata"
+        @timeupdate="onTimeUpdate"
+        @ended="onEnded"
+        @waiting="isBuffering = true"
+        @canplay="isBuffering = false"
+        @play="isPlaying = true"
+        @pause="isPlaying = false"
+      />
+    </template>
+    <!-- Video mode -->
     <video
+      v-else
       ref="videoRef"
       class="player__video"
       :src="content.mediaUrl"
@@ -115,7 +132,7 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null
 const { data: contentData } = await useAsyncData(`content-player-${contentId}`, async () => {
   const { data } = await client
     .from('content_items')
-    .select('id, title, subtitle, type, duration_seconds, media_url')
+    .select('id, title, subtitle, type, duration_seconds, media_url, thumbnail_url')
     .eq('id', contentId)
     .single()
   if (!data) return null
@@ -127,6 +144,8 @@ const { data: contentData } = await useAsyncData(`content-player-${contentId}`, 
     title: data.title,
     subtitle: [typeLabel, durationLabel].filter(Boolean).join(' \u2022 '),
     mediaUrl: data.media_url ?? '/videos/helmet-short-coded.mp4',
+    type: data.type as 'video' | 'audio',
+    thumbnail: data.thumbnail_url ?? '/images/lib-1.jpg',
   }
 })
 
@@ -134,7 +153,11 @@ const content = computed(() => contentData.value ?? {
   title: '',
   subtitle: '',
   mediaUrl: '/videos/helmet-short-coded.mp4',
+  type: 'video' as const,
+  thumbnail: '/images/lib-1.jpg',
 })
+
+const isAudio = computed(() => content.value.type === 'audio')
 
 // ── Computed ──
 const progressPercent = computed(() =>
@@ -196,7 +219,7 @@ function onEnded() {
 function resetHideTimer() {
   if (hideTimer) clearTimeout(hideTimer)
   controlsVisible.value = true
-  if (isPlaying.value) {
+  if (isPlaying.value && !isAudio.value) {
     hideTimer = setTimeout(() => {
       controlsVisible.value = false
     }, 3000)
@@ -204,6 +227,8 @@ function resetHideTimer() {
 }
 
 function toggleControls() {
+  // Audio mode: controls always visible
+  if (isAudio.value) return
   if (controlsVisible.value) {
     controlsVisible.value = false
     if (hideTimer) clearTimeout(hideTimer)
@@ -252,6 +277,10 @@ function onProgressTouchEnd() {
 
 // ── Lifecycle ──
 onMounted(() => {
+  // Flag content as played for Hoy acción auto-complete
+  const today = new Date().toISOString().slice(0, 10)
+  localStorage.setItem(`hoy-content-done-${today}`, contentId)
+
   const video = videoRef.value
   if (!video) return
 
@@ -260,8 +289,13 @@ onMounted(() => {
     duration.value = video.duration
   }
 
+  // Audio mode: keep controls always visible
+  if (isAudio.value) {
+    controlsVisible.value = true
+  }
+
   video.play()
-    .then(() => resetHideTimer())
+    .then(() => { if (!isAudio.value) resetHideTimer() })
     .catch(() => {
       // Autoplay blocked — keep controls visible
       isPlaying.value = false
@@ -295,6 +329,18 @@ onBeforeUnmount(() => {
   max-width: none;
   object-fit: contain;
 }
+
+/* ─── Audio mode: cover image ─── */
+.player__cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(20px) brightness(0.4);
+  transform: scale(1.1);
+}
+.player--audio .player__scrims { display: none; }
 
 /* ─── Gradient scrims ─── */
 .player__scrims {

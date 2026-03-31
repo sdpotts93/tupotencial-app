@@ -49,6 +49,7 @@ definePageMeta({ layout: 'blank' })
 
 const client = useSupabaseClient()
 const { user } = useAuth()
+const toast = useToast()
 
 const selectedMood = ref<string | null>(null)
 const reflection = ref('')
@@ -85,6 +86,8 @@ async function handleSubmit() {
       payload: { mood: selectedMood.value, reflection: reflection.value },
     })
     showSuccess.value = true
+  } catch {
+    toast.show('Error al guardar', 'error')
   } finally {
     loading.value = false
   }

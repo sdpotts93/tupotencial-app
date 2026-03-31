@@ -86,6 +86,7 @@
           :options="roleOptions"
         />
       </div>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showEditModal = false">Cancelar</UiButton>
@@ -115,6 +116,7 @@
         />
       </div>
       <p v-if="inviteError" class="invite-error">{{ inviteError }}</p>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showInviteModal = false">Cancelar</UiButton>
@@ -131,6 +133,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const toast = useToast()
 const { canManageRoles } = useAdminAuth()
 
 const showInviteModal = ref(false)
@@ -139,6 +142,7 @@ const search = ref('')
 const editingId = ref<string | null>(null)
 
 const editSaving = ref(false)
+const formError = ref('')
 
 const editForm = reactive({
   full_name: '',
@@ -241,13 +245,18 @@ function editAdmin(row: Record<string, any>) {
 async function saveEdit() {
   if (!editingId.value) return
   editSaving.value = true
+  formError.value = ''
   try {
     await client
       .from('admin_users')
       .update({ role: editForm.role })
       .eq('id', editingId.value)
+    toast.show('Cambios guardados', 'success')
     showEditModal.value = false
     await refresh()
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     editSaving.value = false
   }
@@ -257,8 +266,12 @@ const confirm = useConfirm()
 
 async function deleteAdmin(row: Record<string, any>) {
   if (await confirm({ message: `¿Seguro que deseas eliminar a ${row.full_name}?` })) {
-    await client.from('admin_users').delete().eq('id', row.id)
-    await refresh()
+    try {
+      await client.from('admin_users').delete().eq('id', row.id)
+      await refresh()
+    } catch {
+      toast.show('Error al eliminar', 'error')
+    }
   }
 }
 
@@ -283,9 +296,11 @@ async function sendInvite() {
     inviteForm.email = ''
     inviteForm.full_name = ''
     inviteForm.role = 'editor'
+    toast.show('Invitación enviada', 'success')
     await refresh()
   } catch (err: any) {
     inviteError.value = err?.data?.message || 'Error al enviar la invitación'
+    toast.show('Error al guardar', 'error')
   } finally {
     inviteLoading.value = false
   }
@@ -387,5 +402,13 @@ async function sendInvite() {
   font-size: var(--text-sm);
   color: var(--color-danger);
   margin-top: var(--space-2);
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>

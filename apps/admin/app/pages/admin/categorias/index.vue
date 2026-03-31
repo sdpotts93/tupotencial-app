@@ -85,6 +85,7 @@
           :options="[{ value: 'true', label: 'Activa' }, { value: 'false', label: 'Inactiva' }]"
         />
       </div>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
       <template #footer>
         <div class="modal-actions">
           <UiButton variant="soft" size="sm" @click="showCreateModal = false">Cancelar</UiButton>
@@ -99,11 +100,14 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const toast = useToast()
 
 const showCreateModal = ref(false)
 const editingCategory = ref<Record<string, any> | null>(null)
 const saving = ref(false)
 const search = ref('')
+
+const formError = ref('')
 
 const categoryForm = reactive({
   name: '',
@@ -201,6 +205,7 @@ function editCategory(row: Record<string, any>) {
 
 async function saveCategory() {
   saving.value = true
+  formError.value = ''
   try {
     const slug = slugify(categoryForm.name)
     const isActive = categoryForm.is_active === 'true'
@@ -218,10 +223,14 @@ async function saveCategory() {
     }
 
     await refresh()
+    toast.show('Categoría guardada', 'success')
     showCreateModal.value = false
     editingCategory.value = null
     categoryForm.name = ''
     categoryForm.is_active = 'true'
+  } catch {
+    formError.value = 'Error al guardar. Intenta de nuevo.'
+    toast.show('Error al guardar', 'error')
   } finally {
     saving.value = false
   }
@@ -231,8 +240,12 @@ const confirm = useConfirm()
 
 async function handleDelete(row: Record<string, any>) {
   if (await confirm({ message: `¿Seguro que deseas eliminar "${row.name}"?` })) {
-    await client.from('content_categories').delete().eq('id', row.id)
-    await refresh()
+    try {
+      await client.from('content_categories').delete().eq('id', row.id)
+      await refresh()
+    } catch {
+      toast.show('Error al eliminar', 'error')
+    }
   }
 }
 </script>
@@ -373,5 +386,13 @@ async function handleDelete(row: Record<string, any>) {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
+}
+
+.form-error {
+  width: 100%;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-align: center;
+  order: -1;
 }
 </style>
