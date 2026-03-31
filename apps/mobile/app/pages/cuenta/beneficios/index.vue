@@ -10,7 +10,7 @@
         <h1 class="benefits__header-title">Beneficios</h1>
       </header>
 
-      <p class="benefits__intro">Alianzas y descuentos exclusivos de tu plan <strong>{{ planTitle }}</strong>.</p>
+      <p class="benefits__intro">Alianzas y descuentos exclusivos de tu plan <UiTag :variant="isSubscriber ? 'accent' : 'default'" size="sm">{{ planTitle }}</UiTag></p>
 
       <div class="benefits__list">
         <NuxtLink
@@ -110,6 +110,11 @@ const { data: benefits } = await useAsyncData('mobile-benefits', async () => {
   margin-bottom: var(--space-6);
   line-height: var(--leading-relaxed);
 }
+
+.benefits__intro strong {
+  font-weight: 500;    
+}
+
 
 /* ─── Card list ─── */
 .benefits__list {

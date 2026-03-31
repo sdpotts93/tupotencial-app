@@ -159,7 +159,7 @@ async function startCheckout() {
 
 .pricing__plan-price {
   font-size: var(--title-lg);
-  font-weight: var(--weight-bold);
+  font-weight: 500;
   color: var(--color-dark-lighter);
   margin-top: var(--space-2);
 }

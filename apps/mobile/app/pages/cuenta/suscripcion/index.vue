@@ -1,60 +1,59 @@
 <template>
-  <div class="screen">
+  <div class="pricing">
     <div class="screen__content">
-      <header class="sub__header">
-        <button class="sub__back" aria-label="Volver" @click="$router.back()">
+      <header class="pricing__header">
+        <button class="pricing__back" aria-label="Volver" @click="$router.back()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <h1 class="sub__header-title">Suscripción</h1>
+        <h1 class="pricing__header-title">Suscripción</h1>
       </header>
 
       <!-- Plans -->
-      <div class="sub__plans">
+      <div class="pricing__plans">
         <div
           v-for="plan in plans"
           :key="plan.id"
-          :class="['sub__plan', { 'sub__plan--current': plan.isCurrent, 'sub__plan--core': plan.id === 'core' }]"
+          :class="['pricing__plan', { 'pricing__plan--core': plan.id === 'core' }]"
         >
-          <div class="sub__plan-top">
-            <div class="sub__plan-name-row">
-              <h3 class="sub__plan-name">{{ plan.title }}</h3>
-              <UiTag v-if="plan.isCurrent" variant="success" size="sm">Tu plan</UiTag>
-            </div>
-            <p class="sub__plan-price">
-              <template v-if="plan.price === 0">Gratis</template>
-              <template v-else>
-                ${{ (plan.price / 100).toLocaleString('es-MX') }}
-                <span class="sub__plan-interval">MXN/{{ plan.interval === 'year' ? 'año' : 'mes' }}</span>
-              </template>
-            </p>
-            <p class="sub__plan-desc">{{ plan.description }}</p>
+          <div class="pricing__plan-header">
+            <h3 class="pricing__plan-name">{{ plan.title }}</h3>
+            <span v-if="plan.isCurrent" class="pricing__tag-current">TU PLAN</span>
+            <span v-else-if="plan.id === 'core'" class="pricing__tag-core">MÁS POPULAR</span>
           </div>
 
-          <!-- Benefits for this plan -->
-          <ul v-if="plan.benefits.length" class="sub__benefits">
+          <p class="pricing__plan-price">
+            <template v-if="plan.price === 0">$0 <span>MXN/mes</span></template>
+            <template v-else>${{ (plan.price / 100).toLocaleString('es-MX') }} <span>MXN/{{ plan.interval === 'year' ? 'año' : 'mes' }}</span></template>
+          </p>
+
+          <p class="pricing__plan-desc">{{ plan.description }}</p>
+
+          <!-- CTA -->
+          <template v-if="plan.isCurrent">
+            <UiButton variant="outline" block disabled>Plan actual</UiButton>
+          </template>
+          <template v-else-if="plan.id === 'core'">
+            <UiButton v-if="!isNative" block class="pricing__cta-core" :loading="checkoutLoading" @click="startCheckout">
+              Suscribirme a Core
+            </UiButton>
+            <p v-else class="pricing__native-note">Suscríbete desde tupotencial.com para acceder al plan Core.</p>
+          </template>
+          <template v-else>
+            <UiButton variant="outline" block disabled>Plan base</UiButton>
+          </template>
+
+          <div class="pricing__divider" />
+
+          <!-- Benefits from benefits table -->
+          <ul v-if="plan.benefits.length" class="pricing__features">
             <li v-for="b in plan.benefits" :key="b.id">{{ b.title }}</li>
           </ul>
-
-          <div class="sub__plan-action">
-            <template v-if="plan.isCurrent">
-              <p class="sub__plan-status">Activo</p>
-            </template>
-            <template v-else-if="plan.id === 'core'">
-              <UiButton v-if="!isNative" block :loading="checkoutLoading" @click="startCheckout">
-                Suscribirme a Core
-              </UiButton>
-              <p v-else class="sub__native-note">Suscríbete desde tupotencial.com para acceder al plan Core.</p>
-            </template>
-            <template v-else>
-              <p class="sub__plan-status sub__plan-status--muted">Plan base</p>
-            </template>
-          </div>
         </div>
       </div>
 
-      <p v-if="!isNative" class="sub__footer">
+      <p v-if="!isNative" class="pricing__note">
         Pago seguro con Stripe. Cancela en cualquier momento.
       </p>
     </div>
@@ -134,22 +133,25 @@ async function startCheckout() {
 </script>
 
 <style scoped>
+.pricing { }
+
 /* ─── Header ─── */
-.sub__header {
+.pricing__header {
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   margin-bottom: var(--space-6);
+  padding-top: var(--space-4);
 }
 
-.sub__header-title {
+.pricing__header-title {
   font-family: var(--font-eyebrow);
   font-size: 12px;
   text-transform: uppercase;
 }
 
-.sub__back {
+.pricing__back {
   position: absolute;
   left: 0;
   width: 36px;
@@ -165,120 +167,146 @@ async function startCheckout() {
   -webkit-tap-highlight-color: transparent;
 }
 @media (hover: hover) {
-  .sub__back:hover { background: rgba(var(--tint-rgb), 0.04); }
+  .pricing__back:hover { background: rgba(var(--tint-rgb), 0.04); }
 }
 
-/* ─── Plans ─── */
-.sub__plans {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+/* Plans grid */
+.pricing__plans {
+  display: flex; flex-direction: column; gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  max-width: 800px;
 }
 
-.sub__plan {
-  border: 1px solid var(--color-border);
+/* Base card */
+.pricing__plan {
+  background: var(--color-desktop-card);
+  color: var(--color-text);
   border-radius: var(--radius-xl);
-  padding: var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
 }
 
-.sub__plan--current {
-  border-color: var(--color-gold);
-  background: rgba(156, 135, 66, 0.04);
+/* Core featured card */
+.pricing__plan--core {
+  border: 2px solid var(--color-gold);
+  background-color: #fbfaf8;
 }
 
-.sub__plan-top {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.sub__plan-name-row {
+.pricing__plan-header {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.sub__plan-name {
+.pricing__plan-name {
   font-family: var(--font-title);
   font-size: var(--title-md);
+  margin: 0 0 var(--space-1);
 }
 
-.sub__plan-price {
+.pricing__plan-header .pricing__plan-name {
+  margin-bottom: 0;
+}
+
+.pricing__plan-price {
   font-size: var(--title-lg);
-  font-weight: var(--weight-bold);
+  font-weight: 500;
   color: var(--color-dark-lighter);
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
 }
 
-.sub__plan-interval {
+.pricing__plan-price span {
   font-size: var(--text-sm);
   font-weight: var(--weight-regular);
   color: var(--color-muted);
 }
 
-.sub__plan-desc {
+/* Short description */
+.pricing__plan-desc {
   font-size: var(--text-sm);
-  color: var(--color-muted);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
   line-height: var(--leading-relaxed);
-  margin-top: var(--space-1);
 }
 
-/* ─── Benefits ─── */
-.sub__benefits {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+/* Divider between CTA and features */
+.pricing__divider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: var(--space-4) 0;
 }
 
-.sub__benefits li {
+/* Tags */
+.pricing__tag-core {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  white-space: nowrap;
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
+}
+
+.pricing__tag-current {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  white-space: nowrap;
+  background: rgba(var(--color-mood-good-rgb), 0.15);
+  color: var(--color-complete);
+}
+
+/* Core CTA override */
+.pricing__cta-core {
+  background: var(--color-gold) !important;
+  color: #fff !important;
+}
+
+/* Feature list */
+.pricing__features {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: var(--space-2);
+}
+
+.pricing__features li {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   padding-left: var(--space-5);
   position: relative;
-  line-height: var(--leading-relaxed);
 }
 
-.sub__benefits li::before {
+.pricing__features li::before {
   content: '\2713';
   position: absolute;
   left: 0;
+  color: var(--color-dark-lighter);
   font-weight: var(--weight-bold);
 }
 
-.sub__plan--core .sub__benefits li::before {
+.pricing__plan--core .pricing__features li::before {
   color: var(--color-gold);
 }
 
-/* ─── Actions ─── */
-.sub__plan-action {
-  margin-top: auto;
-}
-
-.sub__plan-status {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-complete);
-  text-align: center;
-}
-
-.sub__plan-status--muted {
-  color: var(--color-muted);
-}
-
-.sub__native-note {
+.pricing__native-note {
   font-size: var(--text-sm);
   color: var(--color-muted);
   text-align: center;
   line-height: var(--leading-relaxed);
 }
 
-.sub__footer {
+.pricing__note {
   text-align: center;
   font-size: var(--text-xs);
   color: var(--color-muted);
@@ -286,29 +314,23 @@ async function startCheckout() {
   margin-top: var(--space-6);
 }
 
+@media (min-width: 768px) {
+  .pricing__plans {
+    flex-direction: row;
+    align-items: flex-start;
+    margin: 0 auto;
+  }
+
+  .pricing__plan { flex: 1; }
+}
+
 /* ─── Desktop ─── */
 @media (min-width: 1024px) {
-  .sub__header {
+  .pricing__header {
     justify-content: flex-start;
   }
 
-  .sub__header-title { display: none; }
-  .sub__back { display: none; }
-
-  .sub__plans {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
-    max-width: 800px;
-  }
-
-  .sub__plan {
-    background: var(--color-desktop-card);
-    border: 1px solid var(--color-desktop-border);
-  }
-
-  .sub__plan--current {
-    border-color: var(--color-gold);
-  }
+  .pricing__header-title { display: none; }
+  .pricing__back { display: none; }
 }
 </style>
