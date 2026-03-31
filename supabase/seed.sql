@@ -1232,6 +1232,17 @@ VALUES
   );
 
 
+-- ── 24b. Addon entitlements (which addon unlocks which entitlement key) ──────
+
+INSERT INTO public.addon_entitlements (addon_id, entitlement_key)
+VALUES
+  ('f6000000-0000-4000-8000-000000000002', 'vip'),
+  ('f6000000-0000-4000-8000-000000000001', 'mentoria_grupal'),
+  ('f6000000-0000-4000-8000-000000000003', 'bootcamp_liderazgo'),
+  ('f6000000-0000-4000-8000-000000000004', 'coaching_1on1'),
+  ('f6000000-0000-4000-8000-000000000005', 'retiro_marzo_2026');
+
+
 -- ── 25. Addon purchases ──────────────────────────────────────────────────────
 
 INSERT INTO public.addon_purchases (id, addon_id, user_id, stripe_session_id, amount, created_at)

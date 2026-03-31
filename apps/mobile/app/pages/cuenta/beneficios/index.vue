@@ -10,7 +10,7 @@
         <h1 class="benefits__header-title">Beneficios</h1>
       </header>
 
-      <p class="benefits__intro">Disfruta descuentos y ofertas exclusivas para miembros de Tu Potencial.</p>
+      <p class="benefits__intro">Alianzas y descuentos exclusivos de tu plan <strong>{{ planTitle }}</strong>.</p>
 
       <div class="benefits__list">
         <NuxtLink
@@ -40,6 +40,15 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const { isSubscriber } = useAuth()
+
+const { data: currentPlan } = await useAsyncData('beneficios-plan', async () => {
+  const planId = isSubscriber.value ? 'core' : 'free'
+  const { data } = await client.from('subscription_plans').select('title').eq('id', planId).single()
+  return data
+}, { watch: [isSubscriber] })
+
+const planTitle = computed(() => currentPlan.value?.title ?? (isSubscriber.value ? 'Core' : 'Gratis'))
 
 const BENEFIT_COLORS = [
   { color: 'var(--color-mood-great)', bgColor: 'rgba(var(--color-mood-great-rgb), 0.15)' },

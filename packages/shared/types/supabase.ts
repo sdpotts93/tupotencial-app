@@ -1142,6 +1142,36 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          price: number
+          interval: string
+          cover_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          title: string
+          description?: string | null
+          price?: number
+          interval?: string
+          cover_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          price?: number
+          interval?: string
+          cover_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           current_period_end: string | null

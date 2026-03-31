@@ -155,20 +155,23 @@
               <NuxtLink :to="`/cuenta/retos/${prog.id}`" class="library__see-all">Ver programa</NuxtLink>
             </div>
             <div class="library__scroll">
-              <NuxtLink
+              <div
                 v-for="item in prog.items"
                 :key="item.id"
-                :to="`/cuenta/contenido/${item.id}`"
-                class="library__scroll-card"
+                :class="['library__scroll-card', { 'library__scroll-card--locked': isContentLocked(item) }]"
+                @click="handleContentClick(item)"
               >
-                <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
+                <div class="library__scroll-img-wrap">
+                  <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
+                  <EntitlementLockBadge :locked="isContentLocked(item)" />
+                </div>
                 <div class="library__scroll-info">
                   <span class="library__scroll-title">{{ item.title }}</span>
                   <span v-if="item.duration" class="library__scroll-duration">
                     <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
                   </span>
                 </div>
-              </NuxtLink>
+              </div>
             </div>
           </section>
         </template>
@@ -393,7 +396,7 @@ const { data: programsWithContent } = await useAsyncData('mobile-library-program
   // Get content items linked to programs via program_days -> program_day_items -> content_items
   const { data: dayItems } = await client
     .from('program_day_items')
-    .select('program_days(program_id), content_items(id, title, duration_seconds, thumbnail_url)')
+    .select('program_days(program_id), content_items(id, title, duration_seconds, thumbnail_url, entitlement_key, plan)')
     .eq('type', 'content')
     .order('position')
   // Group content items by program_id
@@ -410,6 +413,8 @@ const { data: programsWithContent } = await useAsyncData('mobile-library-program
         title: item.title,
         duration: formatDuration(item.duration_seconds),
         thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+        entitlement_key: item.entitlement_key,
+        plan: item.plan,
       })
     }
     progContentMap.set(programId, arr)

@@ -24,14 +24,24 @@
 
         <h1 class="ent__sheet-title">Contenido exclusivo</h1>
         <p class="ent__sheet-subtitle">
-          {{ addon?.description ?? 'Este contenido requiere un complemento para acceder.' }}
+          <template v-if="isSubscriptionGate">
+            Este contenido requiere la suscripción <strong>{{ addon?.title }}</strong> para acceder.
+          </template>
+          <template v-else-if="addon">
+            Este contenido requiere el complemento <strong>{{ addon.title }}</strong> para acceder.
+          </template>
+          <template v-else>
+            Este contenido requiere un complemento para acceder.
+          </template>
         </p>
 
         <div v-if="addon" class="ent__addon-card">
           <span class="ent__addon-name">{{ addon.title }}</span>
         </div>
 
-        <UiButton block variant="secondary" @click="goToAddon">Ver complemento</UiButton>
+        <UiButton block variant="secondary" @click="goToAddon">
+          {{ isSubscriptionGate ? 'Ver suscripción' : 'Ver complemento' }}
+        </UiButton>
       </div>
     </div>
   </div>
@@ -51,6 +61,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
+const isSubscriptionGate = computed(() => props.addon?.id === 'core' || props.addon?.id === 'free')
+
 function close() {
   emit('update:modelValue', false)
 }
@@ -58,7 +70,11 @@ function close() {
 function goToAddon() {
   emit('update:modelValue', false)
   if (props.addon) {
-    navigateTo(`/cuenta/complementos/${props.addon.id}`)
+    if (isSubscriptionGate.value) {
+      navigateTo('/cuenta/suscripcion')
+    } else {
+      navigateTo(`/cuenta/complementos/${props.addon.id}`)
+    }
   } else {
     navigateTo('/cuenta/complementos')
   }

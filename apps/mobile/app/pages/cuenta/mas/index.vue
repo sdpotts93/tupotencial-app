@@ -14,6 +14,14 @@
       <!-- Suscripción -->
       <p class="more__section-title">Suscripción</p>
       <UiList>
+        <UiListItem label="Suscripción" :description="currentPlanName" to="/cuenta/suscripcion">
+          <template #icon>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4h4v-4z"/></svg>
+          </template>
+          <template #suffix>
+            <UiTag :variant="isSubscriber ? 'accent' : 'default'" size="sm">{{ isSubscriber ? 'Core' : 'Gratis' }}</UiTag>
+          </template>
+        </UiListItem>
         <UiListItem label="VIP" description="Mentorías, retiros y experiencias premium" to="/cuenta/complementos">
           <template #icon>
             <svg class="more__icon--vip" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -75,6 +83,14 @@ const initials = computed(() => {
   const name = user.value?.display_name || user.value?.email?.split('@')[0] || '?'
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 })
+
+const { data: currentPlan } = await useAsyncData('current-plan', async () => {
+  const planId = isSubscriber.value ? 'core' : 'free'
+  const { data } = await client.from('subscription_plans').select('title').eq('id', planId).single()
+  return data
+}, { watch: [isSubscriber] })
+
+const currentPlanName = computed(() => currentPlan.value?.title ?? (isSubscriber.value ? 'Core' : 'Gratis'))
 
 async function openPortal() {
   const { data: { session } } = await client.auth.getSession()

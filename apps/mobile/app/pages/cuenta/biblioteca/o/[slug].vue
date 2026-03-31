@@ -47,21 +47,7 @@ const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 const showPurchaseModal = ref(false)
 const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 
-// ── Fetch objective by slug ──
-const { data: objectiveData } = await useAsyncData(`objective-${slug}`, async () => {
-  const { data } = await client.from('content_objectives').select('id, title, description, slug').eq('slug', slug).single()
-  return data
-})
-
-const objective = computed(() => {
-  if (objectiveData.value) return { title: objectiveData.value.title, description: objectiveData.value.description ?? '' }
-  return {
-    title: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-    description: '',
-  }
-})
-
-// ── Fetch content items for this objective ──
+// ── Fetch objective + content in one call (avoids SSR auth race) ──
 const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Texto' }
 
 function formatDuration(seconds: number | null): string {
@@ -70,23 +56,43 @@ function formatDuration(seconds: number | null): string {
   return `${mins} min`
 }
 
-const { data: items } = await useAsyncData(`objective-content-${slug}`, async () => {
-  if (!objectiveData.value) return []
-  const { data } = await client
+const { data: pageData } = await useAsyncData(`objective-page-${slug}`, async () => {
+  const { data: obj } = await client
+    .from('content_objectives')
+    .select('id, title, slug')
+    .eq('slug', slug)
+    .single()
+  if (!obj) return { objective: null, items: [] }
+
+  const { data: contentItems } = await client
     .from('content_items')
     .select('id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan')
-    .eq('objective_id', objectiveData.value.id)
+    .eq('objective_id', obj.id)
     .eq('status', 'published')
     .order('created_at', { ascending: false })
-  return (data ?? []).map(item => ({
-    id: item.id,
-    title: item.title,
-    meta: [formatDuration(item.duration_seconds), typeLabels[item.type] ?? item.type].filter(Boolean).join(' \u2022 '),
-    thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
-    entitlement_key: item.entitlement_key,
-    plan: item.plan,
-  }))
+
+  return {
+    objective: obj,
+    items: (contentItems ?? []).map(item => ({
+      id: item.id,
+      title: item.title,
+      meta: [formatDuration(item.duration_seconds), typeLabels[item.type] ?? item.type].filter(Boolean).join(' \u2022 '),
+      thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+      entitlement_key: item.entitlement_key,
+      plan: item.plan,
+    })),
+  }
 })
+
+const objective = computed(() => {
+  if (pageData.value?.objective) return { title: pageData.value.objective.title, description: '' }
+  return {
+    title: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    description: '',
+  }
+})
+
+const items = computed(() => pageData.value?.items ?? [])
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) return true
