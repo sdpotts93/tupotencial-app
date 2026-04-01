@@ -8,8 +8,8 @@
       <div class="form-layout__main">
         <UiCard variant="outlined">
           <div class="form-section">
-            <UiInput v-model="form.title" label="Título del evento" />
-            <UiTextarea v-model="form.description" label="Descripción" :rows="5" />
+            <UiInput v-model="form.title" label="Título del evento" required :error="errors.title" />
+            <UiTextarea v-model="form.description" label="Descripción" :rows="5" required :error="errors.description" />
             <!-- Image upload -->
             <div class="upload">
               <label class="upload__label">Imagen de portada</label>
@@ -61,12 +61,16 @@
                 label="Fecha y hora"
                 :enable-time="true"
                 placeholder="Selecciona fecha y hora"
+                required
+                :error="errors.starts_at"
               />
               <UiSelect
                 v-model="form.duration"
                 label="Duración"
                 :options="durationOptions"
                 placeholder="Selecciona duración"
+                required
+                :error="errors.duration"
               />
             </div>
 
@@ -138,6 +142,7 @@ const toast = useToast()
 const saving = ref(false)
 const deleting = ref(false)
 const formError = ref('')
+const errors = reactive({ title: '', description: '', starts_at: '', duration: '' })
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -230,9 +235,21 @@ const statusOptions = [
 
 async function handleSave() {
   formError.value = ''
+  errors.title = ''
+  errors.description = ''
+  errors.starts_at = ''
+  errors.duration = ''
+
+  let hasError = false
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
+  if (!form.description.trim()) { errors.description = 'La descripción es obligatoria'; hasError = true }
+  if (!form.starts_at) { errors.starts_at = 'La fecha y hora es obligatoria'; hasError = true }
+  if (!form.duration) { errors.duration = 'La duración es obligatoria'; hasError = true }
+  if (hasError) return
+
   saving.value = true
   try {
-    const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
+    const startAt = form.starts_at!.toISOString()
 
     if (isNew) {
       await client.from('events').insert({

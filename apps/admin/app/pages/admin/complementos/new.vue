@@ -12,6 +12,8 @@
               v-model="form.title"
               label="Título del add-on"
               placeholder="Nombre descriptivo del add-on"
+              required
+              :error="errors.title"
             />
 
             <UiTextarea
@@ -70,6 +72,8 @@
               type="number"
               placeholder="2499"
               hint="Precio en pesos mexicanos"
+              required
+              :error="errors.price"
             />
 
             <UiSelect
@@ -118,6 +122,7 @@ const client = useSupabaseClient()
 const toast = useToast()
 const formError = ref('')
 const saving = ref(false)
+const errors = reactive({ title: '', price: '' })
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -172,6 +177,14 @@ const statusOptions = [
 
 async function handleSave() {
   formError.value = ''
+  errors.title = ''
+  errors.price = ''
+
+  let hasError = false
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
+  if (!form.price || Number(form.price) <= 0) { errors.price = 'El precio es obligatorio'; hasError = true }
+  if (hasError) return
+
   saving.value = true
   try {
     const payload = {

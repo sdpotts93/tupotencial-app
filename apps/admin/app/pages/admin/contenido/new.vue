@@ -12,6 +12,8 @@
               v-model="form.title"
               label="Título"
               placeholder="Escribe el título del contenido"
+              required
+              :error="errors.title"
             />
 
             <UiTextarea
@@ -42,11 +44,14 @@
               label="URL de Vimeo"
               placeholder="https://vimeo.com/123456789"
               hint="Sube el video a Vimeo y pega la URL aquí"
+              required
+              :error="errors.vimeo_url"
             />
 
             <!-- File upload for audio -->
             <div v-else-if="form.content_type === 'audio'" class="upload">
-              <label class="upload__label">{{ uploadLabel }}</label>
+              <label class="upload__label">{{ uploadLabel }}<span class="upload__required">*</span></label>
+              <p v-if="errors.audio_file" class="upload__error">{{ errors.audio_file }}</p>
               <div
                 class="upload__dropzone"
                 :class="{ 'upload__dropzone--active': isDragging }"
@@ -186,6 +191,8 @@
               label="Fecha de publicación programada"
               :enable-time="true"
               placeholder="Selecciona fecha y hora"
+              required
+              :error="errors.scheduled_at"
             />
 
             <UiDatePicker
@@ -223,6 +230,7 @@ const coverPreview = ref('')
 const isCoverDragging = ref(false)
 const saving = ref(false)
 const formError = ref('')
+const errors = reactive({ title: '', vimeo_url: '', audio_file: '', scheduled_at: '' })
 
 const form = reactive({
   title: '',
@@ -410,12 +418,17 @@ async function uploadFile(file: File, contentId: string): Promise<string> {
 async function handleSave() {
   saving.value = true
   formError.value = ''
+  errors.title = ''
+  errors.vimeo_url = ''
+  errors.audio_file = ''
+  errors.scheduled_at = ''
 
-  if (form.content_type === 'video' && !extractVimeoId(form.vimeo_url)) {
-    formError.value = 'La URL de Vimeo es obligatoria para videos.'
-    saving.value = false
-    return
-  }
+  let hasError = false
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
+  if (form.content_type === 'video' && !extractVimeoId(form.vimeo_url)) { errors.vimeo_url = 'La URL de Vimeo es obligatoria'; hasError = true }
+  if (form.content_type === 'audio' && !uploadedFile.value) { errors.audio_file = 'El archivo de audio es obligatorio'; hasError = true }
+  if (form.status === 'scheduled' && !form.scheduled_at) { errors.scheduled_at = 'La fecha programada es obligatoria'; hasError = true }
+  if (hasError) { saving.value = false; return }
 
   try {
     const targetId = crypto.randomUUID()
@@ -495,6 +508,17 @@ async function handleSave() {
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.upload__required {
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+
+.upload__error {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
   margin-bottom: var(--space-2);
 }
 

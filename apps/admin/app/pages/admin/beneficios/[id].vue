@@ -8,7 +8,7 @@
       <div class="form-layout__main">
         <UiCard variant="outlined">
           <div class="form-section">
-            <UiInput v-model="form.title" label="Título del beneficio" />
+            <UiInput v-model="form.title" label="Título del beneficio" required :error="errors.title" />
             <UiTextarea v-model="form.description" label="Descripción" :rows="4" />
 
             <!-- Image upload -->
@@ -55,7 +55,7 @@
               </div>
             </div>
 
-            <UiInput v-model="form.url" label="URL" />
+            <UiInput v-model="form.url" label="URL" required :error="errors.url" />
 
             <UiInput
               v-model="form.utm_template"
@@ -104,6 +104,7 @@ const toast = useToast()
 const formError = ref('')
 const saving = ref(false)
 const deleting = ref(false)
+const errors = reactive({ title: '', url: '' })
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -162,6 +163,14 @@ const statusOptions = [
 
 async function handleSave() {
   formError.value = ''
+  errors.title = ''
+  errors.url = ''
+
+  let hasError = false
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
+  if (!form.url.trim()) { errors.url = 'La URL es obligatoria'; hasError = true }
+  if (hasError) return
+
   saving.value = true
   try {
     const payload = {

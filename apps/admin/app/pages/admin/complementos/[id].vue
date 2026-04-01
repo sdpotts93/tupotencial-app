@@ -8,7 +8,7 @@
       <div class="form-layout__main">
         <UiCard variant="outlined">
           <div class="form-section">
-            <UiInput v-model="form.title" label="Título del add-on" />
+            <UiInput v-model="form.title" label="Título del add-on" required :error="errors.title" />
 
             <UiTextarea v-model="form.description" label="Descripción" :rows="4" />
 
@@ -69,6 +69,8 @@
               type="number"
               placeholder="2499"
               hint="Precio en pesos mexicanos"
+              required
+              :error="errors.price"
             />
 
             <UiSelect
@@ -156,6 +158,7 @@ const toast = useToast()
 const formError = ref('')
 const saving = ref(false)
 const deleting = ref(false)
+const errors = reactive({ title: '', price: '' })
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -215,6 +218,14 @@ const statusOptions = [
 
 async function handleSave() {
   formError.value = ''
+  errors.title = ''
+  errors.price = ''
+
+  let hasError = false
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
+  if (!form.price || Number(form.price) <= 0) { errors.price = 'El precio es obligatorio'; hasError = true }
+  if (hasError) return
+
   saving.value = true
   try {
     const payload = {

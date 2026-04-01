@@ -3,7 +3,7 @@
     ref="containerRef"
     :class="['select-field', { 'select-field--error': error, 'select-field--disabled': disabled, 'select-field--open': open }]"
   >
-    <label v-if="label" :for="id" class="select-field__label">{{ label }}</label>
+    <label v-if="label" :for="id" class="select-field__label">{{ label }}<span v-if="required" class="select-field__required">*</span></label>
 
     <div class="select-field__wrapper">
       <button
@@ -89,6 +89,7 @@ interface Props {
   options: SelectOption[]
   error?: string
   disabled?: boolean
+  required?: boolean
   searchable?: boolean
   id?: string
 }
@@ -309,6 +310,7 @@ onBeforeUnmount(() => {
   font-size: var(--text-sm);
 }
 
+.select-field__required { color: var(--color-danger); margin-left: 2px; }
 .select-field--error .select-field__trigger { border-color: var(--color-danger); }
 .select-field__error { font-size: var(--text-xs); color: var(--color-danger); }
 

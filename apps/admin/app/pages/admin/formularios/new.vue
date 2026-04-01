@@ -12,6 +12,8 @@
               v-model="form.title"
               label="Título del formulario"
               placeholder="Escribe el título del formulario"
+              required
+              :error="errors.title"
             />
 
             <UiTextarea
@@ -93,6 +95,7 @@ const client = useSupabaseClient()
 const toast = useToast()
 const saving = ref(false)
 const formError = ref('')
+const errors = reactive({ title: '' })
 
 // ── Form state ──
 const form = reactive({
@@ -145,6 +148,10 @@ function localFieldsToDb(localFields: FormField[]) {
 
 async function handleSave() {
   formError.value = ''
+  errors.title = ''
+
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; return }
+
   saving.value = true
   try {
     const payload = {

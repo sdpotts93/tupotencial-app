@@ -1,6 +1,6 @@
 <template>
   <div :class="['datepicker-field', { 'datepicker-field--error': error }]">
-    <label v-if="label" :for="id" class="datepicker-field__label">{{ label }}</label>
+    <label v-if="label" :for="id" class="datepicker-field__label">{{ label }}<span v-if="required" class="datepicker-field__required">*</span></label>
     <ClientOnly>
       <VueDatePicker
         :uid="id"
@@ -39,6 +39,7 @@ interface Props {
   error?: string
   hint?: string
   disabled?: boolean
+  required?: boolean
   id?: string
 }
 
@@ -46,6 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: undefined,
   enableTime: true,
   disabled: false,
+  required: false,
   placeholder: 'Selecciona fecha y hora',
   id: undefined,
 })
@@ -79,6 +81,11 @@ function formatDisplay(date: Date): string {
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: var(--color-text);
+}
+
+.datepicker-field__required {
+  color: var(--color-danger);
+  margin-left: 2px;
 }
 
 .datepicker-field__error {

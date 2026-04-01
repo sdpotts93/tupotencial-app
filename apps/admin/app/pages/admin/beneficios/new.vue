@@ -12,6 +12,8 @@
               v-model="form.title"
               label="Título del beneficio"
               placeholder="Ej: 20% en suplementos"
+              required
+              :error="errors.title"
             />
 
             <UiTextarea
@@ -62,6 +64,8 @@
               v-model="form.url"
               label="URL"
               placeholder="https://ejemplo.com/beneficio"
+              required
+              :error="errors.url"
             />
 
             <UiInput
@@ -114,6 +118,7 @@ const client = useSupabaseClient()
 const toast = useToast()
 const formError = ref('')
 const saving = ref(false)
+const errors = reactive({ title: '', url: '' })
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -168,6 +173,14 @@ const statusOptions = [
 
 async function handleSave() {
   formError.value = ''
+  errors.title = ''
+  errors.url = ''
+
+  let hasError = false
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
+  if (!form.url.trim()) { errors.url = 'La URL es obligatoria'; hasError = true }
+  if (hasError) return
+
   saving.value = true
   try {
     const payload = {

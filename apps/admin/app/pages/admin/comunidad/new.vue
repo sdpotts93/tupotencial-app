@@ -19,6 +19,8 @@
               label="Contenido de la publicación"
               placeholder="Escribe tu publicación aquí..."
               :rows="6"
+              required
+              :error="errors.body"
             />
 
             <!-- Media upload -->
@@ -104,6 +106,7 @@ const client = useSupabaseClient()
 const toast = useToast()
 const saving = ref(false)
 const formError = ref('')
+const errors = reactive({ body: '' })
 
 const form = reactive({
   title: '',
@@ -162,6 +165,10 @@ function formatFileSize(bytes: number): string {
 
 async function handleSave() {
   formError.value = ''
+  errors.body = ''
+
+  if (!form.body.trim()) { errors.body = 'El contenido es obligatorio'; return }
+
   saving.value = true
   try {
     const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'

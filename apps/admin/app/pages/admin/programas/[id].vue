@@ -15,6 +15,8 @@
               <UiInput
                 v-model="form.title"
                 label="Título del programa"
+                required
+                :error="errors.title"
               />
 
               <UiTextarea
@@ -198,6 +200,7 @@ const activeTab = ref('info')
 const saving = ref(false)
 const deleting = ref(false)
 const formError = ref('')
+const errors = reactive({ title: '' })
 
 const tabs = [
   { value: 'info', label: '1. Información' },
@@ -412,6 +415,11 @@ function formatFileSize(bytes: number): string {
 }
 
 async function handleSave() {
+  formError.value = ''
+  errors.title = ''
+
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; return }
+
   if (!form.entitlement_key) {
     const hasConflict = programDays.value.some(day =>
       day.activities.some(a => a.type === 'contenido' && contentEntitlementMap.value[a.content_id]),

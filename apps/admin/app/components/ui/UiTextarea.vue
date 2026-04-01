@@ -1,6 +1,6 @@
 <template>
   <div :class="['textarea-field', { 'textarea-field--error': error }]">
-    <label v-if="label" :for="id" class="textarea-field__label">{{ label }}</label>
+    <label v-if="label" :for="id" class="textarea-field__label">{{ label }}<span v-if="required" class="textarea-field__required">*</span></label>
     <textarea
       :id="id"
       :value="modelValue"
@@ -23,6 +23,7 @@ interface Props {
   error?: string
   hint?: string
   disabled?: boolean
+  required?: boolean
   rows?: number
   id?: string
 }
@@ -68,6 +69,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 
 .textarea-field__input::placeholder { color: var(--color-placeholder); }
 
+.textarea-field__required { color: var(--color-danger); margin-left: 2px; }
 .textarea-field__error { font-size: var(--text-xs); color: var(--color-danger); }
 .textarea-field__hint { font-size: var(--text-xs); color: var(--color-muted); }
 

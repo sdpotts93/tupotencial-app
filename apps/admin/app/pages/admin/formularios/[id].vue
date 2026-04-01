@@ -11,6 +11,8 @@
             <UiInput
               v-model="form.title"
               label="Título del formulario"
+              required
+              :error="errors.title"
             />
 
             <UiTextarea
@@ -102,6 +104,7 @@ const toast = useToast()
 const saving = ref(false)
 const deleting = ref(false)
 const formError = ref('')
+const errors = reactive({ title: '' })
 
 // ── Fetch existing form ──
 const { data: formRecord } = await useAsyncData(`form-${id}`, async () => {
@@ -173,6 +176,10 @@ function removeField(index: number) {
 
 async function handleSave() {
   formError.value = ''
+  errors.title = ''
+
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; return }
+
   saving.value = true
   try {
     const payload = {

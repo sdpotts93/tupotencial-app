@@ -12,6 +12,8 @@
               v-model="form.title"
               label="Título del evento"
               placeholder="Nombre del evento"
+              required
+              :error="errors.title"
             />
 
             <UiTextarea
@@ -19,6 +21,8 @@
               label="Descripción"
               placeholder="Describe el evento..."
               :rows="5"
+              required
+              :error="errors.description"
             />
 
             <!-- Image upload -->
@@ -64,12 +68,16 @@
                 label="Fecha y hora"
                 :enable-time="true"
                 placeholder="Selecciona fecha y hora"
+                required
+                :error="errors.starts_at"
               />
               <UiSelect
                 v-model="form.duration"
                 label="Duración"
                 :options="durationOptions"
                 placeholder="Selecciona duración"
+                required
+                :error="errors.duration"
               />
             </div>
 
@@ -141,6 +149,7 @@ const client = useSupabaseClient()
 const toast = useToast()
 const saving = ref(false)
 const formError = ref('')
+const errors = reactive({ title: '', description: '', starts_at: '', duration: '' })
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -220,9 +229,21 @@ const statusOptions = [
 
 async function handleSave() {
   formError.value = ''
+  errors.title = ''
+  errors.description = ''
+  errors.starts_at = ''
+  errors.duration = ''
+
+  let hasError = false
+  if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
+  if (!form.description.trim()) { errors.description = 'La descripción es obligatoria'; hasError = true }
+  if (!form.starts_at) { errors.starts_at = 'La fecha y hora es obligatoria'; hasError = true }
+  if (!form.duration) { errors.duration = 'La duración es obligatoria'; hasError = true }
+  if (hasError) return
+
   saving.value = true
   try {
-    const startAt = form.starts_at ? form.starts_at.toISOString() : new Date().toISOString()
+    const startAt = form.starts_at!.toISOString()
 
     await client.from('events').insert({
       title: form.title,

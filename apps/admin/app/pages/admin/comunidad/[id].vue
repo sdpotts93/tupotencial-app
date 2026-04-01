@@ -18,6 +18,8 @@
               v-model="form.body"
               label="Contenido de la publicación"
               :rows="6"
+              required
+              :error="errors.body"
             />
 
             <!-- Media upload -->
@@ -128,6 +130,7 @@ const toast = useToast()
 const saving = ref(false)
 const deleting = ref(false)
 const formError = ref('')
+const errors = reactive({ body: '' })
 
 // ── Fetch existing post ──
 const { data: post } = await useAsyncData(`post-${id}`, async () => {
@@ -238,6 +241,10 @@ async function hideComment(comment: any) {
 
 async function handleSave() {
   formError.value = ''
+  errors.body = ''
+
+  if (!form.body.trim()) { errors.body = 'El contenido es obligatorio'; return }
+
   saving.value = true
   try {
     const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
