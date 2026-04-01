@@ -60,6 +60,11 @@
                 label="Opciones (separadas por coma)"
                 placeholder="Ej: Malo, Regular, Bueno, Excelente"
               />
+
+              <label class="field-toggle">
+                <input v-model="field.required" type="checkbox" class="field-toggle__input" />
+                <span class="field-toggle__label">Campo obligatorio</span>
+              </label>
             </div>
           </UiCard>
         </div>
@@ -120,6 +125,7 @@ interface FormField {
   question: string
   type: 'text' | 'select'
   optionsText: string
+  required: boolean
 }
 
 const fields = ref<FormField[]>([])
@@ -129,6 +135,7 @@ function addField() {
     question: '',
     type: 'text',
     optionsText: '',
+    required: false,
   })
 }
 
@@ -140,6 +147,7 @@ function localFieldsToDb(localFields: FormField[]) {
   return localFields.map(f => ({
     question: f.question,
     type: f.type,
+    required: f.required,
     ...(f.type === 'select' && f.optionsText
       ? { options: f.optionsText.split(',').map(o => o.trim()).filter(Boolean) }
       : {}),
@@ -242,6 +250,26 @@ async function handleSave() {
 
 .field-card__number {
   color: var(--color-primary);
+}
+
+/* ─── Field toggle ─── */
+.field-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.field-toggle__input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-tint);
+  cursor: pointer;
+}
+
+.field-toggle__label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 768px) {

@@ -1,6 +1,6 @@
 <template>
   <div :class="['input-field', { 'input-field--error': error, 'input-field--disabled': disabled }]">
-    <label v-if="label" :for="id" class="input-field__label">{{ label }}</label>
+    <label v-if="label" :for="id" class="input-field__label">{{ label }}<span v-if="required" class="input-field__required">*</span></label>
     <div class="input-field__wrapper">
       <span v-if="$slots.prefix" class="input-field__prefix">
         <slot name="prefix" />
@@ -54,6 +54,7 @@ interface Props {
   error?: string
   hint?: string
   disabled?: boolean
+  required?: boolean
   id?: string
   autocomplete?: string
 }
@@ -135,6 +136,11 @@ const showPassword = ref(false)
 .input-field__hint {
   font-size: var(--text-xs);
   color: var(--color-muted);
+}
+
+.input-field__required {
+  color: var(--color-danger);
+  margin-left: 2px;
 }
 
 .input-field--error .input-field__wrapper {

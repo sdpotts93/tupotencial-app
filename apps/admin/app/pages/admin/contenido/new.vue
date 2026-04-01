@@ -21,6 +21,8 @@
               label="Introducción"
               placeholder="Escribe una breve introducción..."
               :rows="3"
+              :required="form.content_type !== 'article'"
+              :error="errors.introduction"
             />
 
             <UiEditor
@@ -28,6 +30,8 @@
               v-model="form.body"
               label="Contenido del artículo"
               placeholder="Escribe el contenido del artículo aquí..."
+              required
+              :error="errors.body"
             />
             <UiTextarea
               v-else
@@ -35,6 +39,8 @@
               label="Texto"
               placeholder="Escribe el contenido aquí..."
               :rows="10"
+              required
+              :error="errors.body"
             />
 
             <!-- Vimeo URL for video content -->
@@ -230,7 +236,7 @@ const coverPreview = ref('')
 const isCoverDragging = ref(false)
 const saving = ref(false)
 const formError = ref('')
-const errors = reactive({ title: '', vimeo_url: '', audio_file: '', scheduled_at: '' })
+const errors = reactive({ title: '', introduction: '', body: '', vimeo_url: '', audio_file: '', scheduled_at: '' })
 
 const form = reactive({
   title: '',
@@ -419,12 +425,17 @@ async function handleSave() {
   saving.value = true
   formError.value = ''
   errors.title = ''
+  errors.introduction = ''
+  errors.body = ''
   errors.vimeo_url = ''
   errors.audio_file = ''
   errors.scheduled_at = ''
 
   let hasError = false
   if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
+  if (form.content_type !== 'article' && !form.introduction.trim()) { errors.introduction = 'La introducción es obligatoria'; hasError = true }
+  if (form.content_type === 'article' && !form.body.trim()) { errors.body = 'El contenido del artículo es obligatorio'; hasError = true }
+  if (form.content_type !== 'article' && !form.body.trim()) { errors.body = 'El texto es obligatorio'; hasError = true }
   if (form.content_type === 'video' && !extractVimeoId(form.vimeo_url)) { errors.vimeo_url = 'La URL de Vimeo es obligatoria'; hasError = true }
   if (form.content_type === 'audio' && !uploadedFile.value) { errors.audio_file = 'El archivo de audio es obligatorio'; hasError = true }
   if (form.status === 'scheduled' && !form.scheduled_at) { errors.scheduled_at = 'La fecha programada es obligatoria'; hasError = true }

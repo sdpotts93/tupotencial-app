@@ -290,12 +290,16 @@
                   v-if="field.type === 'text' || field.type === 'email'"
                   :label="field.question || field.label"
                   :type="field.type"
+                  :required="field.required"
+                  :error="formFieldErrors[idx]"
                   :model-value="formAnswers[idx] ?? ''"
                   @update:model-value="formAnswers[idx] = $event"
                 />
                 <UiTextarea
                   v-else-if="field.type === 'textarea'"
                   :label="field.question || field.label"
+                  :required="field.required"
+                  :error="formFieldErrors[idx]"
                   :model-value="formAnswers[idx] ?? ''"
                   :rows="3"
                   @update:model-value="formAnswers[idx] = $event"
@@ -303,13 +307,15 @@
                 <UiSelect
                   v-else-if="field.type === 'select'"
                   :label="field.question || field.label"
+                  :required="field.required"
+                  :error="formFieldErrors[idx]"
                   :model-value="formAnswers[idx] ?? ''"
                   :options="(field.options ?? []).map((o: string) => ({ value: o, label: o }))"
                   placeholder="Selecciona una opción"
                   @update:model-value="formAnswers[idx] = $event"
                 />
                 <div v-else-if="field.type === 'rating'" class="hoy__form-rating">
-                  <label class="hoy__form-label">{{ field.question || field.label }}</label>
+                  <label class="hoy__form-label">{{ field.question || field.label }}<span v-if="field.required" class="hoy__form-required">*</span></label>
                   <div class="hoy__form-rating-stars">
                     <button
                       v-for="star in 5"
@@ -321,6 +327,7 @@
                       <Icon name="lucide:star" size="28" />
                     </button>
                   </div>
+                  <p v-if="formFieldErrors[idx]" class="hoy__form-field-error">{{ formFieldErrors[idx] }}</p>
                 </div>
               </template>
             </div>
@@ -792,13 +799,29 @@ async function handleAccion() {
 
 // ─── Form action state ───
 const formAnswers = reactive<Record<number, string>>({})
+const formFieldErrors = reactive<Record<number, string>>({})
 
 const isFormValid = computed(() => {
   const fields = (actionRef.value?.fields ?? []) as { type: string; label: string; required?: boolean }[]
   return fields.every((f, idx) => !f.required || (formAnswers[idx] ?? '').trim() !== '')
 })
 
+function validateFormFields(): boolean {
+  const fields = (actionRef.value?.fields ?? []) as { type: string; question?: string; label?: string; required?: boolean }[]
+  // Clear previous errors
+  Object.keys(formFieldErrors).forEach(k => delete formFieldErrors[Number(k)])
+  let valid = true
+  fields.forEach((f, idx) => {
+    if (f.required && !(formAnswers[idx] ?? '').trim()) {
+      formFieldErrors[idx] = 'Este campo es obligatorio'
+      valid = false
+    }
+  })
+  return valid
+}
+
 async function handleFormSubmit() {
+  if (!validateFormFields()) return
   accionLoading.value = true
   try {
     const fields = (actionRef.value?.fields ?? []) as { label?: string; question?: string }[]
@@ -836,8 +859,9 @@ function closeAccionSheet() {
     accionChoice.value = null
     accionSuccess.value = false
     showShareBadge.value = false
-    // Reset form answers
+    // Reset form answers and errors
     Object.keys(formAnswers).forEach(k => delete formAnswers[Number(k)])
+    Object.keys(formFieldErrors).forEach(k => delete formFieldErrors[Number(k)])
   }, 400)
 }
 </script>
@@ -1774,6 +1798,15 @@ function closeAccionSheet() {
 }
 .hoy__form-rating-star--active {
   color: var(--color-sand);
+}
+.hoy__form-required {
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+.hoy__form-field-error {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+  margin-top: var(--space-1);
 }
 
 /* ─── Transitions ─── */

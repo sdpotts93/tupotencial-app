@@ -1004,7 +1004,7 @@ VALUES
     'Únete cada miércoles a una meditación guiada en vivo con Carlotta. Este espacio es para pausar, respirar y reconectarte con tu centro. Abierto a toda la comunidad.',
     '2026-02-25T18:00:00.000Z', '2026-02-25T19:00:00.000Z',
     NULL, true, 'core',
-    NULL, NULL, NULL,
+    '60', NULL, NULL,
     'https://vimeo.com/event/placeholder-001', 'placeholder-001', NULL,
     'published', '2026-02-18T10:00:00.000Z'
   ),
@@ -1014,7 +1014,7 @@ VALUES
     'Un taller práctico de 90 minutos donde aprenderás técnicas para gestionar el estrés laboral, establecer límites saludables y mantener tu energía a lo largo del día. Incluye ejercicios de respiración, meditación rápida y herramientas de journaling.',
     '2026-03-01T17:00:00.000Z', '2026-03-01T18:30:00.000Z',
     'gabriel', true, 'core',
-    NULL, NULL, NULL,
+    '90', NULL, NULL,
     'https://vimeo.com/event/placeholder-002', 'placeholder-002', NULL,
     'published', '2026-02-20T09:00:00.000Z'
   ),
@@ -1024,7 +1024,7 @@ VALUES
     'Una sesión abierta de preguntas y respuestas con Carlotta y Gabriel. Trae tus dudas sobre las prácticas, los programas, o cualquier tema de bienestar y crecimiento personal. Espacio íntimo, máximo 50 personas.',
     '2026-03-05T19:00:00.000Z', '2026-03-05T20:00:00.000Z',
     NULL, true, 'core',
-    NULL, NULL, NULL,
+    '60', NULL, NULL,
     'https://vimeo.com/event/placeholder-003', 'placeholder-003', NULL,
     'published', '2026-02-22T14:00:00.000Z'
   ),
@@ -1034,7 +1034,7 @@ VALUES
     'Una muestra del Bootcamp de Liderazgo Interior. En esta masterclass de 60 minutos, Gabriel comparte los fundamentos del liderazgo consciente y por qué la vulnerabilidad es tu mayor fortaleza como líder.',
     '2026-03-10T18:00:00.000Z', '2026-03-10T19:00:00.000Z',
     'gabriel', false, 'free',
-    NULL, NULL, NULL,
+    '60', NULL, NULL,
     NULL, NULL, NULL,
     'draft', '2026-02-24T08:00:00.000Z'
   ),
@@ -1044,7 +1044,7 @@ VALUES
     'Sesión pasada de la meditación semanal guiada. Disponible para ver en replay.',
     '2026-02-18T18:00:00.000Z', '2026-02-18T19:00:00.000Z',
     NULL, true, 'core',
-    NULL, NULL, NULL,
+    '60', NULL, NULL,
     'https://vimeo.com/event/placeholder-005', 'placeholder-005', NULL,
     'published', '2026-02-11T10:00:00.000Z'
   ),
@@ -1054,7 +1054,7 @@ VALUES
     'Un espacio seguro y sagrado para la comunidad Carlotta. En este círculo hablamos de lo que necesitamos soltar para seguir creciendo. Replay disponible por tiempo limitado.',
     '2026-02-12T19:00:00.000Z', '2026-02-12T20:30:00.000Z',
     'carlotta', true, 'core',
-    NULL, NULL, NULL,
+    '90', NULL, NULL,
     'https://vimeo.com/event/placeholder-006', 'placeholder-006', NULL,
     'published', '2026-02-05T11:00:00.000Z'
   ),
@@ -1064,7 +1064,7 @@ VALUES
     'Un taller práctico donde aprendiste las bases del journaling como herramienta de autoconocimiento. Incluye plantillas descargables.',
     '2026-02-08T17:00:00.000Z', '2026-02-08T18:30:00.000Z',
     NULL, true, 'core',
-    NULL, NULL, NULL,
+    '90', NULL, NULL,
     'https://vimeo.com/event/placeholder-007', 'placeholder-007', NULL,
     'published', '2026-02-01T09:00:00.000Z'
   );

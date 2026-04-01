@@ -1,6 +1,6 @@
 <template>
   <div :class="['editor-field', { 'editor-field--error': error }]">
-    <label v-if="label" class="editor-field__label">{{ label }}</label>
+    <label v-if="label" class="editor-field__label">{{ label }}<span v-if="required" class="editor-field__required">*</span></label>
     <div v-if="editor" class="editor-field__toolbar">
       <button
         v-for="btn in toolbarButtons"
@@ -33,6 +33,7 @@ interface Props {
   placeholder?: string
   error?: string
   hint?: string
+  required?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -264,6 +265,7 @@ const toolbarButtons = computed(() => {
   border-radius: var(--radius-md);
 }
 
+.editor-field__required { color: var(--color-danger); margin-left: 2px; }
 .editor-field__error { font-size: var(--text-xs); color: var(--color-danger); }
 .editor-field__hint { font-size: var(--text-xs); color: var(--color-muted); }
 
