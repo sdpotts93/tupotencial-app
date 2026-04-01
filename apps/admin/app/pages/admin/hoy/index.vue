@@ -102,11 +102,15 @@
             label="Frase"
             placeholder="Frase motivacional por defecto..."
             :rows="2"
+            required
+            :error="defaultErrors.phrase_text"
           />
           <UiSelect
             v-model="defaults.phrase_author"
             label="Quién dice la frase"
             :options="defaultAuthorOptions"
+            required
+            :error="defaultErrors.phrase_author"
           />
         </div>
       </UiCard>
@@ -118,6 +122,8 @@
             v-model="defaults.action_type"
             label="Tipo"
             :options="defaultActionTypeOptions"
+            required
+            :error="defaultErrors.action_type"
           />
 
           <UiSelect
@@ -126,6 +132,8 @@
             label="Contenido"
             :options="defaultContentOptions"
             placeholder="Selecciona contenido"
+            required
+            :error="defaultErrors.content_id"
           />
 
           <UiSelect
@@ -134,6 +142,8 @@
             label="Formulario"
             :options="defaultFormOptions"
             placeholder="Selecciona formulario"
+            required
+            :error="defaultErrors.form_id"
           />
 
         </div>
@@ -146,11 +156,15 @@
             v-model="defaults.badge_title"
             label="Título del badge"
             placeholder="Ej: Día completado"
+            required
+            :error="defaultErrors.badge_title"
           />
           <UiInput
             v-model="defaults.badge_subtitle"
             label="Subtítulo del badge"
             placeholder="Ej: Sigue así, vas genial"
+            required
+            :error="defaultErrors.badge_subtitle"
           />
         </div>
       </UiCard>
@@ -397,8 +411,37 @@ const yearMonths = computed(() => {
 // ── Save all config ──
 const savingConfig = ref(false)
 const toast = useToast()
+const defaultErrors = reactive({
+  phrase_text: '',
+  phrase_author: '',
+  action_type: '',
+  content_id: '',
+  form_id: '',
+  badge_title: '',
+  badge_subtitle: '',
+})
 
 async function handleSaveConfig() {
+  // Reset errors
+  defaultErrors.phrase_text = ''
+  defaultErrors.phrase_author = ''
+  defaultErrors.action_type = ''
+  defaultErrors.content_id = ''
+  defaultErrors.form_id = ''
+  defaultErrors.badge_title = ''
+  defaultErrors.badge_subtitle = ''
+
+  // Validate defaults
+  let valid = true
+  if (!defaults.phrase_text?.trim()) { defaultErrors.phrase_text = 'La frase es obligatoria'; valid = false }
+  if (!defaults.phrase_author) { defaultErrors.phrase_author = 'El autor es obligatorio'; valid = false }
+  if (!defaults.action_type) { defaultErrors.action_type = 'El tipo es obligatorio'; valid = false }
+  if (defaults.action_type === 'contenido' && !defaults.content_id) { defaultErrors.content_id = 'El contenido es obligatorio'; valid = false }
+  if (defaults.action_type === 'formulario' && !defaults.form_id) { defaultErrors.form_id = 'El formulario es obligatorio'; valid = false }
+  if (!defaults.badge_title?.trim()) { defaultErrors.badge_title = 'El título es obligatorio'; valid = false }
+  if (!defaults.badge_subtitle?.trim()) { defaultErrors.badge_subtitle = 'El subtítulo es obligatorio'; valid = false }
+  if (!valid) return
+
   savingConfig.value = true
   try {
     const now = new Date().toISOString()

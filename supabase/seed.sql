@@ -730,7 +730,7 @@ VALUES
     '2026-02-23', NULL,
     'Domingo de reflexión',
     'Es domingo. Un buen día para hacer una pausa más larga. Te dejamos un ejercicio de journaling para cerrar la semana con claridad.',
-    'Hoy hice una pausa para reflexionar y cerrar mi semana. #TuPotencial',
+    NULL,
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000006', '{}'::jsonb,
     'published', 'a0000000-0000-4000-8000-000000000001'
@@ -764,7 +764,7 @@ VALUES
     '2026-02-25', NULL,
     'Martes: Nuevo comienzo',
     'Cada día es una nueva oportunidad. Hoy comienza con la meditación nocturna... pero por la mañana. Experimenta cómo se siente soltar antes de empezar.',
-    'Hoy experimente soltar antes de empezar. #TuPotencial',
+    NULL,
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000004', '{}'::jsonb,
     'scheduled', 'a0000000-0000-4000-8000-000000000001'

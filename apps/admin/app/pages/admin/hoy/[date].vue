@@ -15,13 +15,11 @@
             label="Frase"
             placeholder="Escribe la frase motivacional del día..."
             :rows="3"
-            :error="errors.phrase_text"
           />
           <UiSelect
             v-model="form.phrase_author"
             label="Quién dice la frase"
             :options="authorOptions"
-            :error="errors.phrase_author"
           />
         </div>
       </UiCard>
@@ -35,7 +33,6 @@
             v-model="form.action_type"
             label="Tipo"
             :options="actionTypeOptions"
-            :error="errors.action_type"
           />
 
           <!-- Contenido -->
@@ -45,7 +42,6 @@
             label="Contenido"
             :options="contentOptions"
             placeholder="Selecciona contenido"
-            :error="errors.content_id"
           />
 
           <!-- Formulario -->
@@ -55,7 +51,6 @@
             label="Formulario"
             :options="formOptions"
             placeholder="Selecciona formulario"
-            :error="errors.form_id"
           />
 
           <!-- Talk to AI: no extra fields -->
@@ -71,13 +66,11 @@
             v-model="form.badge_title"
             label="Título del badge"
             placeholder="Ej: Día completado"
-            :error="errors.badge_title"
           />
           <UiInput
             v-model="form.badge_subtitle"
             label="Subtítulo del badge"
             placeholder="Ej: Sigue así, vas genial"
-            :error="errors.badge_subtitle"
           />
         </div>
       </UiCard>
@@ -101,15 +94,6 @@ const toast = useToast()
 const dateParam = computed(() => route.params.date as string)
 const saving = ref(false)
 const formError = ref('')
-const errors = reactive({
-  phrase_text: '',
-  phrase_author: '',
-  action_type: '',
-  content_id: '',
-  form_id: '',
-  badge_title: '',
-  badge_subtitle: '',
-})
 
 // ── Fetch existing daily plan for this date ──
 const { data: existingPlan } = await useAsyncData(`daily-plan-${dateParam.value}`, async () => {
@@ -174,28 +158,8 @@ function formatDate(iso: string) {
 }
 
 async function handleSave() {
-  // Reset errors
-  errors.phrase_text = ''
-  errors.phrase_author = ''
-  errors.action_type = ''
-  errors.content_id = ''
-  errors.form_id = ''
-  errors.badge_title = ''
-  errors.badge_subtitle = ''
-  formError.value = ''
-
-  // Validate
-  let valid = true
-  if (!form.phrase_text.trim()) { errors.phrase_text = 'La frase es obligatoria'; valid = false }
-  if (!form.phrase_author) { errors.phrase_author = 'El autor es obligatorio'; valid = false }
-  if (!form.action_type) { errors.action_type = 'El tipo es obligatorio'; valid = false }
-  if (form.action_type === 'content' && !form.content_id) { errors.content_id = 'El contenido es obligatorio'; valid = false }
-  if (form.action_type === 'form' && !form.form_id) { errors.form_id = 'El formulario es obligatorio'; valid = false }
-  if (!form.badge_title.trim()) { errors.badge_title = 'El título es obligatorio'; valid = false }
-  if (!form.badge_subtitle.trim()) { errors.badge_subtitle = 'El subtítulo es obligatorio'; valid = false }
-  if (!valid) return
-
   saving.value = true
+  formError.value = ''
   try {
     const actionPayload: Record<string, any> = {
       quote_text: form.phrase_text,
