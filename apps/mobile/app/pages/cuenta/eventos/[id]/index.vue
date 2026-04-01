@@ -71,13 +71,13 @@ const { data: eventData } = await useAsyncData(`event-${id}`, async () => {
 
 const event = computed(() => {
   const e = eventData.value
-  if (!e) return { title: '', description: '', dateLabel: '', img: '/images/lib-4.jpg', requiresSub: false, status: '', isLive: false, accessGranted: false }
+  if (!e) return { title: '', description: '', dateLabel: '', img: null, requiresSub: false, status: '', isLive: false, accessGranted: false }
   const startDate = new Date(e.start_at)
   return {
     title: e.title,
     description: e.description ?? '',
     dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
-    img: e.cover_url ?? '/images/lib-4.jpg',
+    img: e.cover_url ?? null,
     requiresSub: e.requires_subscription,
     status: statusLabels[e.status] ?? e.status,
     isLive: startDate > new Date() && e.status === 'published',

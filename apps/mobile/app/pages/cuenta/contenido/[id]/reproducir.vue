@@ -2,7 +2,7 @@
   <div class="player" :class="{ 'player--audio': isAudio, 'player--vimeo': isVimeo }" @click="toggleControls">
     <!-- Audio mode: cover image + hidden audio element -->
     <template v-if="isAudio">
-      <img :src="content.thumbnail" alt="" class="player__cover" />
+      <img v-if="content.thumbnail" :src="content.thumbnail" alt="" class="player__cover" />
       <audio
         ref="videoRef"
         :src="content.mediaUrl"
@@ -163,7 +163,7 @@ const { data: contentData } = await useAsyncData(`content-player-${contentId}`, 
     vimeoId: data.vimeo_id ?? null,
     mediaPath: data.media_url ?? null,
     type: data.type as 'video' | 'audio',
-    thumbnail: data.thumbnail_url ?? '/images/lib-1.jpg',
+    thumbnail: data.thumbnail_url ?? null,
   }
 })
 
@@ -173,11 +173,11 @@ const contentBase = computed(() => contentData.value ?? {
   vimeoId: null as string | null,
   mediaPath: null as string | null,
   type: 'video' as const,
-  thumbnail: '/images/lib-1.jpg',
+  thumbnail: null as string | null,
 })
 
 // Resolve storage path to signed URL on client side
-const mediaUrl = ref('/videos/helmet-short-coded.mp4')
+const mediaUrl = ref('')
 
 const content = computed(() => ({
   ...contentBase.value,

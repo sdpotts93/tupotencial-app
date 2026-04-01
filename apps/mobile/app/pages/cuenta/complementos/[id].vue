@@ -80,7 +80,7 @@ const addon = computed(() => ({
   title: rawAddon.value?.title ?? '',
   description: rawAddon.value?.description ?? '',
   priceLabel: formatPrice(rawAddon.value?.price ?? 0),
-  img: rawAddon.value?.cover_url ?? '/images/lib-4.jpg',
+  img: rawAddon.value?.cover_url ?? null,
   owned: isOwned.value ?? false,
   stripePriceId: rawAddon.value?.stripe_price_id ?? null,
 }))

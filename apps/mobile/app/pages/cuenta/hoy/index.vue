@@ -652,7 +652,7 @@ const latestContent = computed(() =>
     type: item.type,
     typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[item.type] ?? item.type,
     title: item.title,
-    thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+    thumbnail: item.thumbnail_url ?? null,
     duration: item.duration_seconds ? `${Math.round(item.duration_seconds / 60)} min` : '',
     to: `/cuenta/contenido/${item.id}`,
     entitlement_key: item.entitlement_key ?? null,

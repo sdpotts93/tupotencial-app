@@ -77,7 +77,7 @@ const { data: categoryData } = await useAsyncData(`category-${slug}`, async () =
         id: item.id,
         title: item.title,
         meta: [durationLabel, typeLabel].filter(Boolean).join(' \u2022 '),
-        thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+        thumbnail: item.thumbnail_url ?? null,
         entitlement_key: item.entitlement_key,
         plan: item.plan,
       }

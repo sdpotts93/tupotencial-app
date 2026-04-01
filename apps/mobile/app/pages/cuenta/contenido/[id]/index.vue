@@ -3,7 +3,7 @@
     <div class="detail">
       <!-- Media hero (video/audio show play button, article/link show static image) -->
       <div class="detail__media">
-        <img :src="content.thumbnail" alt="" class="detail__img" />
+        <img v-if="content.thumbnail" :src="content.thumbnail" alt="" class="detail__img" />
         <div class="detail__overlay" />
         <div class="detail__nav safe-top">
           <button class="detail__back" aria-label="Volver" @click="$router.back()">
@@ -88,7 +88,8 @@ const { data: contentData } = await useAsyncData(`content-detail-${id}`, async (
     body: data.body ?? '',
     externalUrl: data.external_url ?? '',
     duration: formatDuration(data.duration_seconds),
-    thumbnail: data.thumbnail_url ?? '/images/lib-1.jpg',
+    thumbnail: data.thumbnail_url ?? null,
+    vimeoId: data.vimeo_id ?? null,
     accessGranted: data.access_granted,
   }
 })
@@ -102,10 +103,15 @@ const content = computed(() => contentData.value ?? {
   body: '',
   externalUrl: '',
   duration: null,
-  thumbnail: '/images/lib-1.jpg',
+  thumbnail: null as string | null,
+  vimeoId: null as string | null,
 })
 
-const isPlayable = computed(() => content.value.type === 'video' || content.value.type === 'audio')
+const isPlayable = computed(() => {
+  if (content.value.type === 'audio') return true
+  if (content.value.type === 'video') return !!content.value.vimeoId
+  return false
+})
 
 function openLink() {
   if (content.value.externalUrl) {

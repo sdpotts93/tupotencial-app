@@ -117,7 +117,7 @@ const { data: vipAccesos } = await useAsyncData('profile-vip-accesos', async () 
     id: (p.addons as any)?.id ?? p.addon_id,
     title: (p.addons as any)?.title ?? '',
     typeLabel: 'CONTENIDO PREMIUM',
-    img: (p.addons as any)?.cover_url ?? '/images/lib-8.jpg',
+    img: (p.addons as any)?.cover_url ?? null,
   }))
 }, { watch: [() => user.value?.id] })
 

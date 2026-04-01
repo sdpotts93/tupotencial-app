@@ -129,7 +129,7 @@ const { data: activeEnrollments } = await useAsyncData('mobile-active-programs',
       title: prog?.title ?? '',
       currentDay: checkinCountMap[pid] ?? 0,
       totalDays: dayCountMap[pid] ?? 0,
-      img: prog?.cover_url ?? '/images/lib-4.jpg',
+      img: prog?.cover_url ?? null,
     }
   })
 }, { watch: [() => user.value?.id] })

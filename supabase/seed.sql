@@ -214,7 +214,8 @@ INSERT INTO public.content_items (
   media_url, external_url, thumbnail_url, duration_seconds,
   entitlement_key, plan, objective_id,
   status, published_at, available_from, available_to,
-  community_segment, created_by, updated_by, created_at
+  community_segment, created_by, updated_by, created_at,
+  vimeo_id
 )
 VALUES
   -- ci-001: Meditación matutina (video, free)
@@ -227,13 +228,14 @@ VALUES
     NULL,
     'https://player.vimeo.com/video/000000001',
     NULL,
-    'https://picsum.photos/seed/meditation1/640/360',
+    NULL,
     600,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000001',
     'published', '2026-01-15T06:00:00.000Z', NULL, NULL,
     NULL,
     'a0000000-0000-4000-8000-000000000001', NULL,
-    '2026-01-14T20:00:00.000Z'
+    '2026-01-14T20:00:00.000Z',
+    '1178967904'
   ),
   -- ci-002: Rutina energizante (video, free)
   (
@@ -245,13 +247,14 @@ VALUES
     NULL,
     'https://player.vimeo.com/video/000000002',
     NULL,
-    'https://picsum.photos/seed/routine1/640/360',
+    NULL,
     300,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000002',
     'published', '2026-01-20T06:00:00.000Z', NULL, NULL,
     'carlotta',
     'a0000000-0000-4000-8000-000000000001', NULL,
-    '2026-01-19T18:00:00.000Z'
+    '2026-01-19T18:00:00.000Z',
+    '1178967879'
   ),
   -- ci-003: Respiración 4-7-8 (video, free)
   (
@@ -263,13 +266,14 @@ VALUES
     NULL,
     'https://player.vimeo.com/video/000000003',
     NULL,
-    'https://picsum.photos/seed/breathing1/640/360',
+    NULL,
     480,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000001',
     'published', '2026-02-01T06:00:00.000Z', NULL, NULL,
     'gabriel',
     'a0000000-0000-4000-8000-000000000002', NULL,
-    '2026-01-31T22:00:00.000Z'
+    '2026-01-31T22:00:00.000Z',
+    '1178967928'
   ),
   -- ci-004: Meditación nocturna (audio, free)
   (
@@ -281,13 +285,14 @@ VALUES
     NULL,
     'https://cdn.example.com/audio/meditacion-nocturna.mp3',
     NULL,
-    'https://picsum.photos/seed/night-med/640/360',
+    NULL,
     900,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000001',
     'published', '2026-02-05T06:00:00.000Z', NULL, NULL,
     NULL,
     'a0000000-0000-4000-8000-000000000001', NULL,
-    '2026-02-04T15:00:00.000Z'
+    '2026-02-04T15:00:00.000Z',
+    NULL
   ),
   -- ci-005: Visualización (audio, core — has entitlement_key 'vip')
   (
@@ -299,13 +304,14 @@ VALUES
     NULL,
     'https://cdn.example.com/audio/visualizacion-mejor-version.mp3',
     NULL,
-    'https://picsum.photos/seed/visualize/640/360',
+    NULL,
     900,
     'vip', 'core', 'c4000000-0000-4000-8000-000000000003',
     'published', '2026-02-10T06:00:00.000Z', NULL, NULL,
     'conjunta',
     'a0000000-0000-4000-8000-000000000002', NULL,
-    '2026-02-09T20:00:00.000Z'
+    '2026-02-09T20:00:00.000Z',
+    NULL
   ),
   -- ci-006: 5 preguntas journaling (article, free)
   (
@@ -338,13 +344,14 @@ Visualiza ese momento. Deja que esa imagen guíe tus decisiones.
 *Escribe tus respuestas en un cuaderno. La magia está en la consistencia.*$body$,
     NULL,
     NULL,
-    'https://picsum.photos/seed/journaling1/640/360',
+    NULL,
     NULL,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000002',
     'published', '2026-02-12T06:00:00.000Z', NULL, NULL,
     NULL,
     'a0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000002',
-    '2026-02-11T16:00:00.000Z'
+    '2026-02-11T16:00:00.000Z',
+    NULL
   ),
   -- ci-007: Espacio sagrado (article, free)
   (
@@ -375,13 +382,14 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
 *Tu espacio no tiene que ser perfecto. Solo tiene que ser tuyo.*$body$,
     NULL,
     NULL,
-    'https://picsum.photos/seed/sacred-space/640/360',
+    NULL,
     NULL,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000006',
     'published', '2026-02-14T06:00:00.000Z', NULL, NULL,
     'carlotta',
     'a0000000-0000-4000-8000-000000000001', NULL,
-    '2026-02-13T12:00:00.000Z'
+    '2026-02-13T12:00:00.000Z',
+    NULL
   ),
   -- ci-008: Masterclass IE (video, draft, core — has entitlement_key 'bootcamp_liderazgo')
   (
@@ -393,13 +401,14 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     NULL,
     'https://player.vimeo.com/video/000000008',
     NULL,
-    'https://picsum.photos/seed/masterclass1/640/360',
+    NULL,
     2700,
     'bootcamp_liderazgo', 'core', 'c4000000-0000-4000-8000-000000000005',
     'draft', NULL, NULL, NULL,
     'gabriel',
     'a0000000-0000-4000-8000-000000000002', NULL,
-    '2026-02-20T10:00:00.000Z'
+    '2026-02-20T10:00:00.000Z',
+    '1178968399'
   ),
   -- ci-009: Body scan (audio, scheduled, free)
   (
@@ -411,13 +420,14 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     NULL,
     'https://cdn.example.com/audio/body-scan.mp3',
     NULL,
-    'https://picsum.photos/seed/bodyscan/640/360',
+    NULL,
     1200,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000004',
     'scheduled', '2026-03-01T06:00:00.000Z', '2026-03-01T06:00:00.000Z', NULL,
     NULL,
     'a0000000-0000-4000-8000-000000000001', NULL,
-    '2026-02-22T09:00:00.000Z'
+    '2026-02-22T09:00:00.000Z',
+    NULL
   ),
   -- ci-010: Ciencia hábitos (link, free)
   (
@@ -467,13 +477,14 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
 <p>Elige <strong>un solo hábito</strong> que quieras incorporar esta semana. Identifica tu señal, define la versión de 2 minutos y decide cuál será tu recompensa. Escríbelo y compártelo con la comunidad — el compromiso social es uno de los aceleradores más poderosos que existen.</p>$$,
     NULL,
     NULL,
-    'https://picsum.photos/seed/habits-article/640/360',
+    NULL,
     NULL,
     NULL, 'free', 'c4000000-0000-4000-8000-000000000003',
     'published', '2026-02-18T06:00:00.000Z', NULL, NULL,
     NULL,
     'a0000000-0000-4000-8000-000000000002', NULL,
-    '2026-02-17T14:00:00.000Z'
+    '2026-02-17T14:00:00.000Z',
+    NULL
   );
 
 
@@ -852,7 +863,7 @@ VALUES
     $$¡Comunidad Carlotta! Estamos lanzando el Reto de 7 días de gratitud. Cada día recibirás un ejercicio diferente para cultivar el agradecimiento en tu vida. Es gratuito, es corto, y puede cambiar tu perspectiva.
 
 Inscríbete desde la sección de Retos. ¡Empezamos el lunes!$$,
-    'https://picsum.photos/seed/gratitude-challenge/800/400',
+    NULL,
     'published',
     '2026-02-22T08:00:00.000Z'
   ),
@@ -861,7 +872,7 @@ Inscríbete desde la sección de Retos. ¡Empezamos el lunes!$$,
     'a0000000-0000-4000-8000-000000000005', false, 'carlotta',
     NULL,
     'Hoy creé mi espacio sagrado en casa siguiendo la guía de la biblioteca. Solo un rincón con un cojín, una vela y mi cuaderno. Pero se siente diferente. Es MÍO. Ya quiero hacer mi práctica de mañana ahí.',
-    'https://picsum.photos/seed/sacred-space-photo/800/600',
+    NULL,
     'published',
     '2026-02-23T16:45:00.000Z'
   ),
@@ -1194,7 +1205,7 @@ VALUES
     'f6000000-0000-4000-8000-000000000001',
     'Mentoría grupal mensual',
     'Sesión grupal de mentoría de 90 minutos una vez al mes con Carlotta o Gabriel. Máximo 15 participantes por sesión.',
-    '/images/lib-4.jpg',
+    NULL,
     149900, 'core', NULL, NULL, 'active',
     '2026-01-01T10:00:00.000Z'
   ),
@@ -1202,7 +1213,7 @@ VALUES
     'f6000000-0000-4000-8000-000000000002',
     'Módulo VIP: Liderazgo avanzado',
     '12 lecciones exclusivas de liderazgo avanzado + material descargable y ejercicios prácticos.',
-    '/images/lib-8.jpg',
+    NULL,
     79900, 'core', NULL, NULL, 'active',
     '2026-01-01T10:05:00.000Z'
   ),
@@ -1210,7 +1221,7 @@ VALUES
     'f6000000-0000-4000-8000-000000000003',
     'Bootcamp: Liderazgo Interior',
     'Acceso completo al bootcamp intensivo de 14 días. Incluye sesiones en vivo, materiales exclusivos y certificado.',
-    '/images/lib-6.jpg',
+    NULL,
     299900, 'todos', 3, NULL, 'active',
     '2026-02-01T08:00:00.000Z'
   ),
@@ -1218,7 +1229,7 @@ VALUES
     'f6000000-0000-4000-8000-000000000004',
     'Sesión 1:1 con coach certificado',
     'Una sesión individual de 60 minutos con un coach certificado de Tu Potencial. Personalizada a tus necesidades.',
-    '/images/lib-3.jpg',
+    NULL,
     249900, 'todos', 1, NULL, 'active',
     '2026-02-10T09:00:00.000Z'
   ),
@@ -1226,7 +1237,7 @@ VALUES
     'f6000000-0000-4000-8000-000000000005',
     'Retiro presencial: Reconexión (marzo 2026)',
     'Retiro de fin de semana en Valle de Bravo. Incluye hospedaje, alimentación, sesiones de meditación y yoga.',
-    '/images/lib-5.jpg',
+    NULL,
     899900, 'todos', 3, NULL, 'inactive',
     '2026-02-15T12:00:00.000Z'
   );

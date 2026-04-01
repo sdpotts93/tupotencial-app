@@ -261,7 +261,7 @@ watch(query, (q) => {
       title: c.title,
       meta: `${formatDuration(c.duration_seconds) ?? ''} ${c.type ? `\u2022 ${c.type.charAt(0).toUpperCase() + c.type.slice(1)}` : ''}`.trim(),
       category: c.category_title ?? '',
-      thumbnail: c.thumbnail_url ?? '/images/lib-1.jpg',
+      thumbnail: c.thumbnail_url ?? null,
       entitlement_key: c.entitlement_key ?? null,
     }))
     searchLoading.value = false
@@ -294,7 +294,7 @@ const { data: categoriesData } = await useAsyncData('mobile-library-categories',
       title: item.title,
       typeLabel: item.type ? item.type.charAt(0).toUpperCase() + item.type.slice(1) : '',
       duration: formatDuration(item.duration_seconds),
-      thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+      thumbnail: item.thumbnail_url ?? null,
       entitlement_key: item.entitlement_key,
       plan: item.plan,
     })
@@ -338,7 +338,7 @@ const { data: recordedEvents } = await useAsyncData('mobile-library-recorded-eve
     id: e.id,
     title: e.title,
     dateLabel: new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(e.start_at)),
-    img: e.cover_url ?? '/images/lib-2.jpg',
+    img: e.cover_url ?? null,
     entitlement_key: e.entitlement_key,
     plan: e.plan,
   }))
@@ -412,7 +412,7 @@ const { data: programsWithContent } = await useAsyncData('mobile-library-program
         id: item.id,
         title: item.title,
         duration: formatDuration(item.duration_seconds),
-        thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+        thumbnail: item.thumbnail_url ?? null,
         entitlement_key: item.entitlement_key,
         plan: item.plan,
       })

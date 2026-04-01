@@ -90,7 +90,7 @@ const { data: programs } = await useAsyncData('mobile-programs', async () => {
     return {
       ...p,
       typeLabel: p.type.toUpperCase(),
-      img: p.cover_url ?? '/images/lib-3.jpg',
+      img: p.cover_url ?? null,
       duration: `${totalDays} días`,
       enrolled: !!enrollment,
       free: p.plan === 'free',

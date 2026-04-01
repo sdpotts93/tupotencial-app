@@ -41,6 +41,7 @@
                 </template>
                 <template v-else-if="coverFile">
                   <div class="upload__preview">
+                    <img :src="coverPreview" alt="" class="upload__img-preview" />
                     <p class="upload__filename">{{ coverFile.name }}</p>
                     <p class="upload__filesize">{{ formatFileSize(coverFile.size) }}</p>
                     <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
@@ -48,8 +49,8 @@
                 </template>
                 <template v-else>
                   <div class="upload__preview">
-                    <p class="upload__filename">Imagen actual</p>
-                    <p class="upload__filesize">{{ form.cover_url }}</p>
+                    <img :src="form.cover_url" alt="" class="upload__img-preview" />
+                    <p class="upload__filename">{{ form.cover_url }}</p>
                     <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
                   </div>
                 </template>
@@ -149,6 +150,7 @@ const revenue = computed(() => stats.value?.revenue ?? 0)
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
 const coverFile = ref<File | null>(null)
+const coverPreview = ref('')
 const isDragging = ref(false)
 const toast = useToast()
 const formError = ref('')
@@ -161,16 +163,24 @@ function triggerFileInput() {
 
 function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement
-  if (target.files?.[0]) coverFile.value = target.files[0]
+  if (target.files?.[0]) {
+    coverFile.value = target.files[0]
+    coverPreview.value = URL.createObjectURL(target.files[0])
+  }
 }
 
 function handleDrop(e: DragEvent) {
   isDragging.value = false
-  if (e.dataTransfer?.files?.[0]) coverFile.value = e.dataTransfer.files[0]
+  if (e.dataTransfer?.files?.[0]) {
+    coverFile.value = e.dataTransfer.files[0]
+    coverPreview.value = URL.createObjectURL(e.dataTransfer.files[0])
+  }
 }
 
 function removeCover() {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
   coverFile.value = null
+  coverPreview.value = ''
   form.cover_url = ''
   if (fileInput.value) fileInput.value.value = ''
 }
@@ -348,6 +358,14 @@ async function handleDelete() {
 .upload__filesize {
   font-size: var(--text-xs);
   color: var(--color-muted);
+}
+
+.upload__img-preview {
+  max-width: 100%;
+  max-height: 160px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  margin-bottom: var(--space-2);
 }
 
 .upload__remove {

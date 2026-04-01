@@ -44,8 +44,8 @@
               hint="Sube el video a Vimeo y pega la URL aquí"
             />
 
-            <!-- File upload for audio / article -->
-            <div v-else class="upload">
+            <!-- File upload for audio -->
+            <div v-else-if="form.content_type === 'audio'" class="upload">
               <label class="upload__label">{{ uploadLabel }}</label>
               <div
                 class="upload__dropzone"
@@ -79,6 +79,48 @@
                     <p class="upload__filename">{{ uploadedFile.name }}</p>
                     <p class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
                     <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </UiCard>
+
+        <!-- Cover image upload -->
+        <UiCard variant="outlined">
+          <div class="form-section">
+            <div class="upload">
+              <label class="upload__label">Imagen de portada</label>
+              <div
+                class="upload__dropzone"
+                :class="{ 'upload__dropzone--active': isCoverDragging }"
+                @dragover.prevent="isCoverDragging = true"
+                @dragleave="isCoverDragging = false"
+                @drop.prevent="handleCoverDrop"
+                @click="triggerCoverInput"
+              >
+                <input
+                  ref="coverInput"
+                  type="file"
+                  accept="image/*"
+                  class="upload__input"
+                  @change="handleCoverChange"
+                />
+                <template v-if="!coverFile">
+                  <div class="upload__icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
+                  <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
+                </template>
+                <template v-else>
+                  <div class="upload__preview">
+                    <img :src="coverPreview" alt="" class="upload__img-preview" />
+                    <p class="upload__filename">{{ coverFile.name }}</p>
+                    <p class="upload__filesize">{{ formatFileSize(coverFile.size) }}</p>
+                    <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
                   </div>
                 </template>
               </div>
@@ -175,6 +217,10 @@ const toast = useToast()
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
 const isDragging = ref(false)
+const coverInput = ref<HTMLInputElement | null>(null)
+const coverFile = ref<File | null>(null)
+const coverPreview = ref('')
+const isCoverDragging = ref(false)
 const saving = ref(false)
 const formError = ref('')
 
@@ -294,6 +340,41 @@ function removeFile() {
   if (fileInput.value) fileInput.value.value = ''
 }
 
+// ── Cover image upload ──
+function triggerCoverInput() {
+  coverInput.value?.click()
+}
+
+function setCoverFile(file: File) {
+  coverFile.value = file
+  coverPreview.value = URL.createObjectURL(file)
+}
+
+function handleCoverChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  if (target.files?.[0]) setCoverFile(target.files[0])
+}
+
+function handleCoverDrop(e: DragEvent) {
+  isCoverDragging.value = false
+  if (e.dataTransfer?.files?.[0]) setCoverFile(e.dataTransfer.files[0])
+}
+
+function removeCover() {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
+  coverFile.value = null
+  coverPreview.value = ''
+  if (coverInput.value) coverInput.value.value = ''
+}
+
+async function uploadCover(file: File, contentId: string): Promise<string> {
+  const path = `${contentId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
+
 function extractVimeoId(input: string): string | null {
   const trimmed = input.trim()
   if (/^\d+$/.test(trimmed)) return trimmed
@@ -329,11 +410,22 @@ async function uploadFile(file: File, contentId: string): Promise<string> {
 async function handleSave() {
   saving.value = true
   formError.value = ''
+
+  if (form.content_type === 'video' && !extractVimeoId(form.vimeo_url)) {
+    formError.value = 'La URL de Vimeo es obligatoria para videos.'
+    saving.value = false
+    return
+  }
+
   try {
     const targetId = crypto.randomUUID()
     let mediaUrl: string | null = null
     if (uploadedFile.value) {
       mediaUrl = await uploadFile(uploadedFile.value, targetId)
+    }
+    let thumbnailUrl: string | null = null
+    if (coverFile.value) {
+      thumbnailUrl = await uploadCover(coverFile.value, targetId)
     }
 
     const payload = {
@@ -343,7 +435,7 @@ async function handleSave() {
       body: form.content_type === 'article' ? (form.body || null) : null,
       type: form.content_type,
       vimeo_id: form.content_type === 'video' ? extractVimeoId(form.vimeo_url) : null,
-      media_url: form.content_type !== 'video' ? mediaUrl : null,
+      media_url: form.content_type === 'audio' ? mediaUrl : null,
       plan: form.segment,
       status: form.status,
       published_at: form.status === 'published' ? new Date().toISOString() : null,
@@ -352,6 +444,7 @@ async function handleSave() {
       available_from: form.scheduled_at ? form.scheduled_at.toISOString() : null,
       available_to: form.unpublished_at ? form.unpublished_at.toISOString() : null,
       duration_seconds: parseDuration(form.duration),
+      thumbnail_url: thumbnailUrl,
     }
 
     const { data: inserted } = await client.from('content_items').insert(payload).select('id').single()
@@ -468,6 +561,14 @@ async function handleSave() {
 .upload__filesize {
   font-size: var(--text-xs);
   color: var(--color-muted);
+}
+
+.upload__img-preview {
+  max-width: 100%;
+  max-height: 160px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  margin-bottom: var(--space-2);
 }
 
 .upload__remove {

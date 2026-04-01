@@ -3,7 +3,7 @@
     <div class="detail">
       <!-- Media -->
       <div class="detail__media">
-        <img :src="program.thumbnail" alt="" class="detail__img" />
+        <img v-if="program.thumbnail" :src="program.thumbnail" alt="" class="detail__img" />
         <div class="detail__overlay" />
         <div class="detail__nav safe-top">
           <button class="detail__back" aria-label="Volver" @click="$router.back()">
@@ -139,7 +139,7 @@ const program = computed(() => {
     currentDay: currentDay.value,
     entitlement_key: (p?.entitlement_key ?? null) as string | null,
     description: p?.description ?? '',
-    thumbnail: p?.cover_url ?? '/images/lib-1.jpg',
+    thumbnail: p?.cover_url ?? null,
     days: (programDays.value ?? []).map(d => ({
       index: d.day_index,
       title: d.title ?? '',

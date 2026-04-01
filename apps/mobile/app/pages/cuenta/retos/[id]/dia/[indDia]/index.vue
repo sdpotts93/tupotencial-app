@@ -233,7 +233,7 @@ const { data: dayData } = await useAsyncData(`program-day-${programId}-${dayInde
         mediaType: content.type as 'video' | 'audio' | 'text',
         title: content.title,
         description: content.description ?? '',
-        thumbnail: content.thumbnail_url ?? '/images/lib-1.jpg',
+        thumbnail: content.thumbnail_url ?? null,
         duration: formatDuration(content.duration_seconds),
         done: completedItems.has(di.id),
         to: content.type === 'text'

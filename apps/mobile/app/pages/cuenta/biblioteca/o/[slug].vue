@@ -77,7 +77,7 @@ const { data: pageData } = await useAsyncData(`objective-page-${slug}`, async ()
       id: item.id,
       title: item.title,
       meta: [formatDuration(item.duration_seconds), typeLabels[item.type] ?? item.type].filter(Boolean).join(' \u2022 '),
-      thumbnail: item.thumbnail_url ?? '/images/lib-1.jpg',
+      thumbnail: item.thumbnail_url ?? null,
       entitlement_key: item.entitlement_key,
       plan: item.plan,
     })),
