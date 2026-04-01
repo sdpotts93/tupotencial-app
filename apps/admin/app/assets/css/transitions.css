@@ -2,20 +2,18 @@
    Tu Potencial — Page & layout transitions
    ============================================ */
 
-/* ---- Page transition (fade + slight slide) ---- */
+/* ---- Page transition (fade only — no transform to preserve position:fixed) ---- */
 .page-enter-active,
 .page-leave-active {
-  transition: opacity var(--transition-base), transform var(--transition-base);
+  transition: opacity var(--transition-base);
 }
 
 .page-enter-from {
   opacity: 0;
-  transform: translateY(6px);
 }
 
 .page-leave-to {
   opacity: 0;
-  transform: translateY(-4px);
 }
 
 /* ---- Layout transition ---- */
