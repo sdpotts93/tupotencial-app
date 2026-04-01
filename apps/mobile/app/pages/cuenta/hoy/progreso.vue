@@ -159,8 +159,8 @@ const { data: hoyPage } = await useAsyncData('progreso-hoy-page', async () => {
 })
 
 const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
-const badgeTitle = computed(() => hoyPage.value?.daily_plan?.title || hoyDefaults.value.badge_title || 'Día completado')
-const badgeSubtitle = computed(() => hoyPage.value?.daily_plan?.message || hoyDefaults.value.badge_subtitle || null)
+const badgeTitle = computed(() => hoyPage.value?.daily_plan?.badge_title || hoyDefaults.value.badge_title || 'Día completado')
+const badgeSubtitle = computed(() => hoyPage.value?.daily_plan?.badge_subtitle || hoyDefaults.value.badge_subtitle || null)
 
 // Content viewed count (count content_item_categories or benefit_clicks as a proxy; fallback to 0)
 const { data: contentViewed } = await useAsyncData('mobile-content-viewed', async () => {

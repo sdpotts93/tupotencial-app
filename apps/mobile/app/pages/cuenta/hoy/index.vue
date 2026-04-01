@@ -480,13 +480,13 @@ const featuredName = computed(() => {
     if (contentType === 'audio') return `Escucha ${name}`
     return name
   }
-  return dailyPlanData.value?.title || hoyDefaults.value.badge_title || 'Acción del día'
+  return dailyPlanData.value?.badge_title || hoyDefaults.value.badge_title || 'Acción del día'
 })
 
 const dailyPlan = computed(() => ({
   eyebrow: 'Acción del día',
   title: featuredName.value,
-  badgeShareText: dailyPlanData.value?.message || hoyDefaults.value.badge_subtitle || null,
+  badgeShareText: dailyPlanData.value?.badge_share_text || null,
 }))
 
 // ─── Mensaje del día (derived from daily plan payload or fallback to defaults) ───

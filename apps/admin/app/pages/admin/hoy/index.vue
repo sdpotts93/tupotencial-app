@@ -36,7 +36,7 @@
           <template #toolbar>
             <UiInput
               v-model="search"
-              placeholder="Buscar por tema..."
+              placeholder="Buscar por fecha..."
               style="min-width: 200px;"
             >
               <template #suffix><Icon name="lucide:search" size="18" /></template>
@@ -303,7 +303,6 @@ const weekTabs = [
 
 const columns = [
   { key: 'date', label: 'Fecha' },
-  { key: 'theme', label: 'Tema del día' },
   { key: 'items_count', label: 'Elementos' },
   { key: 'status', label: 'Estado' },
 ]
@@ -361,7 +360,6 @@ const dailyPlans = computed(() => {
   return (plans.value ?? []).map(p => ({
     id: p.id,
     date: p.date,
-    theme: (p as any).title ?? '',
     items_count: 1,
     status: p.status,
   }))
@@ -370,7 +368,7 @@ const dailyPlans = computed(() => {
 const filteredPlans = computed(() => {
   if (!search.value) return dailyPlans.value
   const q = search.value.toLowerCase()
-  return dailyPlans.value.filter(r => r.theme.toLowerCase().includes(q))
+  return dailyPlans.value.filter(r => r.date.toLowerCase().includes(q))
 })
 
 // ── Year view for "Todos los planes" ──

@@ -685,7 +685,7 @@ VALUES
 -- primary_action_ref is uuid; for 'custom' type where ref is null we use NULL
 
 INSERT INTO public.daily_plans (
-  id, date, community_segment, title, message,
+  id, date, community_segment,
   badge_share_text, badge_title, badge_subtitle,
   primary_action_type, primary_action_ref, primary_action_payload,
   status, created_by
@@ -695,8 +695,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000001',
     '2026-02-24', NULL,
-    'Tu momento de hoy',
-    'Buenos días. Hoy te invitamos a pausar, respirar y reconectarte contigo. Completa la meditación matutina y registra tu check-in.',
     'Hoy pause, respire y me reconecte conmigo. #TuPotencial',
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000001', '{}'::jsonb,
@@ -706,8 +704,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000002',
     '2026-02-24', 'carlotta',
-    'Carlotta: Despertar con intención',
-    'Hola, comunidad Carlotta. Hoy tu reto es dedicar 5 minutos a la rutina energizante antes de revisar tu teléfono. ¿Te atreves?',
     'Hoy desperte con intencion y energia. #Carlotta #TuPotencial',
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000002', '{}'::jsonb,
@@ -717,8 +713,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000003',
     '2026-02-24', 'gabriel',
-    'Gabriel: Respira y lidera',
-    'Comunidad Gabriel, el liderazgo empieza por dentro. Hoy practica la respiración 4-7-8 antes de tu primera junta o actividad importante.',
     'Hoy respire con intencion antes de liderar. #Gabriel #TuPotencial',
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000003', '{}'::jsonb,
@@ -728,8 +722,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000004',
     '2026-02-23', NULL,
-    'Domingo de reflexión',
-    'Es domingo. Un buen día para hacer una pausa más larga. Te dejamos un ejercicio de journaling para cerrar la semana con claridad.',
     NULL,
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000006', '{}'::jsonb,
@@ -739,8 +731,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000005',
     '2026-02-22', NULL,
-    'Sábado de visualización',
-    'Cierra los ojos por 15 minutos y visualiza tu mejor versión. ¿Cómo se ve? ¿Qué siente? ¿Qué hace diferente?',
     'Hoy visualice mi mejor version. #TuPotencial',
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000005', '{}'::jsonb,
@@ -750,8 +740,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000006',
     '2026-02-21', NULL,
-    'Viernes: Micro-hábito del día',
-    'Hoy tu único reto es: en algún momento del día, detente por 60 segundos y observa tu respiración sin cambiarla. Solo observa.',
     'Hoy observe mi respiracion por 60 segundos. Pequeños momentos, grandes cambios. #TuPotencial',
     NULL, NULL,
     'custom', NULL,
@@ -762,8 +750,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000007',
     '2026-02-25', NULL,
-    'Martes: Nuevo comienzo',
-    'Cada día es una nueva oportunidad. Hoy comienza con la meditación nocturna... pero por la mañana. Experimenta cómo se siente soltar antes de empezar.',
     NULL,
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000004', '{}'::jsonb,

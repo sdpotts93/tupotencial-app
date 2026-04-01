@@ -72,6 +72,11 @@
             label="Subtítulo del badge"
             placeholder="Ej: Sigue así, vas genial"
           />
+          <UiInput
+            v-model="form.badge_share_text"
+            label="Texto para compartir"
+            placeholder="Ej: Hoy pausé, respiré y me reconecté. #TuPotencial"
+          />
         </div>
       </UiCard>
 
@@ -109,8 +114,9 @@ const form = reactive({
   action_type: existingPlan.value?.primary_action_type ?? 'ai_prompt' as string,
   content_id: existingPayload?.content_id ?? '',
   form_id: existingPayload?.form_id ?? '',
-  badge_title: existingPlan.value?.badge_share_text ?? '',
-  badge_subtitle: existingPlan.value?.message ?? '',
+  badge_title: existingPlan.value?.badge_title ?? '',
+  badge_subtitle: existingPlan.value?.badge_subtitle ?? '',
+  badge_share_text: existingPlan.value?.badge_share_text ?? '',
 })
 
 const authorOptions = [
@@ -174,11 +180,11 @@ async function handleSave() {
 
     const payload = {
       date: dateParam.value,
-      title: form.badge_title,
-      message: form.badge_subtitle,
       primary_action_type: form.action_type,
       primary_action_payload: actionPayload,
-      badge_share_text: form.badge_title,
+      badge_title: form.badge_title,
+      badge_subtitle: form.badge_subtitle,
+      badge_share_text: form.badge_share_text,
       status: 'published',
     }
 

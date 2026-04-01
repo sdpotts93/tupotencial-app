@@ -573,12 +573,10 @@ export type Database = {
           created_by: string | null
           date: string
           id: string
-          message: string | null
           primary_action_payload: Json
           primary_action_ref: string | null
           primary_action_type: string
           status: string
-          title: string | null
           updated_at: string | null
         }
         Insert: {
@@ -590,12 +588,10 @@ export type Database = {
           created_by?: string | null
           date: string
           id?: string
-          message?: string | null
           primary_action_payload?: Json
           primary_action_ref?: string | null
           primary_action_type: string
           status?: string
-          title?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -607,12 +603,10 @@ export type Database = {
           created_by?: string | null
           date?: string
           id?: string
-          message?: string | null
           primary_action_payload?: Json
           primary_action_ref?: string | null
           primary_action_type?: string
           status?: string
-          title?: string | null
           updated_at?: string | null
         }
         Relationships: []
