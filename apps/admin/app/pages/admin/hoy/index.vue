@@ -47,12 +47,6 @@
             <strong>{{ formatDate(value) }}</strong>
           </template>
 
-          <template #cell-status="{ value }">
-            <UiTag :variant="value === 'published' ? 'success' : value === 'scheduled' ? 'info' : 'warning'">
-              {{ statusLabel(value) }}
-            </UiTag>
-          </template>
-
           <template #cell-items_count="{ value }">
             {{ value }} elementos
           </template>
@@ -304,7 +298,6 @@ const weekTabs = [
 const columns = [
   { key: 'date', label: 'Fecha' },
   { key: 'items_count', label: 'Elementos' },
-  { key: 'status', label: 'Estado' },
 ]
 
 // ── Fetch all daily plans from Supabase ──
@@ -361,7 +354,6 @@ const dailyPlans = computed(() => {
     id: p.id,
     date: p.date,
     items_count: 1,
-    status: p.status,
   }))
 })
 
@@ -655,10 +647,6 @@ function formatDate(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
-function statusLabel(status: string) {
-  const map: Record<string, string> = { published: 'Publicado', scheduled: 'Programado', draft: 'Borrador' }
-  return map[status] ?? status
-}
 
 function goToDate(date: string) {
   router.push(`/admin/hoy/${date}`)
