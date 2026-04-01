@@ -101,7 +101,7 @@
         <UiInput
           v-model="inviteForm.email"
           label="Correo electrónico"
-          type="email"
+          type="text"
           placeholder="nuevo@admin.com"
         />
         <UiInput

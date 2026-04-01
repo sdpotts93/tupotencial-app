@@ -46,7 +46,7 @@
           <UiInput
             v-model="email"
             label="Correo electrónico"
-            type="email"
+            type="text"
             placeholder="tu@correo.com"
             autocomplete="email"
             :error="errors.email"
@@ -75,7 +75,6 @@
             type="submit"
             block
             :loading="loading"
-            :disabled="!email || !password || !confirmPassword"
             variant="secondary"
           >
             Crear cuenta

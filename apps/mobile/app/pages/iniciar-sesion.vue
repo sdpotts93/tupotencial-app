@@ -49,7 +49,7 @@
           <UiInput
             v-model="loginEmail"
             label="Correo electrónico"
-            type="email"
+            type="text"
             placeholder="Ingresa tu correo"
             autocomplete="email"
             :error="loginErrors.email"
@@ -71,7 +71,6 @@
             type="submit"
             block
             :loading="loginLoading"
-            :disabled="!loginEmail"
             variant="secondary"
           >
             Continuar
@@ -117,7 +116,7 @@
           <UiInput
             v-model="regEmail"
             label="Correo electrónico"
-            type="email"
+            type="text"
             placeholder="tu@correo.com"
             autocomplete="email"
             :error="regErrors.email"
@@ -146,7 +145,6 @@
             type="submit"
             block
             :loading="regLoading"
-            :disabled="!regEmail || !regPassword || !regConfirm"
             variant="secondary"
           >
             Crear cuenta

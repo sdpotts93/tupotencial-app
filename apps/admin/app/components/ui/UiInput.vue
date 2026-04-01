@@ -86,7 +86,7 @@ const showPassword = ref(false)
   align-items: center;
   gap: var(--space-2);
   background: var(--color-input-bg);
-  border: none;
+  border: 1.5px solid transparent;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);

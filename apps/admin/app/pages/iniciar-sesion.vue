@@ -46,7 +46,7 @@
           <UiInput
             v-model="email"
             label="Correo electrónico"
-            type="email"
+            type="text"
             placeholder="admin@tupotencial.app"
             autocomplete="email"
             :error="errors.email"
@@ -67,7 +67,6 @@
             type="submit"
             block
             :loading="isLoading"
-            :disabled="!email || !password"
             variant="secondary"
           >
             Entrar

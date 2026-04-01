@@ -51,7 +51,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 
 .textarea-field__input {
   background: var(--color-input-bg);
-  border: none;
+  border: 1.5px solid transparent;
   box-shadow: 0px 0px 2px var(--color-input-shadow);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
