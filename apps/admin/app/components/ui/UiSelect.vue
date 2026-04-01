@@ -23,51 +23,54 @@
         </svg>
       </button>
 
-      <div v-if="open" class="select-field__backdrop" @click="close" />
+      <Teleport to="body">
+        <div v-if="open" class="select-field__backdrop" @click="close" />
 
-      <Transition name="select-dropdown">
-        <div
-          v-if="open"
-          ref="dropdownRef"
-          class="select-field__dropdown"
-          role="listbox"
-        >
-          <div v-if="searchable" class="select-field__search">
-            <svg class="select-field__search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <input
-              ref="searchInputRef"
-              v-model="search"
-              type="text"
-              class="select-field__search-input"
-              placeholder="Buscar..."
-              @keydown.escape="close"
-            />
-          </div>
-
-          <div class="select-field__options">
-            <button
-              v-for="opt in filteredOptions"
-              :key="opt.value"
-              type="button"
-              role="option"
-              :class="['select-field__option', { 'select-field__option--selected': opt.value === modelValue }]"
-              :aria-selected="opt.value === modelValue"
-              @click="select(opt.value)"
-            >
-              {{ opt.label }}
-              <svg v-if="opt.value === modelValue" class="select-field__check" width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <Transition name="select-dropdown">
+          <div
+            v-if="open"
+            ref="dropdownRef"
+            class="select-field__dropdown"
+            :style="dropdownStyle"
+            role="listbox"
+          >
+            <div v-if="searchable" class="select-field__search">
+              <svg class="select-field__search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
-            </button>
-            <p v-if="filteredOptions.length === 0" class="select-field__empty">
-              Sin resultados
-            </p>
+              <input
+                ref="searchInputRef"
+                v-model="search"
+                type="text"
+                class="select-field__search-input"
+                placeholder="Buscar..."
+                @keydown.escape="close"
+              />
+            </div>
+
+            <div class="select-field__options">
+              <button
+                v-for="opt in filteredOptions"
+                :key="opt.value"
+                type="button"
+                role="option"
+                :class="['select-field__option', { 'select-field__option--selected': opt.value === modelValue }]"
+                :aria-selected="opt.value === modelValue"
+                @click="select(opt.value)"
+              >
+                {{ opt.label }}
+                <svg v-if="opt.value === modelValue" class="select-field__check" width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <p v-if="filteredOptions.length === 0" class="select-field__empty">
+                Sin resultados
+              </p>
+            </div>
           </div>
-        </div>
-      </Transition>
+        </Transition>
+      </Teleport>
     </div>
 
     <p v-if="error" class="select-field__error">{{ error }}</p>
@@ -110,6 +113,18 @@ const search = ref('')
 const containerRef = ref<HTMLElement>()
 const dropdownRef = ref<HTMLElement>()
 const searchInputRef = ref<HTMLInputElement>()
+const triggerRect = ref<DOMRect | null>(null)
+
+const dropdownStyle = computed(() => {
+  if (!triggerRect.value) return {}
+  const r = triggerRect.value
+  return {
+    position: 'fixed' as const,
+    top: `${r.bottom + 4}px`,
+    left: `${r.left}px`,
+    width: `${r.width}px`,
+  }
+})
 
 const selectedLabel = computed(() => {
   const found = props.options.find(o => o.value === props.modelValue)
@@ -131,6 +146,10 @@ function toggle() {
 }
 
 function openDropdown() {
+  const trigger = containerRef.value?.querySelector('.select-field__trigger')
+  if (trigger) {
+    triggerRect.value = trigger.getBoundingClientRect()
+  }
   open.value = true
   search.value = ''
   if (props.searchable) {
@@ -152,6 +171,7 @@ function onClickOutside(e: MouseEvent) {
   if (!open.value) return
   const target = e.target as Node
   if (containerRef.value?.contains(target)) return
+  if (dropdownRef.value?.contains(target)) return
   close()
 }
 
@@ -220,6 +240,18 @@ onBeforeUnmount(() => {
   transition: transform var(--transition-fast);
 }
 
+.select-field--error .select-field__trigger { border-color: var(--color-danger); }
+.select-field__required { color: var(--color-danger); margin-left: 2px; }
+.select-field__error { font-size: var(--text-xs); color: var(--color-danger); }
+
+.select-field--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+</style>
+
+<!-- Unscoped styles for teleported dropdown -->
+<style>
 .select-field__backdrop {
   position: fixed;
   inset: 0;
@@ -227,10 +259,6 @@ onBeforeUnmount(() => {
 }
 
 .select-field__dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
   z-index: 100;
   background: var(--color-input-bg);
   border: 1px solid var(--color-border);
@@ -311,13 +339,6 @@ onBeforeUnmount(() => {
 }
 
 .select-field__required { color: var(--color-danger); margin-left: 2px; }
-.select-field--error .select-field__trigger { border-color: var(--color-danger); }
-.select-field__error { font-size: var(--text-xs); color: var(--color-danger); }
-
-.select-field--disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
 
 /* Transition */
 .select-dropdown-enter-active,

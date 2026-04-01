@@ -32,7 +32,7 @@
         :key="`desk-${step}`"
         block
         variant="secondary"
-        :disabled="!hasAnswer()"
+        :disabled="!hasAnswer"
         class="onboarding__desktop-btn onboarding__btn-fade"
         @click="handleContinue"
       >
@@ -42,7 +42,7 @@
 
     <!-- Mobile: bottom-pinned button -->
     <div :key="`foot-${step}`" class="onboarding__footer onboarding__btn-fade">
-      <UiButton block variant="secondary" :disabled="!hasAnswer()" @click="handleContinue">
+      <UiButton block variant="secondary" :disabled="!hasAnswer" @click="handleContinue">
         Continuar
       </UiButton>
     </div>
@@ -130,11 +130,11 @@ function toggleOption(value: string) {
   }
 }
 
-function hasAnswer() {
+const hasAnswer = computed(() => {
   const answer = answers.value[currentStep.value.key]
   if (Array.isArray(answer)) return answer.length > 0
   return !!answer
-}
+})
 
 function handleBack() {
   if (step.value > 0) {
@@ -145,7 +145,7 @@ function handleBack() {
 }
 
 async function handleContinue() {
-  if (!hasAnswer()) return
+  if (!hasAnswer.value) return
 
   if (step.value < steps.length - 1) {
     step.value++
