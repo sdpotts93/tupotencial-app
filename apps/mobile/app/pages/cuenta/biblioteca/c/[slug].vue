@@ -23,7 +23,10 @@
           </div>
           <div class="cat__item-body">
             <h3 class="cat__item-name">{{ item.title }}</h3>
-            <p class="cat__item-meta">{{ item.meta }}</p>
+            <div class="cat__item-meta-row">
+              <span v-if="item.duration" class="cat__item-meta">{{ item.duration }}</span>
+              <span v-if="item.typeLabel" class="cat__type-tag">{{ item.typeLabel }}</span>
+            </div>
             <span class="cat__item-category">{{ category.title }}</span>
           </div>
         </div>
@@ -72,11 +75,13 @@ const { data: categoryData } = await useAsyncData(`category-${slug}`, async () =
       const item = ic.content_items as any
       if (!item) return null
       const durationLabel = formatDuration(item.duration_seconds)
-      const typeLabel = item.type ? item.type.charAt(0).toUpperCase() + item.type.slice(1) : ''
+      const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' }
+      const typeLabel = typeLabels[item.type] ?? item.type
       return {
         id: item.id,
         title: item.title,
-        meta: [durationLabel, typeLabel].filter(Boolean).join(' \u2022 '),
+        duration: durationLabel,
+        typeLabel,
         thumbnail: item.thumbnail_url ?? null,
         entitlement_key: item.entitlement_key,
         plan: item.plan,
@@ -195,11 +200,30 @@ function handleItemClick(item: { id: string; entitlement_key: string | null; pla
   margin-bottom: 2px;
 }
 
+.cat__item-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+}
+
 .cat__item-meta {
   font-size: var(--text-sm);
   color: var(--color-muted);
   line-height: var(--leading-normal);
-  margin-bottom: 4px;
+}
+
+.cat__type-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-family: var(--font-eyebrow);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  background: #ebebeb;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
 }
 
 .cat__item-category {

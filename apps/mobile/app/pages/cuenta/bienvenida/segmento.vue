@@ -33,7 +33,7 @@
         block
         variant="secondary"
         :disabled="!hasAnswer"
-        class="onboarding__desktop-btn onboarding__btn-fade"
+        class="onboarding__desktop-btn"
         @click="handleContinue"
       >
         Continuar
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Mobile: bottom-pinned button -->
-    <div :key="`foot-${step}`" class="onboarding__footer onboarding__btn-fade">
+    <div :key="`foot-${step}`" class="onboarding__footer">
       <UiButton block variant="secondary" :disabled="!hasAnswer" @click="handleContinue">
         Continuar
       </UiButton>
@@ -265,12 +265,6 @@ async function handleContinue() {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* ─── Fade-in for buttons ─── */
-@keyframes btn-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 .onboarding__fade-in {

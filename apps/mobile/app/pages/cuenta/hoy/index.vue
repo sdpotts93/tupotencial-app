@@ -142,7 +142,10 @@
             </div>
             <div class="hoy__latest-info">
               <span class="hoy__latest-title">{{ item.title }}</span>
-              <span v-if="item.duration" class="hoy__latest-duration"><Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}</span>
+              <div class="hoy__latest-meta-row">
+                <span v-if="item.duration" class="hoy__latest-duration"><Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}</span>
+                <span v-if="item.typeLabel" class="hoy__type-tag">{{ item.typeLabel }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1443,15 +1446,34 @@ function closeAccionSheet() {
   overflow: hidden;
 }
 
+.hoy__latest-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
 .hoy__latest-duration {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 10px;
   color: var(--color-muted);
-  margin-top: var(--space-1);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
+}
+
+.hoy__type-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-family: var(--font-eyebrow);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  background: #ebebeb;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
 }
 
 /* ─── Explore grid ─── */

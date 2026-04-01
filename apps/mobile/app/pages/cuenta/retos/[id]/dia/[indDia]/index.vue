@@ -33,6 +33,7 @@
               <span class="day__card-meta">
                 <Icon :name="activityIcon(activity)" size="12" />
                 <span v-if="activity.duration">{{ activity.duration }}</span>
+                <span v-if="activityTypeLabel(activity)" class="day__type-tag">{{ activityTypeLabel(activity) }}</span>
               </span>
             </div>
             <span class="day__card-check">
@@ -61,6 +62,7 @@
               <span class="day__card-meta">
                 <Icon :name="activityIcon(activity)" size="12" />
                 <span v-if="activity.duration">{{ activity.duration }}</span>
+                <span v-if="activityTypeLabel(activity)" class="day__type-tag">{{ activityTypeLabel(activity) }}</span>
               </span>
             </div>
             <span class="day__card-check">
@@ -150,6 +152,13 @@ interface DayActivity {
   duration?: string
   done: boolean
   to?: string
+}
+
+function activityTypeLabel(activity: DayActivity): string {
+  if (activity.type === 'ai') return 'Coach IA'
+  if (activity.type === 'form') return 'Check-in'
+  const labels: Record<string, string> = { video: 'Video', audio: 'Audio', text: 'Artículo' }
+  return labels[activity.mediaType ?? ''] ?? ''
 }
 
 function activityIcon(activity: DayActivity): string {
@@ -457,6 +466,19 @@ function closeFormSheet() {
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.day__type-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-family: var(--font-eyebrow);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  background: #ebebeb;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
 }
 
 .day__card-check {

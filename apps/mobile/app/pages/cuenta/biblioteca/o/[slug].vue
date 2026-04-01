@@ -25,7 +25,10 @@
           </div>
           <div class="obj__item-body">
             <h3 class="obj__item-name">{{ item.title }}</h3>
-            <p class="obj__item-meta">{{ item.meta }}</p>
+            <div class="obj__item-meta-row">
+              <span v-if="item.duration" class="obj__item-meta">{{ item.duration }}</span>
+              <span v-if="item.typeLabel" class="obj__type-tag">{{ item.typeLabel }}</span>
+            </div>
             <span class="obj__item-tag">{{ objective.title }}</span>
           </div>
         </div>
@@ -48,7 +51,7 @@ const showPurchaseModal = ref(false)
 const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 
 // ── Fetch objective + content in one call (avoids SSR auth race) ──
-const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Texto' }
+const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' }
 
 function formatDuration(seconds: number | null): string {
   if (!seconds) return ''
@@ -76,7 +79,8 @@ const { data: pageData } = await useAsyncData(`objective-page-${slug}`, async ()
     items: (contentItems ?? []).map(item => ({
       id: item.id,
       title: item.title,
-      meta: [formatDuration(item.duration_seconds), typeLabels[item.type] ?? item.type].filter(Boolean).join(' \u2022 '),
+      duration: formatDuration(item.duration_seconds),
+      typeLabel: typeLabels[item.type] ?? item.type,
       thumbnail: item.thumbnail_url ?? null,
       entitlement_key: item.entitlement_key,
       plan: item.plan,
@@ -204,11 +208,30 @@ function handleItemClick(item: { id: string; entitlement_key: string | null; pla
   margin-bottom: 2px;
 }
 
+.obj__item-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+}
+
 .obj__item-meta {
   font-size: var(--text-sm);
   color: var(--color-muted);
   line-height: var(--leading-normal);
-  margin-bottom: 4px;
+}
+
+.obj__type-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-family: var(--font-eyebrow);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  background: #ebebeb;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
 }
 
 .obj__item-tag {

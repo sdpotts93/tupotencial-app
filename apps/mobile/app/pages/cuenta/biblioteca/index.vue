@@ -47,7 +47,10 @@
               </div>
               <div class="library__search-item-body">
                 <h3 class="library__search-item-name">{{ item.title }}</h3>
-                <p class="library__search-item-meta">{{ item.meta }}</p>
+                <div class="library__search-item-meta-row">
+                  <span v-if="item.duration" class="library__search-item-meta">{{ item.duration }}</span>
+                  <span v-if="item.typeLabel" class="library__type-tag">{{ item.typeLabel }}</span>
+                </div>
                 <span class="library__search-item-category">{{ item.category }}</span>
               </div>
             </div>
@@ -101,9 +104,12 @@
                 </div>
                 <div class="library__scroll-info">
                   <span class="library__scroll-title">{{ item.title }}</span>
-                  <span v-if="item.duration" class="library__scroll-duration">
-                    <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
-                  </span>
+                  <div class="library__scroll-meta-row">
+                    <span v-if="item.duration" class="library__scroll-duration">
+                      <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
+                    </span>
+                    <span v-if="item.typeLabel" class="library__type-tag">{{ item.typeLabel }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -167,9 +173,12 @@
                 </div>
                 <div class="library__scroll-info">
                   <span class="library__scroll-title">{{ item.title }}</span>
-                  <span v-if="item.duration" class="library__scroll-duration">
-                    <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
-                  </span>
+                  <div class="library__scroll-meta-row">
+                    <span v-if="item.duration" class="library__scroll-duration">
+                      <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
+                    </span>
+                    <span v-if="item.typeLabel" class="library__type-tag">{{ item.typeLabel }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -243,7 +252,7 @@ function formatDuration(seconds: number | null) {
 }
 
 // ─── Database-powered search via Postgres full-text search ───
-const searchResults = ref<{ id: string; title: string; meta: string; category: string; thumbnail: string; entitlement_key: string | null }[]>([])
+const searchResults = ref<{ id: string; title: string; duration: string | null; typeLabel: string; category: string; thumbnail: string; entitlement_key: string | null }[]>([])
 const searchLoading = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -259,7 +268,8 @@ watch(query, (q) => {
     searchResults.value = (data ?? []).map((c: any) => ({
       id: c.id,
       title: c.title,
-      meta: `${formatDuration(c.duration_seconds) ?? ''} ${c.type ? `\u2022 ${c.type.charAt(0).toUpperCase() + c.type.slice(1)}` : ''}`.trim(),
+      duration: formatDuration(c.duration_seconds),
+      typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[c.type] ?? c.type,
       category: c.category_title ?? '',
       thumbnail: c.thumbnail_url ?? null,
       entitlement_key: c.entitlement_key ?? null,
@@ -292,7 +302,7 @@ const { data: categoriesData } = await useAsyncData('mobile-library-categories',
     arr.push({
       id: item.id,
       title: item.title,
-      typeLabel: item.type ? item.type.charAt(0).toUpperCase() + item.type.slice(1) : '',
+      typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[item.type] ?? item.type,
       duration: formatDuration(item.duration_seconds),
       thumbnail: item.thumbnail_url ?? null,
       entitlement_key: item.entitlement_key,
@@ -396,10 +406,11 @@ const { data: programsWithContent } = await useAsyncData('mobile-library-program
   // Get content items linked to programs via program_days -> program_day_items -> content_items
   const { data: dayItems } = await client
     .from('program_day_items')
-    .select('program_days(program_id), content_items(id, title, duration_seconds, thumbnail_url, entitlement_key, plan)')
+    .select('program_days(program_id), content_items(id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan)')
     .eq('type', 'content')
     .order('position')
   // Group content items by program_id
+  const typeLabelsMap: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' }
   const progContentMap = new Map<string, any[]>()
   for (const di of dayItems ?? []) {
     const programId = (di.program_days as any)?.program_id
@@ -411,6 +422,7 @@ const { data: programsWithContent } = await useAsyncData('mobile-library-program
       arr.push({
         id: item.id,
         title: item.title,
+        typeLabel: typeLabelsMap[item.type] ?? item.type,
         duration: formatDuration(item.duration_seconds),
         thumbnail: item.thumbnail_url ?? null,
         entitlement_key: item.entitlement_key,
@@ -546,11 +558,17 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
   margin-bottom: 2px;
 }
 
+.library__search-item-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+}
+
 .library__search-item-meta {
   font-size: var(--text-sm);
   color: var(--color-muted);
   line-height: var(--leading-normal);
-  margin-bottom: 4px;
 }
 
 .library__search-item-category {
@@ -733,15 +751,34 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
   overflow: hidden;
 }
 
+.library__scroll-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
 .library__scroll-duration {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 10px;
   color: var(--color-muted);
-  margin-top: var(--space-1);
   font-family: var(--font-eyebrow);
   text-transform: uppercase;
+}
+
+.library__type-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-family: var(--font-eyebrow);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  background: #ebebeb;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
 }
 
 /* ─── Programs tab: header + badge ─── */
