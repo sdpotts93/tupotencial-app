@@ -32,31 +32,50 @@
         </UiInput>
 
         <div v-if="query" class="library__search-results">
-          <p v-if="filteredResults.length" class="eyebrow library__search-results-label">RESULTADOS</p>
-
-          <div class="library__search-list">
-            <div
-              v-for="item in filteredResults"
-              :key="item.id"
-              :class="['library__search-item', { 'library__search-item--locked': isLocked(item.entitlement_key) }]"
-              @click="handleSearchClick(item)"
-            >
-              <div class="library__search-item-thumb-wrap">
-                <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__search-item-thumb" />
-                <EntitlementLockBadge :locked="isLocked(item.entitlement_key)" />
-              </div>
-              <div class="library__search-item-body">
-                <h3 class="library__search-item-name">{{ item.title }}</h3>
-                <div class="library__search-item-meta-row">
-                  <span v-if="item.duration" class="library__search-item-meta">{{ item.duration }}</span>
-                  <span v-if="item.typeLabel" class="library__type-tag">{{ item.typeLabel }}</span>
-                </div>
-                <span class="library__search-item-category">{{ item.category }}</span>
-              </div>
-            </div>
+          <!-- Loading -->
+          <div v-if="searchLoading" class="library__search-loading">
+            <svg class="library__spinner" width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.2" />
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <span class="library__search-loading-text">Buscando...</span>
           </div>
 
-          <UiEmptyState v-if="!filteredResults.length" title="Sin resultados" description="Intenta con otros términos de búsqueda." />
+          <!-- Error -->
+          <UiEmptyState v-else-if="searchError" title="Error al buscar" :description="searchError">
+            <template #action>
+              <button class="library__retry-btn" @click="retrySearch">Reintentar</button>
+            </template>
+          </UiEmptyState>
+
+          <!-- Results -->
+          <template v-else>
+            <p v-if="filteredResults.length" class="eyebrow library__search-results-label">RESULTADOS</p>
+
+            <div class="library__search-list">
+              <div
+                v-for="item in filteredResults"
+                :key="item.id"
+                :class="['library__search-item', { 'library__search-item--locked': isLocked(item.entitlement_key) }]"
+                @click="handleSearchClick(item)"
+              >
+                <div class="library__search-item-thumb-wrap">
+                  <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__search-item-thumb" />
+                  <EntitlementLockBadge :locked="isLocked(item.entitlement_key)" />
+                </div>
+                <div class="library__search-item-body">
+                  <h3 class="library__search-item-name">{{ item.title }}</h3>
+                  <div class="library__search-item-meta-row">
+                    <span v-if="item.duration" class="library__search-item-meta">{{ item.duration }}</span>
+                    <span v-if="item.typeLabel" class="library__type-tag">{{ item.typeLabel }}</span>
+                  </div>
+                  <span class="library__search-item-category">{{ item.category }}</span>
+                </div>
+              </div>
+            </div>
+
+            <UiEmptyState v-if="!filteredResults.length" title="Sin resultados" description="Intenta con otros términos de búsqueda." />
+          </template>
         </div>
       </div>
 
@@ -254,28 +273,69 @@ function formatDuration(seconds: number | null) {
 // ─── Database-powered search via Postgres full-text search ───
 const searchResults = ref<{ id: string; title: string; duration: string | null; typeLabel: string; category: string; thumbnail: string; entitlement_key: string | null }[]>([])
 const searchLoading = ref(false)
+const searchError = ref<string | null>(null)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
+
+const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' }
+
+function mapResults(rows: any[]) {
+  return rows.map((c: any) => ({
+    id: c.id,
+    title: c.title,
+    duration: formatDuration(c.duration_seconds),
+    typeLabel: typeLabels[c.type] ?? c.type,
+    category: c.category_title ?? '',
+    thumbnail: c.thumbnail_url ?? null,
+    entitlement_key: c.entitlement_key ?? null,
+  }))
+}
+
+async function performSearch(q: string) {
+  searchError.value = null
+  searchLoading.value = true
+  try {
+    // Full-text search
+    const { data: ftsData, error: ftsErr } = await client.rpc('search_content', { search_query: q, max_results: 20 })
+    if (ftsErr) throw ftsErr
+
+    // ILIKE fallback on title for partial/exact matches the FTS may miss
+    const { data: likeData, error: likeErr } = await client
+      .from('content_items')
+      .select('id, title, type, duration_seconds, thumbnail_url, entitlement_key')
+      .eq('status', 'published')
+      .ilike('title', `%${q}%`)
+      .limit(20)
+    if (likeErr) throw likeErr
+
+    // Merge: FTS results first, then ILIKE-only results (no duplicates)
+    const ftsIds = new Set((ftsData ?? []).map((r: any) => r.id))
+    const likeOnly = (likeData ?? []).filter((r: any) => !ftsIds.has(r.id)).map((r: any) => ({
+      ...r,
+      category_title: null,
+    }))
+    searchResults.value = mapResults([...(ftsData ?? []), ...likeOnly])
+  } catch (err: any) {
+    searchError.value = err?.message ?? 'No se pudo completar la búsqueda. Intenta de nuevo.'
+    searchResults.value = []
+  } finally {
+    searchLoading.value = false
+  }
+}
+
+function retrySearch() {
+  if (query.value && query.value.length >= 2) performSearch(query.value)
+}
 
 watch(query, (q) => {
   if (searchTimer) clearTimeout(searchTimer)
   if (!q || q.length < 2) {
     searchResults.value = []
+    searchError.value = null
+    searchLoading.value = false
     return
   }
   searchLoading.value = true
-  searchTimer = setTimeout(async () => {
-    const { data } = await client.rpc('search_content', { search_query: q, max_results: 20 })
-    searchResults.value = (data ?? []).map((c: any) => ({
-      id: c.id,
-      title: c.title,
-      duration: formatDuration(c.duration_seconds),
-      typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[c.type] ?? c.type,
-      category: c.category_title ?? '',
-      thumbnail: c.thumbnail_url ?? null,
-      entitlement_key: c.entitlement_key ?? null,
-    }))
-    searchLoading.value = false
-  }, 300)
+  searchTimer = setTimeout(() => performSearch(q), 1000)
 })
 
 const filteredResults = computed(() => searchResults.value)
@@ -511,6 +571,38 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
 }
 
 .library__search-results-label { margin-bottom: var(--space-4); }
+
+.library__search-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) 0;
+  color: var(--color-muted);
+}
+
+.library__search-loading-text {
+  font-size: var(--text-sm);
+}
+
+.library__spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.library__retry-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  margin-top: var(--space-2);
+}
 
 .library__search-list {
   display: flex;

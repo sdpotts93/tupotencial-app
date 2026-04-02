@@ -109,15 +109,15 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh } = await useInfi
     if (filterSegment.value) profilesQuery = profilesQuery.eq('community_segment', filterSegment.value)
 
     // For plan/status filter, pre-filter by subscription status
-    if (filterPlan.value === 'core' || filterStatus.value === 'active') {
-      const { data: activeSubs } = await client.from('subscriptions').select('user_id').eq('status', 'active')
-      const activeIds = (activeSubs ?? []).map(s => s.user_id)
-      if (!activeIds.length) return []
-      profilesQuery = profilesQuery.in('id', activeIds)
-    } else if (filterPlan.value === 'free' || filterStatus.value === 'inactive') {
-      const { data: activeSubs } = await client.from('subscriptions').select('user_id').eq('status', 'active')
-      const activeIds = (activeSubs ?? []).map(s => s.user_id)
-      if (activeIds.length) profilesQuery = profilesQuery.not('id', 'in', `(${activeIds.join(',')})`)
+    if (filterPlan.value === 'core' || filterStatus.value === 'active' || filterPlan.value === 'free' || filterStatus.value === 'inactive') {
+      const { data: activeIds } = await client.rpc('get_subscriber_user_ids')
+      const ids = activeIds ?? []
+      if (filterPlan.value === 'core' || filterStatus.value === 'active') {
+        if (!ids.length) return []
+        profilesQuery = profilesQuery.in('id', ids)
+      } else {
+        if (ids.length) profilesQuery = profilesQuery.not('id', 'in', `(${ids.join(',')})`)
+      }
     }
 
     const { data: profiles } = await profilesQuery.range(from, to).order('created_at', { ascending: false })

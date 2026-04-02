@@ -545,6 +545,7 @@ export type Database = {
           date: string
           id: string
           payload: Json
+          type: string
           user_id: string
         }
         Insert: {
@@ -552,6 +553,7 @@ export type Database = {
           date: string
           id?: string
           payload?: Json
+          type: string
           user_id: string
         }
         Update: {
@@ -559,6 +561,7 @@ export type Database = {
           date?: string
           id?: string
           payload?: Json
+          type?: string
           user_id?: string
         }
         Relationships: []
@@ -1253,7 +1256,22 @@ export type Database = {
         Args: { p_date?: string }
         Returns: Json
       }
+      count_completed_days: { Args: Record<PropertyKey, never>; Returns: number }
+      get_subscriber_user_ids: { Args: Record<PropertyKey, never>; Returns: string[] }
       is_admin: { Args: never; Returns: boolean }
+      search_content: {
+        Args: { search_query: string; max_results?: number }
+        Returns: {
+          id: string
+          title: string
+          type: string
+          duration_seconds: number | null
+          thumbnail_url: string | null
+          entitlement_key: string | null
+          category_title: string | null
+          rank: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

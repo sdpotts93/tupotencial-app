@@ -124,7 +124,7 @@ const { canEdit } = useAdminAuth()
 const { rows, hasMore, loading, loadingMore, loadMore, refresh } = await useInfiniteTable(
   'admin-programs',
   async ({ from, to }) => {
-    let query = client.from('programs').select('*')
+    let query = client.from('programs').select('*, program_enrollments(count)')
 
     if (search.value) query = query.ilike('title', `%${search.value}%`)
     if (filterType.value) query = query.eq('type', filterType.value)
@@ -135,6 +135,7 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh } = await useInfi
     return (data ?? []).map(p => ({
       ...p,
       program_type: p.type,
+      enrolled_count: (p.program_enrollments as any)?.[0]?.count ?? 0,
     }))
   },
   [search, filterType, filterStatus, filterPlan],

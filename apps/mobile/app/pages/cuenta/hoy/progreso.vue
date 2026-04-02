@@ -41,8 +41,8 @@
       <!-- Stats -->
       <section class="progress__stats">
         <div class="progress__stat">
-          <span class="progress__stat-value progress__stat-value--checkins">{{ totalCheckins }}</span>
-          <span class="progress__stat-label">Check-ins hechos</span>
+          <span class="progress__stat-value progress__stat-value--checkins">{{ completedDays }}</span>
+          <span class="progress__stat-label">Días completados</span>
         </div>
         <div class="progress__stat">
           <span class="progress__stat-value progress__stat-value--programs">{{ activeProgramsCount }}</span>
@@ -94,10 +94,10 @@ const { data: streakData } = await useAsyncData('mobile-streak', async () => {
 const currentStreak = computed(() => streakData.value?.current_streak ?? 0)
 const bestStreak = computed(() => streakData.value?.best_streak ?? 0)
 
-const { data: totalCheckins } = await useAsyncData('mobile-total-checkins', async () => {
+const { data: completedDays } = await useAsyncData('mobile-completed-days', async () => {
   if (!user.value?.id) return 0
-  const { count } = await client.from('daily_checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.value.id).eq('type', 'checkin')
-  return count ?? 0
+  const { data } = await client.rpc('count_completed_days')
+  return data ?? 0
 }, { watch: [() => user.value?.id] })
 
 const { data: activeEnrollments } = await useAsyncData('mobile-active-programs', async () => {
