@@ -486,7 +486,7 @@ const featuredName = computed(() => {
 const dailyPlan = computed(() => ({
   eyebrow: 'Acción del día',
   title: featuredName.value,
-  badgeShareText: dailyPlanData.value?.badge_share_text || null,
+  badgeShareText: dailyPlanData.value?.badge_subtitle || hoyDefaults.value.badge_subtitle || null,
 }))
 
 // ─── Mensaje del día (derived from daily plan payload or fallback to defaults) ───
@@ -558,12 +558,15 @@ async function checkAutoCompleteAccion() {
   if (actionType.value === 'ai_prompt') {
     // Check localStorage flag AND verify a user message actually exists in DB today
     if (localStorage.getItem(`hoy-ai-done-${today}`) === 'true') {
+      // Use timezone-aware bounds so the filter matches the user's local day
+      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+      const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
       const { data } = await client.from('ai_messages')
         .select('id')
         .eq('user_id', user.value.id)
         .eq('role', 'user')
-        .gte('created_at', `${today}T00:00:00`)
-        .lte('created_at', `${today}T23:59:59`)
+        .gte('created_at', dayStart)
+        .lt('created_at', dayEnd)
         .limit(1)
         .maybeSingle()
       completed = !!data

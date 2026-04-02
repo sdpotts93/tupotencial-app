@@ -686,7 +686,7 @@ VALUES
 
 INSERT INTO public.daily_plans (
   id, date, community_segment,
-  badge_share_text, badge_title, badge_subtitle,
+  badge_title, badge_subtitle,
   primary_action_type, primary_action_ref, primary_action_payload,
   status, created_by
 )
@@ -879,6 +879,238 @@ Inscríbete desde la sección de Retos. ¡Empezamos el lunes!$$,
     NULL,
     'draft',
     '2026-02-24T07:00:00.000Z'
+  ),
+  -- ── Additional posts for pagination testing (40 total) ──
+  (
+    'f0000000-0000-4000-8000-000000000008',
+    'a0000000-0000-4000-8000-000000000002', false, 'gabriel',
+    'Pequeños cambios, grandes resultados',
+    'Esta semana cambié solo una cosa: dejar el celular fuera del cuarto al dormir. El resultado ha sido increíble. Duermo mejor, me despierto más tranquilo y mi check-in matutino sale natural. A veces el cambio más pequeño es el más poderoso.',
+    NULL, 'published', '2026-02-25T08:30:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000009',
+    'a0000000-0000-4000-8000-000000000003', false, 'carlotta',
+    NULL,
+    'Acabo de terminar el módulo de alimentación consciente y estoy impactada. Nunca me había dado cuenta de cuántas veces como sin realmente estar presente. Hoy almorcé sin pantallas por primera vez en meses y fue una experiencia totalmente diferente.',
+    NULL, 'published', '2026-02-25T13:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000010',
+    NULL, true, 'gabriel',
+    'Tip de la semana: La regla de los 2 minutos',
+    'Si algo te toma menos de 2 minutos, hazlo ahora. No lo dejes para después. Aplica para tu práctica de bienestar también: 2 minutos de respiración consciente es mejor que 0 minutos de una meditación perfecta que nunca haces.',
+    NULL, 'published', '2026-02-26T09:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000011',
+    'a0000000-0000-4000-8000-000000000004', false, 'carlotta',
+    'Día 3 del reto de gratitud',
+    'Hoy el ejercicio fue escribir una carta de agradecimiento a alguien que no espera recibirla. Se la mandé a mi mamá y me llamó llorando. No esperaba que algo tan sencillo tuviera tanto impacto. Gracias por este reto.',
+    NULL, 'published', '2026-02-26T18:20:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000012',
+    'a0000000-0000-4000-8000-000000000005', false, 'gabriel',
+    NULL,
+    '¿Alguien ha probado hacer ejercicios de respiración antes de una junta importante? Hoy lo hice por primera vez y llegué mucho más centrado. Mis compañeros hasta me preguntaron si me había tomado un café especial jaja.',
+    NULL, 'published', '2026-02-27T11:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000013',
+    'a0000000-0000-4000-8000-000000000001', false, 'carlotta',
+    'Reflexión sobre el autoconocimiento',
+    'Algo que he aprendido en estas semanas: conocerte no es un destino, es un camino. Cada día descubro algo nuevo sobre mí. Hoy descubrí que necesito más silencio del que pensaba. Y está bien.',
+    NULL, 'published', '2026-02-27T20:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000014',
+    'a0000000-0000-4000-8000-000000000002', false, 'gabriel',
+    'Mi rutina matutina actualizada',
+    'Después de un mes probando cosas, encontré mi rutina ideal: 1) Despertar sin alarma (me acuesto más temprano), 2) 5 min de respiración, 3) Check-in en la app, 4) Desayuno sin pantallas. Total: 30 min que cambian todo el día.',
+    NULL, 'published', '2026-02-28T07:45:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000015',
+    'a0000000-0000-4000-8000-000000000003', false, 'carlotta',
+    NULL,
+    'Hoy fue un día difícil. No logré hacer mi práctica, me sentí culpable, y luego recordé algo que leí aquí: un día sin práctica no borra todo tu progreso. Mañana será otro día. Gracias comunidad por normalizar que no todo tiene que ser perfecto.',
+    NULL, 'published', '2026-02-28T22:30:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000016',
+    NULL, true, 'gabriel',
+    'Evento especial: Taller de manejo del estrés',
+    'Este viernes tendremos un taller en vivo sobre técnicas prácticas para manejar el estrés laboral. Será a las 7pm (hora CDMX). No se lo pierdan. Pueden inscribirse desde la sección de Eventos.',
+    NULL, 'published', '2026-03-01T10:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000017',
+    'a0000000-0000-4000-8000-000000000004', false, 'gabriel',
+    NULL,
+    'Terminé el reto de 7 días de gratitud (sí, soy de la comunidad Gabriel pero también lo hice). Fue transformador. Lo que más me impactó fue el día 5: agradecer algo que en su momento fue difícil. Cambió completamente mi perspectiva sobre un problema del trabajo.',
+    NULL, 'published', '2026-03-01T15:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000018',
+    'a0000000-0000-4000-8000-000000000005', false, 'carlotta',
+    'Descubrimiento del mes',
+    'Descubrí que caminar 10 minutos después de comer me ayuda más que cualquier siesta. Suena simple pero el impacto en mi energía de la tarde es brutal. ¿A alguien más le funciona?',
+    NULL, 'published', '2026-03-02T14:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000019',
+    'a0000000-0000-4000-8000-000000000001', false, 'gabriel',
+    'Sobre la vulnerabilidad',
+    'Hoy en terapia hablé de algo que llevaba guardando mucho tiempo. Fue difícil pero me sentí más ligero al salir. La vulnerabilidad no es debilidad. Es valentía. Gracias a esta comunidad por recordármelo constantemente.',
+    NULL, 'published', '2026-03-02T19:30:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000020',
+    'a0000000-0000-4000-8000-000000000002', false, 'carlotta',
+    NULL,
+    'Mi hija de 8 años me vio haciendo la meditación de la mañana y me pidió que le enseñara. Ahora la hacemos juntas. Es el mejor momento del día para las dos. Nunca pensé que esto se convertiría en algo familiar.',
+    NULL, 'published', '2026-03-03T08:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000021',
+    NULL, true, 'carlotta',
+    'Resultados del reto de gratitud',
+    'Increíble: el 78% de quienes completaron el Reto de 7 Días de Gratitud reportaron sentirse más positivos al final de la semana. Estamos preparando un segundo reto sobre mindfulness. ¡Estén pendientes!',
+    NULL, 'published', '2026-03-03T12:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000022',
+    'a0000000-0000-4000-8000-000000000003', false, 'gabriel',
+    'Hábitos que he dejado ir',
+    'Parte de crecer es soltar. Este mes dejé de: 1) Revisar redes antes de dormir, 2) Decir sí a todo por compromiso, 3) Compararme con los demás. No ha sido fácil pero mi bienestar lo agradece enormemente.',
+    NULL, 'published', '2026-03-04T10:30:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000023',
+    'a0000000-0000-4000-8000-000000000004', false, 'carlotta',
+    NULL,
+    'Pregunta honesta: ¿alguien más siente que a veces el autocuidado se vuelve otra obligación más en la lista? Estoy buscando el balance entre cuidarme sin presionarme. Agradecería sus consejos.',
+    NULL, 'published', '2026-03-04T16:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000024',
+    'a0000000-0000-4000-8000-000000000005', false, 'gabriel',
+    'Mi experiencia con el coaching IA',
+    'Llevo 2 semanas usando el Coach IA y quiero ser honesto: al principio era escéptico. Pero las preguntas que me hace son sorprendentemente buenas. Me ayudó a identificar un patrón de pensamiento que no veía. Recomendado.',
+    NULL, 'published', '2026-03-05T09:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000025',
+    'a0000000-0000-4000-8000-000000000001', false, 'carlotta',
+    'Celebrando pequeñas victorias',
+    'Hoy completé 30 días consecutivos de check-in. No suena como mucho pero para alguien que nunca terminaba nada, es enorme. Cada día cuenta. Cada esfuerzo suma. No subestimen el poder de la constancia.',
+    NULL, 'published', '2026-03-05T18:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000026',
+    'a0000000-0000-4000-8000-000000000002', false, 'gabriel',
+    NULL,
+    'Algo que nadie me dijo sobre meditar: no se trata de vaciar la mente. Se trata de observar lo que hay sin juzgarlo. Cuando entendí eso, todo cambió. Dejé de pelearme conmigo mismo por "no poder concentrarme".',
+    NULL, 'published', '2026-03-06T11:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000027',
+    'a0000000-0000-4000-8000-000000000003', false, 'carlotta',
+    NULL,
+    'El contenido de nutrición consciente me abrió los ojos. No sabía que el estrés afecta tanto la digestión. Ahora intento comer en calma y noto una diferencia real. Mi cuerpo me lo agradece.',
+    NULL, 'published', '2026-03-06T14:30:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000028',
+    NULL, true, 'gabriel',
+    'Nuevo contenido: Serie de sueño saludable',
+    'Lanzamos una nueva serie de 5 episodios sobre higiene del sueño. Desde técnicas para conciliar el sueño hasta cómo crear el ambiente ideal. Disponible ahora en la Biblioteca para todos los planes.',
+    NULL, 'published', '2026-03-07T09:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000029',
+    'a0000000-0000-4000-8000-000000000004', false, 'gabriel',
+    'Lo que aprendí de mis errores',
+    'Fracasé en mi primer intento de crear una rutina matutina. Y en el segundo. Al tercero bajé mis expectativas: solo 5 minutos. Eso fue hace 3 semanas y no he fallado ni un día. La clave no era motivación, era ser realista.',
+    NULL, 'published', '2026-03-07T17:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000030',
+    'a0000000-0000-4000-8000-000000000005', false, 'carlotta',
+    'Agradecimiento a esta comunidad',
+    'Llevo 6 semanas aquí y quiero decir algo: esta comunidad me ha dado más herramientas que años de buscar soluciones por mi cuenta. No es magia, es constancia y apoyo. Gracias a todos los que comparten aquí.',
+    NULL, 'published', '2026-03-08T10:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000031',
+    'a0000000-0000-4000-8000-000000000001', false, 'gabriel',
+    NULL,
+    'Hoy probé la técnica de journaling guiado del Coach IA. Me hizo una pregunta que no esperaba: "¿Qué necesitas perdonarte hoy?" Me quedé en silencio un buen rato. A veces las preguntas simples son las más profundas.',
+    NULL, 'published', '2026-03-08T20:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000032',
+    'a0000000-0000-4000-8000-000000000002', false, 'carlotta',
+    'Mindfulness en el trabajo',
+    'Empecé a hacer micro-pausas de 1 minuto entre reuniones. Solo cerrar los ojos y respirar. Mis compañeros pensaron que estaba loca al principio pero ahora dos de ellos también lo hacen. El bienestar es contagioso.',
+    NULL, 'published', '2026-03-09T12:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000033',
+    'a0000000-0000-4000-8000-000000000003', false, 'gabriel',
+    NULL,
+    'Pregunta para los que llevan más tiempo: ¿cómo manejan las recaídas? Llevaba 3 semanas muy bien y esta semana no pude hacer nada. Me siento frustrado pero no quiero rendirme.',
+    NULL, 'published', '2026-03-09T16:45:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000034',
+    NULL, true, 'carlotta',
+    'Recordatorio importante',
+    'Tu bienestar no es un destino, es una práctica diaria. No importa si hoy no fue perfecto. Lo que importa es que mañana vuelvas a intentarlo. Estamos aquí para acompañarte en cada paso.',
+    NULL, 'published', '2026-03-10T08:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000035',
+    'a0000000-0000-4000-8000-000000000004', false, 'gabriel',
+    'El poder del no',
+    'Aprendí a decir no sin sentir culpa. No a compromisos que drenan mi energía. No a personas que no respetan mis límites. No a la autoexigencia extrema. Cada "no" es un "sí" a mi bienestar.',
+    NULL, 'published', '2026-03-10T15:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000036',
+    'a0000000-0000-4000-8000-000000000005', false, 'carlotta',
+    NULL,
+    'Hoy me di cuenta de algo: llevo semanas enfocada en mejorar y se me olvidó celebrar lo que ya logré. Así que hoy me celebro. Y los invito a hacer lo mismo. ¿Qué logro reciente quieren celebrar?',
+    NULL, 'published', '2026-03-11T11:30:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000037',
+    'a0000000-0000-4000-8000-000000000001', false, 'gabriel',
+    'Actualización: 2 meses después',
+    'Hace 2 meses empecé en Tu Potencial sin saber qué esperar. Hoy puedo decir que mi relación conmigo mismo cambió. No soy otra persona, soy la misma pero más consciente. Y eso hace toda la diferencia.',
+    NULL, 'published', '2026-03-11T19:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000038',
+    'a0000000-0000-4000-8000-000000000002', false, 'carlotta',
+    'Compartiendo un recurso',
+    'Para las que les cuesta dormir: la meditación guiada de la biblioteca (la de 10 min antes de dormir) es increíble. La pongo con audífonos y no llego ni a la mitad despierta. Mi esposo dice que ya no me muevo tanto en la noche.',
+    NULL, 'published', '2026-03-12T21:00:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000039',
+    'a0000000-0000-4000-8000-000000000003', false, 'gabriel',
+    'Gratitud del día',
+    'Hoy agradezco: tener acceso a herramientas de bienestar, una comunidad que entiende, y la valentía de empezar cuando no sabía si funcionaría. Si estás leyendo esto y todavía dudas, dale una oportunidad. No te vas a arrepentir.',
+    NULL, 'published', '2026-03-12T08:15:00.000Z'
+  ),
+  (
+    'f0000000-0000-4000-8000-000000000040',
+    'a0000000-0000-4000-8000-000000000004', false, 'carlotta',
+    NULL,
+    'Último día del bootcamp de liderazgo consciente y estoy emocionada. Aprendí que liderar empieza por liderarte a ti misma. Gracias al equipo de Tu Potencial por crear este espacio. Ya quiero el siguiente programa.',
+    NULL, 'published', '2026-03-13T17:30:00.000Z'
   );
 
 

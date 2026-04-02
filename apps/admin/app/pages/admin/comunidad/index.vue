@@ -10,10 +10,10 @@
     <UiTabs v-model="activeTab" :tabs="tabs" />
 
     <div class="tab-content">
-      <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
+      <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
         <template #toolbar>
           <UiInput
-            v-model="search"
+            v-model="searchInput"
             placeholder="Buscar por autor o contenido..."
             style="min-width: 200px;"
           >
@@ -69,7 +69,7 @@
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
-const search = ref('')
+const { input: searchInput, debounced: search, pending: searchPending } = useDebouncedRef('')
 const activeTab = ref('all')
 
 const tabs = [
@@ -92,7 +92,7 @@ const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
 const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
 
-const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+const { rows, hasMore, loading, loadingMore, loadMore, refresh } = await useInfiniteTable(
   'admin-posts',
   async ({ from, to }) => {
     let query = client.from('posts').select('*, post_reactions(count), post_comments(count)')

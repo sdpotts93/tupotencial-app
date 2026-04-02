@@ -9,14 +9,17 @@ export async function useInfiniteTable<T>(
 ) {
   const rows = ref<T[]>([]) as Ref<T[]>
   const hasMore = ref(true)
+  const loading = ref(false)
   const loadingMore = ref(false)
   let currentPage = 0
 
   async function reset() {
+    loading.value = true
     currentPage = 0
     const data = await fetchFn({ from: 0, to: PAGE_SIZE - 1 })
     rows.value = data
     hasMore.value = data.length >= PAGE_SIZE
+    loading.value = false
   }
 
   async function loadMore() {
@@ -40,5 +43,5 @@ export async function useInfiniteTable<T>(
     watch(watchSources, () => reset())
   }
 
-  return { rows, hasMore, loadingMore, loadMore, refresh: reset }
+  return { rows, hasMore, loading, loadingMore, loadMore, refresh: reset }
 }

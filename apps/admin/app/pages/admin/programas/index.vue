@@ -7,10 +7,10 @@
       </div>
     </div>
 
-    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
+    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
       <template #toolbar>
         <UiInput
-          v-model="search"
+          v-model="searchInput"
           placeholder="Buscar por título..."
           style="min-width: 200px;"
         >
@@ -77,7 +77,7 @@ definePageMeta({ layout: 'default' })
 
 const router = useRouter()
 
-const search = ref('')
+const { input: searchInput, debounced: search, pending: searchPending } = useDebouncedRef('')
 const filterType = ref('')
 const filterStatus = ref('')
 const filterPlan = ref('')
@@ -121,7 +121,7 @@ const columns = [
 
 const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
-const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+const { rows, hasMore, loading, loadingMore, loadMore, refresh } = await useInfiniteTable(
   'admin-programs',
   async ({ from, to }) => {
     let query = client.from('programs').select('*')

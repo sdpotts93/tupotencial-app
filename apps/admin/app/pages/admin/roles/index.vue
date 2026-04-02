@@ -20,10 +20,10 @@
 
     <!-- Admin Users Table -->
     <h2 class="section-title">Administradores</h2>
-    <UiDataTable fill :columns="columns" :rows="filteredAdmins" :has-more="hasMore" :loading-more="loadingMore" @load-more="loadMore">
+    <UiDataTable fill :columns="columns" :rows="filteredAdmins" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @load-more="loadMore">
       <template #toolbar>
         <UiInput
-          v-model="search"
+          v-model="searchInput"
           placeholder="Buscar por nombre o correo..."
           style="min-width: 200px;"
         >
@@ -138,7 +138,7 @@ const { canManageRoles } = useAdminAuth()
 
 const showInviteModal = ref(false)
 const showEditModal = ref(false)
-const search = ref('')
+const { input: searchInput, debounced: search, pending: searchPending } = useDebouncedRef('')
 const editingId = ref<string | null>(null)
 
 const editSaving = ref(false)
@@ -157,7 +157,7 @@ const inviteForm = reactive({
 })
 
 // ── Fetch admin users from Supabase ──
-const { rows: adminUsers, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+const { rows: adminUsers, hasMore, loading, loadingMore, loadMore, refresh } = await useInfiniteTable(
   'admin-roles',
   async ({ from, to }) => {
     let query = client.from('admin_users').select('*, profiles:user_id(display_name, avatar_url)')

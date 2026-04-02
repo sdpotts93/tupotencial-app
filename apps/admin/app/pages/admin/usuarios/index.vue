@@ -4,10 +4,10 @@
       <h1 class="page-header__title">Usuarios</h1>
     </div>
 
-    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" @row-click="goToUser" @load-more="loadMore">
+    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToUser" @load-more="loadMore">
       <template #toolbar>
         <UiInput
-          v-model="search"
+          v-model="searchInput"
           placeholder="Buscar por nombre o correo..."
           style="min-width: 250px;"
         >
@@ -67,7 +67,7 @@ definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
 
-const search = ref('')
+const { input: searchInput, debounced: search, pending: searchPending } = useDebouncedRef('')
 const filterPlan = ref('')
 const filterStatus = ref('')
 const filterSegment = ref('')
@@ -99,7 +99,7 @@ const columns = [
 ]
 
 // ── Fetch users from Supabase ──
-const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+const { rows, hasMore, loading, loadingMore, loadMore, refresh } = await useInfiniteTable(
   'admin-users',
   async ({ from, to }) => {
     // profiles, subscriptions, and user_entitlements all FK to auth.users (not to each other),

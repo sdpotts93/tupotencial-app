@@ -35,7 +35,7 @@
         <UiDataTable fill :columns="columns" :rows="dailyPlans" @row-click="goToDateFromRow">
           <template #toolbar>
             <UiInput
-              v-model="search"
+              v-model="searchInput"
               placeholder="Buscar por fecha..."
               style="min-width: 200px;"
             >
@@ -278,7 +278,7 @@ definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
 const router = useRouter()
-const search = ref('')
+const { input: searchInput, debounced: search } = useDebouncedRef('')
 const viewMode = ref<'calendar' | 'list'>(
   (typeof localStorage !== 'undefined' && localStorage.getItem('hoy-view-mode') as 'calendar' | 'list') || 'calendar',
 )

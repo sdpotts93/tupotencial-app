@@ -10,7 +10,7 @@
     <div class="cat-container">
       <div class="cat-toolbar">
         <UiInput
-          v-model="search"
+          v-model="searchInput"
           placeholder="Buscar por nombre..."
           style="min-width: 200px;"
         >
@@ -36,13 +36,13 @@
             'cat-row--dragging': dragIndex === index,
             'cat-row--over': dragOverIndex === index && dragIndex !== index,
           }"
-          :draggable="!search"
+          :draggable="!searchInput"
           @dragstart="onDragStart(index, $event)"
           @dragover.prevent="onDragOver(index)"
           @dragend="onDragEnd"
           @click="editCategory(cat)"
         >
-          <span class="cat-row__drag" :class="{ 'cat-row__drag--disabled': !!search }">
+          <span class="cat-row__drag" :class="{ 'cat-row__drag--disabled': !!searchInput }">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
               <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
               <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
@@ -105,7 +105,7 @@ const toast = useToast()
 const showCreateModal = ref(false)
 const editingCategory = ref<Record<string, any> | null>(null)
 const saving = ref(false)
-const search = ref('')
+const { input: searchInput, debounced: search } = useDebouncedRef('')
 
 const formError = ref('')
 

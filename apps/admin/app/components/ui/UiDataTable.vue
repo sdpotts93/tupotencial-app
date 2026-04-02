@@ -17,14 +17,14 @@
             </th>
             <th v-if="$slots.actions" class="data-table__actions-header" />
           </tr>
+          <tr v-if="loading" aria-hidden="true" class="data-table__bar-row">
+            <th :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__bar-cell">
+              <div class="data-table__bar" />
+            </th>
+          </tr>
         </thead>
         <tbody>
-          <tr v-if="loading">
-            <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__loading">
-              Cargando...
-            </td>
-          </tr>
-          <tr v-else-if="!rows.length">
+          <tr v-if="!rows.length && !loading">
             <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__empty">
               {{ emptyText }}
             </td>
@@ -227,12 +227,53 @@ th.data-table__sticky-col {
   margin-left: var(--space-2);
 }
 
-.data-table__loading,
 .data-table__empty {
   text-align: center;
   padding: var(--space-10) var(--space-4);
   color: var(--color-muted);
   font-size: var(--text-sm);
+}
+
+/* ─── Indeterminate progress bar ─── */
+.data-table__bar-row {
+  height: 0;
+  line-height: 0;
+}
+
+.data-table__bar-cell {
+  padding: 0 !important;
+  border: none !important;
+  height: 0 !important;
+  position: relative;
+  overflow: visible;
+}
+
+.data-table__bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.data-table__bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  border-radius: 2px;
+  background: rgba(230, 120, 74, 0.7);
+  animation: dt-slide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes dt-slide {
+  0%   { left: -40%; }
+  100% { left: 100%; }
 }
 
 .data-table__loading-more {

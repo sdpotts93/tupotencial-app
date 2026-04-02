@@ -7,10 +7,10 @@
       </div>
     </div>
 
-    <UiDataTable :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" fill @row-click="goToEdit" @load-more="loadMore">
+    <UiDataTable :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @row-click="goToEdit" @load-more="loadMore">
       <template #toolbar>
         <UiInput
-          v-model="search"
+          v-model="searchInput"
           placeholder="Buscar por título..."
           style="min-width: 200px;"
         >
@@ -93,7 +93,7 @@ definePageMeta({ layout: 'default' })
 
 const router = useRouter()
 
-const search = ref('')
+const { input: searchInput, debounced: search, pending: searchPending } = useDebouncedRef('')
 const filterStatus = ref('')
 const filterType = ref('')
 const filterSegment = ref('')
@@ -149,7 +149,7 @@ const columns = [
   { key: 'published_at', label: 'Publicación' },
 ]
 
-const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+const { rows, hasMore, loading, loadingMore, loadMore, refresh } = await useInfiniteTable(
   'admin-content',
   async ({ from, to }) => {
     const selectStr = filterCategory.value

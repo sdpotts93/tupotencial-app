@@ -10,7 +10,7 @@
     <div class="ben-container">
       <div class="ben-toolbar">
         <UiInput
-          v-model="search"
+          v-model="searchInput"
           placeholder="Buscar beneficio..."
           style="min-width: 200px;"
         >
@@ -35,13 +35,13 @@
             'ben-row--dragging': dragIndex === index,
             'ben-row--over': dragOverIndex === index && dragIndex !== index,
           }"
-          :draggable="!search"
+          :draggable="!searchInput"
           @dragstart="onDragStart(index, $event)"
           @dragover.prevent="onDragOver(index)"
           @dragend="onDragEnd"
           @click="goToEdit(row)"
         >
-          <span class="ben-row__drag" :class="{ 'ben-row__drag--disabled': !!search }">
+          <span class="ben-row__drag" :class="{ 'ben-row__drag--disabled': !!searchInput }">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
               <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
               <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
@@ -79,7 +79,7 @@
 definePageMeta({ layout: 'default' })
 
 const router = useRouter()
-const search = ref('')
+const { input: searchInput, debounced: search } = useDebouncedRef('')
 
 const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()

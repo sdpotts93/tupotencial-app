@@ -565,7 +565,6 @@ export type Database = {
       }
       daily_plans: {
         Row: {
-          badge_share_text: string | null
           badge_subtitle: string | null
           badge_title: string | null
           community_segment: string | null
@@ -580,7 +579,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          badge_share_text?: string | null
           badge_subtitle?: string | null
           badge_title?: string | null
           community_segment?: string | null
@@ -595,7 +593,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          badge_share_text?: string | null
           badge_subtitle?: string | null
           badge_title?: string | null
           community_segment?: string | null

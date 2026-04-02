@@ -24,10 +24,15 @@
 </template>
 
 <script setup lang="ts">
+const client = useSupabaseClient()
 const { user } = useAuth()
 const route = useRoute()
 
-const streak = ref(7)
+const { data: streakData } = await useAsyncData('default-layout-streak', async () => {
+  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value?.id ?? '').maybeSingle()
+  return data?.current_streak ?? 0
+}, { watch: [() => user.value?.id] })
+const streak = computed(() => streakData.value ?? 0)
 
 const initials = computed(() => {
   const name = user.value?.display_name || '?'
