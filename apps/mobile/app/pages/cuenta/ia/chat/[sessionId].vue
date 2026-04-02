@@ -35,7 +35,6 @@
             </div>
             <div v-if="msg.role === 'assistant'" class="chat__msg-body">
               <span v-html="renderMarkdown(msg.content)" />
-              <span v-if="generating && streamingStarted && msg === messages[messages.length - 1]" class="chat__cursor" />
             </div>
             <p v-else class="chat__msg-body">{{ msg.content }}</p>
           </div>
@@ -50,7 +49,7 @@
             <div class="chat__msg-top">
               <span class="chat__msg-author">{{ toneName }}</span>
             </div>
-            <span class="chat__typing-dots"><span /><span /><span /></span>
+            <span class="chat__glow-dot" />
           </div>
         </div>
       </div>
@@ -494,17 +493,28 @@ async function retry() {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: var(--leading-relaxed);
+}
+
+p.chat__msg-body {
   white-space: pre-wrap;
 }
 
-/* Markdown inside assistant messages */
-.chat__msg-body :deep(p) { margin: 0 0 0.5em; }
-.chat__msg-body :deep(p:last-child) { margin-bottom: 0; }
+/* Markdown inside assistant messages — reset all block spacing */
+.chat__msg-body :deep(p),
+.chat__msg-body :deep(ol),
+.chat__msg-body :deep(ul),
+.chat__msg-body :deep(li) { margin: 0; padding: 0; }
+
+.chat__msg-body :deep(p + p) { margin-top: 0.45em; }
+.chat__msg-body :deep(p + ol),
+.chat__msg-body :deep(p + ul) { margin-top: 0.35em; }
+.chat__msg-body :deep(ol + p),
+.chat__msg-body :deep(ul + p) { margin-top: 0.35em; }
+.chat__msg-body :deep(ol),
+.chat__msg-body :deep(ul) { padding-left: 1.2em; }
+.chat__msg-body :deep(li + li) { margin-top: 0.15em; }
 .chat__msg-body :deep(strong) { font-weight: var(--weight-semibold); color: var(--color-text); }
 .chat__msg-body :deep(em) { font-style: italic; }
-.chat__msg-body :deep(ol),
-.chat__msg-body :deep(ul) { margin: 0.25em 0 0.5em 1.2em; padding: 0; }
-.chat__msg-body :deep(li) { margin-bottom: 0.25em; }
 .chat__msg-body :deep(code) {
   background: rgba(var(--tint-rgb), 0.06);
   padding: 0.1em 0.3em;
@@ -512,42 +522,20 @@ async function retry() {
   font-size: 0.9em;
 }
 
-/* ─── Blinking cursor ─── */
-.chat__cursor {
+/* ─── Glowing dot (ChatGPT-style) ─── */
+.chat__glow-dot {
   display: inline-block;
-  width: 2px;
-  height: 1em;
-  background: var(--color-text-secondary);
-  margin-left: 1px;
-  vertical-align: text-bottom;
-  animation: blink 0.6s steps(2) infinite;
-}
-
-@keyframes blink {
-  0% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-/* ─── Typing dots ─── */
-.chat__typing-dots {
-  display: flex;
-  gap: 4px;
-  padding-top: var(--space-1);
-}
-
-.chat__typing-dots span {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(var(--tint-rgb), 0.2);
-  animation: typingDot 1.2s infinite;
+  background: var(--color-sand, rgba(var(--tint-rgb), 0.4));
+  margin-top: var(--space-1);
+  animation: glowPulse 1.4s ease-in-out infinite;
 }
-.chat__typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.chat__typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-@keyframes typingDot {
-  0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
-  30% { opacity: 1; transform: scale(1); }
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.4; box-shadow: 0 0 4px 1px rgba(var(--tint-rgb), 0.15); }
+  50% { opacity: 1; box-shadow: 0 0 8px 3px rgba(var(--tint-rgb), 0.3); }
 }
 
 /* ─── Error / limit states ─── */
