@@ -213,7 +213,6 @@ CREATE TABLE public.daily_plans (
   date                     date NOT NULL,
   community_segment        text
     CHECK (community_segment IS NULL OR community_segment IN ('gabriel', 'carlotta', 'conjunta')),
-  badge_share_text         text,
   badge_title              text,
   badge_subtitle           text,
   primary_action_type      text NOT NULL

@@ -695,7 +695,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000001',
     '2026-02-24', NULL,
-    'Hoy pause, respire y me reconecte conmigo. #TuPotencial',
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000001', '{}'::jsonb,
     'published', 'a0000000-0000-4000-8000-000000000001'
@@ -704,7 +703,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000002',
     '2026-02-24', 'carlotta',
-    'Hoy desperte con intencion y energia. #Carlotta #TuPotencial',
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000002', '{}'::jsonb,
     'published', 'a0000000-0000-4000-8000-000000000001'
@@ -713,7 +711,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000003',
     '2026-02-24', 'gabriel',
-    'Hoy respire con intencion antes de liderar. #Gabriel #TuPotencial',
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000003', '{}'::jsonb,
     'published', 'a0000000-0000-4000-8000-000000000002'
@@ -722,7 +719,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000004',
     '2026-02-23', NULL,
-    NULL,
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000006', '{}'::jsonb,
     'published', 'a0000000-0000-4000-8000-000000000001'
@@ -731,7 +727,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000005',
     '2026-02-22', NULL,
-    'Hoy visualice mi mejor version. #TuPotencial',
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000005', '{}'::jsonb,
     'published', 'a0000000-0000-4000-8000-000000000001'
@@ -740,7 +735,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000006',
     '2026-02-21', NULL,
-    'Hoy observe mi respiracion por 60 segundos. Pequeños momentos, grandes cambios. #TuPotencial',
     NULL, NULL,
     'custom', NULL,
     '{"label": "Observar mi respiración por 60 segundos", "type": "simple_check", "prompt": "¿Completaste tu momento de observación hoy?"}'::jsonb,
@@ -750,7 +744,6 @@ VALUES
   (
     'e0000000-0000-4000-8000-000000000007',
     '2026-02-25', NULL,
-    NULL,
     NULL, NULL,
     'content', 'c2000000-0000-4000-8000-000000000004', '{}'::jsonb,
     'published', 'a0000000-0000-4000-8000-000000000001'

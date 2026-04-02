@@ -346,7 +346,6 @@ Indexes: `(program_id,user_id)`, `(user_id,created_at)`.
 - `primary_action_type text not null` (`content|program_day|custom|ai_prompt|form`)
 - `primary_action_ref uuid null` (e.g., content_items.id, program_days.id, or forms.id)
 - `primary_action_payload jsonb not null default '{}'::jsonb` (custom action config)
-- `badge_share_text text null`
 - `badge_title text null`
 - `badge_subtitle text null`
 - `status text not null default 'scheduled'` (`scheduled|published|archived`)
