@@ -1,5 +1,10 @@
 <template>
-  <div class="watch">
+  <div v-if="watchStatus === 'pending'" class="watch" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <UiSkeleton variant="rect" width="80%" height="50%" radius="var(--radius-lg)" style="margin-bottom: var(--space-6);" />
+    <UiSkeleton variant="text" width="50%" height="20px" style="margin-bottom: var(--space-2);" />
+    <UiSkeleton variant="text" width="30%" height="14px" />
+  </div>
+  <div v-else class="watch">
     <!-- Nav overlaid on player -->
     <div class="watch__nav safe-top">
       <button class="watch__back" aria-label="Volver" @click="$router.back()">
@@ -36,14 +41,14 @@ const route = useRoute()
 const id = route.params.id as string
 const client = useSupabaseClient()
 
-const { data: eventData } = await useAsyncData(`event-watch-${id}`, async () => {
+const { data: eventData, status: watchStatus } = useAsyncData(`event-watch-${id}`, async () => {
   const { data } = await client.rpc('get_secure_event', { p_event_id: id })
   if (!data || !data.access_granted) {
     navigateTo(`/cuenta/eventos/${id}`)
     return null
   }
   return data
-})
+}, { lazy: true })
 
 const event = computed(() => {
   const e = eventData.value

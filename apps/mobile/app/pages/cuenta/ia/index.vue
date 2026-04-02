@@ -10,6 +10,34 @@
         <h1 class="ai__header-title">Mi Coach IA</h1>
       </header>
 
+      <template v-if="iaStatus === 'pending'">
+        <div style="text-align: center; margin-bottom: var(--space-8);">
+          <UiSkeleton variant="circle" width="48px" height="48px" style="margin: 0 auto var(--space-3);" />
+          <UiSkeleton variant="text" width="60%" height="24px" style="margin: 0 auto var(--space-2);" />
+          <UiSkeleton variant="text" width="80%" height="14px" style="margin: 0 auto;" />
+        </div>
+
+        <div style="margin-bottom: var(--space-6);">
+          <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: var(--space-3);" />
+          <UiSkeleton variant="rect" width="100%" height="52px" style="border-radius: var(--radius-xl); margin-bottom: var(--space-3);" />
+          <UiSkeleton variant="rect" width="100%" height="52px" style="border-radius: var(--radius-xl);" />
+        </div>
+
+        <div style="margin-bottom: var(--space-6);">
+          <UiSkeleton variant="text" width="25%" height="10px" style="margin-bottom: var(--space-3);" />
+          <div v-for="i in 3" :key="i" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); background: rgba(var(--tint-rgb), 0.04); margin-bottom: var(--space-3);">
+            <div style="flex: 1;">
+              <UiSkeleton variant="text" width="70%" height="14px" style="margin-bottom: 4px;" />
+              <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: 4px;" />
+              <UiSkeleton variant="text" width="20%" height="10px" />
+            </div>
+          </div>
+        </div>
+
+        <UiSkeleton variant="rect" width="100%" height="44px" style="border-radius: var(--radius-lg);" />
+      </template>
+      <template v-else>
+
       <!-- Intro + Tone (side-by-side on desktop) -->
       <div class="ai-home__top-row">
         <div class="ai-home__hero">
@@ -75,6 +103,8 @@
         <p><strong>Límite alcanzado</strong></p>
         <p>Has usado todos tus mensajes de hoy. El límite se restablece mañana a las 00:00 (CDMX).</p>
       </div>
+
+      </template>
     </div>
   </div>
 </template>
@@ -88,20 +118,20 @@ const { user } = useAuth()
 const selectedTone = ref<'carlotta' | 'gabriel'>('carlotta')
 const limitReached = ref(false)
 
-const { data: rawSessions, refresh: refreshSessions } = await useAsyncData('mobile-ai-sessions', async () => {
+const { data: rawSessions, refresh: refreshSessions, status: iaStatus } = useAsyncData('mobile-ai-sessions', async () => {
   if (!user.value?.id) return []
   const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value.id).order('created_at', { ascending: false })
   return data ?? []
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 // Check daily quota
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
-const { data: quota } = await useAsyncData('ai-quota-check', async () => {
+const { data: quota } = useAsyncData('ai-quota-check', async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('ai_quotas').select('messages_used')
     .eq('user_id', user.value.id).eq('day', today).maybeSingle()
   return data
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 watchEffect(() => {
   limitReached.value = (quota.value?.messages_used ?? 0) >= 20
 })

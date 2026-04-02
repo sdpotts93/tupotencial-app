@@ -11,6 +11,36 @@
         <h1 class="progress__header-title">Mi Progreso</h1>
       </header>
 
+      <template v-if="progresoStatus === 'pending'">
+        <!-- Hero circle skeleton -->
+        <div class="progress__hero">
+          <UiSkeleton variant="circle" width="120px" height="120px" style="margin-bottom: var(--space-4);" />
+          <UiSkeleton variant="text" width="40%" height="18px" style="margin-bottom: var(--space-1);" />
+          <UiSkeleton variant="text" width="50%" height="12px" />
+        </div>
+        <!-- Stats skeleton -->
+        <section class="progress__stats">
+          <div v-for="i in 3" :key="i" class="progress__stat">
+            <UiSkeleton variant="text" width="40px" height="28px" />
+            <UiSkeleton variant="text" width="80%" height="10px" />
+          </div>
+        </section>
+        <!-- Programs skeleton -->
+        <section class="progress__programs">
+          <UiSkeleton variant="text" width="50%" height="10px" style="margin-bottom: var(--space-3);" />
+          <div class="progress__programs-list">
+            <div v-for="i in 2" :key="i" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); background: rgba(var(--tint-rgb), 0.04); border-radius: var(--radius-xl);">
+              <UiSkeleton variant="rect" width="56px" height="56px" radius="var(--radius-lg)" />
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                <UiSkeleton variant="text" width="70%" height="14px" />
+                <UiSkeleton variant="text" width="40%" height="10px" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </template>
+
+      <template v-else>
       <!-- Streak highlight -->
       <div class="progress__hero">
         <div class="progress__hero-circle">
@@ -75,6 +105,7 @@
           </NuxtLink>
         </div>
       </section>
+      </template>
     </div>
   </div>
 </template>
@@ -85,22 +116,22 @@ definePageMeta({ layout: 'blank' })
 const client = useSupabaseClient()
 const { user } = useAuth()
 
-const { data: streakData } = await useAsyncData('mobile-streak', async () => {
+const { data: streakData, status: progresoStatus } = useAsyncData('mobile-streak', async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('user_streaks').select('*').eq('user_id', user.value.id).maybeSingle()
   return data
-}, { watch: [() => user.value?.id] })
+}, { watch: [() => user.value?.id], lazy: true })
 
 const currentStreak = computed(() => streakData.value?.current_streak ?? 0)
 const bestStreak = computed(() => streakData.value?.best_streak ?? 0)
 
-const { data: completedDays } = await useAsyncData('mobile-completed-days', async () => {
+const { data: completedDays } = useAsyncData('mobile-completed-days', async () => {
   if (!user.value?.id) return 0
   const { data } = await client.rpc('count_completed_days')
   return data ?? 0
-}, { watch: [() => user.value?.id] })
+}, { watch: [() => user.value?.id], lazy: true })
 
-const { data: activeEnrollments } = await useAsyncData('mobile-active-programs', async () => {
+const { data: activeEnrollments } = useAsyncData('mobile-active-programs', async () => {
   if (!user.value?.id) return []
   const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title, type, cover_url)').eq('user_id', user.value.id).eq('status', 'active')
   if (!enrollments?.length) return []
@@ -132,7 +163,7 @@ const { data: activeEnrollments } = await useAsyncData('mobile-active-programs',
       img: prog?.cover_url ?? null,
     }
   })
-}, { watch: [() => user.value?.id] })
+}, { watch: [() => user.value?.id], lazy: true })
 
 const activeProgramsCount = computed(() => activeEnrollments.value?.length ?? 0)
 
@@ -142,33 +173,33 @@ const activePrograms = computed(() => activeEnrollments.value ?? [])
 const now = new Date()
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
-const { data: todayRetos } = await useAsyncData('mobile-today-retos', async () => {
+const { data: todayRetos } = useAsyncData('mobile-today-retos', async () => {
   if (!user.value?.id) return { checkin: false, accion: false }
   const { data } = await client.from('daily_checkins').select('type').eq('user_id', user.value.id).eq('date', today)
   const types = (data ?? []).map(r => r.type)
   return { checkin: types.includes('checkin'), accion: types.includes('accion') }
-}, { watch: [() => user.value?.id] })
+}, { watch: [() => user.value?.id], lazy: true })
 
 const dayComplete = computed(() => todayRetos.value?.checkin && todayRetos.value?.accion)
 const showShareBadge = ref(false)
 
 // Badge info from hoy page data
-const { data: hoyPage } = await useAsyncData('progreso-hoy-page', async () => {
+const { data: hoyPage } = useAsyncData('progreso-hoy-page', async () => {
   const { data } = await client.rpc('get_hoy_page', { p_date: today })
   return data as { settings: Record<string, any>; daily_plan: Record<string, any> | null } | null
-})
+}, { lazy: true })
 
 const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
 const badgeTitle = computed(() => hoyPage.value?.daily_plan?.badge_title || hoyDefaults.value.badge_title || 'Día completado')
 const badgeSubtitle = computed(() => hoyPage.value?.daily_plan?.badge_subtitle || hoyDefaults.value.badge_subtitle || null)
 
 // Content viewed count (count content_item_categories or benefit_clicks as a proxy; fallback to 0)
-const { data: contentViewed } = await useAsyncData('mobile-content-viewed', async () => {
+const { data: contentViewed } = useAsyncData('mobile-content-viewed', async () => {
   if (!user.value?.id) return 0
   // No dedicated content_views table; count the user's unique form_submissions as an activity proxy
   const { count } = await client.from('form_submissions').select('id', { count: 'exact', head: true }).eq('user_id', user.value.id)
   return count ?? 0
-}, { watch: [() => user.value?.id] })
+}, { watch: [() => user.value?.id], lazy: true })
 </script>
 
 <style scoped>

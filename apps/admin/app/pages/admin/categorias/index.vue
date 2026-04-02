@@ -7,69 +7,90 @@
       </div>
     </div>
 
-    <div class="cat-container">
-      <div class="cat-toolbar">
-        <UiInput
-          v-model="searchInput"
-          placeholder="Buscar por nombre..."
-          style="min-width: 200px;"
-        >
-          <template #suffix><Icon name="lucide:search" size="18" /></template>
-        </UiInput>
+    <!-- Skeleton loader -->
+    <template v-if="catsStatus === 'pending'">
+      <div class="cat-container">
+        <div class="cat-toolbar">
+          <UiSkeleton variant="rect" width="200px" height="36px" radius="var(--radius-md)" />
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <div v-for="i in 6" :key="i" style="display: grid; grid-template-columns: 40px 1fr 1fr 1fr 1fr auto; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-light); align-items: center;">
+            <UiSkeleton variant="rect" width="16px" height="16px" radius="var(--radius-sm)" />
+            <UiSkeleton variant="text" width="70%" height="14px" />
+            <UiSkeleton variant="text" width="50%" height="14px" />
+            <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
+            <UiSkeleton variant="text" width="60%" height="14px" />
+            <UiSkeleton variant="rect" width="120px" height="30px" radius="var(--radius-md)" />
+          </div>
+        </div>
       </div>
+    </template>
 
-      <div class="cat-list">
-        <div class="cat-header">
-          <span class="cat-header__drag" />
-          <span class="cat-header__name">Nombre</span>
-          <span class="cat-header__slug">Slug</span>
-          <span class="cat-header__status">Estado</span>
-          <span class="cat-header__count">Contenidos</span>
-          <span class="cat-header__actions" />
+    <template v-else>
+      <div class="cat-container">
+        <div class="cat-toolbar">
+          <UiInput
+            v-model="searchInput"
+            placeholder="Buscar por nombre..."
+            style="min-width: 200px;"
+          >
+            <template #suffix><Icon name="lucide:search" size="18" /></template>
+          </UiInput>
         </div>
 
-        <div
-          v-for="(cat, index) in filteredRows"
-          :key="cat.id"
-          class="cat-row"
-          :class="{
-            'cat-row--dragging': dragIndex === index,
-            'cat-row--over': dragOverIndex === index && dragIndex !== index,
-          }"
-          :draggable="!searchInput"
-          @dragstart="onDragStart(index, $event)"
-          @dragover.prevent="onDragOver(index)"
-          @dragend="onDragEnd"
-          @click="editCategory(cat)"
-        >
-          <span class="cat-row__drag" :class="{ 'cat-row__drag--disabled': !!searchInput }">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
-              <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
-              <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
-            </svg>
-          </span>
-          <span class="cat-row__name">{{ cat.name }}</span>
-          <span class="cat-row__slug">{{ cat.slug }}</span>
-          <span class="cat-row__status">
-            <UiTag :variant="cat.is_active ? 'success' : 'default'">{{ cat.is_active ? 'Activa' : 'Inactiva' }}</UiTag>
-          </span>
-          <span class="cat-row__count">{{ cat.content_count }} elementos</span>
-          <span class="cat-row__actions" @click.stop>
-            <UiButton variant="soft" size="sm" @click="editCategory(cat)">
-              <template #icon><Icon name="lucide:pencil" size="16" /></template>
-              Editar
-            </UiButton>
-            <UiButton variant="danger-ghost" size="sm" @click="handleDelete(cat)">
-              <template #icon><Icon name="lucide:trash-2" size="16" /></template>
-              Eliminar
-            </UiButton>
-          </span>
-        </div>
+        <div class="cat-list">
+          <div class="cat-header">
+            <span class="cat-header__drag" />
+            <span class="cat-header__name">Nombre</span>
+            <span class="cat-header__slug">Slug</span>
+            <span class="cat-header__status">Estado</span>
+            <span class="cat-header__count">Contenidos</span>
+            <span class="cat-header__actions" />
+          </div>
 
-        <div v-if="!filteredRows.length" class="cat-empty">Sin resultados</div>
+          <div
+            v-for="(cat, index) in filteredRows"
+            :key="cat.id"
+            class="cat-row"
+            :class="{
+              'cat-row--dragging': dragIndex === index,
+              'cat-row--over': dragOverIndex === index && dragIndex !== index,
+            }"
+            :draggable="!searchInput"
+            @dragstart="onDragStart(index, $event)"
+            @dragover.prevent="onDragOver(index)"
+            @dragend="onDragEnd"
+            @click="editCategory(cat)"
+          >
+            <span class="cat-row__drag" :class="{ 'cat-row__drag--disabled': !!searchInput }">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
+                <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+                <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
+              </svg>
+            </span>
+            <span class="cat-row__name">{{ cat.name }}</span>
+            <span class="cat-row__slug">{{ cat.slug }}</span>
+            <span class="cat-row__status">
+              <UiTag :variant="cat.is_active ? 'success' : 'default'">{{ cat.is_active ? 'Activa' : 'Inactiva' }}</UiTag>
+            </span>
+            <span class="cat-row__count">{{ cat.content_count }} elementos</span>
+            <span class="cat-row__actions" @click.stop>
+              <UiButton variant="soft" size="sm" @click="editCategory(cat)">
+                <template #icon><Icon name="lucide:pencil" size="16" /></template>
+                Editar
+              </UiButton>
+              <UiButton variant="danger-ghost" size="sm" @click="handleDelete(cat)">
+                <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+                Eliminar
+              </UiButton>
+            </span>
+          </div>
+
+          <div v-if="!filteredRows.length" class="cat-empty">Sin resultados</div>
+        </div>
       </div>
-    </div>
+    </template>
 
     <!-- Create/Edit Modal -->
     <UiModal v-model="showCreateModal" :title="editingCategory ? 'Editar categoría' : 'Nueva categoría'" variant="center" :show-handle="false">
@@ -122,7 +143,7 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-const { data: categories, refresh } = await useAsyncData('admin-categories', async () => {
+const { data: categories, refresh, status: catsStatus } = useAsyncData('admin-categories', async () => {
   let query = client.from('content_categories').select('*, content_item_categories(count)')
 
   if (search.value) query = query.or(`title.ilike.%${search.value}%,slug.ilike.%${search.value}%`)
@@ -133,7 +154,7 @@ const { data: categories, refresh } = await useAsyncData('admin-categories', asy
     name: c.title,
     content_count: (c.content_item_categories as any)?.[0]?.count ?? 0,
   }))
-}, { watch: [search] })
+}, { watch: [search], lazy: true })
 
 const filteredRows = computed(() => {
   return [...(categories.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)

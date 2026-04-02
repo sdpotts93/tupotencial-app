@@ -7,133 +7,184 @@
       </div>
     </div>
 
-    <div class="user-detail" v-if="profile">
-      <!-- Profile header -->
+    <!-- Skeleton loader -->
+    <div v-if="userStatus === 'pending'" class="user-detail">
+      <!-- Profile card skeleton -->
       <UiCard variant="outlined">
         <div class="user-detail__header">
-          <div class="user-detail__avatar">{{ profile.display_name?.charAt(0) ?? '?' }}</div>
-          <div class="user-detail__info">
-            <h2 class="user-detail__name">{{ profile.display_name ?? 'Sin nombre' }}</h2>
-            <p class="user-detail__meta">
-              <UiTag :variant="segmentVariant(profile.community_segment)">{{ segmentLabel(profile.community_segment) }}</UiTag>
-              <span class="user-detail__date">Registrado {{ formatDate(profile.created_at) }}</span>
-            </p>
+          <UiSkeleton variant="circle" width="56px" height="56px" />
+          <div style="flex: 1; display: flex; flex-direction: column; gap: var(--space-2);">
+            <UiSkeleton variant="text" width="40%" height="20px" />
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <UiSkeleton variant="rect" width="70px" height="22px" radius="var(--radius-full)" />
+              <UiSkeleton variant="text" width="120px" height="12px" />
+            </div>
           </div>
         </div>
       </UiCard>
 
-      <!-- Stats grid -->
+      <!-- Stats grid skeleton -->
       <div class="user-detail__stats">
-        <div class="user-detail__stat">
-          <span class="eyebrow user-detail__stat-label">Plan</span>
-          <span class="user-detail__stat-value">
-            <UiTag :variant="subscription?.status === 'active' ? 'gold' : 'default'">
-              {{ subscription?.status === 'active' ? 'Core' : 'Gratuito' }}
-            </UiTag>
-          </span>
-        </div>
-        <div class="user-detail__stat">
-          <span class="eyebrow user-detail__stat-label">Racha actual</span>
-          <span class="user-detail__stat-value">{{ streak?.current_streak ?? 0 }} días</span>
-        </div>
-        <div class="user-detail__stat">
-          <span class="eyebrow user-detail__stat-label">Check-ins</span>
-          <span class="user-detail__stat-value">{{ checkinCount }}</span>
-        </div>
-        <div class="user-detail__stat">
-          <span class="eyebrow user-detail__stat-label">Racha máxima</span>
-          <span class="user-detail__stat-value">{{ streak?.longest_streak ?? 0 }} días</span>
+        <div v-for="i in 4" :key="i" class="user-detail__stat">
+          <UiSkeleton variant="text" width="60%" height="10px" />
+          <UiSkeleton variant="text" width="40%" height="24px" />
         </div>
       </div>
 
+      <!-- Two side-by-side cards skeleton -->
       <div class="user-detail__grid">
-        <!-- Subscription details -->
-        <div>
-          <h3 class="user-detail__section-title">Suscripción</h3>
+        <div v-for="i in 2" :key="i">
+          <UiSkeleton variant="text" width="100px" height="10px" style="margin-bottom: var(--space-2);" />
           <UiCard variant="outlined">
-            <div class="user-detail__list" v-if="subscription">
-              <div class="user-detail__row">
-                <span class="user-detail__row-label">Estado</span>
-                <UiTag :variant="subStatusVariant(subscription.status)">{{ subStatusLabel(subscription.status) }}</UiTag>
-              </div>
-              <div class="user-detail__row" v-if="subscription.current_period_end">
-                <span class="user-detail__row-label">Periodo actual hasta</span>
-                <span>{{ formatDate(subscription.current_period_end) }}</span>
-              </div>
-              <div class="user-detail__row" v-if="subscription.stripe_customer_id">
-                <span class="user-detail__row-label">Stripe Customer</span>
-                <span class="user-detail__mono">{{ subscription.stripe_customer_id }}</span>
-              </div>
+            <div v-for="j in 3" :key="j" style="display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid rgba(var(--tint-rgb), 0.06);">
+              <UiSkeleton variant="text" width="40%" height="12px" />
+              <UiSkeleton variant="text" width="30%" height="12px" />
             </div>
-            <p v-else class="user-detail__empty">Sin suscripción activa</p>
-          </UiCard>
-        </div>
-
-        <!-- Entitlements -->
-        <div>
-          <h3 class="user-detail__section-title">Entitlements</h3>
-          <UiCard variant="outlined">
-            <div class="user-detail__tags" v-if="entitlements.length">
-              <UiTag v-for="e in entitlements" :key="e.id" variant="info">{{ e.entitlement_key }}</UiTag>
-            </div>
-            <p v-else class="user-detail__empty">Sin entitlements</p>
           </UiCard>
         </div>
       </div>
 
-      <!-- Programs -->
-      <h3 class="user-detail__section-title">Programas inscritos</h3>
-      <UiCard variant="outlined">
-        <div v-if="enrollments.length">
-          <div v-for="e in enrollments" :key="e.id" class="user-detail__row">
-            <span>{{ e.program_title }}</span>
-            <UiTag :variant="e.status === 'active' ? 'success' : 'default'">{{ e.status }}</UiTag>
+      <!-- 3 list sections skeleton -->
+      <div v-for="i in 3" :key="'sec'+i">
+        <UiSkeleton variant="text" width="140px" height="10px" style="margin-bottom: var(--space-2); margin-top: var(--space-2);" />
+        <UiCard variant="outlined">
+          <div v-for="j in 3" :key="j" style="display: flex; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid rgba(var(--tint-rgb), 0.06);">
+            <UiSkeleton variant="text" width="50%" height="12px" />
+            <UiSkeleton variant="text" width="20%" height="12px" />
           </div>
-        </div>
-        <p v-else class="user-detail__empty">Sin programas inscritos</p>
-      </UiCard>
-
-      <!-- Add-on purchases -->
-      <h3 class="user-detail__section-title">Compras de add-ons</h3>
-      <UiCard variant="outlined">
-        <div v-if="addonPurchases.length">
-          <div v-for="p in addonPurchases" :key="p.id" class="user-detail__row">
-            <span>{{ p.addon_title }}</span>
-            <span class="user-detail__mono">${{ (p.amount / 100).toLocaleString('es-MX') }} MXN</span>
-          </div>
-        </div>
-        <p v-else class="user-detail__empty">Sin compras</p>
-      </UiCard>
-
-      <!-- Recent check-ins -->
-      <h3 class="user-detail__section-title">Check-ins recientes</h3>
-      <UiCard variant="outlined">
-        <div v-if="recentCheckins.length">
-          <div v-for="c in recentCheckins" :key="c.id" class="user-detail__row">
-            <span>{{ formatDate(c.date) }}</span>
-            <span>{{ moodLabel((c.payload as any)?.mood) }}</span>
-          </div>
-        </div>
-        <p v-else class="user-detail__empty">Sin check-ins</p>
-      </UiCard>
-
-      <!-- Community activity -->
-      <h3 class="user-detail__section-title">Actividad en comunidad</h3>
-      <div class="user-detail__stats user-detail__stats--small">
-        <div class="user-detail__stat">
-          <span class="eyebrow user-detail__stat-label">Comentarios</span>
-          <span class="user-detail__stat-value">{{ commentCount }}</span>
-        </div>
-        <div class="user-detail__stat">
-          <span class="eyebrow user-detail__stat-label">Reacciones</span>
-          <span class="user-detail__stat-value">{{ reactionCount }}</span>
-        </div>
+        </UiCard>
       </div>
     </div>
 
-    <div v-else class="user-detail__loading">
-      <p>Cargando usuario...</p>
-    </div>
+    <template v-else>
+      <div class="user-detail" v-if="profile">
+        <!-- Profile header -->
+        <UiCard variant="outlined">
+          <div class="user-detail__header">
+            <div class="user-detail__avatar">{{ profile.display_name?.charAt(0) ?? '?' }}</div>
+            <div class="user-detail__info">
+              <h2 class="user-detail__name">{{ profile.display_name ?? 'Sin nombre' }}</h2>
+              <p class="user-detail__meta">
+                <UiTag :variant="segmentVariant(profile.community_segment)">{{ segmentLabel(profile.community_segment) }}</UiTag>
+                <span class="user-detail__date">Registrado {{ formatDate(profile.created_at) }}</span>
+              </p>
+            </div>
+          </div>
+        </UiCard>
+
+        <!-- Stats grid -->
+        <div class="user-detail__stats">
+          <div class="user-detail__stat">
+            <span class="eyebrow user-detail__stat-label">Plan</span>
+            <span class="user-detail__stat-value">
+              <UiTag :variant="subscription?.status === 'active' ? 'gold' : 'default'">
+                {{ subscription?.status === 'active' ? 'Core' : 'Gratuito' }}
+              </UiTag>
+            </span>
+          </div>
+          <div class="user-detail__stat">
+            <span class="eyebrow user-detail__stat-label">Racha actual</span>
+            <span class="user-detail__stat-value">{{ streak?.current_streak ?? 0 }} días</span>
+          </div>
+          <div class="user-detail__stat">
+            <span class="eyebrow user-detail__stat-label">Check-ins</span>
+            <span class="user-detail__stat-value">{{ checkinCount }}</span>
+          </div>
+          <div class="user-detail__stat">
+            <span class="eyebrow user-detail__stat-label">Racha máxima</span>
+            <span class="user-detail__stat-value">{{ streak?.longest_streak ?? 0 }} días</span>
+          </div>
+        </div>
+
+        <div class="user-detail__grid">
+          <!-- Subscription details -->
+          <div>
+            <h3 class="user-detail__section-title">Suscripción</h3>
+            <UiCard variant="outlined">
+              <div class="user-detail__list" v-if="subscription">
+                <div class="user-detail__row">
+                  <span class="user-detail__row-label">Estado</span>
+                  <UiTag :variant="subStatusVariant(subscription.status)">{{ subStatusLabel(subscription.status) }}</UiTag>
+                </div>
+                <div class="user-detail__row" v-if="subscription.current_period_end">
+                  <span class="user-detail__row-label">Periodo actual hasta</span>
+                  <span>{{ formatDate(subscription.current_period_end) }}</span>
+                </div>
+                <div class="user-detail__row" v-if="subscription.stripe_customer_id">
+                  <span class="user-detail__row-label">Stripe Customer</span>
+                  <span class="user-detail__mono">{{ subscription.stripe_customer_id }}</span>
+                </div>
+              </div>
+              <p v-else class="user-detail__empty">Sin suscripción activa</p>
+            </UiCard>
+          </div>
+
+          <!-- Entitlements -->
+          <div>
+            <h3 class="user-detail__section-title">Entitlements</h3>
+            <UiCard variant="outlined">
+              <div class="user-detail__tags" v-if="entitlements.length">
+                <UiTag v-for="e in entitlements" :key="e.id" variant="info">{{ e.entitlement_key }}</UiTag>
+              </div>
+              <p v-else class="user-detail__empty">Sin entitlements</p>
+            </UiCard>
+          </div>
+        </div>
+
+        <!-- Programs -->
+        <h3 class="user-detail__section-title">Programas inscritos</h3>
+        <UiCard variant="outlined">
+          <div v-if="enrollments.length">
+            <div v-for="e in enrollments" :key="e.id" class="user-detail__row">
+              <span>{{ e.program_title }}</span>
+              <UiTag :variant="e.status === 'active' ? 'success' : 'default'">{{ e.status }}</UiTag>
+            </div>
+          </div>
+          <p v-else class="user-detail__empty">Sin programas inscritos</p>
+        </UiCard>
+
+        <!-- Add-on purchases -->
+        <h3 class="user-detail__section-title">Compras de add-ons</h3>
+        <UiCard variant="outlined">
+          <div v-if="addonPurchases.length">
+            <div v-for="p in addonPurchases" :key="p.id" class="user-detail__row">
+              <span>{{ p.addon_title }}</span>
+              <span class="user-detail__mono">${{ (p.amount / 100).toLocaleString('es-MX') }} MXN</span>
+            </div>
+          </div>
+          <p v-else class="user-detail__empty">Sin compras</p>
+        </UiCard>
+
+        <!-- Recent check-ins -->
+        <h3 class="user-detail__section-title">Check-ins recientes</h3>
+        <UiCard variant="outlined">
+          <div v-if="recentCheckins.length">
+            <div v-for="c in recentCheckins" :key="c.id" class="user-detail__row">
+              <span>{{ formatDate(c.date) }}</span>
+              <span>{{ moodLabel((c.payload as any)?.mood) }}</span>
+            </div>
+          </div>
+          <p v-else class="user-detail__empty">Sin check-ins</p>
+        </UiCard>
+
+        <!-- Community activity -->
+        <h3 class="user-detail__section-title">Actividad en comunidad</h3>
+        <div class="user-detail__stats user-detail__stats--small">
+          <div class="user-detail__stat">
+            <span class="eyebrow user-detail__stat-label">Comentarios</span>
+            <span class="user-detail__stat-value">{{ commentCount }}</span>
+          </div>
+          <div class="user-detail__stat">
+            <span class="eyebrow user-detail__stat-label">Reacciones</span>
+            <span class="user-detail__stat-value">{{ reactionCount }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="user-detail__loading">
+        <p>Usuario no encontrado</p>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -145,74 +196,74 @@ const client = useSupabaseClient()
 const userId = route.params.id as string
 
 // ── Profile ──
-const { data: profile } = await useAsyncData(`user-${userId}`, async () => {
+const { data: profile, status: userStatus } = useAsyncData(`user-${userId}`, async () => {
   const { data } = await client.from('profiles').select('*').eq('id', userId).single()
   return data
-})
+}, { lazy: true })
 
 // ── Subscription ──
-const { data: subscription } = await useAsyncData(`user-sub-${userId}`, async () => {
+const { data: subscription } = useAsyncData(`user-sub-${userId}`, async () => {
   const { data } = await client.from('subscriptions').select('*').eq('user_id', userId).maybeSingle()
   return data
-})
+}, { lazy: true })
 
 // ── Entitlements ──
-const { data: _entitlements } = await useAsyncData(`user-ent-${userId}`, async () => {
+const { data: _entitlements } = useAsyncData(`user-ent-${userId}`, async () => {
   const { data } = await client.from('user_entitlements').select('*').eq('user_id', userId)
   return data ?? []
-})
+}, { lazy: true })
 const entitlements = computed(() => _entitlements.value ?? [])
 
 // ── Streak ──
-const { data: streak } = await useAsyncData(`user-streak-${userId}`, async () => {
+const { data: streak } = useAsyncData(`user-streak-${userId}`, async () => {
   const { data } = await client.from('user_streaks').select('*').eq('user_id', userId).maybeSingle()
   return data
-})
+}, { lazy: true })
 
 // ── Check-ins (count + recent) ──
-const { data: _checkins } = await useAsyncData(`user-checkins-${userId}`, async () => {
+const { data: _checkins } = useAsyncData(`user-checkins-${userId}`, async () => {
   const { data } = await client.from('daily_checkins').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(10)
   return data ?? []
-})
+}, { lazy: true })
 const recentCheckins = computed(() => _checkins.value ?? [])
 
-const { data: _checkinCount } = await useAsyncData(`user-checkin-count-${userId}`, async () => {
+const { data: _checkinCount } = useAsyncData(`user-checkin-count-${userId}`, async () => {
   const { count } = await client.from('daily_checkins').select('*', { count: 'exact', head: true }).eq('user_id', userId)
   return count ?? 0
-})
+}, { lazy: true })
 const checkinCount = computed(() => _checkinCount.value ?? 0)
 
 // ── Program enrollments ──
-const { data: _enrollments } = await useAsyncData(`user-enrollments-${userId}`, async () => {
+const { data: _enrollments } = useAsyncData(`user-enrollments-${userId}`, async () => {
   const { data } = await client.from('program_enrollments').select('*, programs:program_id(title)').eq('user_id', userId)
   return (data ?? []).map(e => ({
     ...e,
     program_title: (e.programs as any)?.title ?? 'Programa desconocido',
   }))
-})
+}, { lazy: true })
 const enrollments = computed(() => _enrollments.value ?? [])
 
 // ── Addon purchases ──
-const { data: _addonPurchases } = await useAsyncData(`user-addons-${userId}`, async () => {
+const { data: _addonPurchases } = useAsyncData(`user-addons-${userId}`, async () => {
   const { data } = await client.from('addon_purchases').select('*, addons:addon_id(title)').eq('user_id', userId)
   return (data ?? []).map(p => ({
     ...p,
     addon_title: (p.addons as any)?.title ?? 'Add-on desconocido',
   }))
-})
+}, { lazy: true })
 const addonPurchases = computed(() => _addonPurchases.value ?? [])
 
 // ── Community activity counts ──
-const { data: _commentCount } = await useAsyncData(`user-comments-${userId}`, async () => {
+const { data: _commentCount } = useAsyncData(`user-comments-${userId}`, async () => {
   const { count } = await client.from('post_comments').select('*', { count: 'exact', head: true }).eq('user_id', userId)
   return count ?? 0
-})
+}, { lazy: true })
 const commentCount = computed(() => _commentCount.value ?? 0)
 
-const { data: _reactionCount } = await useAsyncData(`user-reactions-${userId}`, async () => {
+const { data: _reactionCount } = useAsyncData(`user-reactions-${userId}`, async () => {
   const { count } = await client.from('post_reactions').select('*', { count: 'exact', head: true }).eq('user_id', userId)
   return count ?? 0
-})
+}, { lazy: true })
 const reactionCount = computed(() => _reactionCount.value ?? 0)
 
 // ── Helpers ──

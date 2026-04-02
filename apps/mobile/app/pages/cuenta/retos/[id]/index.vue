@@ -1,5 +1,37 @@
 <template>
   <div class="screen">
+    <!-- Skeleton -->
+    <template v-if="programStatus === 'pending'">
+      <div class="detail">
+        <div class="detail__media">
+          <UiSkeleton variant="rect" width="100%" height="100%" />
+        </div>
+        <div class="detail__info">
+          <UiSkeleton variant="text" width="40%" height="10px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="80%" height="24px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="rect" width="100%" height="44px" radius="var(--radius-lg)" style="margin: var(--space-5) 0;" />
+          <UiSkeleton variant="text" width="100%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="90%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="60%" height="14px" style="margin-bottom: var(--space-5);" />
+          <div style="display: flex; gap: var(--space-2);">
+            <UiSkeleton variant="text" width="70px" height="24px" radius="var(--radius-full)" />
+            <UiSkeleton variant="text" width="70px" height="24px" radius="var(--radius-full)" />
+          </div>
+        </div>
+      </div>
+      <section class="detail__days">
+        <UiSkeleton variant="text" width="50%" height="10px" style="margin-bottom: var(--space-3);" />
+        <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+          <div v-for="i in 4" :key="i" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); background: rgba(var(--tint-rgb), 0.04); border-radius: var(--radius-lg);">
+            <UiSkeleton variant="text" width="50px" height="14px" />
+            <UiSkeleton variant="text" width="60%" height="12px" />
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <!-- Content -->
+    <template v-else>
     <div class="detail">
       <!-- Media -->
       <div class="detail__media">
@@ -80,6 +112,7 @@
     </section>
 
     <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="addonInfo" />
+    </template>
   </div>
 </template>
 
@@ -95,30 +128,30 @@ const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 const showPurchaseModal = ref(false)
 
 // ── Fetch program from Supabase ──
-const { data: programData } = await useAsyncData(`program-detail-${id}`, async () => {
+const { data: programData, status: programStatus } = useAsyncData(`program-detail-${id}`, async () => {
   const { data } = await client.from('programs').select('*').eq('id', id).single()
   return data
-})
+}, { lazy: true })
 
 // ── Fetch program days ──
-const { data: programDays } = await useAsyncData(`program-days-${id}`, async () => {
+const { data: programDays } = useAsyncData(`program-days-${id}`, async () => {
   const { data } = await client.from('program_days').select('day_index, title').eq('program_id', id).order('day_index')
   return data ?? []
-})
+}, { lazy: true })
 
 // ── Fetch enrollment status ──
-const { data: enrollment, refresh: refreshEnrollment } = await useAsyncData(`program-enrollment-${id}`, async () => {
+const { data: enrollment, refresh: refreshEnrollment } = useAsyncData(`program-enrollment-${id}`, async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('program_enrollments').select('id').eq('program_id', id).eq('user_id', user.value.id).maybeSingle()
   return data
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 // ── Fetch checkin progress ──
-const { data: checkins } = await useAsyncData(`program-checkins-${id}`, async () => {
+const { data: checkins } = useAsyncData(`program-checkins-${id}`, async () => {
   if (!user.value?.id) return []
   const { data } = await client.from('program_checkins').select('day_index').eq('program_id', id).eq('user_id', user.value.id)
   return data ?? []
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 const completedDays = computed(() => new Set((checkins.value ?? []).map(c => c.day_index)))
 const totalDays = computed(() => programDays.value?.length ?? 0)

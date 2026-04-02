@@ -10,6 +10,22 @@
         <h1 class="pricing__header-title">Suscripción</h1>
       </header>
 
+      <template v-if="subStatus === 'pending'">
+        <div class="pricing__plans">
+          <div v-for="i in 2" :key="i" style="flex: 1; padding: var(--space-6); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
+            <UiSkeleton variant="text" width="40%" height="20px" style="margin-bottom: var(--space-3);" />
+            <UiSkeleton variant="text" width="50%" height="28px" style="margin-bottom: var(--space-2);" />
+            <UiSkeleton variant="text" width="90%" height="14px" style="margin-bottom: var(--space-2);" />
+            <UiSkeleton variant="text" width="70%" height="14px" style="margin-bottom: var(--space-4);" />
+            <UiSkeleton variant="rect" width="100%" height="44px" style="border-radius: var(--radius-lg); margin-bottom: var(--space-4);" />
+            <div style="border-top: 1px solid var(--color-border-light); padding-top: var(--space-4);">
+              <UiSkeleton v-for="j in 3" :key="j" variant="text" width="80%" height="12px" style="margin-bottom: var(--space-2);" />
+            </div>
+          </div>
+        </div>
+      </template>
+      <template v-else>
+
       <!-- Plans -->
       <div class="pricing__plans">
         <div
@@ -53,6 +69,8 @@
         </div>
       </div>
 
+      </template>
+
       <p v-if="!isNative" class="pricing__note">
         Pago seguro con Stripe. Cancela en cualquier momento.
       </p>
@@ -69,7 +87,7 @@ const { isNative } = useNativePlatform()
 const config = useRuntimeConfig()
 
 // Fetch both plans + benefits for each
-const { data: plansData } = await useAsyncData('suscripcion-plans', async () => {
+const { data: plansData, status: subStatus } = useAsyncData('suscripcion-plans', async () => {
   const [plansRes, benefitsRes] = await Promise.all([
     client.from('subscription_plans').select('id, title, description, price, interval').order('price'),
     client.from('benefits').select('id, title, plan').eq('status', 'active').order('position'),
@@ -86,7 +104,7 @@ const { data: plansData } = await useAsyncData('suscripcion-plans', async () => 
     ...p,
     benefits: benefitsByPlan.get(p.id) ?? [],
   }))
-})
+}, { lazy: true })
 
 const plans = computed(() =>
   (plansData.value ?? []).map(p => ({

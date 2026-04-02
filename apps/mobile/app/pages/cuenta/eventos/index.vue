@@ -10,59 +10,86 @@
         <h1 class="events__header-title">Eventos y Lives</h1>
       </header>
 
-      <!-- Upcoming -->
-      <section class="events__section">
-        <p class="eyebrow">PRÓXIMOS</p>
-        <div class="events__list">
-          <div
-            v-for="event in upcomingEvents"
-            :key="event.id"
-            :class="['events__card', { 'events__card--locked': isEventLocked(event) }]"
-            @click="handleEventClick(event)"
-          >
-            <div class="events__card-hero">
-              <img :src="event.img" alt="" class="events__card-img" />
-              <span class="events__card-date">{{ event.dateLabel }}</span>
-              <EntitlementLockBadge :locked="isEventLocked(event)" />
+      <template v-if="eventosStatus === 'pending'">
+        <!-- Upcoming skeleton -->
+        <section class="events__section">
+          <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: var(--space-3);" />
+          <div class="events__list">
+            <div v-for="i in 2" :key="i" style="margin-bottom: var(--space-4);">
+              <UiSkeleton variant="rect" width="100%" height="180px" radius="var(--radius-2xl)" style="margin-bottom: var(--space-3);" />
+              <UiSkeleton variant="text" width="40%" height="10px" style="margin-bottom: var(--space-2);" />
+              <UiSkeleton variant="text" width="70%" height="16px" style="margin-bottom: var(--space-2);" />
+              <UiSkeleton variant="text" width="90%" height="12px" />
             </div>
-            <div class="events__card-info">
-              <span class="events__card-eyebrow">{{ event.timeLabel }}</span>
-              <h3 class="events__card-name">{{ event.title }}</h3>
-              <p class="events__card-desc">{{ event.description }}</p>
-              <div v-if="event.requiresSub || isEventLocked(event)" class="events__card-footer">
-                <span v-if="event.requiresSub" class="events__tag events__tag--member">Solo miembros</span>
+          </div>
+        </section>
+        <!-- Past skeleton -->
+        <section class="events__section">
+          <UiSkeleton variant="text" width="25%" height="10px" style="margin-bottom: var(--space-3);" />
+          <div v-for="i in 3" :key="i" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid rgba(var(--tint-rgb), 0.06);">
+            <UiSkeleton variant="rect" width="64px" height="48px" radius="var(--radius-md)" />
+            <div style="flex: 1;">
+              <UiSkeleton variant="text" width="60%" height="14px" style="margin-bottom: 4px;" />
+              <UiSkeleton variant="text" width="40%" height="10px" />
+            </div>
+          </div>
+        </section>
+      </template>
+      <template v-else>
+        <!-- Upcoming -->
+        <section class="events__section">
+          <p class="eyebrow">PRÓXIMOS</p>
+          <div class="events__list">
+            <div
+              v-for="event in upcomingEvents"
+              :key="event.id"
+              :class="['events__card', { 'events__card--locked': isEventLocked(event) }]"
+              @click="handleEventClick(event)"
+            >
+              <div class="events__card-hero">
+                <img :src="event.img" alt="" class="events__card-img" />
+                <span class="events__card-date">{{ event.dateLabel }}</span>
+                <EntitlementLockBadge :locked="isEventLocked(event)" />
+              </div>
+              <div class="events__card-info">
+                <span class="events__card-eyebrow">{{ event.timeLabel }}</span>
+                <h3 class="events__card-name">{{ event.title }}</h3>
+                <p class="events__card-desc">{{ event.description }}</p>
+                <div v-if="event.requiresSub || isEventLocked(event)" class="events__card-footer">
+                  <span v-if="event.requiresSub" class="events__tag events__tag--member">Solo miembros</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Past -->
-      <section class="events__section">
-        <p class="eyebrow">PASADOS</p>
-        <div class="events__past-list">
-          <div
-            v-for="event in pastEvents"
-            :key="event.id"
-            :class="['events__past-card', { 'events__past-card--locked': isEventLocked(event) }]"
-            @click="handleEventClick(event)"
-          >
-            <div class="events__past-img-wrap">
-              <img :src="event.img" alt="" class="events__past-img" />
-              <EntitlementLockBadge :locked="isEventLocked(event)" />
+        <!-- Past -->
+        <section class="events__section">
+          <p class="eyebrow">PASADOS</p>
+          <div class="events__past-list">
+            <div
+              v-for="event in pastEvents"
+              :key="event.id"
+              :class="['events__past-card', { 'events__past-card--locked': isEventLocked(event) }]"
+              @click="handleEventClick(event)"
+            >
+              <div class="events__past-img-wrap">
+                <img :src="event.img" alt="" class="events__past-img" />
+                <EntitlementLockBadge :locked="isEventLocked(event)" />
+              </div>
+              <div class="events__past-body">
+                <span class="events__past-title">{{ event.title }}</span>
+                <span class="events__past-meta">GRABACIÓN · {{ event.dateLabel }}</span>
+              </div>
+              <svg class="events__past-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </div>
-            <div class="events__past-body">
-              <span class="events__past-title">{{ event.title }}</span>
-              <span class="events__past-meta">GRABACIÓN · {{ event.dateLabel }}</span>
-            </div>
-            <svg class="events__past-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
+        <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
+      </template>
     </div>
   </div>
 </template>
@@ -81,10 +108,10 @@ const dateFmt = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short
 const dateFmtFull = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
 
-const { data: events } = await useAsyncData('mobile-events', async () => {
+const { data: events, status: eventosStatus } = useAsyncData('mobile-events', async () => {
   const { data } = await client.from('events').select('id, title, description, start_at, cover_url, requires_subscription, entitlement_key, plan, status').in('status', ['published']).order('start_at')
   return data ?? []
-})
+}, { lazy: true })
 
 const upcomingEvents = computed(() =>
   (events.value ?? [])

@@ -4,118 +4,159 @@
       <h1 class="page-header__title">Editar publicación</h1>
     </div>
 
-    <div class="form-layout">
-      <div class="form-layout__main">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiInput
-              v-model="form.title"
-              label="Título (opcional)"
-              placeholder="Ej: Reflexión del día"
-            />
+    <!-- Skeleton loader -->
+    <template v-if="postStatus === 'pending'">
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="60px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="36px" radius="var(--radius-md)" />
+              <UiSkeleton variant="text" width="120px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="140px" radius="var(--radius-md)" />
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="120px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
 
-            <UiTextarea
-              v-model="form.body"
-              label="Contenido de la publicación"
-              :rows="6"
-              required
-              :error="errors.body"
-            />
+          <UiSkeleton variant="text" width="140px" height="16px" style="margin-top: var(--space-2);" />
+          <div v-for="i in 3" :key="i" style="background: var(--color-white); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-3);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+              <UiSkeleton variant="text" width="100px" height="12px" />
+              <UiSkeleton variant="text" width="80px" height="10px" />
+            </div>
+            <UiSkeleton variant="text" width="90%" height="12px" style="margin-bottom: var(--space-1);" />
+            <UiSkeleton variant="text" width="60%" height="12px" />
+          </div>
+        </div>
 
-            <!-- Media upload -->
-            <div class="upload">
-              <label class="upload__label">Imagen o video</label>
-              <div
-                class="upload__dropzone"
-                :class="{ 'upload__dropzone--active': isDragging }"
-                @dragover.prevent="isDragging = true"
-                @dragleave="isDragging = false"
-                @drop.prevent="handleDrop"
-                @click="triggerFileInput"
-              >
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept="image/*,video/*"
-                  class="upload__input"
-                  @change="handleFileChange"
-                />
-                <template v-if="!uploadedFile && !form.media_url">
-                  <div class="upload__icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                  </div>
-                  <p class="upload__text">Arrastra tu archivo aquí o <span class="upload__link">selecciona</span></p>
-                  <p class="upload__hint">JPG, PNG, WebP, MP4, MOV — max 50 MB</p>
-                </template>
-                <template v-else>
-                  <div class="upload__preview">
-                    <p class="upload__filename">{{ uploadedFile?.name ?? form.media_url }}</p>
-                    <p v-if="uploadedFile" class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
-                    <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
-                  </div>
-                </template>
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="40px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="36px" radius="var(--radius-md)" />
+              <UiSkeleton variant="text" width="50px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="36px" radius="var(--radius-md)" />
+            </div>
+          </UiCard>
+        </div>
+      </div>
+    </template>
+
+    <template v-else>
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiInput
+                v-model="form.title"
+                label="Título (opcional)"
+                placeholder="Ej: Reflexión del día"
+              />
+
+              <UiTextarea
+                v-model="form.body"
+                label="Contenido de la publicación"
+                :rows="6"
+                required
+                :error="errors.body"
+              />
+
+              <!-- Media upload -->
+              <div class="upload">
+                <label class="upload__label">Imagen o video</label>
+                <div
+                  class="upload__dropzone"
+                  :class="{ 'upload__dropzone--active': isDragging }"
+                  @dragover.prevent="isDragging = true"
+                  @dragleave="isDragging = false"
+                  @drop.prevent="handleDrop"
+                  @click="triggerFileInput"
+                >
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    accept="image/*,video/*"
+                    class="upload__input"
+                    @change="handleFileChange"
+                  />
+                  <template v-if="!uploadedFile && !form.media_url">
+                    <div class="upload__icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <p class="upload__text">Arrastra tu archivo aquí o <span class="upload__link">selecciona</span></p>
+                    <p class="upload__hint">JPG, PNG, WebP, MP4, MOV — max 50 MB</p>
+                  </template>
+                  <template v-else>
+                    <div class="upload__preview">
+                      <p class="upload__filename">{{ uploadedFile?.name ?? form.media_url }}</p>
+                      <p v-if="uploadedFile" class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
+                      <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </UiCard>
+
+          <!-- Comments section -->
+          <h2 class="section-title">Comentarios ({{ comments.length }})</h2>
+          <div class="comments-list">
+            <div v-for="comment in comments" :key="comment.id" class="comment-item">
+              <div class="comment-item__header">
+                <span class="comment-item__author">{{ comment.author_name }}</span>
+                <span class="comment-item__date">{{ formatDate(comment.created_at) }}</span>
+              </div>
+              <p class="comment-item__body">{{ comment.body }}</p>
+              <div class="comment-item__actions">
+                <UiButton variant="ghost" size="sm" @click="hideComment(comment)">
+                  {{ comment.is_hidden ? 'Mostrar' : 'Ocultar' }}
+                </UiButton>
               </div>
             </div>
           </div>
-        </UiCard>
+        </div>
 
-        <!-- Comments section -->
-        <h2 class="section-title">Comentarios ({{ comments.length }})</h2>
-        <div class="comments-list">
-          <div v-for="comment in comments" :key="comment.id" class="comment-item">
-            <div class="comment-item__header">
-              <span class="comment-item__author">{{ comment.author_name }}</span>
-              <span class="comment-item__date">{{ formatDate(comment.created_at) }}</span>
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSelect
+                v-model="form.author"
+                label="Autor"
+                :options="authorOptions"
+              />
+
+              <UiSelect
+                v-model="form.status"
+                label="Estado"
+                :options="statusOptions"
+              />
             </div>
-            <p class="comment-item__body">{{ comment.body }}</p>
-            <div class="comment-item__actions">
-              <UiButton variant="ghost" size="sm" @click="hideComment(comment)">
-                {{ comment.is_hidden ? 'Mostrar' : 'Ocultar' }}
-              </UiButton>
+          </UiCard>
+
+          <!-- <UiCard variant="filled">
+            <div class="form-section">
+              <div class="author-preview">
+                <img :src="authorAvatar" :alt="form.author" class="author-preview__avatar" />
+                <span class="author-preview__name">{{ form.author }}</span>
+              </div>
+              <p class="meta-label">Likes: {{ form.likes_count }}</p>
+              <p class="meta-label">Comentarios: {{ comments.length }}</p>
+              <p class="meta-label">Creado: {{ formatDate(form.created_at) }}</p>
             </div>
-          </div>
+          </UiCard> -->
         </div>
       </div>
 
-      <div class="form-layout__sidebar">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiSelect
-              v-model="form.author"
-              label="Autor"
-              :options="authorOptions"
-            />
-
-            <UiSelect
-              v-model="form.status"
-              label="Estado"
-              :options="statusOptions"
-            />
-          </div>
-        </UiCard>
-
-        <!-- <UiCard variant="filled">
-          <div class="form-section">
-            <div class="author-preview">
-              <img :src="authorAvatar" :alt="form.author" class="author-preview__avatar" />
-              <span class="author-preview__name">{{ form.author }}</span>
-            </div>
-            <p class="meta-label">Likes: {{ form.likes_count }}</p>
-            <p class="meta-label">Comentarios: {{ comments.length }}</p>
-            <p class="meta-label">Creado: {{ formatDate(form.created_at) }}</p>
-          </div>
-        </UiCard> -->
+      <div class="page-actions">
+        <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/comunidad">Volver</UiButton>
+        <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">{{ form.status === 'draft' ? 'Guardar' : 'Publicar' }}</UiButton>
+        <p v-if="formError" class="form-error">{{ formError }}</p>
       </div>
-    </div>
-
-    <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
-      <UiButton variant="soft" size="sm" to="/admin/comunidad">Volver</UiButton>
-      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">{{ form.status === 'draft' ? 'Guardar' : 'Publicar' }}</UiButton>
-      <p v-if="formError" class="form-error">{{ formError }}</p>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -133,14 +174,14 @@ const formError = ref('')
 const errors = reactive({ body: '' })
 
 // ── Fetch existing post ──
-const { data: post } = await useAsyncData(`post-${id}`, async () => {
+const { data: post, status: postStatus } = useAsyncData(`post-${id}`, async () => {
   if (isNew) return null
   const { data } = await client.from('posts').select('*').eq('id', id).single()
   return data
-})
+}, { lazy: true })
 
 // ── Fetch comments with author profile ──
-const { data: rawComments } = await useAsyncData(`post-comments-${id}`, async () => {
+const { data: rawComments } = useAsyncData(`post-comments-${id}`, async () => {
   if (isNew) return []
   const { data } = await client
     .from('post_comments')
@@ -154,25 +195,37 @@ const { data: rawComments } = await useAsyncData(`post-comments-${id}`, async ()
     created_at: c.created_at,
     is_hidden: c.status === 'hidden',
   }))
-})
+}, { lazy: true })
 
 const form = reactive({
-  title: post.value?.title ?? '',
-  body: post.value?.body ?? '',
-  media_url: post.value?.media_url ?? '',
-  status: post.value?.status ?? 'draft',
-  author: post.value?.community_segment === 'carlotta' ? 'Carlotta' : 'Gabriel',
+  title: '',
+  body: '',
+  media_url: '',
+  status: 'draft',
+  author: 'Gabriel',
   likes_count: 0,
-  created_at: post.value?.created_at ?? '',
+  created_at: '',
 })
 
+// Populate form when post data arrives
+watch(post, (val) => {
+  if (val) {
+    form.title = val.title ?? ''
+    form.body = val.body ?? ''
+    form.media_url = val.media_url ?? ''
+    form.status = val.status ?? 'draft'
+    form.author = val.community_segment === 'carlotta' ? 'Carlotta' : 'Gabriel'
+    form.created_at = val.created_at ?? ''
+  }
+}, { immediate: true })
+
 // Fetch likes count
-const { data: likesData } = await useAsyncData(`post-likes-${id}`, async () => {
+const { data: likesData } = useAsyncData(`post-likes-${id}`, async () => {
   if (isNew) return 0
   const { count } = await client.from('post_reactions').select('*', { count: 'exact', head: true }).eq('post_id', id)
   return count ?? 0
-})
-form.likes_count = likesData.value ?? 0
+}, { lazy: true })
+watch(likesData, (val) => { form.likes_count = val ?? 0 }, { immediate: true })
 
 const authorOptions = [
   { value: 'Gabriel', label: 'Gabriel' },
@@ -189,7 +242,8 @@ const authorAvatar = computed(() =>
   form.author === 'Carlotta' ? '/images/carlotta.png' : '/images/gabriel.png',
 )
 
-const comments = ref(rawComments.value ?? [])
+const comments = ref<any[]>([])
+watch(rawComments, (val) => { comments.value = val ?? [] }, { immediate: true })
 
 // ── Media upload ──
 const fileInput = ref<HTMLInputElement | null>(null)

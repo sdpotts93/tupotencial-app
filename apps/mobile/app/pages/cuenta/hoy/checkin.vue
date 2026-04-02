@@ -2,6 +2,22 @@
   <div class="screen">
     <UiTopNav title="Check-in diario" show-back />
     <div class="screen__content">
+      <!-- Skeleton -->
+      <template v-if="checkinStatus === 'pending'">
+        <h1 class="title title--lg">¿Cómo te sientes hoy?</h1>
+        <UiSkeleton variant="text" width="70%" height="14px" style="margin: var(--space-2) 0 var(--space-8);" />
+        <div style="display: flex; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-6);">
+          <div v-for="i in 5" :key="i" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-3);">
+            <UiSkeleton variant="circle" width="36px" height="36px" />
+            <UiSkeleton variant="text" width="80%" height="10px" />
+          </div>
+        </div>
+        <UiSkeleton variant="rect" width="100%" height="80px" radius="var(--radius-lg)" style="margin-bottom: var(--space-6);" />
+        <UiSkeleton variant="rect" width="100%" height="44px" radius="var(--radius-lg)" />
+      </template>
+
+      <!-- Content -->
+      <template v-else>
       <h1 class="title title--lg">¿Cómo te sientes hoy?</h1>
       <p class="checkin__subtitle">Tómate un momento para reflexionar sobre tu estado actual.</p>
 
@@ -40,6 +56,7 @@
           <UiButton block @click="navigateTo('/cuenta/hoy')">Volver a Hoy</UiButton>
         </template>
       </UiModal>
+      </template>
     </div>
   </div>
 </template>
@@ -60,11 +77,11 @@ const _now = new Date()
 const today = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`
 
 // ── Fetch current streak ──
-const { data: streakData } = await useAsyncData('checkin-streak', async () => {
+const { data: streakData, status: checkinStatus } = useAsyncData('checkin-streak', async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value.id).maybeSingle()
   return data?.current_streak ?? 0
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 const streak = computed(() => streakData.value ?? 0)
 
 const moods = [

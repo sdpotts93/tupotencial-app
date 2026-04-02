@@ -1,5 +1,26 @@
 <template>
   <div class="screen">
+    <!-- Skeleton -->
+    <template v-if="contentStatus === 'pending'">
+      <div class="detail">
+        <div class="detail__media">
+          <UiSkeleton variant="rect" width="100%" height="100%" />
+        </div>
+        <div class="detail__info">
+          <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="80%" height="24px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="50%" height="14px" style="margin-bottom: var(--space-5);" />
+          <UiSkeleton variant="rect" width="100%" height="44px" radius="var(--radius-lg)" style="margin-bottom: var(--space-5);" />
+          <UiSkeleton variant="text" width="100%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="85%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="60%" height="14px" style="margin-bottom: var(--space-5);" />
+          <UiSkeleton variant="text" width="60px" height="24px" radius="var(--radius-full)" />
+        </div>
+      </div>
+    </template>
+
+    <!-- Content -->
+    <template v-else>
     <div class="detail">
       <!-- Media hero (video/audio show play button, article/link show static image) -->
       <div class="detail__media">
@@ -53,6 +74,7 @@
         <div v-if="content.type === 'article' && content.body" class="detail__body" v-html="content.body" />
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -76,7 +98,7 @@ const typeLabels: Record<string, string> = {
   link: 'Enlace',
 }
 
-const { data: contentData } = await useAsyncData(`content-detail-${id}`, async () => {
+const { data: contentData, status: contentStatus } = useAsyncData(`content-detail-${id}`, async () => {
   const { data } = await client.rpc('get_secure_content', { p_content_id: id })
   if (!data) return null
   return {
@@ -92,7 +114,7 @@ const { data: contentData } = await useAsyncData(`content-detail-${id}`, async (
     vimeoId: data.vimeo_id ?? null,
     accessGranted: data.access_granted,
   }
-})
+}, { lazy: true })
 
 const content = computed(() => contentData.value ?? {
   title: '',

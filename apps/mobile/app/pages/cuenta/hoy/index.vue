@@ -1,5 +1,61 @@
 <template>
   <div class="screen">
+    <!-- Loading skeleton -->
+    <template v-if="hoyStatus === 'pending'">
+      <div class="hoy__hero-row">
+        <div class="hoy__hero">
+          <div class="hoy__hero-top">
+            <UiSkeleton variant="circle" width="40px" height="40px" />
+            <UiSkeleton variant="rect" width="80px" height="28px" radius="var(--radius-full)" />
+          </div>
+          <UiSkeleton variant="text" width="60%" height="24px" />
+        </div>
+        <div style="padding: var(--space-4) var(--space-5);">
+          <UiSkeleton variant="text" width="40%" height="10px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="rect" width="100%" height="6px" radius="var(--radius-full)" />
+          <UiSkeleton variant="text" width="30%" height="10px" style="margin-top: var(--space-2);" />
+        </div>
+      </div>
+      <div class="screen__content">
+        <!-- Retos skeleton -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-6);">
+          <div v-for="i in 2" :key="i" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0;">
+            <UiSkeleton variant="circle" width="20px" height="20px" />
+            <UiSkeleton variant="text" width="60%" height="14px" />
+          </div>
+        </div>
+        <!-- Featured + Mensaje skeleton -->
+        <div style="display: flex; gap: var(--space-4); margin-bottom: var(--space-6);">
+          <div style="flex: 1;">
+            <UiSkeleton variant="card" width="100%" height="180px" />
+          </div>
+          <div style="flex: 1;">
+            <UiSkeleton variant="rect" width="100%" height="180px" radius="var(--radius-xl)" />
+          </div>
+        </div>
+        <!-- Programs skeleton -->
+        <UiSkeleton variant="text" width="50%" height="16px" style="margin-bottom: var(--space-3);" />
+        <div style="display: flex; gap: var(--space-3); overflow: hidden; margin-bottom: var(--space-6);">
+          <UiSkeleton v-for="i in 2" :key="i" variant="rect" width="200px" height="64px" radius="var(--radius-xl)" style="flex-shrink: 0;" />
+        </div>
+        <!-- Latest content skeleton -->
+        <UiSkeleton variant="text" width="50%" height="16px" style="margin-bottom: var(--space-3);" />
+        <div style="display: flex; gap: var(--space-3); overflow: hidden; margin-bottom: var(--space-6);">
+          <div v-for="i in 3" :key="i" style="flex-shrink: 0; width: 160px;">
+            <UiSkeleton variant="rect" width="160px" height="100px" radius="var(--radius-lg)" style="margin-bottom: var(--space-2);" />
+            <UiSkeleton variant="text" width="80%" height="12px" style="margin-bottom: var(--space-1);" />
+            <UiSkeleton variant="text" width="50%" height="10px" />
+          </div>
+        </div>
+        <!-- Explore skeleton -->
+        <UiSkeleton variant="text" width="60%" height="16px" style="margin-bottom: var(--space-3);" />
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <UiSkeleton v-for="i in 3" :key="i" variant="rect" width="100%" height="64px" radius="var(--radius-xl)" />
+        </div>
+      </div>
+    </template>
+
+    <template v-else>
     <!-- Branded header (logo scrolls away, progress sticks) -->
     <div class="hoy__hero-row">
       <div class="hoy__hero">
@@ -177,6 +233,7 @@
       </section>
 
     </div>
+    </template>
 
     <!-- Check-in slideover -->
     <div
@@ -397,11 +454,11 @@ const greeting = computed(() => {
 })
 
 // ─── Streak ───
-const { data: streakData, refresh: refreshStreak } = await useAsyncData('hoy-streak', async () => {
+const { data: streakData, status: hoyStatus, refresh: refreshStreak } = useAsyncData('hoy-streak', async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value.id).maybeSingle()
   return data?.current_streak ?? 0
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 const streak = computed(() => streakData.value ?? 0)
 
 const streakMessage = computed(() => {
@@ -444,10 +501,10 @@ async function maybeUpdateStreak() {
 }
 
 // ─── Hoy page data (single RPC: settings + daily plan + content) ───
-const { data: hoyPage } = await useAsyncData('hoy-page', async () => {
+const { data: hoyPage } = useAsyncData('hoy-page', async () => {
   const { data } = await client.rpc('get_hoy_page', { p_date: today })
   return data as { settings: Record<string, any>; daily_plan: Record<string, any> | null; action_ref: Record<string, any> | null; content: any[] } | null
-})
+}, { lazy: true })
 
 const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
 const dailyPlanData = computed(() => hoyPage.value?.daily_plan)
@@ -499,18 +556,18 @@ const mensajeDelDia = computed(() => {
 })
 
 // ─── Today's checkin (to know if already completed) ───
-const { data: todayCheckin, refresh: refreshCheckin } = await useAsyncData('hoy-checkin', async () => {
+const { data: todayCheckin, refresh: refreshCheckin } = useAsyncData('hoy-checkin', async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('daily_checkins').select('id').eq('date', today).eq('user_id', user.value.id).eq('type', 'checkin').maybeSingle()
   return data
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 // ─── Today's accion completion ───
-const { data: todayAccion, refresh: refreshAccion } = await useAsyncData('hoy-accion', async () => {
+const { data: todayAccion, refresh: refreshAccion } = useAsyncData('hoy-accion', async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('daily_checkins').select('id, payload').eq('date', today).eq('user_id', user.value.id).eq('type', 'accion').maybeSingle()
   return data
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 // ─── Daily retos queue (2 items: check-in + admin-configurable action) ───
 const accionTitle = computed(() => {
@@ -621,7 +678,7 @@ function handleRetoTap(type: 'checkin' | 'accion') {
 }
 
 // ─── Active programs ───
-const { data: activeProgramsData } = await useAsyncData('hoy-programs', async () => {
+const { data: activeProgramsData } = useAsyncData('hoy-programs', async () => {
   if (!user.value?.id) return []
   const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title)').eq('user_id', user.value.id).eq('status', 'active')
   if (!enrollments?.length) return []
@@ -649,7 +706,7 @@ const { data: activeProgramsData } = await useAsyncData('hoy-programs', async ()
     const currentDay = checkinCountMap[pid] ?? 0
     return { id: pid, title: prog?.title ?? '', currentDay, totalDays }
   })
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 const activePrograms = computed(() =>
   (activeProgramsData.value ?? []).map(p => ({

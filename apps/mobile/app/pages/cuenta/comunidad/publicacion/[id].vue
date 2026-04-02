@@ -10,6 +10,36 @@
         <h1 class="pdetail__header-title">Publicación</h1>
       </header>
 
+      <!-- Skeleton -->
+      <template v-if="postStatus === 'pending'">
+        <div class="post-detail">
+          <div class="post-detail__header">
+            <UiSkeleton variant="circle" width="40px" height="40px" />
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <UiSkeleton variant="text" width="100px" height="14px" />
+              <UiSkeleton variant="text" width="60px" height="10px" />
+            </div>
+          </div>
+          <UiSkeleton variant="text" width="70%" height="20px" style="margin-bottom: var(--space-3);" />
+          <UiSkeleton variant="text" width="100%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="90%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="60%" height="14px" style="margin-bottom: var(--space-4);" />
+          <UiSkeleton variant="rect" width="100%" height="200px" radius="var(--radius-lg)" />
+        </div>
+        <section class="post-detail__comments">
+          <UiSkeleton variant="text" width="40%" height="10px" style="margin-bottom: var(--space-4);" />
+          <div v-for="i in 3" :key="i" style="display: flex; gap: var(--space-3); padding: var(--space-3) 0;">
+            <UiSkeleton variant="circle" width="28px" height="28px" />
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <UiSkeleton variant="text" width="30%" height="10px" />
+              <UiSkeleton variant="text" width="80%" height="12px" />
+            </div>
+          </div>
+        </section>
+      </template>
+
+      <!-- Content -->
+      <template v-else>
       <!-- Post -->
       <article class="post-detail">
         <div class="post-detail__header">
@@ -51,6 +81,7 @@
           </div>
         </div>
       </section>
+      </template>
     </div>
 
     <!-- Fixed input bar -->
@@ -102,7 +133,7 @@ function isVideo(url: string) {
 const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
 const segmentAvatar: Record<string, string> = { gabriel: '/images/gabriel.png', carlotta: '/images/carlotta.png' }
 
-const { data: postData, refresh: refreshPost } = await useAsyncData(`post-${postId}`, async () => {
+const { data: postData, refresh: refreshPost, status: postStatus } = useAsyncData(`post-${postId}`, async () => {
   const { data } = await client
     .from('posts')
     .select('*, post_reactions(user_id, reaction)')
@@ -117,14 +148,14 @@ const { data: postData, refresh: refreshPost } = await useAsyncData(`post-${post
     liked: ((data.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
     timeAgo: formatTimeAgo(data.created_at),
   }
-})
+}, { lazy: true })
 
 const post = computed(() => postData.value ?? {
   author: '', avatar: '', timeAgo: '', title: '', body: '', media_url: null, reactions: 0, liked: false,
 })
 
 // Load comments
-const { data: commentsData, refresh: refreshComments } = await useAsyncData(`post-comments-${postId}`, async () => {
+const { data: commentsData, refresh: refreshComments } = useAsyncData(`post-comments-${postId}`, async () => {
   const { data } = await client
     .from('post_comments')
     .select('*, profiles:user_id(display_name)')
@@ -138,7 +169,7 @@ const { data: commentsData, refresh: refreshComments } = await useAsyncData(`pos
     body: c.body,
     timeAgo: formatTimeAgo(c.created_at),
   }))
-})
+}, { lazy: true })
 
 const comments = computed(() => commentsData.value ?? [])
 

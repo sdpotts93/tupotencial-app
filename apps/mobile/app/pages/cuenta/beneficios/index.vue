@@ -10,28 +10,42 @@
         <h1 class="benefits__header-title">Beneficios</h1>
       </header>
 
-      <p class="benefits__intro">Alianzas y descuentos exclusivos de tu plan <UiTag :variant="isSubscriber ? 'accent' : 'default'" size="sm">{{ planTitle }}</UiTag></p>
+      <template v-if="beneficiosStatus === 'pending'">
+        <UiSkeleton variant="text" width="70%" height="14px" style="margin-bottom: var(--space-5);" />
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div v-for="i in 4" :key="i" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4); border-radius: var(--radius-xl); background: rgba(var(--tint-rgb), 0.04);">
+            <UiSkeleton variant="circle" width="44px" height="44px" />
+            <div style="flex: 1;">
+              <UiSkeleton variant="text" width="50%" height="14px" style="margin-bottom: 4px;" />
+              <UiSkeleton variant="text" width="80%" height="12px" />
+            </div>
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <p class="benefits__intro">Alianzas y descuentos exclusivos de tu plan <UiTag :variant="isSubscriber ? 'accent' : 'default'" size="sm">{{ planTitle }}</UiTag></p>
 
-      <div class="benefits__list">
-        <NuxtLink
-          v-for="benefit in benefits"
-          :key="benefit.id"
-          :to="`/cuenta/beneficios/${benefit.id}`"
-          class="benefits__card"
-          :style="{ '--benefit-accent': benefit.color, '--benefit-bg': benefit.bgColor }"
-        >
-          <div class="benefits__icon-wrap">
-            <Icon :name="benefit.emoji" size="28" />
-          </div>
-          <div class="benefits__body">
-            <h3 class="benefits__name">{{ benefit.title }}</h3>
-            <p class="benefits__desc">{{ benefit.description }}</p>
-          </div>
-          <svg class="benefits__chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </NuxtLink>
-      </div>
+        <div class="benefits__list">
+          <NuxtLink
+            v-for="benefit in benefits"
+            :key="benefit.id"
+            :to="`/cuenta/beneficios/${benefit.id}`"
+            class="benefits__card"
+            :style="{ '--benefit-accent': benefit.color, '--benefit-bg': benefit.bgColor }"
+          >
+            <div class="benefits__icon-wrap">
+              <Icon :name="benefit.emoji" size="28" />
+            </div>
+            <div class="benefits__body">
+              <h3 class="benefits__name">{{ benefit.title }}</h3>
+              <p class="benefits__desc">{{ benefit.description }}</p>
+            </div>
+            <svg class="benefits__chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </NuxtLink>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -42,11 +56,11 @@ definePageMeta({ layout: 'default' })
 const client = useSupabaseClient()
 const { isSubscriber } = useAuth()
 
-const { data: currentPlan } = await useAsyncData('beneficios-plan', async () => {
+const { data: currentPlan, status: beneficiosStatus } = useAsyncData('beneficios-plan', async () => {
   const planId = isSubscriber.value ? 'core' : 'free'
   const { data } = await client.from('subscription_plans').select('title').eq('id', planId).single()
   return data
-}, { watch: [isSubscriber] })
+}, { watch: [isSubscriber], lazy: true })
 
 const planTitle = computed(() => currentPlan.value?.title ?? (isSubscriber.value ? 'Core' : 'Gratis'))
 
@@ -57,7 +71,7 @@ const BENEFIT_COLORS = [
   { color: 'var(--color-benefit-pink)', bgColor: 'rgba(var(--color-benefit-pink-rgb), 0.15)' },
 ]
 
-const { data: benefits } = await useAsyncData('mobile-benefits', async () => {
+const { data: benefits } = useAsyncData('mobile-benefits', async () => {
   const planId = isSubscriber.value ? 'core' : 'free'
   const { data } = await client.from('benefits').select('*').eq('status', 'active').eq('plan', planId).order('position')
   return (data ?? []).map((b, i) => ({
@@ -66,7 +80,7 @@ const { data: benefits } = await useAsyncData('mobile-benefits', async () => {
     color: BENEFIT_COLORS[i % BENEFIT_COLORS.length].color,
     bgColor: BENEFIT_COLORS[i % BENEFIT_COLORS.length].bgColor,
   }))
-}, { watch: [isSubscriber] })
+}, { watch: [isSubscriber], lazy: true })
 </script>
 
 <style scoped>

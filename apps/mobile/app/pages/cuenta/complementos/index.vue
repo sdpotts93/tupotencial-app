@@ -10,29 +10,41 @@
         <h1 class="addons__header-title">VIP</h1>
       </header>
 
-      <p class="addons__intro">Lleva tu experiencia al siguiente nivel con contenido y experiencias exclusivas.</p>
+      <template v-if="addonsStatus === 'pending'">
+        <UiSkeleton variant="text" width="80%" height="14px" style="margin-bottom: var(--space-5);" />
+        <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+          <div v-for="i in 3" :key="i">
+            <UiSkeleton variant="rect" width="100%" height="160px" radius="var(--radius-2xl)" style="margin-bottom: var(--space-3);" />
+            <UiSkeleton variant="text" width="60%" height="16px" style="margin-bottom: var(--space-2);" />
+            <UiSkeleton variant="text" width="90%" height="12px" />
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <p class="addons__intro">Lleva tu experiencia al siguiente nivel con contenido y experiencias exclusivas.</p>
 
-      <div class="addons__list">
-        <NuxtLink
-          v-for="addon in addons"
-          :key="addon.id"
-          :to="`/cuenta/complementos/${addon.id}`"
-          class="addons__card"
-        >
-          <div class="addons__card-hero">
-            <img v-if="addon.img" :src="addon.img" alt="" class="addons__card-img" />
-            <div v-else class="addons__card-gradient" :style="{ background: addon.bg }" />
-            <span class="addons__card-price">{{ addon.priceLabel }}</span>
-          </div>
-          <div class="addons__card-info">
-            <h3 class="addons__card-name">{{ addon.title }}</h3>
-            <p class="addons__card-desc">{{ addon.description }}</p>
-            <div v-if="addon.owned" class="addons__card-footer">
-              <span class="addons__tag addons__tag--unlocked">Desbloqueado</span>
+        <div class="addons__list">
+          <NuxtLink
+            v-for="addon in addons"
+            :key="addon.id"
+            :to="`/cuenta/complementos/${addon.id}`"
+            class="addons__card"
+          >
+            <div class="addons__card-hero">
+              <img v-if="addon.img" :src="addon.img" alt="" class="addons__card-img" />
+              <div v-else class="addons__card-gradient" :style="{ background: addon.bg }" />
+              <span class="addons__card-price">{{ addon.priceLabel }}</span>
             </div>
-          </div>
-        </NuxtLink>
-      </div>
+            <div class="addons__card-info">
+              <h3 class="addons__card-name">{{ addon.title }}</h3>
+              <p class="addons__card-desc">{{ addon.description }}</p>
+              <div v-if="addon.owned" class="addons__card-footer">
+                <span class="addons__tag addons__tag--unlocked">Desbloqueado</span>
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -47,7 +59,7 @@ function formatPrice(cents: number) {
   return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
 }
 
-const { data: addons } = await useAsyncData('mobile-addons', async () => {
+const { data: addons, status: addonsStatus } = useAsyncData('mobile-addons', async () => {
   const { data: addonsList } = await client.from('addons').select('*').eq('status', 'active').order('created_at')
   let purchasedIds = new Set<string>()
   if (user.value?.id) {
@@ -63,7 +75,7 @@ const { data: addons } = await useAsyncData('mobile-addons', async () => {
     bg: 'linear-gradient(135deg, var(--color-surface-alt) 0%, var(--color-surface) 100%)',
     owned: purchasedIds.has(a.id),
   }))
-}, { watch: [() => user.value?.id] })
+}, { watch: [() => user.value?.id], lazy: true })
 </script>
 
 <style scoped>

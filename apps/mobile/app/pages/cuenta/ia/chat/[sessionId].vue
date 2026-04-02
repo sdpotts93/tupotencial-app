@@ -16,6 +16,20 @@
 
       <p class="chat__disclaimer">No es consejo médico/terapéutico.</p>
 
+      <template v-if="chatStatus === 'pending'">
+        <div class="chat__messages">
+          <div v-for="i in 3" :key="i" class="chat__msg">
+            <UiSkeleton variant="circle" width="28px" height="28px" />
+            <div style="flex: 1;">
+              <UiSkeleton variant="text" width="25%" height="10px" style="margin-bottom: 6px;" />
+              <UiSkeleton variant="text" :width="i % 2 === 0 ? '90%' : '60%'" height="14px" style="margin-bottom: 4px;" />
+              <UiSkeleton v-if="i % 2 === 0" variant="text" width="75%" height="14px" />
+            </div>
+          </div>
+        </div>
+      </template>
+      <template v-else>
+
       <!-- Messages (comment-style) -->
       <div ref="messagesRef" class="chat__messages">
         <div
@@ -71,6 +85,8 @@
           {{ p }}
         </button>
       </div>
+
+      </template>
     </div>
 
     <!-- Fixed input bar (community post style) -->
@@ -231,22 +247,25 @@ function formatTime(date?: string) {
 }
 
 // Load existing session messages (or show welcome for new)
-if (!isNewSession.value) {
-  const { data: session } = await useAsyncData(`ai-session-${currentSessionId.value}`, async () => {
-    const { data } = await client.from('ai_sessions').select('tone').eq('id', currentSessionId.value).single()
-    return data
-  })
-  if (session.value) {
-    toneName.value = session.value.tone === 'gabriel' ? 'Gabriel' : 'Carlotta'
-  }
+const { data: sessionData, status: chatStatus } = useAsyncData(`ai-session-${currentSessionId.value}`, async () => {
+  if (isNewSession.value) return null
+  const { data } = await client.from('ai_sessions').select('tone').eq('id', currentSessionId.value).single()
+  return data
+}, { lazy: true })
 
-  const { data: dbMessages } = await useAsyncData(`ai-messages-${currentSessionId.value}`, async () => {
-    const { data } = await client.from('ai_messages')
-      .select('id, role, content, created_at')
-      .eq('session_id', currentSessionId.value)
-      .order('created_at', { ascending: true })
-    return data ?? []
-  })
+const { data: dbMessages } = useAsyncData(`ai-messages-${currentSessionId.value}`, async () => {
+  if (isNewSession.value) return []
+  const { data } = await client.from('ai_messages')
+    .select('id, role, content, created_at')
+    .eq('session_id', currentSessionId.value)
+    .order('created_at', { ascending: true })
+  return data ?? []
+}, { lazy: true })
+
+watch([sessionData, dbMessages], () => {
+  if (sessionData.value) {
+    toneName.value = sessionData.value.tone === 'gabriel' ? 'Gabriel' : 'Carlotta'
+  }
 
   if (dbMessages.value?.length) {
     messages.value = dbMessages.value
@@ -258,10 +277,18 @@ if (!isNewSession.value) {
         time: formatTime(m.created_at),
       }))
   }
-}
 
-// Show welcome message if no messages yet
-if (!messages.value.length) {
+  // Show welcome message if no messages yet
+  if (!messages.value.length) {
+    const welcome = toneName.value === 'Carlotta'
+      ? '¡Hola! Soy tu coach Carlotta. Estoy aquí para ayudarte a reflexionar y encontrar claridad. ¿Qué te gustaría explorar hoy?'
+      : '¡Hey! Soy Gabriel, tu coach. Estoy aquí para ayudarte a tomar acción y crecer. ¿Qué quieres lograr hoy?'
+    messages.value.push({ id: 'welcome', role: 'assistant', content: welcome, time: formatTime() })
+  }
+}, { immediate: true })
+
+// Show welcome for new sessions immediately
+if (isNewSession.value && !messages.value.length) {
   const welcome = toneName.value === 'Carlotta'
     ? '¡Hola! Soy tu coach Carlotta. Estoy aquí para ayudarte a reflexionar y encontrar claridad. ¿Qué te gustaría explorar hoy?'
     : '¡Hey! Soy Gabriel, tu coach. Estoy aquí para ayudarte a tomar acción y crecer. ¿Qué quieres lograr hoy?'

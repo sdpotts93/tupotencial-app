@@ -81,7 +81,32 @@
         <!-- Tabs -->
         <UiTabs v-model="activeTab" :tabs="tabs" />
 
-        <!-- ═══════════ TAB: Categorías ═══════════ -->
+        <!-- Loading skeleton -->
+        <template v-if="biblioStatus === 'pending'">
+          <!-- Featured skeleton -->
+          <section style="margin-bottom: var(--space-6);">
+            <UiSkeleton variant="text" width="30%" height="16px" style="margin-bottom: var(--space-3);" />
+            <UiSkeleton variant="card" width="100%" height="200px" />
+          </section>
+          <!-- Category rows skeleton -->
+          <section v-for="i in 3" :key="i" style="margin-bottom: var(--space-6);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-3);">
+              <UiSkeleton variant="text" width="40%" height="16px" />
+              <UiSkeleton variant="text" width="15%" height="12px" />
+            </div>
+            <div style="display: flex; gap: var(--space-3); overflow: hidden;">
+              <div v-for="j in 3" :key="j" style="flex-shrink: 0; width: 160px;">
+                <UiSkeleton variant="rect" width="160px" height="100px" radius="var(--radius-lg)" style="margin-bottom: var(--space-2);" />
+                <UiSkeleton variant="text" width="80%" height="12px" style="margin-bottom: var(--space-1);" />
+                <UiSkeleton variant="text" width="50%" height="10px" />
+              </div>
+            </div>
+          </section>
+        </template>
+
+        <!-- Actual tab content -->
+        <template v-else>
+          <!-- ═══════════ TAB: Categorías ═══════════ -->
         <template v-if="activeTab === 'categorias'">
           <!-- Featured / hero -->
           <section v-if="featuredItem" class="library__featured">
@@ -223,6 +248,7 @@
             </NuxtLink>
           </div>
         </template>
+        </template>
       </template>
 
       <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
@@ -338,7 +364,7 @@ watch(query, (q) => {
 const filteredResults = computed(() => searchResults.value)
 
 // ─── Tab: Categorías ───
-const { data: categoriesData } = await useAsyncData('mobile-library-categories', async () => {
+const { data: categoriesData, status: biblioStatus } = useAsyncData('mobile-library-categories', async () => {
   // Fetch categories
   const { data: cats } = await client
     .from('content_categories')
@@ -372,14 +398,14 @@ const { data: categoriesData } = await useAsyncData('mobile-library-categories',
     slug: cat.slug,
     items: catItemsMap.get(cat.id) ?? [],
   }))
-})
+}, { lazy: true })
 const categories = computed(() => categoriesData.value ?? [])
 
 // Featured content from app_settings
-const { data: featuredContentId } = await useAsyncData('biblioteca-featured', async () => {
+const { data: featuredContentId } = useAsyncData('biblioteca-featured', async () => {
   const { data } = await client.from('app_settings').select('value').eq('key', 'biblioteca_featured').single()
   return (data?.value as any)?.content_id ?? null
-})
+}, { lazy: true })
 const featuredItem = computed(() => {
   const fid = featuredContentId.value
   if (fid) {
@@ -393,7 +419,7 @@ const featuredItem = computed(() => {
   return firstCat?.items?.[0] ?? null
 })
 
-const { data: recordedEvents } = await useAsyncData('mobile-library-recorded-events', async () => {
+const { data: recordedEvents } = useAsyncData('mobile-library-recorded-events', async () => {
   const { data } = await client
     .from('events')
     .select('id, title, start_at, cover_url, entitlement_key, plan')
@@ -409,7 +435,7 @@ const { data: recordedEvents } = await useAsyncData('mobile-library-recorded-eve
     entitlement_key: e.entitlement_key,
     plan: e.plan,
   }))
-})
+}, { lazy: true })
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) return true
@@ -455,7 +481,7 @@ function handleEventClick(ev: { id: string; entitlement_key: string | null; plan
 }
 
 // ─── Tab: Programas ───
-const { data: programsWithContent } = await useAsyncData('mobile-library-programs', async () => {
+const { data: programsWithContent } = useAsyncData('mobile-library-programs', async () => {
   if (!user.value?.id) return []
   const { data: progs } = await client.from('programs').select('id, type, title, plan, is_active').eq('is_active', true).order('created_at')
   const { data: enrollments } = await client.from('program_enrollments').select('program_id').eq('user_id', user.value.id)
@@ -497,10 +523,10 @@ const { data: programsWithContent } = await useAsyncData('mobile-library-program
     free: p.plan === 'free',
     items: progContentMap.get(p.id) ?? [],
   }))
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 // ─── Tab: Objetivos ───
-const { data: objectives } = await useAsyncData('mobile-library-objectives', async () => {
+const { data: objectives } = useAsyncData('mobile-library-objectives', async () => {
   const { data: objs } = await client.from('content_objectives').select('id, title, slug').order('position')
   // Count published content per objective
   const { data: items } = await client
@@ -521,7 +547,7 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
     icon: 'lucide:target',
     count: countMap.get(o.id) ?? 0,
   }))
-})
+}, { lazy: true })
 </script>
 
 <style scoped>

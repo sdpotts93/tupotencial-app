@@ -9,44 +9,70 @@
       </div> -->
     </div>
 
-    <!-- KPI Cards -->
-    <div class="dashboard__kpis">
-      <div v-for="kpi in kpis" :key="kpi.label" class="dashboard__kpi-card" :style="{ '--kpi-bg': kpi.bg, '--kpi-accent': kpi.accent }">
-        <span class="eyebrow dashboard__kpi-label">{{ kpi.label }}</span>
-        <span class="dashboard__kpi-value">{{ kpi.value }}</span>
+    <!-- Skeleton loader -->
+    <template v-if="dashStatus === 'pending'">
+      <div class="dashboard__kpis">
+        <div v-for="i in 4" :key="i" class="dashboard__kpi-card">
+          <UiSkeleton variant="text" width="60%" height="10px" />
+          <UiSkeleton variant="text" width="40%" height="24px" />
+        </div>
       </div>
-    </div>
 
-    <!-- Quick Actions -->
-    <h2 v-if="canEdit" class="dashboard__section-title">Acciones rápidas</h2>
-    <div v-if="canEdit" class="dashboard__actions-grid">
-      <NuxtLink
-        v-for="action in quickActions"
-        :key="action.to"
-        :to="action.to"
-        class="dashboard__action"
-      >
-        <div class="dashboard__action-thumb">
-          <Icon :name="action.icon" size="22" />
+      <UiSkeleton variant="text" width="120px" height="12px" style="margin-bottom: var(--space-3);" />
+      <div class="dashboard__actions-grid">
+        <div v-for="i in 6" :key="i" class="dashboard__action" style="pointer-events: none;">
+          <UiSkeleton variant="circle" width="48px" height="48px" />
+          <UiSkeleton variant="text" width="70%" height="14px" />
+          <UiSkeleton variant="text" width="50%" height="10px" />
         </div>
-        <div class="dashboard__action-info">
-          <span class="dashboard__action-name">{{ action.title }}</span>
-          <span class="dashboard__action-meta">{{ action.description }}</span>
-        </div>
-        <Icon name="lucide:chevron-right" size="16" class="dashboard__action-arrow" />
-      </NuxtLink>
-    </div>
+      </div>
 
-    <!-- Recent Activity -->
-    <h2 class="dashboard__section-title">Actividad reciente</h2>
-    <UiDataTable :columns="activityColumns" :rows="activityRows">
-      <template #cell-type="{ value }">
-        <UiTag :variant="typeVariant(value)">{{ value }}</UiTag>
-      </template>
-      <template #cell-created_at="{ value }">
-        {{ formatDate(value) }}
-      </template>
-    </UiDataTable>
+      <UiSkeleton variant="text" width="140px" height="12px" style="margin-bottom: var(--space-3); margin-top: var(--space-2);" />
+      <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+        <UiSkeleton v-for="i in 5" :key="i" variant="rect" width="100%" height="40px" radius="var(--radius-md)" />
+      </div>
+    </template>
+
+    <template v-else>
+      <!-- KPI Cards -->
+      <div class="dashboard__kpis">
+        <div v-for="kpi in kpis" :key="kpi.label" class="dashboard__kpi-card" :style="{ '--kpi-bg': kpi.bg, '--kpi-accent': kpi.accent }">
+          <span class="eyebrow dashboard__kpi-label">{{ kpi.label }}</span>
+          <span class="dashboard__kpi-value">{{ kpi.value }}</span>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <h2 v-if="canEdit" class="dashboard__section-title">Acciones rápidas</h2>
+      <div v-if="canEdit" class="dashboard__actions-grid">
+        <NuxtLink
+          v-for="action in quickActions"
+          :key="action.to"
+          :to="action.to"
+          class="dashboard__action"
+        >
+          <div class="dashboard__action-thumb">
+            <Icon :name="action.icon" size="22" />
+          </div>
+          <div class="dashboard__action-info">
+            <span class="dashboard__action-name">{{ action.title }}</span>
+            <span class="dashboard__action-meta">{{ action.description }}</span>
+          </div>
+          <Icon name="lucide:chevron-right" size="16" class="dashboard__action-arrow" />
+        </NuxtLink>
+      </div>
+
+      <!-- Recent Activity -->
+      <h2 class="dashboard__section-title">Actividad reciente</h2>
+      <UiDataTable :columns="activityColumns" :rows="activityRows">
+        <template #cell-type="{ value }">
+          <UiTag :variant="typeVariant(value)">{{ value }}</UiTag>
+        </template>
+        <template #cell-created_at="{ value }">
+          {{ formatDate(value) }}
+        </template>
+      </UiDataTable>
+    </template>
   </div>
 </template>
 
@@ -59,7 +85,7 @@ const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
 
 // ── KPIs from Supabase aggregate queries ──
-const { data: kpis } = await useAsyncData('admin-dashboard-kpis', async () => {
+const { data: kpis, status: dashStatus } = useAsyncData('admin-dashboard-kpis', async () => {
   const _n = new Date()
   const today = `${_n.getFullYear()}-${String(_n.getMonth() + 1).padStart(2, '0')}-${String(_n.getDate()).padStart(2, '0')}`
   const [usersRes, subsRes, checkinsRes, programsRes] = await Promise.all([
@@ -74,7 +100,7 @@ const { data: kpis } = await useAsyncData('admin-dashboard-kpis', async () => {
     { label: 'Check-ins hoy', value: (checkinsRes.count ?? 0).toLocaleString('es-MX'), bg: 'var(--color-ai-warm-bg)', accent: 'var(--color-ai-warm)' },
     { label: 'Programas activos', value: (programsRes.count ?? 0).toLocaleString('es-MX'), bg: 'var(--color-pro-bg)', accent: 'var(--color-pro)' },
   ]
-})
+}, { lazy: true })
 
 const quickActions = [
   { title: 'Crear contenido', description: 'Artículo, video o audio nuevo', icon: 'lucide:file-plus', to: '/admin/contenido/new' },
@@ -93,7 +119,7 @@ const activityColumns = [
 ]
 
 // ── Recent activity from multiple tables ──
-const { data: _activityData } = await useAsyncData('admin-dashboard-activity', async () => {
+const { data: _activityData } = useAsyncData('admin-dashboard-activity', async () => {
   const [contentRes, programsRes, eventsRes, profilesRes] = await Promise.all([
     client.from('content_items').select('id, title, created_at').order('created_at', { ascending: false }).limit(3),
     client.from('programs').select('id, title, created_at').order('created_at', { ascending: false }).limit(3),
@@ -118,7 +144,7 @@ const { data: _activityData } = await useAsyncData('admin-dashboard-activity', a
 
   rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
   return rows.slice(0, 10)
-})
+}, { lazy: true })
 const activityRows = computed(() => _activityData.value ?? [])
 
 function typeVariant(type: string) {

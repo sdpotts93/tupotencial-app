@@ -1,5 +1,28 @@
 <template>
   <div class="screen">
+    <!-- Skeleton -->
+    <template v-if="eventStatus === 'pending'">
+      <div class="edetail">
+        <div class="edetail__media">
+          <UiSkeleton variant="rect" width="100%" height="100%" />
+        </div>
+        <div class="edetail__info">
+          <UiSkeleton variant="text" width="50%" height="10px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="80%" height="24px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="rect" width="100%" height="44px" radius="var(--radius-lg)" style="margin: var(--space-5) 0;" />
+          <UiSkeleton variant="text" width="100%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="85%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="60%" height="14px" style="margin-bottom: var(--space-5);" />
+          <div style="display: flex; gap: var(--space-2);">
+            <UiSkeleton variant="text" width="90px" height="24px" radius="var(--radius-full)" />
+            <UiSkeleton variant="text" width="70px" height="24px" radius="var(--radius-full)" />
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Content -->
+    <template v-else>
     <div class="edetail">
       <!-- Media -->
       <div class="edetail__media">
@@ -39,6 +62,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -64,10 +88,10 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelado',
 }
 
-const { data: eventData } = await useAsyncData(`event-${id}`, async () => {
+const { data: eventData, status: eventStatus } = useAsyncData(`event-${id}`, async () => {
   const { data } = await client.rpc('get_secure_event', { p_event_id: id })
   return data
-})
+}, { lazy: true })
 
 const event = computed(() => {
   const e = eventData.value

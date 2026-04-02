@@ -1,6 +1,27 @@
 <template>
   <div class="screen">
-    <div class="addon">
+    <template v-if="addonStatus === 'pending'">
+      <div class="addon">
+        <div class="addon__media" style="background: rgba(var(--tint-rgb), 0.06);">
+          <UiSkeleton variant="rect" width="100%" height="100%" />
+          <div class="addon__nav safe-top">
+            <button class="addon__back" aria-label="Volver" @click="$router.back()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="addon__info">
+          <UiSkeleton variant="text" width="65%" height="24px" style="margin-bottom: var(--space-3);" />
+          <UiSkeleton variant="text" width="100%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="80%" height="14px" style="margin-bottom: var(--space-5);" />
+          <UiSkeleton variant="text" width="40%" height="22px" style="margin-bottom: var(--space-5);" />
+          <UiSkeleton variant="rect" width="100%" height="44px" style="border-radius: var(--radius-lg);" />
+        </div>
+      </div>
+    </template>
+    <div v-else class="addon">
       <!-- Media -->
       <div class="addon__media">
         <img :src="addon.img" alt="" class="addon__img" />
@@ -65,16 +86,16 @@ function formatPrice(cents: number) {
   return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
 }
 
-const { data: rawAddon } = await useAsyncData(`addon-${route.params.id}`, async () => {
+const { data: rawAddon, status: addonStatus } = useAsyncData(`addon-${route.params.id}`, async () => {
   const { data } = await client.from('addons').select('*').eq('id', route.params.id).single()
   return data
-})
+}, { lazy: true })
 
-const { data: isOwned } = await useAsyncData(`addon-owned-${route.params.id}`, async () => {
+const { data: isOwned } = useAsyncData(`addon-owned-${route.params.id}`, async () => {
   if (!user.value?.id) return null
   const { data } = await client.from('addon_purchases').select('id').eq('addon_id', route.params.id as string).eq('user_id', user.value.id).maybeSingle()
   return !!data
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 const addon = computed(() => ({
   title: rawAddon.value?.title ?? '',

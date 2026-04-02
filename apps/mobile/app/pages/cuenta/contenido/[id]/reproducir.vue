@@ -1,5 +1,10 @@
 <template>
-  <div class="player" :class="{ 'player--audio': isAudio, 'player--vimeo': isVimeo }" @click="toggleControls">
+  <div v-if="playerStatus === 'pending'" class="player" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <UiSkeleton variant="rect" width="80%" height="60%" radius="var(--radius-lg)" style="margin-bottom: var(--space-6);" />
+    <UiSkeleton variant="text" width="50%" height="20px" style="margin-bottom: var(--space-2);" />
+    <UiSkeleton variant="text" width="30%" height="14px" />
+  </div>
+  <div v-else class="player" :class="{ 'player--audio': isAudio, 'player--vimeo': isVimeo }" @click="toggleControls">
     <!-- Audio mode: cover image + hidden audio element -->
     <template v-if="isAudio">
       <img v-if="content.thumbnail" :src="content.thumbnail" alt="" class="player__cover" />
@@ -145,7 +150,7 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null
 let vimeoPlayer: Player | null = null
 
 // ── Content from DB ──
-const { data: contentData } = await useAsyncData(`content-player-${contentId}`, async () => {
+const { data: contentData, status: playerStatus } = useAsyncData(`content-player-${contentId}`, async () => {
   const { data } = await client.rpc('get_secure_content', { p_content_id: contentId })
   if (!data) return null
   if (!data.access_granted) {
@@ -165,7 +170,7 @@ const { data: contentData } = await useAsyncData(`content-player-${contentId}`, 
     type: data.type as 'video' | 'audio',
     thumbnail: data.thumbnail_url ?? null,
   }
-})
+}, { lazy: true })
 
 const contentBase = computed(() => contentData.value ?? {
   title: '',

@@ -11,6 +11,25 @@
         <UiTag variant="accent" class="day__counter">{{ dayIndex }}/{{ totalDays }}</UiTag>
       </header>
 
+      <template v-if="dayStatus === 'pending'">
+        <UiSkeleton variant="text" width="60%" height="24px" style="margin-bottom: var(--space-3);" />
+        <UiSkeleton variant="text" width="90%" height="14px" style="margin-bottom: var(--space-2);" />
+        <UiSkeleton variant="text" width="75%" height="14px" style="margin-bottom: var(--space-6);" />
+
+        <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: var(--space-3);" />
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+          <div v-for="i in 3" :key="i" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); background: rgba(var(--tint-rgb), 0.04);">
+            <UiSkeleton variant="rect" width="56px" height="56px" style="border-radius: var(--radius-lg); flex-shrink: 0;" />
+            <div style="flex: 1;">
+              <UiSkeleton variant="text" width="60%" height="14px" style="margin-bottom: 4px;" />
+              <UiSkeleton variant="text" width="35%" height="10px" />
+            </div>
+            <UiSkeleton variant="circle" width="22px" height="22px" />
+          </div>
+        </div>
+      </template>
+      <template v-else>
+
       <h2 class="title title--lg">{{ dayTitle }}</h2>
       <p class="day__desc">{{ dayDescription }}</p>
 
@@ -84,6 +103,8 @@
           Completar día
         </UiButton>
       </div>
+
+      </template>
     </div>
 
     <!-- Slideover feedback form -->
@@ -185,7 +206,7 @@ const toast = useToast()
 const programId = route.params.id as string
 const dayIndex = route.params.indDia as string
 
-const { data: dayData } = await useAsyncData(`program-day-${programId}-${dayIndex}`, async () => {
+const { data: dayData, status: dayStatus } = useAsyncData(`program-day-${programId}-${dayIndex}`, async () => {
   if (!user.value?.id) return null
   // Fetch program type
   const { data: program } = await client
@@ -280,7 +301,7 @@ const { data: dayData } = await useAsyncData(`program-day-${programId}-${dayInde
     description: day.description ?? '',
     activities: acts,
   }
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 const programType = computed<ProgramType>(() => dayData.value?.programType ?? 'reto')
 const totalDays = computed(() => dayData.value?.totalDays ?? 0)

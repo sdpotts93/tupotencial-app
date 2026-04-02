@@ -11,6 +11,33 @@
         <h1 class="profile__header-title">Mis Datos</h1>
       </header>
 
+      <template v-if="profileStatus === 'pending'">
+        <div class="profile__top-grid">
+          <div class="profile__top-left">
+            <div class="profile__avatar-area">
+              <UiSkeleton variant="circle" width="88px" height="88px" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: var(--space-5);">
+              <div>
+                <UiSkeleton variant="text" width="30%" height="12px" style="margin-bottom: var(--space-2);" />
+                <UiSkeleton variant="rect" width="100%" height="44px" style="border-radius: var(--radius-lg);" />
+              </div>
+              <div>
+                <UiSkeleton variant="text" width="30%" height="12px" style="margin-bottom: var(--space-2);" />
+                <UiSkeleton variant="rect" width="100%" height="44px" style="border-radius: var(--radius-lg);" />
+              </div>
+              <UiSkeleton variant="rect" width="100%" height="44px" style="border-radius: var(--radius-lg);" />
+            </div>
+          </div>
+          <div class="profile__top-right">
+            <hr class="profile__divider" />
+            <UiSkeleton variant="text" width="30%" height="12px" style="margin-bottom: var(--space-3);" />
+            <UiSkeleton variant="rect" width="100%" height="64px" style="border-radius: var(--radius-xl); margin-bottom: var(--space-6);" />
+          </div>
+        </div>
+      </template>
+      <template v-else>
+
       <!-- Desktop two-column layout wrapper -->
       <div class="profile__top-grid">
         <!-- Left column: Avatar + Form -->
@@ -80,6 +107,8 @@
           </section>
         </div>
       </div>
+
+      </template>
     </div>
   </div>
 </template>
@@ -107,7 +136,7 @@ const initials = computed(() => {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 })
 
-const { data: vipAccesos } = await useAsyncData('profile-vip-accesos', async () => {
+const { data: vipAccesos, status: profileStatus } = useAsyncData('profile-vip-accesos', async () => {
   if (!user.value?.id) return []
   const { data } = await client
     .from('addon_purchases')
@@ -119,7 +148,7 @@ const { data: vipAccesos } = await useAsyncData('profile-vip-accesos', async () 
     typeLabel: 'CONTENIDO PREMIUM',
     img: (p.addons as any)?.cover_url ?? null,
   }))
-}, { watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id] })
 
 async function handleSave() {
   formError.value = ''

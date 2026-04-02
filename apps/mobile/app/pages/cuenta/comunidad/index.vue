@@ -7,7 +7,34 @@
 
       <p class="community__subtitle">El espacio donde compartir avances, sostener el proceso y crecer con otros que viven con intención.</p>
 
-      <div class="community__desktop-wrapper">
+      <!-- Loading skeleton -->
+      <div v-if="comunidadStatus === 'pending'">
+        <!-- Pills skeleton -->
+        <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-5);">
+          <UiSkeleton v-for="i in 3" :key="i" variant="rect" width="70px" height="32px" radius="var(--radius-full)" />
+        </div>
+        <!-- Post cards skeleton -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-5);">
+          <div v-for="i in 3" :key="i" style="padding-bottom: var(--space-5); border-bottom: 1px solid rgba(var(--tint-rgb), 0.06);">
+            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+              <UiSkeleton variant="circle" width="36px" height="36px" />
+              <div style="flex: 1;">
+                <UiSkeleton variant="text" width="30%" height="12px" style="margin-bottom: 4px;" />
+                <UiSkeleton variant="text" width="20%" height="10px" />
+              </div>
+            </div>
+            <UiSkeleton variant="text" width="80%" height="14px" style="margin-bottom: var(--space-2);" />
+            <UiSkeleton variant="text" width="100%" height="12px" style="margin-bottom: var(--space-1);" />
+            <UiSkeleton variant="text" width="60%" height="12px" style="margin-bottom: var(--space-3);" />
+            <div style="display: flex; gap: var(--space-4);">
+              <UiSkeleton variant="text" width="40px" height="12px" />
+              <UiSkeleton variant="text" width="40px" height="12px" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="community__desktop-wrapper">
         <!-- Main feed column -->
         <div class="community__main">
           <!-- Filter pills -->
@@ -164,7 +191,7 @@ function formatTimeAgo(dateStr: string) {
 const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
 const segmentAvatar: Record<string, string> = { gabriel: '/images/gabriel.png', carlotta: '/images/carlotta.png' }
 
-const { data: posts, refresh } = await useAsyncData('mobile-posts', async () => {
+const { data: posts, refresh, status: comunidadStatus } = useAsyncData('mobile-posts', async () => {
   const { data } = await client
     .from('posts')
     .select('*, post_reactions(user_id, reaction), post_comments(count)')
@@ -179,7 +206,7 @@ const { data: posts, refresh } = await useAsyncData('mobile-posts', async () => 
     comments: (p.post_comments as any)?.[0]?.count ?? 0,
     timeAgo: formatTimeAgo(p.created_at),
   }))
-})
+}, { lazy: true })
 
 const filteredPosts = computed(() => {
   if (activeFilter.value === 'all') return posts.value ?? []

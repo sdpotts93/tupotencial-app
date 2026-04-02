@@ -1,6 +1,39 @@
 <template>
   <div class="screen">
     <div class="screen__content">
+      <template v-if="masStatus === 'pending'">
+        <div class="more__profile">
+          <UiSkeleton variant="circle" width="56px" height="56px" />
+          <div class="more__info">
+            <UiSkeleton variant="text" width="120px" height="18px" style="margin-bottom: 4px;" />
+            <UiSkeleton variant="text" width="50px" height="20px" style="border-radius: var(--radius-full);" />
+          </div>
+        </div>
+
+        <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: var(--space-3);" />
+        <div style="display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-6);">
+          <div v-for="i in 4" :key="i" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0;">
+            <UiSkeleton variant="circle" width="20px" height="20px" />
+            <div style="flex: 1;">
+              <UiSkeleton variant="text" width="40%" height="14px" style="margin-bottom: 4px;" />
+              <UiSkeleton variant="text" width="70%" height="12px" />
+            </div>
+          </div>
+        </div>
+
+        <UiSkeleton variant="text" width="25%" height="10px" style="margin-bottom: var(--space-3); margin-top: var(--space-6);" />
+        <div style="display: flex; flex-direction: column; gap: var(--space-1);">
+          <div v-for="i in 4" :key="i" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0;">
+            <UiSkeleton variant="circle" width="20px" height="20px" />
+            <div style="flex: 1;">
+              <UiSkeleton variant="text" width="35%" height="14px" style="margin-bottom: 4px;" />
+              <UiSkeleton variant="text" width="65%" height="12px" />
+            </div>
+          </div>
+        </div>
+      </template>
+      <template v-else>
+
       <!-- Profile header -->
       <div class="more__profile">
         <div class="more__avatar"><span>{{ initials }}</span></div>
@@ -68,6 +101,8 @@
           </template>
         </UiListItem>
       </UiList>
+
+      </template>
     </div>
   </div>
 </template>
@@ -84,11 +119,11 @@ const initials = computed(() => {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 })
 
-const { data: currentPlan } = await useAsyncData('current-plan', async () => {
+const { data: currentPlan, status: masStatus } = useAsyncData('current-plan', async () => {
   const planId = isSubscriber.value ? 'core' : 'free'
   const { data } = await client.from('subscription_plans').select('title').eq('id', planId).single()
   return data
-}, { watch: [isSubscriber] })
+}, { lazy: true, watch: [isSubscriber] })
 
 const currentPlanName = computed(() => currentPlan.value?.title ?? (isSubscriber.value ? 'Core' : 'Gratis'))
 

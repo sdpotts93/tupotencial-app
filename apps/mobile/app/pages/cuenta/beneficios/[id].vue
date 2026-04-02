@@ -1,6 +1,27 @@
 <template>
   <div class="screen">
-    <div class="benefit">
+    <template v-if="benefitStatus === 'pending'">
+      <div class="benefit">
+        <div class="benefit__media" style="background: rgba(var(--tint-rgb), 0.06);">
+          <UiSkeleton variant="rect" width="100%" height="100%" />
+          <div class="benefit__nav safe-top">
+            <button class="benefit__back" aria-label="Volver" @click="$router.back()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="benefit__info">
+          <UiSkeleton variant="text" width="40%" height="12px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="70%" height="24px" style="margin-bottom: var(--space-3);" />
+          <UiSkeleton variant="text" width="100%" height="14px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="85%" height="14px" style="margin-bottom: var(--space-5);" />
+          <UiSkeleton variant="rect" width="100%" height="44px" style="border-radius: var(--radius-lg);" />
+        </div>
+      </div>
+    </template>
+    <div v-else class="benefit">
       <!-- Media (cover image or icon fallback) -->
       <div class="benefit__media" :style="{ background: benefit.bgGradient }">
         <img v-if="benefit.cover_url" :src="benefit.cover_url" :alt="benefit.title" class="benefit__cover" />
@@ -49,10 +70,10 @@ const route = useRoute()
 const id = route.params.id as string
 const client = useSupabaseClient()
 
-const { data: benefitData } = await useAsyncData(`benefit-${id}`, async () => {
+const { data: benefitData, status: benefitStatus } = useAsyncData(`benefit-${id}`, async () => {
   const { data } = await client.from('benefits').select('*').eq('id', id).single()
   return data
-})
+}, { lazy: true })
 
 const benefit = computed(() => {
   const b = benefitData.value

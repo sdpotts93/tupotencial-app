@@ -33,15 +33,20 @@ export async function useInfiniteTable<T>(
     loadingMore.value = false
   }
 
-  // Initial load via useAsyncData for SSR hydration
-  const { data: initial } = await useAsyncData(key, () => fetchFn({ from: 0, to: PAGE_SIZE - 1 }))
-  rows.value = initial.value ?? []
-  hasMore.value = rows.value.length >= PAGE_SIZE
+  // Initial load via useAsyncData (lazy for instant navigation)
+  const { data: initial, status } = useAsyncData(key, () => fetchFn({ from: 0, to: PAGE_SIZE - 1 }), { lazy: true })
+  const initialLoading = computed(() => status.value === 'pending')
+  watch(initial, (val) => {
+    if (val) {
+      rows.value = val
+      hasMore.value = val.length >= PAGE_SIZE
+    }
+  }, { immediate: true })
 
   // Watch filter changes → reset to first page
   if (watchSources.length) {
     watch(watchSources, () => reset())
   }
 
-  return { rows, hasMore, loading, loadingMore, loadMore, refresh: reset }
+  return { rows, hasMore, loading: computed(() => loading.value || initialLoading.value), loadingMore, loadMore, refresh: reset, status }
 }

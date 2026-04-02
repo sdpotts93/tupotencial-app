@@ -10,8 +10,19 @@
       <!-- Tabs -->
       <UiTabs v-model="activeTab" :tabs="tabs" />
 
+      <!-- Loading skeleton -->
+      <div v-if="retosStatus === 'pending'" class="retos__list">
+        <div v-for="i in 3" :key="i" style="display: flex; flex-direction: column;">
+          <UiSkeleton variant="rect" width="100%" height="0" radius="var(--radius-2xl)" style="padding-bottom: 75%; margin-bottom: var(--space-4);" />
+          <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="70%" height="20px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="90%" height="12px" style="margin-bottom: var(--space-3);" />
+          <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
+        </div>
+      </div>
+
       <!-- Programs list -->
-      <div class="retos__list">
+      <div v-else class="retos__list">
         <div
           v-for="item in filteredPrograms"
           :key="item.id"
@@ -64,7 +75,7 @@ const tabs = [
   { value: 'bootcamp', label: 'Bootcamps' },
 ]
 
-const { data: programs } = await useAsyncData('mobile-programs', async () => {
+const { data: programs, status: retosStatus } = useAsyncData('mobile-programs', async () => {
   const { data: progs } = await client.from('programs').select('*').eq('is_active', true).order('created_at')
   // Get program total days (no user needed)
   const { data: days } = await client.from('program_days').select('program_id, day_index')
@@ -97,7 +108,7 @@ const { data: programs } = await useAsyncData('mobile-programs', async () => {
       progress: enrollment ? `Día ${currentDay}/${totalDays}` : null,
     }
   })
-}, { watch: [() => user.value?.id] })
+}, { watch: [() => user.value?.id], lazy: true })
 
 const filteredPrograms = computed(() => {
   if (activeTab.value === 'all') return programs.value ?? []

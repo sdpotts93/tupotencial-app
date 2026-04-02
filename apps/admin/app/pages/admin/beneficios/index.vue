@@ -7,71 +7,91 @@
       </div>
     </div>
 
-    <div class="ben-container">
-      <div class="ben-toolbar">
-        <UiInput
-          v-model="searchInput"
-          placeholder="Buscar beneficio..."
-          style="min-width: 200px;"
-        >
-          <template #suffix><Icon name="lucide:search" size="18" /></template>
-        </UiInput>
+    <!-- Skeleton loader -->
+    <template v-if="benefitsStatus === 'pending'">
+      <div class="ben-container">
+        <div class="ben-toolbar">
+          <UiSkeleton variant="rect" width="200px" height="36px" radius="var(--radius-md)" />
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <div v-for="i in 6" :key="i" style="display: grid; grid-template-columns: 40px minmax(200px, 1fr) 1fr 1fr auto; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-light); align-items: center;">
+            <UiSkeleton variant="rect" width="16px" height="16px" radius="var(--radius-sm)" />
+            <UiSkeleton variant="text" width="70%" height="14px" />
+            <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
+            <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
+            <UiSkeleton variant="rect" width="120px" height="30px" radius="var(--radius-md)" />
+          </div>
+        </div>
       </div>
+    </template>
 
-      <div class="ben-list">
-        <div class="ben-header">
-          <span class="ben-header__drag" />
-          <span>Beneficio</span>
-          <span>Plan</span>
-          <span>Estado</span>
-          <span class="ben-header__actions" />
+    <template v-else>
+      <div class="ben-container">
+        <div class="ben-toolbar">
+          <UiInput
+            v-model="searchInput"
+            placeholder="Buscar beneficio..."
+            style="min-width: 200px;"
+          >
+            <template #suffix><Icon name="lucide:search" size="18" /></template>
+          </UiInput>
         </div>
 
-        <div
-          v-for="(row, index) in filteredRows"
-          :key="row.id"
-          class="ben-row"
-          :class="{
-            'ben-row--dragging': dragIndex === index,
-            'ben-row--over': dragOverIndex === index && dragIndex !== index,
-          }"
-          :draggable="!searchInput"
-          @dragstart="onDragStart(index, $event)"
-          @dragover.prevent="onDragOver(index)"
-          @dragend="onDragEnd"
-          @click="goToEdit(row)"
-        >
-          <span class="ben-row__drag" :class="{ 'ben-row__drag--disabled': !!searchInput }">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
-              <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
-              <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
-            </svg>
-          </span>
-          <span class="ben-row__title">{{ row.title }}</span>
-          <span class="ben-row__plan">
-            <UiTag :variant="row.plan === 'core' ? 'gold' : 'default'">{{ planLabel(row.plan) }}</UiTag>
-          </span>
-          <span class="ben-row__status">
-            <UiTag :variant="row.status === 'active' ? 'success' : 'warning'">
-              {{ statusLabel(row.status) }}
-            </UiTag>
-          </span>
-          <span class="ben-row__actions" @click.stop>
-            <UiButton variant="soft" size="sm" :to="`/admin/beneficios/${row.id}`">
-              <template #icon><Icon name="lucide:pencil" size="16" /></template>
-              Editar
-            </UiButton>
-            <UiButton variant="danger-ghost" size="sm" @click="handleDelete(row)">
-              <template #icon><Icon name="lucide:trash-2" size="16" /></template>
-              Eliminar
-            </UiButton>
-          </span>
-        </div>
+        <div class="ben-list">
+          <div class="ben-header">
+            <span class="ben-header__drag" />
+            <span>Beneficio</span>
+            <span>Plan</span>
+            <span>Estado</span>
+            <span class="ben-header__actions" />
+          </div>
 
-        <div v-if="!filteredRows.length" class="ben-empty">Sin resultados</div>
+          <div
+            v-for="(row, index) in filteredRows"
+            :key="row.id"
+            class="ben-row"
+            :class="{
+              'ben-row--dragging': dragIndex === index,
+              'ben-row--over': dragOverIndex === index && dragIndex !== index,
+            }"
+            :draggable="!searchInput"
+            @dragstart="onDragStart(index, $event)"
+            @dragover.prevent="onDragOver(index)"
+            @dragend="onDragEnd"
+            @click="goToEdit(row)"
+          >
+            <span class="ben-row__drag" :class="{ 'ben-row__drag--disabled': !!searchInput }">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
+                <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+                <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
+              </svg>
+            </span>
+            <span class="ben-row__title">{{ row.title }}</span>
+            <span class="ben-row__plan">
+              <UiTag :variant="row.plan === 'core' ? 'gold' : 'default'">{{ planLabel(row.plan) }}</UiTag>
+            </span>
+            <span class="ben-row__status">
+              <UiTag :variant="row.status === 'active' ? 'success' : 'warning'">
+                {{ statusLabel(row.status) }}
+              </UiTag>
+            </span>
+            <span class="ben-row__actions" @click.stop>
+              <UiButton variant="soft" size="sm" :to="`/admin/beneficios/${row.id}`">
+                <template #icon><Icon name="lucide:pencil" size="16" /></template>
+                Editar
+              </UiButton>
+              <UiButton variant="danger-ghost" size="sm" @click="handleDelete(row)">
+                <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+                Eliminar
+              </UiButton>
+            </span>
+          </div>
+
+          <div v-if="!filteredRows.length" class="ben-empty">Sin resultados</div>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -83,7 +103,7 @@ const { input: searchInput, debounced: search } = useDebouncedRef('')
 
 const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
-const { data: benefits, refresh } = await useAsyncData('admin-benefits', async () => {
+const { data: benefits, refresh, status: benefitsStatus } = useAsyncData('admin-benefits', async () => {
   let query = client.from('benefits').select('*')
 
   if (search.value) query = query.ilike('title', `%${search.value}%`)
@@ -93,7 +113,7 @@ const { data: benefits, refresh } = await useAsyncData('admin-benefits', async (
     ...b,
     sort_order: b.position,
   }))
-}, { watch: [search] })
+}, { watch: [search], lazy: true })
 
 const filteredRows = computed(() => {
   return [...(benefits.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)
