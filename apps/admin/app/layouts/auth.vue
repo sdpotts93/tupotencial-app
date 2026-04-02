@@ -4,7 +4,7 @@
     <div class="auth-layout__branding">
       <div class="auth-layout__branding-bg" />
       <div class="auth-layout__branding-content">
-        <img src="/logo-icon/logo-running.png" alt="Tu Potencial" class="auth-layout__branding-logo" />
+        <BlobLogo class="auth-layout__branding-logo" />
         <p class="auth-layout__branding-tagline">
           Un espacio seguro para tu crecimiento integral.
         </p>
@@ -69,9 +69,9 @@
   }
 
   .auth-layout__branding-logo {
-    height: 200px;
-    width: auto;
-    border-radius: var(--radius-xl);
+    width: 250px;
+    height: 250px;
+    flex-shrink: 0;
   }
 
   .auth-layout__branding-tagline {

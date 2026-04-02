@@ -4,9 +4,7 @@
     <div class="login__hero">
       <div class="login__hero-content">
         <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="login__wordmark" />
-        <div ref="blobRef" class="login__logo">
-          <img src="/logo-icon/logo-running.png" alt="Tu Potencial" class="login__logo-img" />
-        </div>
+        <BlobLogo class="login__logo" />
         <p class="login__tagline">
           Un espacio seguro para <br> tu crecimiento integral.
         </p>
@@ -170,47 +168,6 @@ definePageMeta({ layout: 'auth' })
 const { login, register, user } = useAuth()
 const toast = useToast()
 
-// ─── Organic blob (noise-driven, never repeats) ───
-const blobRef = ref<HTMLElement | null>(null)
-
-function noise1D(x: number): number {
-  const xi = Math.floor(x)
-  const f = x - xi
-  const t = f * f * (3 - 2 * f) // smoothstep
-  const hash = (n: number) => {
-    const s = Math.sin(n * 127.1 + 311.7) * 43758.5453
-    return s - Math.floor(s)
-  }
-  return hash(xi) * (1 - t) + hash(xi + 1) * t
-}
-
-onMounted(() => {
-  const el = blobRef.value
-  if (!el) return
-
-  // 8 channels for border-radius, each with unique speed + phase
-  const channels = Array.from({ length: 8 }, (_, i) => ({
-    speed: 0.3 + Math.random() * 0.4,   // 0.3–0.7 units/s
-    offset: Math.random() * 1000,
-  }))
-
-  let raf: number
-  const start = performance.now()
-
-  function tick() {
-    const t = (performance.now() - start) / 1000
-    const radii = channels.map(c => {
-      const n = noise1D(t * c.speed + c.offset)
-      return 38 + n * 24  // range: 38%–62%
-    })
-    el!.style.borderRadius =
-      `${radii[0]}% ${radii[1]}% ${radii[2]}% ${radii[3]}% / ${radii[4]}% ${radii[5]}% ${radii[6]}% ${radii[7]}%`
-    raf = requestAnimationFrame(tick)
-  }
-
-  raf = requestAnimationFrame(tick)
-  onBeforeUnmount(() => cancelAnimationFrame(raf))
-})
 
 const activeSheet = ref<'none' | 'login' | 'register'>('none')
 
@@ -343,30 +300,9 @@ async function handleRegister() {
 
 .login__logo {
   margin-bottom: var(--space-8);
-  width: 170px;
-  height: 170px;
-  overflow: hidden;
-  border-radius: 50%;
+  width: 200px;
+  height: 200px;
   flex-shrink: 0;
-  animation: blob-reveal 1s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.login__logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.8;
-  animation: blob-img-reveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
-}
-
-@keyframes blob-reveal {
-  from { transform: scale(0.4); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
-}
-
-@keyframes blob-img-reveal {
-  from { opacity: 0; transform: scale(1.3); }
-  to   { opacity: 0.8; transform: scale(1); }
 }
 
 .login__wordmark {

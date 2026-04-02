@@ -4,9 +4,7 @@
     <div class="login__hero">
       <div class="login__hero-content">
         <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="login__wordmark" />
-        <div class="login__logo">
-          <img src="/logo-icon/logo-running.png" alt="Tu Potencial" class="login__logo-img" />
-        </div>
+        <BlobLogo class="login__logo" />
         <p class="login__tagline">
           Panel de administración
         </p>
@@ -87,6 +85,7 @@ definePageMeta({ layout: 'auth' })
 const { login, isLoading, isAuthenticated } = useAdminAuth()
 const toast = useToast()
 
+
 const sheetOpen = ref(false)
 const email = ref('')
 const password = ref('')
@@ -156,14 +155,9 @@ async function handleLogin() {
 
 .login__logo {
   margin-bottom: var(--space-8);
-  border-radius: 1rem;
-}
-
-.login__logo-img {
-  height: 160px;
-  width: auto;
-  border-radius: var(--radius-xl);
-  opacity: 0.75;
+  width: 200px;
+  height: 200px;
+  flex-shrink: 0;
 }
 
 .login__wordmark {
