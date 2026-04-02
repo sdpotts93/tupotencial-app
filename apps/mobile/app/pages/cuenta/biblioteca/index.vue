@@ -34,10 +34,7 @@
         <div v-if="query" class="library__search-results">
           <!-- Loading -->
           <div v-if="searchLoading" class="library__search-loading">
-            <svg class="library__spinner" width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.2" />
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
+            <BlobLoader />
             <span class="library__search-loading-text">Buscando...</span>
           </div>
 
@@ -585,13 +582,6 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
   font-size: var(--text-sm);
 }
 
-.library__spinner {
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
 
 .library__retry-btn {
   background: none;
