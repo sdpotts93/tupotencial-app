@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <UiDataTable :columns="columns" :rows="filteredRows" fill @row-click="goToEdit">
+    <UiDataTable :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" fill @row-click="goToEdit" @load-more="loadMore">
       <template #toolbar>
         <UiInput
           v-model="search"
@@ -72,24 +72,22 @@ const columns = [
 
 const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
-const { data: rows, refresh } = await useAsyncData('admin-forms', async () => {
-  const { data } = await client.from('forms').select('*').order('created_at', { ascending: false })
-  return (data ?? []).map(f => ({
-    ...f,
-    fields_count: Array.isArray(f.fields) ? f.fields.length : 0,
-  }))
-})
+const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+  'admin-forms',
+  async ({ from, to }) => {
+    let query = client.from('forms').select('*')
 
-const filteredRows = computed(() => {
-  return (rows.value ?? []).filter(row => {
-    if (search.value) {
-      const q = search.value.toLowerCase()
-      if (!row.title.toLowerCase().includes(q)) return false
-    }
-    if (filterStatus.value && row.status !== filterStatus.value) return false
-    return true
-  })
-})
+    if (search.value) query = query.ilike('title', `%${search.value}%`)
+    if (filterStatus.value) query = query.eq('status', filterStatus.value)
+
+    const { data } = await query.range(from, to).order('created_at', { ascending: false })
+    return (data ?? []).map(f => ({
+      ...f,
+      fields_count: Array.isArray(f.fields) ? f.fields.length : 0,
+    }))
+  },
+  [search, filterStatus],
+)
 
 function statusVariant(status: string) {
   const map: Record<string, string> = { active: 'success', inactive: 'default' }

@@ -4,7 +4,7 @@
       <h1 class="page-header__title">Usuarios</h1>
     </div>
 
-    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToUser">
+    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" @row-click="goToUser" @load-more="loadMore">
       <template #toolbar>
         <UiInput
           v-model="search"
@@ -99,49 +99,58 @@ const columns = [
 ]
 
 // ── Fetch users from Supabase ──
-const { data: rows, refresh } = await useAsyncData('admin-users', async () => {
-  // profiles, subscriptions, and user_entitlements all FK to auth.users (not to each other),
-  // so we query them separately and join in JS.
-  const [{ data: profiles }, { data: subs }, { data: entitlements }] = await Promise.all([
-    client.from('profiles').select('*').order('created_at', { ascending: false }),
-    client.from('subscriptions').select('user_id, status'),
-    client.from('user_entitlements').select('user_id, entitlement_key'),
-  ])
-  const subsMap = new Map((subs ?? []).map(s => [s.user_id, s.status]))
-  const entMap = new Map<string, string[]>()
-  for (const e of entitlements ?? []) {
-    const list = entMap.get(e.user_id) ?? []
-    list.push(e.entitlement_key)
-    entMap.set(e.user_id, list)
-  }
-  return (profiles ?? []).map(p => {
-    const subStatus = subsMap.get(p.id) ?? null
-    return {
-      ...p,
-      full_name: p.display_name ?? 'Sin nombre',
-      email: '\u2014',
-      segment: p.community_segment ?? '',
-      plan: subStatus === 'active' ? 'core' : 'free',
-      subscription_status: subStatus,
-      status: subStatus === 'active' ? 'active' : 'inactive',
-      entitlements: entMap.get(p.id) ?? [],
-    }
-  })
-})
+const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+  'admin-users',
+  async ({ from, to }) => {
+    // profiles, subscriptions, and user_entitlements all FK to auth.users (not to each other),
+    // so we query them separately and join in JS.
+    let profilesQuery = client.from('profiles').select('*')
+    if (search.value) profilesQuery = profilesQuery.ilike('display_name', `%${search.value}%`)
+    if (filterSegment.value) profilesQuery = profilesQuery.eq('community_segment', filterSegment.value)
 
-const filteredRows = computed(() => {
-  const list = rows.value ?? []
-  return list.filter(row => {
-    if (search.value) {
-      const q = search.value.toLowerCase()
-      if (!row.full_name.toLowerCase().includes(q) && !row.email.toLowerCase().includes(q)) return false
+    // For plan/status filter, pre-filter by subscription status
+    if (filterPlan.value === 'core' || filterStatus.value === 'active') {
+      const { data: activeSubs } = await client.from('subscriptions').select('user_id').eq('status', 'active')
+      const activeIds = (activeSubs ?? []).map(s => s.user_id)
+      if (!activeIds.length) return []
+      profilesQuery = profilesQuery.in('id', activeIds)
+    } else if (filterPlan.value === 'free' || filterStatus.value === 'inactive') {
+      const { data: activeSubs } = await client.from('subscriptions').select('user_id').eq('status', 'active')
+      const activeIds = (activeSubs ?? []).map(s => s.user_id)
+      if (activeIds.length) profilesQuery = profilesQuery.not('id', 'in', `(${activeIds.join(',')})`)
     }
-    if (filterPlan.value && row.plan !== filterPlan.value) return false
-    if (filterStatus.value && row.status !== filterStatus.value) return false
-    if (filterSegment.value && row.segment !== filterSegment.value) return false
-    return true
-  })
-})
+
+    const { data: profiles } = await profilesQuery.range(from, to).order('created_at', { ascending: false })
+    const profileIds = (profiles ?? []).map(p => p.id)
+    if (!profileIds.length) return []
+
+    const [{ data: subs }, { data: entitlements }] = await Promise.all([
+      client.from('subscriptions').select('user_id, status').in('user_id', profileIds),
+      client.from('user_entitlements').select('user_id, entitlement_key').in('user_id', profileIds),
+    ])
+    const subsMap = new Map((subs ?? []).map(s => [s.user_id, s.status]))
+    const entMap = new Map<string, string[]>()
+    for (const e of entitlements ?? []) {
+      const list = entMap.get(e.user_id) ?? []
+      list.push(e.entitlement_key)
+      entMap.set(e.user_id, list)
+    }
+    return (profiles ?? []).map(p => {
+      const subStatus = subsMap.get(p.id) ?? null
+      return {
+        ...p,
+        full_name: p.display_name ?? 'Sin nombre',
+        email: '\u2014',
+        segment: p.community_segment ?? '',
+        plan: subStatus === 'active' ? 'core' : 'free',
+        subscription_status: subStatus,
+        status: subStatus === 'active' ? 'active' : 'inactive',
+        entitlements: entMap.get(p.id) ?? [],
+      }
+    })
+  },
+  [search, filterSegment, filterPlan, filterStatus],
+)
 
 function planVariant(plan: string) {
   const map: Record<string, string> = { free: 'default', core: 'gold' }

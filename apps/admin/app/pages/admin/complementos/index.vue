@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
       <template #toolbar>
         <UiInput
           v-model="search"
@@ -64,22 +64,21 @@ const columns = [
   { key: 'compras', label: 'Compras' },
 ]
 
-const { data: rows, refresh } = await useAsyncData('admin-addons', async () => {
-  const { data } = await client
-    .from('addons')
-    .select('*, addon_purchases(count)')
-    .order('created_at', { ascending: false })
-  return (data ?? []).map(a => ({
-    ...a,
-    purchases: (a.addon_purchases as any)?.[0]?.count ?? 0,
-  }))
-})
+const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+  'admin-addons',
+  async ({ from, to }) => {
+    let query = client.from('addons').select('*, addon_purchases(count)')
 
-const filteredRows = computed(() => {
-  if (!search.value) return rows.value ?? []
-  const q = search.value.toLowerCase()
-  return (rows.value ?? []).filter(r => r.title.toLowerCase().includes(q))
-})
+    if (search.value) query = query.ilike('title', `%${search.value}%`)
+
+    const { data } = await query.range(from, to).order('created_at', { ascending: false })
+    return (data ?? []).map(a => ({
+      ...a,
+      purchases: (a.addon_purchases as any)?.[0]?.count ?? 0,
+    }))
+  },
+  [search],
+)
 
 function goToEdit(row: Record<string, any>) {
   router.push(`/admin/complementos/${row.id}`)

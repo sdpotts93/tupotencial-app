@@ -20,7 +20,7 @@
 
     <!-- Admin Users Table -->
     <h2 class="section-title">Administradores</h2>
-    <UiDataTable fill :columns="columns" :rows="filteredAdmins">
+    <UiDataTable fill :columns="columns" :rows="filteredAdmins" :has-more="hasMore" :loading-more="loadingMore" @load-more="loadMore">
       <template #toolbar>
         <UiInput
           v-model="search"
@@ -157,24 +157,31 @@ const inviteForm = reactive({
 })
 
 // ── Fetch admin users from Supabase ──
-const { data: adminUsers, refresh } = await useAsyncData('admin-roles', async () => {
-  const { data } = await client
-    .from('admin_users')
-    .select('*, profiles:user_id(display_name, avatar_url)')
-    .order('created_at', { ascending: false })
-  return (data ?? []).map(a => ({
-    ...a,
-    full_name: (a.profiles as any)?.display_name ?? 'Sin nombre',
-    avatar_url: (a.profiles as any)?.avatar_url ?? null,
-    email: '\u2014',
-    status: 'active',
-    last_login: null as string | null,
-  }))
-}, { server: false })
+const { rows: adminUsers, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+  'admin-roles',
+  async ({ from, to }) => {
+    let query = client.from('admin_users').select('*, profiles:user_id(display_name, avatar_url)')
+
+    if (search.value) {
+      query = query.ilike('profiles.display_name', `%${search.value}%`)
+    }
+
+    const { data } = await query.range(from, to).order('created_at', { ascending: false })
+    return (data ?? []).map(a => ({
+      ...a,
+      full_name: (a.profiles as any)?.display_name ?? 'Sin nombre',
+      avatar_url: (a.profiles as any)?.avatar_url ?? null,
+      email: '\u2014',
+      status: 'active',
+      last_login: null as string | null,
+    }))
+  },
+  [search],
+)
 
 // ── Computed role summary cards ──
 const roles = computed(() => {
-  const list = adminUsers.value ?? []
+  const list = adminUsers.value
   return [
     {
       key: 'admin',
@@ -207,12 +214,7 @@ const columns = [
   { key: 'last_login', label: 'Último acceso' },
 ]
 
-const filteredAdmins = computed(() => {
-  const list = adminUsers.value ?? []
-  if (!search.value) return list
-  const q = search.value.toLowerCase()
-  return list.filter(r => r.full_name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q))
-})
+const filteredAdmins = computed(() => adminUsers.value)
 
 const roleOptions = [
   { value: 'admin', label: 'Administrador' },

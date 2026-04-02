@@ -10,7 +10,7 @@
     <UiTabs v-model="activeTab" :tabs="tabs" />
 
     <div class="tab-content">
-      <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+      <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
         <template #toolbar>
           <UiInput
             v-model="search"
@@ -77,15 +77,31 @@ const columns = [
 
 const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
-const { data: rows, refresh } = await useAsyncData('admin-events', async () => {
-  const { data } = await client.from('events').select('*, event_registrations(count)').order('start_at', { ascending: false })
-  return (data ?? []).map(e => ({
-    ...e,
-    starts_at: e.start_at,
-    registered_count: (e.event_registrations as any)?.[0]?.count ?? 0,
-    is_upcoming: new Date(e.start_at) > new Date(),
-  }))
-})
+const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+  'admin-events',
+  async ({ from, to }) => {
+    let query = client.from('events').select('*, event_registrations(count)')
+
+    const now = new Date().toISOString()
+    if (activeTab.value === 'upcoming') {
+      query = query.gt('start_at', now).neq('status', 'draft')
+    } else if (activeTab.value === 'past') {
+      query = query.lte('start_at', now)
+    } else if (activeTab.value === 'draft') {
+      query = query.eq('status', 'draft')
+    }
+
+    if (search.value) query = query.ilike('title', `%${search.value}%`)
+
+    const { data } = await query.range(from, to).order('start_at', { ascending: false })
+    return (data ?? []).map(e => ({
+      ...e,
+      starts_at: e.start_at,
+      registered_count: (e.event_registrations as any)?.[0]?.count ?? 0,
+    }))
+  },
+  [activeTab, search],
+)
 
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
@@ -94,18 +110,6 @@ const entitlementLabels: Record<string, string> = {
   coaching_1on1: 'Coaching 1:1',
   retiro_marzo_2026: 'Retiro marzo 2026',
 }
-
-const filteredRows = computed(() => {
-  let result = rows.value ?? []
-  if (activeTab.value === 'upcoming') result = result.filter(r => r.is_upcoming && r.status !== 'draft')
-  else if (activeTab.value === 'past') result = result.filter(r => !r.is_upcoming)
-  else if (activeTab.value === 'draft') result = result.filter(r => r.status === 'draft')
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    result = result.filter(r => r.title.toLowerCase().includes(q))
-  }
-  return result
-})
 
 function statusVariant(status: string) {
   const map: Record<string, string> = { published: 'success', draft: 'warning', cancelled: 'danger' }

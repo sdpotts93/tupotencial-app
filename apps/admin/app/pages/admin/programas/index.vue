@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
       <template #toolbar>
         <UiInput
           v-model="search"
@@ -121,26 +121,24 @@ const columns = [
 
 const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
-const { data: rows, refresh } = await useAsyncData('admin-programs', async () => {
-  const { data } = await client.from('programs').select('*').order('created_at', { ascending: false })
-  return (data ?? []).map(p => ({
-    ...p,
-    program_type: p.type,
-  }))
-})
+const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+  'admin-programs',
+  async ({ from, to }) => {
+    let query = client.from('programs').select('*')
 
-const filteredRows = computed(() => {
-  return (rows.value ?? []).filter(row => {
-    if (search.value) {
-      const q = search.value.toLowerCase()
-      if (!row.title.toLowerCase().includes(q)) return false
-    }
-    if (filterType.value && row.program_type !== filterType.value) return false
-    if (filterStatus.value && row.status !== filterStatus.value) return false
-    if (filterPlan.value && row.plan !== filterPlan.value) return false
-    return true
-  })
-})
+    if (search.value) query = query.ilike('title', `%${search.value}%`)
+    if (filterType.value) query = query.eq('type', filterType.value)
+    if (filterStatus.value) query = query.eq('status', filterStatus.value)
+    if (filterPlan.value) query = query.eq('plan', filterPlan.value)
+
+    const { data } = await query.range(from, to).order('created_at', { ascending: false })
+    return (data ?? []).map(p => ({
+      ...p,
+      program_type: p.type,
+    }))
+  },
+  [search, filterType, filterStatus, filterPlan],
+)
 
 function typeVariant(type: string) {
   const map: Record<string, string> = { program: 'info', reto: 'warning', bootcamp: 'accent' }

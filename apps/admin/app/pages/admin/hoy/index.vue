@@ -4,7 +4,7 @@
       <h1 class="page-header__title">Hoy - Planificación diaria</h1>
       <div class="page-header__actions">
         <UiButton v-if="activeTab !== 'all'" variant="outline" size="sm" @click="viewMode = viewMode === 'calendar' ? 'list' : 'calendar'">
-          {{ viewMode === 'calendar' ? 'Ver lista' : 'Ver calendario' }}
+          {{ viewMode === 'calendar' ? 'Ver solo días con plan' : 'Ver calendario' }}
         </UiButton>
       </div>
     </div>
@@ -32,7 +32,7 @@
 
       <!-- List View -->
       <div v-else class="hoy-list">
-        <UiDataTable fill :columns="columns" :rows="filteredPlans" @row-click="goToDateFromRow">
+        <UiDataTable fill :columns="columns" :rows="dailyPlans" @row-click="goToDateFromRow">
           <template #toolbar>
             <UiInput
               v-model="search"
@@ -45,10 +45,6 @@
 
           <template #cell-date="{ value }">
             <strong>{{ formatDate(value) }}</strong>
-          </template>
-
-          <template #cell-items_count="{ value }">
-            {{ value }} elementos
           </template>
 
           <template #actions="{ row }">
@@ -297,17 +293,30 @@ const weekTabs = [
 
 const columns = [
   { key: 'date', label: 'Fecha' },
-  { key: 'items_count', label: 'Elementos' },
 ]
 
-// ── Fetch all daily plans from Supabase ──
+// ── Fetch daily plans from Supabase (filtered by active tab & search) ──
 const { data: plans, refresh } = await useAsyncData('admin-daily-plans', async () => {
-  const { data } = await client
-    .from('daily_plans')
-    .select('*')
-    .order('date', { ascending: false })
+  let query = client.from('daily_plans').select('*')
+
+  if (activeTab.value === 'all') {
+    const year = new Date().getFullYear()
+    query = query.gte('date', `${year}-01-01`).lte('date', `${year}-12-31`)
+  } else {
+    const weekOffset = activeTab.value === 'next' ? 1 : 0
+    const monday = getWeekMonday(weekOffset)
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
+    query = query.gte('date', toDateStr(monday)).lte('date', toDateStr(sunday))
+  }
+
+  if (search.value) {
+    query = query.ilike('date', `%${search.value}%`)
+  }
+
+  const { data } = await query.order('date', { ascending: false })
   return data ?? []
-})
+}, { watch: [activeTab, search] })
 
 // ── Helper: get Monday of a given week offset (0 = current, 1 = next) ──
 function getWeekMonday(offset: number): Date {
@@ -350,17 +359,7 @@ const calendarDays = computed(() => {
 
 // ── Map plans into table-friendly rows (for list view) ──
 const dailyPlans = computed(() => {
-  return (plans.value ?? []).map(p => ({
-    id: p.id,
-    date: p.date,
-    items_count: 1,
-  }))
-})
-
-const filteredPlans = computed(() => {
-  if (!search.value) return dailyPlans.value
-  const q = search.value.toLowerCase()
-  return dailyPlans.value.filter(r => r.date.toLowerCase().includes(q))
+  return (plans.value ?? []).map(p => ({ id: p.id, date: p.date }))
 })
 
 // ── Year view for "Todos los planes" ──

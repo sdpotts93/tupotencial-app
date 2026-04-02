@@ -123,22 +123,20 @@ function slugify(text: string) {
 }
 
 const { data: categories, refresh } = await useAsyncData('admin-categories', async () => {
-  const { data } = await client
-    .from('content_categories')
-    .select('*, content_item_categories(count)')
-    .order('sort_order')
+  let query = client.from('content_categories').select('*, content_item_categories(count)')
+
+  if (search.value) query = query.or(`title.ilike.%${search.value}%,slug.ilike.%${search.value}%`)
+
+  const { data } = await query.order('sort_order')
   return (data ?? []).map(c => ({
     ...c,
     name: c.title,
     content_count: (c.content_item_categories as any)?.[0]?.count ?? 0,
   }))
-})
+}, { watch: [search] })
 
 const filteredRows = computed(() => {
-  const sorted = [...(categories.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)
-  if (!search.value) return sorted
-  const q = search.value.toLowerCase()
-  return sorted.filter(r => r.name.toLowerCase().includes(q) || r.slug.toLowerCase().includes(q))
+  return [...(categories.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)
 })
 
 // ── Drag & drop ──

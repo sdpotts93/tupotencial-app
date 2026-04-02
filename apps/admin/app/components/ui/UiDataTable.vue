@@ -43,8 +43,14 @@
               <slot name="actions" :row="row" />
             </td>
           </tr>
+          <tr v-if="loadingMore">
+            <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__loading-more">
+              Cargando más...
+            </td>
+          </tr>
         </tbody>
       </table>
+      <div v-if="hasMore && !loading" ref="sentinelRef" class="data-table__sentinel" />
     </div>
   </div>
 </template>
@@ -60,19 +66,49 @@ interface Props {
   columns: Column[]
   rows: Record<string, any>[]
   loading?: boolean
+  loadingMore?: boolean
+  hasMore?: boolean
   emptyText?: string
   scrollable?: boolean
   fill?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   loading: false,
+  loadingMore: false,
+  hasMore: false,
   emptyText: 'Sin resultados',
   scrollable: false,
   fill: false,
 })
 
-defineEmits<{ 'row-click': [row: Record<string, any>] }>()
+const emit = defineEmits<{
+  'row-click': [row: Record<string, any>]
+  'load-more': []
+}>()
+
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting && props.hasMore && !props.loadingMore) {
+        emit('load-more')
+      }
+    },
+    { rootMargin: '200px' },
+  )
+  if (sentinelRef.value) observer.observe(sentinelRef.value)
+})
+
+watch(sentinelRef, (el) => {
+  if (observer && el) observer.observe(el)
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
+})
 </script>
 
 <style scoped>
@@ -197,5 +233,16 @@ th.data-table__sticky-col {
   padding: var(--space-10) var(--space-4);
   color: var(--color-muted);
   font-size: var(--text-sm);
+}
+
+.data-table__loading-more {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.data-table__sentinel {
+  height: 1px;
 }
 </style>

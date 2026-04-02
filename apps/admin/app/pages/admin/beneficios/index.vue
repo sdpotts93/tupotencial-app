@@ -84,18 +84,19 @@ const search = ref('')
 const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
 const { data: benefits, refresh } = await useAsyncData('admin-benefits', async () => {
-  const { data } = await client.from('benefits').select('*').order('position')
+  let query = client.from('benefits').select('*')
+
+  if (search.value) query = query.ilike('title', `%${search.value}%`)
+
+  const { data } = await query.order('position')
   return (data ?? []).map(b => ({
     ...b,
     sort_order: b.position,
   }))
-})
+}, { watch: [search] })
 
 const filteredRows = computed(() => {
-  const sorted = [...(benefits.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)
-  if (!search.value) return sorted
-  const q = search.value.toLowerCase()
-  return sorted.filter(r => r.title.toLowerCase().includes(q))
+  return [...(benefits.value ?? [])].sort((a, b) => a.sort_order - b.sort_order)
 })
 
 // ── Drag & drop ──

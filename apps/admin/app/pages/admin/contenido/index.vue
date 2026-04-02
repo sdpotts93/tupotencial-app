@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <UiDataTable :columns="columns" :rows="filteredRows" fill @row-click="goToEdit">
+    <UiDataTable :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" fill @row-click="goToEdit" @load-more="loadMore">
       <template #toolbar>
         <UiInput
           v-model="search"
@@ -149,29 +149,30 @@ const columns = [
   { key: 'published_at', label: 'Publicación' },
 ]
 
-const { data: rows, refresh } = await useAsyncData('admin-content', async () => {
-  const { data } = await client.from('content_items').select('*, content_item_categories(category_id)').order('created_at', { ascending: false })
-  return (data ?? []).map(item => ({
-    ...item,
-    content_type: item.type,
-    segment: item.plan,
-    category: (item.content_item_categories as any)?.[0]?.category_id ?? null,
-  }))
-})
+const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+  'admin-content',
+  async ({ from, to }) => {
+    const selectStr = filterCategory.value
+      ? '*, content_item_categories!inner(category_id)'
+      : '*, content_item_categories(category_id)'
+    let query = client.from('content_items').select(selectStr)
 
-const filteredRows = computed(() => {
-  return (rows.value ?? []).filter(row => {
-    if (search.value) {
-      const q = search.value.toLowerCase()
-      if (!row.title.toLowerCase().includes(q)) return false
-    }
-    if (filterStatus.value && row.status !== filterStatus.value) return false
-    if (filterType.value && row.content_type !== filterType.value) return false
-    if (filterSegment.value && row.segment !== filterSegment.value) return false
-    if (filterCategory.value && row.category !== filterCategory.value) return false
-    return true
-  })
-})
+    if (search.value) query = query.ilike('title', `%${search.value}%`)
+    if (filterStatus.value) query = query.eq('status', filterStatus.value)
+    if (filterType.value) query = query.eq('type', filterType.value)
+    if (filterSegment.value) query = query.eq('plan', filterSegment.value)
+    if (filterCategory.value) query = query.eq('content_item_categories.category_id', filterCategory.value)
+
+    const { data } = await query.range(from, to).order('created_at', { ascending: false })
+    return (data ?? []).map(item => ({
+      ...item,
+      content_type: item.type,
+      segment: item.plan,
+      category: (item.content_item_categories as any)?.[0]?.category_id ?? null,
+    }))
+  },
+  [search, filterStatus, filterType, filterSegment, filterCategory],
+)
 
 function statusVariant(status: string) {
   const map: Record<string, string> = { published: 'success', draft: 'warning', archived: 'default' }

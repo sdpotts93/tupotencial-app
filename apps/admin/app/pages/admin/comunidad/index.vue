@@ -10,7 +10,7 @@
     <UiTabs v-model="activeTab" :tabs="tabs" />
 
     <div class="tab-content">
-      <UiDataTable fill :columns="columns" :rows="filteredRows" @row-click="goToEdit">
+      <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
         <template #toolbar>
           <UiInput
             v-model="search"
@@ -92,29 +92,28 @@ const client = useSupabaseClient()
 const { canEdit } = useAdminAuth()
 const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
 
-const { data: rows, refresh } = await useAsyncData('admin-posts', async () => {
-  const { data } = await client
-    .from('posts')
-    .select('*, post_reactions(count), post_comments(count)')
-    .order('created_at', { ascending: false })
-  return (data ?? []).map(p => ({
-    ...p,
-    author: segmentAuthor[p.community_segment ?? ''] ?? 'Anónimo',
-    likes_count: (p.post_reactions as any)?.[0]?.count ?? 0,
-    comments_count: (p.post_comments as any)?.[0]?.count ?? 0,
-  }))
-})
+const { rows, hasMore, loadingMore, loadMore, refresh } = await useInfiniteTable(
+  'admin-posts',
+  async ({ from, to }) => {
+    let query = client.from('posts').select('*, post_reactions(count), post_comments(count)')
 
-const filteredRows = computed(() => {
-  let result = rows.value ?? []
-  if (activeTab.value === 'gabriel') result = result.filter(r => r.author === 'Gabriel')
-  else if (activeTab.value === 'carlotta') result = result.filter(r => r.author === 'Carlotta')
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    result = result.filter(r => r.author.toLowerCase().includes(q) || r.body.toLowerCase().includes(q))
-  }
-  return result
-})
+    if (activeTab.value !== 'all') {
+      query = query.eq('community_segment', activeTab.value)
+    }
+    if (search.value) {
+      query = query.or(`body.ilike.%${search.value}%,community_segment.ilike.%${search.value}%`)
+    }
+
+    const { data } = await query.range(from, to).order('created_at', { ascending: false })
+    return (data ?? []).map(p => ({
+      ...p,
+      author: segmentAuthor[p.community_segment ?? ''] ?? 'Anónimo',
+      likes_count: (p.post_reactions as any)?.[0]?.count ?? 0,
+      comments_count: (p.post_comments as any)?.[0]?.count ?? 0,
+    }))
+  },
+  [activeTab, search],
+)
 
 function statusVariant(status: string) {
   const map: Record<string, string> = { published: 'success', hidden: 'default', draft: 'warning' }

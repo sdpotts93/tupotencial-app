@@ -965,7 +965,8 @@ const { data: objectives } = await useAsyncData('mobile-library-objectives', asy
   }
 
   .library__featured-img {
-    width: 520px;
+    width: calc(100% - var(--space-8));
+    max-width: 520px;
     aspect-ratio: 4 / 3;
     border-radius: var(--radius-lg);
     margin: var(--space-4);
