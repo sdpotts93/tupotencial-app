@@ -46,7 +46,8 @@
             :style="{ '--benefit-accent': benefit.color, '--benefit-bg': benefit.bgColor }"
           >
             <div class="benefits__icon-wrap">
-              <Icon :name="benefit.emoji" size="28" />
+              <img v-if="benefit.cover_url" :src="benefit.cover_url" :alt="benefit.title" class="benefits__icon-img" />
+              <Icon v-else :name="benefit.emoji" size="28" />
             </div>
             <div class="benefits__body">
               <h3 class="benefits__name">{{ benefit.title }}</h3>
@@ -180,6 +181,13 @@ const { data: benefits } = useAsyncData('mobile-benefits', async () => {
   flex-shrink: 0;
   background: var(--benefit-bg);
   color: var(--benefit-accent);
+  overflow: hidden;
+}
+
+.benefits__icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* ─── Body ─── */

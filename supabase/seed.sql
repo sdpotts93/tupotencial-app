@@ -1306,7 +1306,7 @@ VALUES
     'https://tupotencial.app/retiros',
     'utm_source=app&utm_medium=benefits&utm_campaign=retiros_2026',
     'RETIRO20',
-    'https://images.tupotencial.app/benefits/retiros.jpg',
+    NULL,
     'core', 'active', 0,
     '2026-01-10T10:00:00.000Z'
   ),
@@ -1317,7 +1317,7 @@ VALUES
     'https://chat.whatsapp.com/placeholder-vip-community',
     NULL,
     NULL,
-    'https://images.tupotencial.app/benefits/comunidad-vip.jpg',
+    NULL,
     'core', 'active', 1,
     '2026-01-10T10:05:00.000Z'
   ),
@@ -1328,7 +1328,7 @@ VALUES
     'https://bienestar-mx.example.com/tienda',
     'utm_source=tupotencial&utm_medium=partner&utm_campaign=bienestar_mx',
     'TUPOTENCIAL15',
-    'https://images.tupotencial.app/benefits/bienestar-mx.jpg',
+    NULL,
     'free', 'active', 2,
     '2026-01-15T08:00:00.000Z'
   ),
@@ -1339,7 +1339,7 @@ VALUES
     'https://yogaflow.example.com/clase-gratis',
     'utm_source=tupotencial&utm_medium=partner&utm_campaign=yogaflow_free',
     'TPYOGA',
-    'https://images.tupotencial.app/benefits/yogaflow.jpg',
+    NULL,
     'free', 'active', 3,
     '2026-02-01T09:00:00.000Z'
   ),
@@ -1350,7 +1350,7 @@ VALUES
     'https://tupotencial.app/recursos/plantillas-journaling',
     'utm_source=app&utm_medium=benefits&utm_campaign=journaling_templates',
     NULL,
-    'https://images.tupotencial.app/benefits/journaling.jpg',
+    NULL,
     'core', 'active', 4,
     '2026-02-10T12:00:00.000Z'
   ),
