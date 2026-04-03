@@ -73,25 +73,9 @@
           </form>
         </div>
 
-        <!-- Right column: Membership + Accesos VIP -->
+        <!-- Right column: Accesos VIP -->
         <div class="profile__top-right">
           <hr class="profile__divider" />
-
-          <section class="profile__section">
-            <p class="eyebrow">MEMBRESÍA</p>
-            <div class="profile__membership">
-              <div class="profile__membership-info">
-                <span :class="['profile__membership-tag', isSubscriber ? 'profile__membership-tag--core' : 'profile__membership-tag--gratis']">
-                  {{ isSubscriber ? 'Core' : 'Gratis' }}
-                </span>
-                <span v-if="!isSubscriber" class="profile__membership-detail">Suscríbete para desbloquear todo</span>
-              </div>
-              <span v-if="isSubscriber" class="profile__membership-renewal">Renovación: 15 Mar 2026</span>
-            </div>
-            <UiButton v-if="isSubscriber" block variant="outline" @click="handleManageSub">
-              Administrar suscripción
-            </UiButton>
-          </section>
 
           <!-- Accesos VIP -->
           <section v-if="vipAccesos.length" class="profile__section">
@@ -126,7 +110,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
-const { user, isSubscriber, updateProfile, setSegment } = useAuth()
+const { user, updateProfile, setSegment } = useAuth()
 const toast = useToast()
 
 const displayName = ref(user.value?.display_name || '')
@@ -174,9 +158,6 @@ async function handleSave() {
   }
 }
 
-function handleManageSub() {
-  window.open('https://tupotencial.com/cuenta', '_blank')
-}
 </script>
 
 <style scoped>
@@ -319,61 +300,6 @@ function handleManageSub() {
 .profile__section { margin-bottom: var(--space-6); }
 .profile__section > .eyebrow { margin-bottom: var(--space-3); }
 
-/* ─── Membership (golden for Core) ─── */
-.profile__membership {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-4);
-  background: rgba(var(--tint-rgb), 0.04);
-  border-radius: var(--radius-xl);
-}
-
-.profile__membership-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.profile__membership-tag {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-eyebrow);
-  font-size: 10px;
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-full);
-  width: fit-content;
-  white-space: nowrap;
-}
-
-.profile__membership-tag--core {
-  background: var(--color-gold-bg);
-  color: var(--color-gold);
-}
-
-.profile__membership-tag--gratis {
-  background: var(--color-silver-bg);
-  color: var(--color-silver);
-}
-
-.profile__membership-detail {
-  font-size: var(--text-xs);
-  color: var(--color-muted);
-}
-
-.profile__membership-renewal {
-  font-size: var(--text-xs);
-  color: var(--color-muted);
-  white-space: nowrap;
-}
-
-.profile__section :deep(.btn--outline) {
-  margin-top: var(--space-3);
-}
-
 /* ─── Accesos VIP (progress__card style) ─── */
 .profile__accesos-list {
   display: flex;
@@ -476,17 +402,6 @@ function handleManageSub() {
     margin-bottom: 0;
   }
 
-  /* Membership row: flat, no card bg, bottom border */
-  .profile__membership {
-    background: none;
-    border-radius: 0;
-    padding: var(--space-5) 0 0;
-  }
-
-  .profile__section :deep(.btn--outline) {
-    margin-top: var(--space-4);
-    max-width: 240px;
-  }
 
   /* Accesos VIP rows: flat with bottom borders */
   .profile__accesos-list {
