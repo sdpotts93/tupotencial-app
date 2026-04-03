@@ -35,6 +35,18 @@
           </div>
         </section>
       </template>
+      <!-- Error state -->
+      <template v-else-if="eventosStatus === 'error'">
+        <div class="screen__content">
+          <div class="events__error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 20 20" class="events__error-icon"><path fill="currentColor" d="m12.876 8.17l.952 1.089a5.5 5.5 0 0 0-.966.414l-.295-.337l-.585.936a5.5 5.5 0 0 0-1.76 2.676a.5.5 0 0 1-.684-.256L7.495 7.79L6.26 10.696A.5.5 0 0 1 5.8 11H2.5a.5.5 0 0 1 0-1h2.97l1.57-3.696a.5.5 0 0 1 .922.004l2.127 5.106l1.987-3.179a.5.5 0 0 1 .8-.064m3.848-3.858a4.42 4.42 0 0 1 .978 4.702A2 2 0 0 0 17.5 9h-.889a3.415 3.415 0 0 0-.598-3.984A3.306 3.306 0 0 0 11.3 5l-.951.963a.5.5 0 0 1-.711 0l-.96-.97a3.3 3.3 0 0 0-4.706-.016C2.899 6.061 2.713 7.711 3.42 9H2.5q-.09 0-.18.01a4.4 4.4 0 0 1 .941-4.736a4.3 4.3 0 0 1 6.127.016l.605.61l.596-.603l.109-.106a4.306 4.306 0 0 1 6.026.121M4.856 12l4.784 4.847a.5.5 0 0 0 .712-.703l-4.146-4.2Q6.011 12 5.8 12zM20 14.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0M15.5 12a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5m0 5.125a.625.625 0 1 0 0-1.25a.625.625 0 0 0 0 1.25"/></svg>
+            <h2 class="events__error-title">No pudimos cargar los eventos</h2>
+            <p class="events__error-desc">Hubo un problema al conectar. Revisa tu conexión e intenta de nuevo.</p>
+            <UiButton variant="primary-outline" size="sm" @click="refreshEventos()">Reintentar</UiButton>
+          </div>
+        </div>
+      </template>
+
       <template v-else>
         <!-- Upcoming -->
         <section class="events__section">
@@ -108,7 +120,7 @@ const dateFmt = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short
 const dateFmtFull = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
 
-const { data: events, status: eventosStatus } = useAsyncData('mobile-events', async () => {
+const { data: events, status: eventosStatus, refresh: refreshEventos } = useAsyncData('mobile-events', async () => {
   const { data } = await client.from('events').select('id, title, description, start_at, cover_url, requires_subscription, entitlement_key, plan, status').in('status', ['published']).order('start_at')
   return data ?? []
 }, { lazy: true })
@@ -380,6 +392,37 @@ function handleEventClick(event: { id: string; entitlement_key: string | null; p
 .events__past-chevron {
   flex-shrink: 0;
   color: var(--color-muted);
+}
+
+/* ─── Error state ─── */
+.events__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+  min-height: 60dvh;
+  gap: var(--space-3);
+}
+
+.events__error-icon {
+  color: var(--color-muted);
+  margin-bottom: var(--space-2);
+}
+
+.events__error-title {
+  font-family: var(--font-title);
+  font-size: var(--title-md);
+  color: var(--color-text);
+  line-height: var(--leading-snug);
+}
+
+.events__error-desc {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  max-width: 28ch;
+  line-height: var(--leading-normal);
 }
 
 /* ─── Desktop SaaS ─── */
