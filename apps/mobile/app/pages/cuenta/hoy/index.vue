@@ -8,7 +8,7 @@
             <UiSkeleton variant="circle" width="40px" height="40px" />
             <UiSkeleton variant="rect" width="80px" height="28px" radius="var(--radius-full)" />
           </div>
-          <UiSkeleton variant="text" width="60%" height="24px" />
+          <UiSkeleton variant="text" width="60%" height="24px" style="margin-bottom: var(--space-3);" />
         </div>
         <div style="padding: var(--space-4) var(--space-5);">
           <UiSkeleton variant="text" width="40%" height="10px" style="margin-bottom: var(--space-2);" />
