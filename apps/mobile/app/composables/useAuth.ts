@@ -42,7 +42,7 @@ export function useAuth() {
       email: supaUser.value?.email ?? '',
       display_name: profileRes.data?.display_name ?? '',
       avatar_url: profileRes.data?.avatar_url ?? null,
-      community_segment: profileRes.data?.community_segment ?? null,
+      community_segment: (profileRes.data?.community_segment as AuthUser['community_segment']) ?? null,
       is_subscriber: subRes.data?.status === 'active' || subRes.data?.status === 'trialing',
       subscription_status: subRes.data?.status ?? null,
       entitlements: (entRes.data ?? []).map(e => e.entitlement_key),
@@ -107,8 +107,8 @@ export function useAuth() {
     if (data.user) {
       const { error: profileError } = await client.from('profiles').insert({
         id: data.user.id,
-        email,
         display_name: '',
+        community_segment: '',
       })
       if (profileError) console.error('Profile insert error:', profileError)
 

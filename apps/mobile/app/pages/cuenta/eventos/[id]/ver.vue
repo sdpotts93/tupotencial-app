@@ -50,7 +50,7 @@ const id = route.params.id as string
 const client = useSupabaseClient()
 
 const { data: eventData, status: watchStatus, refresh: refreshWatch } = useAsyncData(`event-watch-${id}`, async () => {
-  const { data } = await client.rpc('get_secure_event', { p_event_id: id })
+  const { data } = await (client.rpc as any)('get_secure_event', { p_event_id: id }) as { data: Record<string, any> | null }
   if (!data || !data.access_granted) {
     navigateTo(`/cuenta/eventos/${id}`)
     return null

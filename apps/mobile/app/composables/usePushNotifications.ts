@@ -78,8 +78,7 @@ export function usePushNotifications() {
 
     const platform = Capacitor.getPlatform() as 'ios' | 'android'
 
-    await client
-      .from('push_tokens')
+    await (client.from as any)('push_tokens')
       .upsert(
         {
           user_id: user.value.id,
@@ -97,8 +96,7 @@ export function usePushNotifications() {
     if (!Capacitor.isNativePlatform()) return
     if (!user.value) return
 
-    await client
-      .from('push_tokens')
+    await (client.from as any)('push_tokens')
       .delete()
       .eq('user_id', user.value.id)
 

@@ -134,7 +134,7 @@ const upcomingEvents = computed(() =>
       description: e.description,
       dateLabel: dateFmt.format(new Date(e.start_at)),
       timeLabel: dayTimeFmt.format(new Date(e.start_at)).toUpperCase() + ' CDMX',
-      img: e.cover_url ?? null,
+      img: e.cover_url ?? undefined,
       requiresSub: e.requires_subscription,
       entitlement_key: e.entitlement_key,
       plan: e.plan,
@@ -148,21 +148,21 @@ const pastEvents = computed(() =>
       id: e.id,
       title: e.title,
       dateLabel: dateFmtFull.format(new Date(e.start_at)),
-      img: e.cover_url ?? null,
+      img: e.cover_url ?? undefined,
       entitlement_key: e.entitlement_key,
       plan: e.plan,
       requiresSub: e.requires_subscription,
     })),
 )
 
-function isEventLocked(event: { entitlement_key: string | null; plan?: string; requiresSub?: boolean }) {
+function isEventLocked(event: { entitlement_key: string | null; plan?: string | null; requiresSub?: boolean }) {
   if (isLocked(event.entitlement_key)) return true
   if (event.plan === 'core' && !isSubscriber.value) return true
   if (event.requiresSub && !isSubscriber.value) return true
   return false
 }
 
-function handleEventClick(event: { id: string; entitlement_key: string | null; plan?: string; requiresSub?: boolean }) {
+function handleEventClick(event: { id: string; entitlement_key: string | null; plan?: string | null; requiresSub?: boolean }) {
   if (isLocked(event.entitlement_key)) {
     selectedAddon.value = getAddonForEntitlement(event.entitlement_key!)
     showPurchaseModal.value = true

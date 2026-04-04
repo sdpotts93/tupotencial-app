@@ -407,7 +407,7 @@ function parseDuration(input: string): number | null {
   if (!trimmed) return null
   const match = trimmed.match(/^(\d+)\s*(.*)?$/)
   if (!match) return null
-  const num = parseInt(match[1], 10)
+  const num = parseInt(match[1]!, 10)
   const unit = (match[2] || '').trim().toLowerCase()
   if (['m', 'min', 'mins', 'minuto', 'minutos'].includes(unit)) return num * 60
   // default to seconds for: s, seg, segundo, segundos, or no unit

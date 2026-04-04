@@ -117,7 +117,7 @@ function animateCover() {
     const size = coverStartSize + eased * (coverEndSize - coverStartSize)
     const offsetY = eased * coverEndOffsetY
 
-    setSvgImage(img, vw, vh, size, offsetY)
+    setSvgImage(img!, vw, vh, size, offsetY)
 
     if (progress < 1) {
       requestAnimationFrame(step)
@@ -149,7 +149,7 @@ function animateReveal() {
     const size = coverEndSize + eased * (revealEndSize - coverEndSize)
     const offsetY = coverEndOffsetY + eased * (revealEndOffsetY - coverEndOffsetY)
 
-    setSvgImage(maskImg, vw, vh, size, offsetY)
+    setSvgImage(maskImg!, vw, vh, size, offsetY)
 
     if (progress < 1) {
       requestAnimationFrame(step)

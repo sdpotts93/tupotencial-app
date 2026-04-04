@@ -102,7 +102,7 @@
           </div>
           <div class="user-detail__stat">
             <span class="eyebrow user-detail__stat-label">Racha máxima</span>
-            <span class="user-detail__stat-value">{{ streak?.longest_streak ?? 0 }} días</span>
+            <span class="user-detail__stat-value">{{ streak?.best_streak ?? 0 }} días</span>
           </div>
         </div>
 

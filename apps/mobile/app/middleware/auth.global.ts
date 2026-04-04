@@ -81,7 +81,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Block /cuenta/contenido/[id] routes if user lacks the required entitlement or plan
   const contentMatch = path.match(/^\/cuenta\/contenido\/([^/]+)/)
   if (contentMatch) {
-    const contentId = contentMatch[1]
+    const contentId = contentMatch[1]!
     const { data } = await client
       .from('content_items')
       .select('entitlement_key, plan')
@@ -99,7 +99,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Block /cuenta/eventos/[id] routes if user lacks the required entitlement or plan
   const eventMatch = path.match(/^\/cuenta\/eventos\/([^/]+)/)
   if (eventMatch) {
-    const eventId = eventMatch[1]
+    const eventId = eventMatch[1]!
     const { data } = await client
       .from('events')
       .select('entitlement_key, plan, requires_subscription')

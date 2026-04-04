@@ -139,7 +139,7 @@ const bestStreak = computed(() => streakData.value?.best_streak ?? 0)
 
 const { data: completedDays } = useAsyncData('mobile-completed-days', async () => {
   if (!user.value?.id) return 0
-  const { data } = await client.rpc('count_completed_days')
+  const { data } = await (client.rpc as any)('count_completed_days')
   return data ?? 0
 }, { watch: [() => user.value?.id], lazy: true })
 
@@ -187,8 +187,8 @@ const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0'
 
 const { data: todayRetos } = useAsyncData('mobile-today-retos', async () => {
   if (!user.value?.id) return { checkin: false, accion: false }
-  const { data } = await client.from('daily_checkins').select('type').eq('user_id', user.value.id).eq('date', today)
-  const types = (data ?? []).map(r => r.type)
+  const { data } = await (client.from as any)('daily_checkins').select('type').eq('user_id', user.value.id).eq('date', today)
+  const types = (data ?? []).map((r: any) => r.type)
   return { checkin: types.includes('checkin'), accion: types.includes('accion') }
 }, { watch: [() => user.value?.id], lazy: true })
 

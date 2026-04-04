@@ -99,8 +99,8 @@ const statusLabels: Record<string, string> = {
 }
 
 const { data: eventData, status: eventStatus, refresh: refreshEvent } = useAsyncData(`event-${id}`, async () => {
-  const { data } = await client.rpc('get_secure_event', { p_event_id: id })
-  return data
+  const { data } = await (client.rpc as any)('get_secure_event', { p_event_id: id })
+  return data as Record<string, any> | null
 }, { lazy: true })
 
 const event = computed(() => {

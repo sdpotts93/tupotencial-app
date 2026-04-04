@@ -78,7 +78,7 @@
           <hr class="profile__divider" />
 
           <!-- Accesos VIP -->
-          <section v-if="vipAccesos.length" class="profile__section">
+          <section v-if="vipAccesos?.length" class="profile__section">
             <p class="eyebrow">ACCESOS VIP</p>
             <div class="profile__accesos-list">
               <NuxtLink

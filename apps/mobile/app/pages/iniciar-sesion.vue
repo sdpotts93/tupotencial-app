@@ -245,7 +245,7 @@ async function handleLogin() {
     loginLoading.value = true
     try {
       const client = useSupabaseClient()
-      const { data: exists } = await client.rpc('check_email_exists', { p_email: loginEmail.value })
+      const { data: exists } = await (client.rpc as any)('check_email_exists', { p_email: loginEmail.value })
       if (!exists) {
         emailNotFound.value = true
         return

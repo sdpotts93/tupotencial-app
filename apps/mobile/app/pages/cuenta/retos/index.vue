@@ -111,7 +111,7 @@ const { data: programs, status: retosStatus, refresh: refreshRetos } = useAsyncD
     return {
       ...p,
       typeLabel: p.type.toUpperCase(),
-      img: p.cover_url ?? null,
+      img: p.cover_url ?? undefined,
       duration: `${totalDays} días`,
       enrolled: !!enrollment,
       free: p.plan === 'free',
