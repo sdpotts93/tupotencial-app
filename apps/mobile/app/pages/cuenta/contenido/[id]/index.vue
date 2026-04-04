@@ -109,20 +109,20 @@ const typeLabels: Record<string, string> = {
 }
 
 const { data: contentData, status: contentStatus, refresh: refreshContent } = useAsyncData(`content-detail-${id}`, async () => {
-  const { data } = await client.rpc('get_secure_content', { p_content_id: id })
+  const { data } = await (client.rpc as any)('get_secure_content', { p_content_id: id })
   if (!data) return null
   return {
-    title: data.title,
-    subtitle: data.subtitle ?? '',
-    typeLabel: typeLabels[data.type] ?? data.type,
-    type: data.type,
-    description: data.description ?? '',
-    body: data.body ?? '',
-    externalUrl: data.external_url ?? '',
-    duration: formatDuration(data.duration_seconds),
-    thumbnail: data.thumbnail_url ?? null,
-    vimeoId: data.vimeo_id ?? null,
-    accessGranted: data.access_granted,
+    title: data.title as string,
+    subtitle: (data.subtitle as string) ?? '',
+    typeLabel: typeLabels[data.type as string] ?? (data.type as string),
+    type: data.type as string,
+    description: (data.description as string) ?? '',
+    body: (data.body as string) ?? '',
+    externalUrl: (data.external_url as string) ?? '',
+    duration: formatDuration(data.duration_seconds as number | null),
+    thumbnail: (data.thumbnail_url as string) ?? null,
+    vimeoId: (data.vimeo_id as string) ?? null,
+    accessGranted: data.access_granted as boolean,
   }
 }, { lazy: true })
 

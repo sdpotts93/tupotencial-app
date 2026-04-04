@@ -159,7 +159,7 @@ let vimeoPlayer: Player | null = null
 
 // ── Content from DB ──
 const { data: contentData, status: playerStatus, refresh: refreshPlayer } = useAsyncData(`content-player-${contentId}`, async () => {
-  const { data } = await client.rpc('get_secure_content', { p_content_id: contentId })
+  const { data } = await (client.rpc as any)('get_secure_content', { p_content_id: contentId })
   if (!data) return null
   if (!data.access_granted) {
     navigateTo(`/cuenta/contenido/${contentId}`)
@@ -171,12 +171,12 @@ const { data: contentData, status: playerStatus, refresh: refreshPlayer } = useA
   const typeLabel = data.type ? data.type.charAt(0).toUpperCase() + data.type.slice(1) : ''
 
   return {
-    title: data.title,
+    title: data.title as string,
     subtitle: [typeLabel, durationLabel].filter(Boolean).join(' \u2022 '),
-    vimeoId: data.vimeo_id ?? null,
-    mediaPath: data.media_url ?? null,
+    vimeoId: (data.vimeo_id as string) ?? null,
+    mediaPath: (data.media_url as string) ?? null,
     type: data.type as 'video' | 'audio',
-    thumbnail: data.thumbnail_url ?? null,
+    thumbnail: (data.thumbnail_url as string) ?? null,
   }
 }, { lazy: true })
 
