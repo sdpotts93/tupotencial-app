@@ -87,11 +87,11 @@ const BENEFIT_COLORS = [
 const { data: benefits } = useAsyncData('mobile-benefits', async () => {
   const planId = isSubscriber.value ? 'core' : 'free'
   const { data } = await client.from('benefits').select('*').eq('status', 'active').eq('plan', planId).order('position')
-  return (data ?? []).map((b, i) => ({
+  return (data ?? []).map((b) => ({
     ...b,
-    emoji: 'lucide:tag',
-    color: BENEFIT_COLORS[i % BENEFIT_COLORS.length].color,
-    bgColor: BENEFIT_COLORS[i % BENEFIT_COLORS.length].bgColor,
+    emoji: 'lucide:gift',
+    color: BENEFIT_COLORS[b.position % BENEFIT_COLORS.length]!.color,
+    bgColor: BENEFIT_COLORS[b.position % BENEFIT_COLORS.length]!.bgColor,
   }))
 }, { watch: [isSubscriber], lazy: true })
 </script>

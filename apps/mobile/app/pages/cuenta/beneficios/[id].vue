@@ -84,9 +84,18 @@ const { data: benefitData, status: benefitStatus, refresh: refreshBenefit } = us
   return data
 }, { lazy: true })
 
+const BENEFIT_COLORS = [
+  { color: 'var(--color-mood-great)', colorRgb: 'var(--color-mood-great-rgb)' },
+  { color: 'var(--color-benefit-purple)', colorRgb: 'var(--color-benefit-purple-rgb)' },
+  { color: 'var(--color-mood-low)', colorRgb: 'var(--color-mood-low-rgb)' },
+  { color: 'var(--color-benefit-pink)', colorRgb: 'var(--color-benefit-pink-rgb)' },
+]
+
 const benefit = computed(() => {
   const b = benefitData.value
-  if (!b) return { title: '', description: '', code: null, url: null, cover_url: null, icon: 'lucide:gift', color: 'var(--color-mood-great)', bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))' }
+  const palette = BENEFIT_COLORS[0]!
+  if (!b) return { title: '', description: '', code: null, url: null, cover_url: null, icon: 'lucide:gift', color: palette.color, bgGradient: `linear-gradient(135deg, rgba(${palette.colorRgb}, 0.3), rgba(${palette.colorRgb}, 0.08))` }
+  const c = BENEFIT_COLORS[b.position % BENEFIT_COLORS.length]!
   return {
     title: b.title,
     description: b.description ?? '',
@@ -94,8 +103,8 @@ const benefit = computed(() => {
     url: b.url,
     cover_url: b.cover_url,
     icon: 'lucide:gift',
-    color: 'var(--color-mood-great)',
-    bgGradient: 'linear-gradient(135deg, rgba(var(--color-mood-great-rgb), 0.3), rgba(var(--color-mood-great-rgb), 0.08))',
+    color: c.color,
+    bgGradient: `linear-gradient(135deg, rgba(${c.colorRgb}, 0.3), rgba(${c.colorRgb}, 0.08))`,
   }
 })
 
