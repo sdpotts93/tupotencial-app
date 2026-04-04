@@ -263,7 +263,6 @@ export interface Event {
   end_at: string | null;
   duration: string | null;
   community_segment: CommunitySegment | null;
-  requires_subscription: boolean;
   entitlement_key: string | null;
   plan: EventPlan;
   cover_url: string | null;

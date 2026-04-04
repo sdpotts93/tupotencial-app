@@ -67,7 +67,7 @@
         <p class="edetail__desc">{{ event.description }}</p>
 
         <div class="edetail__meta">
-          <span v-if="event.requiresSub" class="edetail__tag edetail__tag--member">Solo miembros</span>
+          <span v-if="event.plan === 'core'" class="edetail__tag edetail__tag--member">Solo miembros</span>
           <UiTag>{{ event.status }}</UiTag>
         </div>
       </div>
@@ -105,14 +105,14 @@ const { data: eventData, status: eventStatus, refresh: refreshEvent } = useAsync
 
 const event = computed(() => {
   const e = eventData.value
-  if (!e) return { title: '', description: '', dateLabel: '', img: null, requiresSub: false, status: '', isLive: false, accessGranted: false }
+  if (!e) return { title: '', description: '', dateLabel: '', img: null, plan: 'free', status: '', isLive: false, accessGranted: false }
   const startDate = new Date(e.start_at)
   return {
     title: e.title,
     description: e.description ?? '',
     dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
     img: e.cover_url ?? null,
-    requiresSub: e.requires_subscription,
+    plan: e.plan ?? 'free',
     status: statusLabels[e.status] ?? e.status,
     isLive: startDate > new Date() && e.status === 'published',
     accessGranted: e.access_granted,

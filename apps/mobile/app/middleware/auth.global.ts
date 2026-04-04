@@ -102,16 +102,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const eventId = eventMatch[1]!
     const { data } = await client
       .from('events')
-      .select('entitlement_key, plan, requires_subscription')
+      .select('entitlement_key, plan')
       .eq('id', eventId)
       .single()
     if (data?.entitlement_key && !hasEntitlement(data.entitlement_key)) {
       return navigateTo('/cuenta/biblioteca')
     }
     if (data?.plan === 'core' && !isSubscriber.value) {
-      return navigateTo('/cuenta/biblioteca')
-    }
-    if (data?.requires_subscription && !isSubscriber.value) {
       return navigateTo('/cuenta/biblioteca')
     }
   }

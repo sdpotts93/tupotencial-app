@@ -654,7 +654,6 @@ export type Database = {
           entitlement_key: string | null
           id: string
           plan: string | null
-          requires_subscription: boolean
           start_at: string
           status: string
           title: string
@@ -673,7 +672,6 @@ export type Database = {
           entitlement_key?: string | null
           id?: string
           plan?: string | null
-          requires_subscription?: boolean
           start_at: string
           status?: string
           title: string
@@ -692,7 +690,6 @@ export type Database = {
           entitlement_key?: string | null
           id?: string
           plan?: string | null
-          requires_subscription?: boolean
           start_at?: string
           status?: string
           title?: string

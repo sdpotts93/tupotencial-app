@@ -411,7 +411,6 @@ Optional streak materialization (MVP can compute on the fly):
 - `end_at timestamptz null`
 - `duration text null`
 - `community_segment text null`
-- `requires_subscription bool not null default true`
 - `entitlement_key text null`
 - `plan text default 'free'` (`free|core`)
 - `cover_url text null`

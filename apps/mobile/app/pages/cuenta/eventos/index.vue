@@ -51,7 +51,7 @@
         <!-- Upcoming -->
         <section class="events__section">
           <p class="eyebrow">PRÓXIMOS</p>
-          <div class="events__list">
+          <div v-if="upcomingEvents.length" class="events__list">
             <div
               v-for="event in upcomingEvents"
               :key="event.id"
@@ -67,18 +67,22 @@
                 <span class="events__card-eyebrow">{{ event.timeLabel }}</span>
                 <h3 class="events__card-name">{{ event.title }}</h3>
                 <p class="events__card-desc">{{ event.description }}</p>
-                <div v-if="event.requiresSub || isEventLocked(event)" class="events__card-footer">
-                  <span v-if="event.requiresSub" class="events__tag events__tag--member">Solo miembros</span>
+                <div v-if="event.plan === 'core'" class="events__card-footer">
+                  <span class="events__tag events__tag--member">Solo miembros</span>
                 </div>
               </div>
             </div>
+          </div>
+          <div v-else class="events__empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="events__empty-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <p class="events__empty-text">No hay eventos programados</p>
           </div>
         </section>
 
         <!-- Past -->
         <section class="events__section">
           <p class="eyebrow">PASADOS</p>
-          <div class="events__past-list">
+          <div v-if="pastEvents.length" class="events__past-list">
             <div
               v-for="event in pastEvents"
               :key="event.id"
@@ -97,6 +101,10 @@
                 <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
+          </div>
+          <div v-else class="events__empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="events__empty-icon"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+            <p class="events__empty-text">Aún no hay eventos pasados</p>
           </div>
         </section>
 
@@ -121,7 +129,7 @@ const dateFmtFull = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 's
 const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
 
 const { data: events, status: eventosStatus, refresh: refreshEventos } = useAsyncData('mobile-events', async () => {
-  const { data } = await client.from('events').select('id, title, description, start_at, cover_url, requires_subscription, entitlement_key, plan, status').in('status', ['published']).order('start_at')
+  const { data } = await client.from('events').select('id, title, description, start_at, cover_url, entitlement_key, plan, status').in('status', ['published']).order('start_at')
   return data ?? []
 }, { lazy: true })
 
@@ -135,7 +143,6 @@ const upcomingEvents = computed(() =>
       dateLabel: dateFmt.format(new Date(e.start_at)),
       timeLabel: dayTimeFmt.format(new Date(e.start_at)).toUpperCase() + ' CDMX',
       img: e.cover_url ?? undefined,
-      requiresSub: e.requires_subscription,
       entitlement_key: e.entitlement_key,
       plan: e.plan,
     })),
@@ -151,24 +158,22 @@ const pastEvents = computed(() =>
       img: e.cover_url ?? undefined,
       entitlement_key: e.entitlement_key,
       plan: e.plan,
-      requiresSub: e.requires_subscription,
     })),
 )
 
-function isEventLocked(event: { entitlement_key: string | null; plan?: string | null; requiresSub?: boolean }) {
+function isEventLocked(event: { entitlement_key: string | null; plan?: string | null }) {
   if (isLocked(event.entitlement_key)) return true
   if (event.plan === 'core' && !isSubscriber.value) return true
-  if (event.requiresSub && !isSubscriber.value) return true
   return false
 }
 
-function handleEventClick(event: { id: string; entitlement_key: string | null; plan?: string | null; requiresSub?: boolean }) {
+function handleEventClick(event: { id: string; entitlement_key: string | null; plan?: string | null }) {
   if (isLocked(event.entitlement_key)) {
     selectedAddon.value = getAddonForEntitlement(event.entitlement_key!)
     showPurchaseModal.value = true
     return
   }
-  if ((event.plan === 'core' || event.requiresSub) && !isSubscriber.value) {
+  if (event.plan === 'core' && !isSubscriber.value) {
     selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este evento.' }
     showPurchaseModal.value = true
     return
@@ -391,6 +396,27 @@ function handleEventClick(event: { id: string; entitlement_key: string | null; p
 
 .events__past-chevron {
   flex-shrink: 0;
+  color: var(--color-muted);
+}
+
+/* ─── Empty state ─── */
+.events__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  gap: var(--space-3);
+}
+
+.events__empty-icon {
+  color: var(--color-muted);
+  opacity: 0.5;
+}
+
+.events__empty-text {
+  font-size: var(--text-sm);
   color: var(--color-muted);
 }
 

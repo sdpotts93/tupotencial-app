@@ -37,7 +37,7 @@
       <template v-else>
         <p class="benefits__intro">Alianzas y descuentos exclusivos de tu plan <UiTag :variant="isSubscriber ? 'accent' : 'default'" size="sm">{{ planTitle }}</UiTag></p>
 
-        <div class="benefits__list">
+        <div v-if="benefits?.length" class="benefits__list">
           <NuxtLink
             v-for="benefit in benefits"
             :key="benefit.id"
@@ -57,6 +57,10 @@
               <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </NuxtLink>
+        </div>
+        <div v-else class="benefits__empty">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="benefits__empty-icon"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+          <p class="benefits__empty-text">No hay beneficios disponibles en tu plan</p>
         </div>
       </template>
     </div>
@@ -214,6 +218,27 @@ const { data: benefits } = useAsyncData('mobile-benefits', async () => {
 
 .benefits__chevron {
   flex-shrink: 0;
+  color: var(--color-muted);
+}
+
+/* ─── Empty state ─── */
+.benefits__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  gap: var(--space-3);
+}
+
+.benefits__empty-icon {
+  color: var(--color-muted);
+  opacity: 0.5;
+}
+
+.benefits__empty-text {
+  font-size: var(--text-sm);
   color: var(--color-muted);
 }
 
