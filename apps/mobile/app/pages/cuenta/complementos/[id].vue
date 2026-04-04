@@ -96,7 +96,7 @@ function formatPrice(cents: number) {
 }
 
 const { data: rawAddon, status: addonStatus, refresh: refreshAddon } = useAsyncData(`addon-${route.params.id}`, async () => {
-  const { data } = await client.from('addons').select('*').eq('id', route.params.id).single()
+  const { data } = await client.from('addons').select('*').eq('id', route.params.id as string).single()
   return data
 }, { lazy: true })
 
@@ -110,7 +110,7 @@ const addon = computed(() => ({
   title: rawAddon.value?.title ?? '',
   description: rawAddon.value?.description ?? '',
   priceLabel: formatPrice(rawAddon.value?.price ?? 0),
-  img: rawAddon.value?.cover_url ?? null,
+  img: rawAddon.value?.cover_url ?? undefined,
   owned: isOwned.value ?? false,
   stripePriceId: rawAddon.value?.stripe_price_id ?? null,
 }))

@@ -51,7 +51,18 @@
             placeholder="Ingresa tu correo"
             autocomplete="email"
             :error="loginErrors.email"
+            @update:model-value="onLoginEmailChange"
           />
+
+          <Transition name="fade">
+            <div v-if="emailNotFound" class="login__not-found">
+              <p class="login__not-found-text">Usuario no encontrado</p>
+              <p class="login__not-found-hint">
+                ¿Aún no tienes cuenta?
+                <button type="button" class="login__not-found-link" @click="goToRegister">Regístrate aquí</button>
+              </p>
+            </div>
+          </Transition>
 
           <Transition name="fade">
             <UiInput
@@ -173,6 +184,7 @@ const activeSheet = ref<'none' | 'login' | 'register'>('none')
 
 // ─── Login state ───
 const showPassword = ref(false)
+const emailNotFound = ref(false)
 const loginEmail = ref('')
 const loginPassword = ref('')
 const loginLoading = ref(false)
@@ -184,6 +196,16 @@ const regPassword = ref('')
 const regConfirm = ref('')
 const regLoading = ref(false)
 const regErrors = reactive<{ email?: string; password?: string; confirm?: string }>({})
+
+function onLoginEmailChange() {
+  emailNotFound.value = false
+  showPassword.value = false
+}
+
+function goToRegister() {
+  regEmail.value = loginEmail.value
+  activeSheet.value = 'register'
+}
 
 // Debounced live validation for register form
 let regValidateTimer: ReturnType<typeof setTimeout> | null = null
@@ -211,6 +233,7 @@ function scheduleRegValidation() {
 
 async function handleLogin() {
   loginErrors.value = {}
+  emailNotFound.value = false
 
   if (!loginEmail.value) {
     loginErrors.value.email = 'Ingresa tu correo electrónico'
@@ -218,7 +241,22 @@ async function handleLogin() {
   }
 
   if (!showPassword.value) {
-    showPassword.value = true
+    // Check if the email exists before revealing the password field
+    loginLoading.value = true
+    try {
+      const client = useSupabaseClient()
+      const { data: exists } = await client.rpc('check_email_exists', { p_email: loginEmail.value })
+      if (!exists) {
+        emailNotFound.value = true
+        return
+      }
+      showPassword.value = true
+    } catch {
+      // If the check fails, fall through and show password anyway
+      showPassword.value = true
+    } finally {
+      loginLoading.value = false
+    }
     return
   }
 
@@ -473,6 +511,37 @@ async function handleRegister() {
 /* Desktop-only links (hidden on mobile) */
 .login__desktop-links {
   display: none;
+}
+
+/* ─── "User not found" tooltip ─── */
+.login__not-found {}
+
+.login__not-found-text {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-danger);
+  margin-bottom: var(--space-1);
+}
+
+.login__not-found-hint {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.login__not-found-link {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0;
+}
+@media (hover: hover) {
+  .login__not-found-link:hover {
+    text-decoration: underline;
+  }
 }
 
 /* ─── Fade transition for password field ─── */

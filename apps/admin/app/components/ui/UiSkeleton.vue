@@ -23,7 +23,7 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped>
 .skeleton {
-  background: linear-gradient(90deg, var(--color-surface-alt) 25%, var(--color-border-light) 50%, var(--color-surface-alt) 75%);
+  background: linear-gradient(90deg, #e0e0e0 25%, var(--color-border-light) 50%, #e0e0e0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

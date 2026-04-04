@@ -1258,6 +1258,7 @@ export type Database = {
       }
       count_completed_days: { Args: Record<PropertyKey, never>; Returns: number }
       get_subscriber_user_ids: { Args: Record<PropertyKey, never>; Returns: string[] }
+      check_email_exists: { Args: { p_email: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       search_content: {
         Args: { search_query: string; max_results?: number }
