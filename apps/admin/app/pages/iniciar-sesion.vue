@@ -290,7 +290,6 @@ async function handleLogin() {
 .login__error {
   font-size: var(--text-sm);
   color: var(--color-danger);
-  text-align: center;
 }
 
 .login__sheet-help {
