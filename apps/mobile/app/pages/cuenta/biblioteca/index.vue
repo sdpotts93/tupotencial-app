@@ -320,7 +320,7 @@ function mapResults(rows: any[]) {
     duration: formatDuration(c.duration_seconds),
     typeLabel: typeLabels[c.type] ?? c.type,
     category: c.category_title ?? '',
-    thumbnail: c.thumbnail_url ?? null,
+    thumbnail: c.thumbnail_url ?? undefined,
     entitlement_key: c.entitlement_key ?? null,
   }))
 }
@@ -330,7 +330,7 @@ async function performSearch(q: string) {
   searchLoading.value = true
   try {
     // Full-text search
-    const { data: ftsData, error: ftsErr } = await client.rpc('search_content', { search_query: q, max_results: 20 })
+    const { data: ftsData, error: ftsErr } = await client.rpc('search_content' as any, { search_query: q, max_results: 20 })
     if (ftsErr) throw ftsErr
 
     // ILIKE fallback on title for partial/exact matches the FTS may miss
@@ -399,7 +399,7 @@ const { data: categoriesData, status: biblioStatus, refresh: refreshBiblio } = u
       title: item.title,
       typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[item.type] ?? item.type,
       duration: formatDuration(item.duration_seconds),
-      thumbnail: item.thumbnail_url ?? null,
+      thumbnail: item.thumbnail_url ?? undefined,
       entitlement_key: item.entitlement_key,
       plan: item.plan,
     })
@@ -443,9 +443,9 @@ const { data: recordedEvents } = useAsyncData('mobile-library-recorded-events', 
     id: e.id,
     title: e.title,
     dateLabel: new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(e.start_at)),
-    img: e.cover_url ?? null,
+    img: e.cover_url ?? undefined,
     entitlement_key: e.entitlement_key,
-    plan: e.plan,
+    plan: e.plan ?? undefined,
   }))
 }, { lazy: true })
 
@@ -519,7 +519,7 @@ const { data: programsWithContent } = useAsyncData('mobile-library-programs', as
         title: item.title,
         typeLabel: typeLabelsMap[item.type] ?? item.type,
         duration: formatDuration(item.duration_seconds),
-        thumbnail: item.thumbnail_url ?? null,
+        thumbnail: item.thumbnail_url ?? undefined,
         entitlement_key: item.entitlement_key,
         plan: item.plan,
       })

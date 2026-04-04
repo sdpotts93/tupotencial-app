@@ -159,10 +159,10 @@ async function handleContinue() {
     // Save onboarding preferences for AI context
     if (user.value) {
       await supabase.from('profiles').update({
-        onboarding_motivation: answers.value.motivation as string[],
-        onboarding_focus: answers.value.focus as string[],
-        onboarding_time: answers.value.time as string,
-      }).eq('id', user.value.id)
+        onboarding_motivation: answers.value.motivation,
+        onboarding_focus: answers.value.focus,
+        onboarding_time: answers.value.time,
+      } as any).eq('id', user.value.id)
     }
 
     navigateTo('/cuenta/hoy')

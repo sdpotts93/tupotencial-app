@@ -114,7 +114,7 @@ const { data: categoryData, status: catStatus, refresh: refreshCategory } = awai
         title: item.title,
         duration: durationLabel,
         typeLabel,
-        thumbnail: item.thumbnail_url ?? null,
+        thumbnail: item.thumbnail_url ?? undefined,
         entitlement_key: item.entitlement_key,
         plan: item.plan,
       }
