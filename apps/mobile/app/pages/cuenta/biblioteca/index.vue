@@ -188,7 +188,7 @@
                 <div class="library__scroll-info">
                   <span class="library__scroll-title">{{ ev.title }}</span>
                   <span class="library__scroll-duration">
-                    <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.dateLabel }}
+                    <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.duration }}
                   </span>
                 </div>
               </div>
@@ -432,21 +432,29 @@ const featuredItem = computed(() => {
 })
 
 const { data: recordedEvents } = useAsyncData('mobile-library-recorded-events', async () => {
-  const { data } = await client
-    .from('events')
-    .select('id, title, start_at, cover_url, entitlement_key, plan')
-    .eq('status', 'published')
-    .lt('start_at', new Date().toISOString())
-    .order('start_at', { ascending: false })
+  const { data: cat } = await client
+    .from('content_categories')
+    .select('id')
+    .eq('slug', 'eventos-grabados')
+    .single()
+  if (!cat) return []
+  const { data: itemCats } = await client
+    .from('content_item_categories')
+    .select('position, content_items(id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key, status, created_at)')
+    .eq('category_id', cat.id)
+    .order('position')
     .limit(5)
-  return (data ?? []).map(e => ({
-    id: e.id,
-    title: e.title,
-    dateLabel: new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(e.start_at)),
-    img: e.cover_url ?? undefined,
-    entitlement_key: e.entitlement_key,
-    plan: e.plan ?? undefined,
-  }))
+  return (itemCats ?? [])
+    .map(ic => ic.content_items as any)
+    .filter((item: any) => item && item.status === 'published')
+    .map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      duration: formatDuration(item.duration_seconds),
+      img: item.thumbnail_url ?? undefined,
+      entitlement_key: item.entitlement_key,
+      plan: item.plan ?? undefined,
+    }))
 }, { lazy: true })
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
@@ -489,7 +497,7 @@ function handleEventClick(ev: { id: string; entitlement_key: string | null; plan
     showPurchaseModal.value = true
     return
   }
-  router.push(`/cuenta/eventos/${ev.id}`)
+  router.push(`/cuenta/contenido/${ev.id}`)
 }
 
 // ─── Tab: Programas ───

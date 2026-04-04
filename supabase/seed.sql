@@ -182,6 +182,13 @@ VALUES
     'journaling',
     'Ejercicios de escritura reflexiva para conocerte mejor.',
     NULL, true, 'hidden', 5
+  ),
+  (
+    'c1000000-0000-4000-8000-000000000007',
+    'Eventos Grabados',
+    'eventos-grabados',
+    'Grabaciones de eventos y lives pasados.',
+    NULL, true, 'active', 6
   );
 
 
@@ -485,6 +492,57 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     'a0000000-0000-4000-8000-000000000002', NULL,
     '2026-02-17T14:00:00.000Z',
     NULL
+  ),
+  -- ci-011: Recorded event — Meditación guiada (video, core)
+  (
+    'c2000000-0000-4000-8000-000000000011',
+    'video',
+    'Live: Meditación guiada con Carlotta',
+    'Grabación del live semanal',
+    'Sesión grabada de la meditación semanal guiada por Carlotta. Un espacio para pausar, respirar y reconectarte con tu centro.',
+    NULL,
+    NULL, NULL, NULL,
+    3600,
+    NULL, 'core', NULL,
+    'published', now() - interval '14 days', NULL, NULL,
+    NULL,
+    'a0000000-0000-4000-8000-000000000001', NULL,
+    now() - interval '14 days',
+    '1178967904'
+  ),
+  -- ci-012: Recorded event — Círculo de mujeres (video, core)
+  (
+    'c2000000-0000-4000-8000-000000000012',
+    'video',
+    'Círculo de mujeres: Soltar para avanzar',
+    'Grabación del círculo Carlotta',
+    'Un espacio seguro y sagrado para la comunidad Carlotta. En este círculo hablamos de lo que necesitamos soltar para seguir creciendo.',
+    NULL,
+    NULL, NULL, NULL,
+    5400,
+    NULL, 'core', NULL,
+    'published', now() - interval '21 days', NULL, NULL,
+    'carlotta',
+    'a0000000-0000-4000-8000-000000000001', NULL,
+    now() - interval '21 days',
+    '1178967904'
+  ),
+  -- ci-013: Recorded event — Journaling consciente (video, core)
+  (
+    'c2000000-0000-4000-8000-000000000013',
+    'video',
+    'Taller: Introducción al journaling consciente',
+    'Grabación del taller práctico',
+    'Un taller práctico donde aprendes las bases del journaling como herramienta de autoconocimiento. Incluye plantillas descargables.',
+    NULL,
+    NULL, NULL, NULL,
+    5400,
+    NULL, 'core', NULL,
+    'published', now() - interval '28 days', NULL, NULL,
+    NULL,
+    'a0000000-0000-4000-8000-000000000001', NULL,
+    now() - interval '28 days',
+    '1178967904'
   );
 
 
@@ -510,7 +568,11 @@ VALUES
   ('c3000000-0000-4000-8000-000000000012', 'c2000000-0000-4000-8000-000000000008', 'c1000000-0000-4000-8000-000000000004', 2),
   ('c3000000-0000-4000-8000-000000000013', 'c2000000-0000-4000-8000-000000000010', 'c1000000-0000-4000-8000-000000000004', 3),
   -- Respiración
-  ('c3000000-0000-4000-8000-000000000014', 'c2000000-0000-4000-8000-000000000003', 'c1000000-0000-4000-8000-000000000005', 0);
+  ('c3000000-0000-4000-8000-000000000014', 'c2000000-0000-4000-8000-000000000003', 'c1000000-0000-4000-8000-000000000005', 0),
+  -- Eventos Grabados
+  ('c3000000-0000-4000-8000-000000000015', 'c2000000-0000-4000-8000-000000000011', 'c1000000-0000-4000-8000-000000000007', 0),
+  ('c3000000-0000-4000-8000-000000000016', 'c2000000-0000-4000-8000-000000000012', 'c1000000-0000-4000-8000-000000000007', 1),
+  ('c3000000-0000-4000-8000-000000000017', 'c2000000-0000-4000-8000-000000000013', 'c1000000-0000-4000-8000-000000000007', 2);
 
 
 -- ── 9. Programs ──────────────────────────────────────────────────────────────
@@ -1213,71 +1275,41 @@ VALUES
     'f3000000-0000-4000-8000-000000000001',
     'Live semanal: Meditación guiada con Carlotta',
     'Únete cada miércoles a una meditación guiada en vivo con Carlotta. Este espacio es para pausar, respirar y reconectarte con tu centro. Abierto a toda la comunidad.',
-    '2026-02-25T18:00:00.000Z', '2026-02-25T19:00:00.000Z',
+    now() + interval '3 days', now() + interval '3 days 1 hour',
     NULL, 'core',
     '60', NULL, NULL,
-    'https://vimeo.com/event/placeholder-001', 'placeholder-001', NULL,
-    'published', '2026-02-18T10:00:00.000Z'
+    NULL, NULL, '5846484',
+    'published', now() - interval '7 days'
   ),
   (
     'f3000000-0000-4000-8000-000000000002',
     'Taller especial: Manejo de estrés en el trabajo',
     'Un taller práctico de 90 minutos donde aprenderás técnicas para gestionar el estrés laboral, establecer límites saludables y mantener tu energía a lo largo del día. Incluye ejercicios de respiración, meditación rápida y herramientas de journaling.',
-    '2026-03-01T17:00:00.000Z', '2026-03-01T18:30:00.000Z',
+    now() + interval '7 days', now() + interval '7 days 1 hour 30 minutes',
     'gabriel', 'core',
     '90', NULL, NULL,
-    'https://vimeo.com/event/placeholder-002', 'placeholder-002', NULL,
-    'published', '2026-02-20T09:00:00.000Z'
+    NULL, NULL, NULL,
+    'published', now() - interval '5 days'
   ),
   (
     'f3000000-0000-4000-8000-000000000003',
     'Sesión Q&A: Pregúntale a Carlotta y Gabriel',
     'Una sesión abierta de preguntas y respuestas con Carlotta y Gabriel. Trae tus dudas sobre las prácticas, los programas, o cualquier tema de bienestar y crecimiento personal. Espacio íntimo, máximo 50 personas.',
-    '2026-03-05T19:00:00.000Z', '2026-03-05T20:00:00.000Z',
+    now() + interval '14 days', now() + interval '14 days 1 hour',
     NULL, 'core',
     '60', NULL, NULL,
-    'https://vimeo.com/event/placeholder-003', 'placeholder-003', NULL,
-    'published', '2026-02-22T14:00:00.000Z'
+    NULL, NULL, NULL,
+    'published', now() - interval '3 days'
   ),
   (
     'f3000000-0000-4000-8000-000000000004',
     'Masterclass: Liderazgo consciente (Bootcamp preview)',
     'Una muestra del Bootcamp de Liderazgo Interior. En esta masterclass de 60 minutos, Gabriel comparte los fundamentos del liderazgo consciente y por qué la vulnerabilidad es tu mayor fortaleza como líder.',
-    '2026-03-10T18:00:00.000Z', '2026-03-10T19:00:00.000Z',
+    now() + interval '21 days', now() + interval '21 days 1 hour',
     'gabriel', 'free',
     '60', NULL, NULL,
     NULL, NULL, NULL,
-    'draft', '2026-02-24T08:00:00.000Z'
-  ),
-  (
-    'f3000000-0000-4000-8000-000000000005',
-    'Live semanal: Meditación guiada con Carlotta',
-    'Sesión pasada de la meditación semanal guiada. Disponible para ver en replay.',
-    '2026-02-18T18:00:00.000Z', '2026-02-18T19:00:00.000Z',
-    NULL, 'core',
-    '60', NULL, NULL,
-    'https://vimeo.com/event/placeholder-005', 'placeholder-005', NULL,
-    'published', '2026-02-11T10:00:00.000Z'
-  ),
-  (
-    'f3000000-0000-4000-8000-000000000006',
-    'Círculo de mujeres: Soltar para avanzar',
-    'Un espacio seguro y sagrado para la comunidad Carlotta. En este círculo hablamos de lo que necesitamos soltar para seguir creciendo. Replay disponible por tiempo limitado.',
-    '2026-02-12T19:00:00.000Z', '2026-02-12T20:30:00.000Z',
-    'carlotta', 'core',
-    '90', NULL, NULL,
-    'https://vimeo.com/event/placeholder-006', 'placeholder-006', NULL,
-    'published', '2026-02-05T11:00:00.000Z'
-  ),
-  (
-    'f3000000-0000-4000-8000-000000000007',
-    'Taller: Introducción al journaling consciente',
-    'Un taller práctico donde aprendiste las bases del journaling como herramienta de autoconocimiento. Incluye plantillas descargables.',
-    '2026-02-08T17:00:00.000Z', '2026-02-08T18:30:00.000Z',
-    NULL, 'core',
-    '90', NULL, NULL,
-    'https://vimeo.com/event/placeholder-007', 'placeholder-007', NULL,
-    'published', '2026-02-01T09:00:00.000Z'
+    'published', now() - interval '1 day'
   );
 
 
@@ -1285,14 +1317,14 @@ VALUES
 
 INSERT INTO public.event_registrations (id, event_id, user_id, status, created_at)
 VALUES
-  ('fd000000-0000-4000-8000-000000000001', 'f3000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'registered', '2026-02-19T08:00:00.000Z'),
-  ('fd000000-0000-4000-8000-000000000002', 'f3000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'registered', '2026-02-21T09:00:00.000Z'),
-  ('fd000000-0000-4000-8000-000000000003', 'f3000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000001', 'registered', '2026-02-23T10:00:00.000Z'),
-  ('fd000000-0000-4000-8000-000000000004', 'f3000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000002', 'registered', '2026-02-21T10:00:00.000Z'),
-  ('fd000000-0000-4000-8000-000000000005', 'f3000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000002', 'registered', '2026-02-23T11:00:00.000Z'),
-  ('fd000000-0000-4000-8000-000000000006', 'f3000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000003', 'registered', '2026-02-19T12:00:00.000Z'),
-  ('fd000000-0000-4000-8000-000000000007', 'f3000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000003', 'registered', '2026-02-23T12:00:00.000Z'),
-  ('fd000000-0000-4000-8000-000000000008', 'f3000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000005', 'registered', '2026-02-20T07:00:00.000Z');
+  ('fd000000-0000-4000-8000-000000000001', 'f3000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'registered', now() - interval '5 days'),
+  ('fd000000-0000-4000-8000-000000000002', 'f3000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'registered', now() - interval '4 days'),
+  ('fd000000-0000-4000-8000-000000000003', 'f3000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000001', 'registered', now() - interval '2 days'),
+  ('fd000000-0000-4000-8000-000000000004', 'f3000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000002', 'registered', now() - interval '4 days'),
+  ('fd000000-0000-4000-8000-000000000005', 'f3000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000002', 'registered', now() - interval '2 days'),
+  ('fd000000-0000-4000-8000-000000000006', 'f3000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000003', 'registered', now() - interval '5 days'),
+  ('fd000000-0000-4000-8000-000000000007', 'f3000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000003', 'registered', now() - interval '2 days'),
+  ('fd000000-0000-4000-8000-000000000008', 'f3000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000005', 'registered', now() - interval '3 days');
 
 
 -- ── 22. Benefits ─────────────────────────────────────────────────────────────

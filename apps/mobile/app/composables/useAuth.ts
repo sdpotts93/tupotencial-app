@@ -108,7 +108,6 @@ export function useAuth() {
       const { error: profileError } = await client.from('profiles').insert({
         id: data.user.id,
         display_name: '',
-        community_segment: '',
       })
       if (profileError) console.error('Profile insert error:', profileError)
 

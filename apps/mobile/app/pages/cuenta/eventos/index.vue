@@ -48,6 +48,31 @@
       </template>
 
       <template v-else>
+        <!-- Registered events -->
+        <section v-if="myEvents.length" class="events__section">
+          <p class="eyebrow">TUS EVENTOS</p>
+          <div class="events__list">
+            <div
+              v-for="event in myEvents"
+              :key="event.id"
+              class="events__card"
+              @click="router.push(`/cuenta/eventos/${event.id}`)"
+            >
+              <div class="events__card-hero">
+                <img :src="event.img" alt="" class="events__card-img" />
+                <span class="events__card-date">{{ event.dateLabel }}</span>
+              </div>
+              <div class="events__card-info">
+                <span class="events__card-eyebrow">{{ event.timeLabel }}</span>
+                <h3 class="events__card-name">{{ event.title }}</h3>
+                <div class="events__card-footer">
+                  <span class="events__tag events__tag--registered">Registrado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Upcoming -->
         <section class="events__section">
           <p class="eyebrow">PRÓXIMOS</p>
@@ -56,7 +81,7 @@
               v-for="event in upcomingEvents"
               :key="event.id"
               :class="['events__card', { 'events__card--locked': isEventLocked(event) }]"
-              @click="handleEventClick(event)"
+              @click="handleUpcomingClick(event)"
             >
               <div class="events__card-hero">
                 <img :src="event.img" alt="" class="events__card-img" />
@@ -82,12 +107,12 @@
         <!-- Past -->
         <section class="events__section">
           <p class="eyebrow">PASADOS</p>
-          <div v-if="pastEvents.length" class="events__past-list">
+          <div v-if="pastEvents?.length" class="events__past-list">
             <div
               v-for="event in pastEvents"
               :key="event.id"
               :class="['events__past-card', { 'events__past-card--locked': isEventLocked(event) }]"
-              @click="handleEventClick(event)"
+              @click="handleRecordedClick(event)"
             >
               <div class="events__past-img-wrap">
                 <img :src="event.img" alt="" class="events__past-img" />
@@ -95,7 +120,7 @@
               </div>
               <div class="events__past-body">
                 <span class="events__past-title">{{ event.title }}</span>
-                <span class="events__past-meta">GRABACIÓN · {{ event.dateLabel }}</span>
+                <span class="events__past-meta">GRABACIÓN</span>
               </div>
               <svg class="events__past-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -125,15 +150,27 @@ const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 const showPurchaseModal = ref(false)
 const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 const dateFmt = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' })
-const dateFmtFull = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
 const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
+
+const user = useSupabaseUser()
+
+// Fetch user's registered event IDs
+const { data: registeredEventIds } = useAsyncData('mobile-my-event-ids', async () => {
+  if (!user.value) return []
+  const { data } = await client
+    .from('event_registrations')
+    .select('event_id')
+    .eq('user_id', user.value.id)
+    .eq('status', 'registered')
+  return (data ?? []).map(r => r.event_id)
+}, { lazy: true })
 
 const { data: events, status: eventosStatus, refresh: refreshEventos } = useAsyncData('mobile-events', async () => {
   const { data } = await client.from('events').select('id, title, description, start_at, cover_url, entitlement_key, plan, status').in('status', ['published']).order('start_at')
   return data ?? []
 }, { lazy: true })
 
-const upcomingEvents = computed(() =>
+const upcomingMapped = computed(() =>
   (events.value ?? [])
     .filter(e => new Date(e.start_at) > new Date())
     .map(e => ({
@@ -148,18 +185,39 @@ const upcomingEvents = computed(() =>
     })),
 )
 
-const pastEvents = computed(() =>
-  (events.value ?? [])
-    .filter(e => new Date(e.start_at) <= new Date())
-    .map(e => ({
-      id: e.id,
-      title: e.title,
-      dateLabel: dateFmtFull.format(new Date(e.start_at)),
-      img: e.cover_url ?? undefined,
-      entitlement_key: e.entitlement_key,
-      plan: e.plan,
-    })),
+const myEventIds = computed(() => new Set(registeredEventIds.value ?? []))
+
+const myEvents = computed(() =>
+  upcomingMapped.value.filter(e => myEventIds.value.has(e.id)),
 )
+
+const upcomingEvents = computed(() =>
+  upcomingMapped.value.filter(e => !myEventIds.value.has(e.id)),
+)
+
+const { data: pastEvents } = useAsyncData('mobile-events-recorded', async () => {
+  const { data: cat } = await client
+    .from('content_categories')
+    .select('id')
+    .eq('slug', 'eventos-grabados')
+    .single()
+  if (!cat) return []
+  const { data: itemCats } = await client
+    .from('content_item_categories')
+    .select('position, content_items(id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key, status)')
+    .eq('category_id', cat.id)
+    .order('position')
+  return (itemCats ?? [])
+    .map(ic => ic.content_items as any)
+    .filter((item: any) => item && item.status === 'published')
+    .map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      img: item.thumbnail_url ?? undefined,
+      entitlement_key: item.entitlement_key,
+      plan: item.plan,
+    }))
+}, { lazy: true })
 
 function isEventLocked(event: { entitlement_key: string | null; plan?: string | null }) {
   if (isLocked(event.entitlement_key)) return true
@@ -167,7 +225,7 @@ function isEventLocked(event: { entitlement_key: string | null; plan?: string | 
   return false
 }
 
-function handleEventClick(event: { id: string; entitlement_key: string | null; plan?: string | null }) {
+function handleUpcomingClick(event: { id: string; entitlement_key: string | null; plan?: string | null }) {
   if (isLocked(event.entitlement_key)) {
     selectedAddon.value = getAddonForEntitlement(event.entitlement_key!)
     showPurchaseModal.value = true
@@ -179,6 +237,20 @@ function handleEventClick(event: { id: string; entitlement_key: string | null; p
     return
   }
   router.push(`/cuenta/eventos/${event.id}`)
+}
+
+function handleRecordedClick(item: { id: string; entitlement_key: string | null; plan?: string | null }) {
+  if (isLocked(item.entitlement_key)) {
+    selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  if (item.plan === 'core' && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este contenido.' }
+    showPurchaseModal.value = true
+    return
+  }
+  router.push(`/cuenta/contenido/${item.id}`)
 }
 </script>
 
@@ -320,6 +392,11 @@ function handleEventClick(event: { id: string; entitlement_key: string | null; p
 .events__tag--member {
   background: var(--color-gold-bg);
   color: var(--color-gold);
+}
+
+.events__tag--registered {
+  background: rgba(var(--color-success-rgb, 34, 197, 94), 0.12);
+  color: var(--color-success, #16a34a);
 }
 
 /* ─── Past events (day__card style) ─── */

@@ -203,8 +203,12 @@ function onLoginEmailChange() {
 }
 
 function goToRegister() {
-  regEmail.value = loginEmail.value
-  activeSheet.value = 'register'
+  if (window.innerWidth >= 1024) {
+    navigateTo({ path: '/registro', query: { email: loginEmail.value } })
+  } else {
+    regEmail.value = loginEmail.value
+    activeSheet.value = 'register'
+  }
 }
 
 // Debounced live validation for register form

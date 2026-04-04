@@ -56,13 +56,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const subscriberRoutes = ['/cuenta/comunidad', '/cuenta/eventos']
   const isSubscriberRoute = subscriberRoutes.some(r => path === r || path.startsWith(r + '/'))
 
-  // /cuenta/eventos/[id]/ver is subscriber-only
-  if (path.match(/^\/cuenta\/eventos\/[^/]+\/ver$/)) {
-    if (!isSubscriber.value) {
-      const eventId = path.split('/')[3]
-      return navigateTo(`/cuenta/eventos/${eventId}`)
-    }
-  }
+  // /cuenta/eventos/[id]/ver — gate handled by the event entitlement check below
 
   // Community is subscriber-only
   if (path.startsWith('/cuenta/comunidad') && !isSubscriber.value) {

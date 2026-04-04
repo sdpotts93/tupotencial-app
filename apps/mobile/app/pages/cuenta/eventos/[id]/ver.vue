@@ -20,24 +20,56 @@
           <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
-      <span :class="['watch__badge', { 'watch__badge--live': event.isLive }]">
-        {{ event.isLive ? 'EN VIVO' : 'GRABACIÓN' }}
-      </span>
+      <span v-if="event.isLive" class="watch__badge watch__badge--live">EN VIVO</span>
     </div>
 
     <!-- Fullscreen player -->
     <div class="watch__player">
-      <div class="watch__placeholder">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-        <p>Vimeo embed</p>
-        <p class="watch__hint">Aquí se cargará el video de Vimeo</p>
+      <!-- Live: Vimeo embed -->
+      <iframe
+        v-if="event.isLive && event.vimeoEmbedUrl"
+        :src="event.vimeoEmbedUrl"
+        class="watch__iframe"
+        frameborder="0"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      />
+      <!-- Upcoming: countdown -->
+      <div v-else-if="event.isUpcoming" class="watch__countdown">
+        <h2 class="watch__countdown-title">{{ event.title }}</h2>
+        <p class="watch__countdown-label">El evento comienza en</p>
+        <div class="watch__countdown-timer">
+          <div class="watch__countdown-unit">
+            <span class="watch__countdown-value">{{ countdown.days }}</span>
+            <span class="watch__countdown-suffix">días</span>
+          </div>
+          <span class="watch__countdown-sep">:</span>
+          <div class="watch__countdown-unit">
+            <span class="watch__countdown-value">{{ countdown.hours }}</span>
+            <span class="watch__countdown-suffix">hrs</span>
+          </div>
+          <span class="watch__countdown-sep">:</span>
+          <div class="watch__countdown-unit">
+            <span class="watch__countdown-value">{{ countdown.minutes }}</span>
+            <span class="watch__countdown-suffix">min</span>
+          </div>
+          <span class="watch__countdown-sep">:</span>
+          <div class="watch__countdown-unit">
+            <span class="watch__countdown-value">{{ countdown.seconds }}</span>
+            <span class="watch__countdown-suffix">seg</span>
+          </div>
+        </div>
+        <p class="watch__countdown-date">{{ event.dateLabel }}</p>
       </div>
-    </div>
-
-    <!-- Info overlaid at bottom -->
-    <div class="watch__info safe-bottom">
-      <h2 class="watch__title">{{ event.title }}</h2>
-      <p class="watch__subtitle">{{ event.subtitle }}</p>
+      <!-- Waiting for stream / no video -->
+      <div v-else class="watch__placeholder">
+        <svg v-if="event.isLive" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="watch__spinner">
+          <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+        </svg>
+        <svg v-else width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        <p>{{ event.isLive ? 'Esperando transmisión...' : 'Video no disponible' }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -58,14 +90,69 @@ const { data: eventData, status: watchStatus, refresh: refreshWatch } = useAsync
   return data
 }, { lazy: true })
 
+const now = ref(new Date())
+let ticker: ReturnType<typeof setInterval> | null = null
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  ticker = setInterval(() => { now.value = new Date() }, 1000)
+})
+onBeforeUnmount(() => {
+  if (ticker) clearInterval(ticker)
+  if (pollTimer) clearInterval(pollTimer)
+})
+
+const dayTimeFmt = new Intl.DateTimeFormat('es-MX', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'America/Mexico_City',
+})
+
 const event = computed(() => {
   const e = eventData.value
-  if (!e) return { title: '', subtitle: '', isLive: false }
+  if (!e) return { title: '', subtitle: '', isLive: false, isUpcoming: false, vimeoEmbedUrl: null as string | null, dateLabel: '', startAt: null as Date | null }
   const startDate = new Date(e.start_at)
+  const endDate = e.end_at ? new Date(e.end_at) : new Date(startDate.getTime() + (parseInt(e.duration) || 60) * 60 * 1000)
+  const liveId = e.vimeo_live_event_id as string | null
+  const isUpcoming = startDate > now.value
+  const isLive = !isUpcoming && now.value < endDate && e.status === 'published'
   return {
     title: e.title,
     subtitle: e.description ?? '',
-    isLive: startDate > new Date() && e.status === 'published',
+    isLive,
+    isUpcoming,
+    vimeoEmbedUrl: liveId ? `https://vimeo.com/event/${liveId}/embed/interaction` : null,
+    dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
+    startAt: startDate,
+  }
+})
+
+const countdown = computed(() => {
+  if (!event.value.startAt) return { days: '00', hours: '00', minutes: '00', seconds: '00' }
+  const diff = Math.max(0, event.value.startAt.getTime() - now.value.getTime())
+  const totalSec = Math.floor(diff / 1000)
+  const days = String(Math.floor(totalSec / 86400)).padStart(2, '0')
+  const hours = String(Math.floor((totalSec % 86400) / 3600)).padStart(2, '0')
+  const minutes = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0')
+  const seconds = String(totalSec % 60).padStart(2, '0')
+  return { days, hours, minutes, seconds }
+})
+
+// Once the event time arrives, poll every 30s to pick up vimeo_live_event_id
+// in case the admin sets it right before going live
+watch(() => event.value.isUpcoming, (isUpcoming) => {
+  if (!isUpcoming && !event.value.vimeoEmbedUrl && !pollTimer) {
+    pollTimer = setInterval(() => {
+      if (event.value.vimeoEmbedUrl) {
+        clearInterval(pollTimer!)
+        pollTimer = null
+        return
+      }
+      refreshWatch()
+    }, 30_000)
   }
 })
 </script>
@@ -128,7 +215,7 @@ const event = computed(() => {
   color: var(--color-white);
 }
 
-/* ─── Player (fullscreen, centered) ─── */
+/* ─── Player (fullscreen) ─── */
 .watch__player {
   position: absolute;
   inset: 0;
@@ -136,6 +223,14 @@ const event = computed(() => {
   align-items: center;
   justify-content: center;
   background: var(--color-black);
+}
+
+.watch__iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
 }
 
 .watch__placeholder {
@@ -148,7 +243,84 @@ const event = computed(() => {
   max-width: 100%;
 }
 
-.watch__hint { font-size: var(--text-xs); }
+/* ─── Countdown ─── */
+.watch__countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+
+.watch__countdown-title {
+  font-family: var(--font-title);
+  font-size: var(--title-md);
+  color: var(--color-white);
+  max-width: 30ch;
+  line-height: var(--leading-snug);
+}
+
+.watch__countdown-label {
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(var(--tint-inverse-rgb), 0.5);
+}
+
+.watch__countdown-timer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.watch__countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+}
+
+.watch__countdown-value {
+  font-family: var(--font-eyebrow);
+  font-size: 40px;
+  font-weight: var(--weight-bold);
+  color: var(--color-white);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.watch__countdown-suffix {
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  text-transform: uppercase;
+  color: rgba(var(--tint-inverse-rgb), 0.4);
+  margin-top: var(--space-1);
+}
+
+.watch__countdown-sep {
+  font-size: 32px;
+  font-weight: var(--weight-bold);
+  color: rgba(var(--tint-inverse-rgb), 0.3);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.watch__countdown-date {
+  font-size: var(--text-sm);
+  color: rgba(var(--tint-inverse-rgb), 0.5);
+}
+
+/* ─── Spinner ─── */
+.watch__spinner {
+  animation: watch-spin 0.8s linear infinite;
+  color: var(--color-white);
+}
+@keyframes watch-spin {
+  to { transform: rotate(360deg); }
+}
 
 /* ─── Info (overlaid bottom) ─── */
 .watch__info {

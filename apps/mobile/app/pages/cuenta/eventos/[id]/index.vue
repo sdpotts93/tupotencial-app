@@ -59,19 +59,51 @@
         <h1 class="title title--lg edetail__title">{{ event.title }}</h1>
 
         <div class="edetail__actions">
-          <UiButton variant="outline" block :to="`/cuenta/eventos/${id}/ver`">
-            {{ event.isLive ? 'Ver en vivo' : 'Ver grabación' }}
-          </UiButton>
+          <!-- Not accessible (locked by plan/entitlement) -->
+          <template v-if="!event.accessGranted">
+            <UiButton variant="outline" block @click="handleLockedClick">
+              {{ event.isLive ? 'Ver en vivo' : 'Ver evento' }}
+            </UiButton>
+          </template>
+
+          <!-- Accessible but not registered -->
+          <template v-else-if="!isRegistered">
+            <UiButton
+              variant="outline"
+              block
+              :loading="registering"
+              @click="register"
+            >
+              Registrarme
+            </UiButton>
+          </template>
+
+          <!-- Registered -->
+          <template v-else>
+            <UiButton variant="primary" block :to="`/cuenta/eventos/${id}/ver`">
+              {{ event.isLive ? 'Ver en vivo' : 'Ver evento' }}
+            </UiButton>
+            <UiButton
+              variant="ghost"
+              block
+              :loading="registering"
+              @click="unregister"
+              style="margin-top: var(--space-2);"
+            >
+              Cancelar registro
+            </UiButton>
+          </template>
         </div>
 
         <p class="edetail__desc">{{ event.description }}</p>
 
         <div class="edetail__meta">
           <span v-if="event.plan === 'core'" class="edetail__tag edetail__tag--member">Solo miembros</span>
-          <UiTag>{{ event.status }}</UiTag>
         </div>
       </div>
     </div>
+
+    <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
     </template>
   </div>
 </template>
@@ -82,6 +114,11 @@ definePageMeta({ layout: 'blank' })
 const route = useRoute()
 const id = route.params.id as string
 const client = useSupabaseClient()
+const { isSubscriber } = useAuth()
+const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+
+const showPurchaseModal = ref(false)
+const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 
 const dayTimeFmt = new Intl.DateTimeFormat('es-MX', {
   weekday: 'long',
@@ -98,10 +135,81 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelado',
 }
 
+const user = useSupabaseUser()
+
+// Registration state
+const isRegistered = ref(false)
+const registering = ref(false)
+
+const { data: regData } = useAsyncData(`event-reg-${id}`, async () => {
+  if (!user.value) return null
+  const { data } = await client
+    .from('event_registrations')
+    .select('id, status')
+    .eq('event_id', id)
+    .eq('user_id', user.value.id)
+    .single()
+  return data
+}, { lazy: true })
+
+watch(regData, (d) => {
+  isRegistered.value = !!d && d.status === 'registered'
+}, { immediate: true })
+
+async function register() {
+  if (!user.value) return
+  registering.value = true
+  try {
+    // Try insert first; if already exists, update status back to registered
+    const { error } = await client.from('event_registrations').insert({
+      event_id: id,
+      user_id: user.value.id,
+      status: 'registered',
+    })
+    if (error?.code === '23505') {
+      // Unique violation — row exists (previously cancelled), update it
+      await client.from('event_registrations')
+        .update({ status: 'registered' })
+        .eq('event_id', id)
+        .eq('user_id', user.value.id)
+    }
+    isRegistered.value = true
+  } finally {
+    registering.value = false
+  }
+}
+
+async function unregister() {
+  if (!user.value) return
+  registering.value = true
+  try {
+    await client.from('event_registrations')
+      .update({ status: 'cancelled' })
+      .eq('event_id', id)
+      .eq('user_id', user.value.id)
+    isRegistered.value = false
+  } finally {
+    registering.value = false
+  }
+}
+
 const { data: eventData, status: eventStatus, refresh: refreshEvent } = useAsyncData(`event-${id}`, async () => {
   const { data } = await (client.rpc as any)('get_secure_event', { p_event_id: id })
   return data as Record<string, any> | null
 }, { lazy: true })
+
+function handleLockedClick() {
+  const e = eventData.value
+  if (e?.entitlement_key && isLocked(e.entitlement_key)) {
+    selectedAddon.value = getAddonForEntitlement(e.entitlement_key)
+    showPurchaseModal.value = true
+    return
+  }
+  if (e?.plan === 'core' && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este evento.' }
+    showPurchaseModal.value = true
+  }
+}
 
 const event = computed(() => {
   const e = eventData.value

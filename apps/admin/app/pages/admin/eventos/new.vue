@@ -238,6 +238,7 @@ async function handleSave() {
   if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
   if (!form.description.trim()) { errors.description = 'La descripción es obligatoria'; hasError = true }
   if (!form.starts_at) { errors.starts_at = 'La fecha y hora es obligatoria'; hasError = true }
+  else if (form.starts_at.getTime() < Date.now() + 10 * 60 * 1000) { errors.starts_at = 'El evento debe iniciar al menos 10 minutos en el futuro'; hasError = true }
   if (!form.duration) { errors.duration = 'La duración es obligatoria'; hasError = true }
   if (hasError) return
 

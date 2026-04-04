@@ -101,8 +101,9 @@ const { register } = useAuth()
 const toast = useToast()
 
 
+const route = useRoute()
 const showSheet = ref(true)
-const email = ref('')
+const email = ref((route.query.email as string) || '')
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)

@@ -10,7 +10,7 @@
     <UiTabs v-model="activeTab" :tabs="tabs" />
 
     <div class="tab-content">
-      <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
+      <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="handleRowClick" @load-more="loadMore">
         <template #toolbar>
           <UiInput
             v-model="searchInput"
@@ -42,7 +42,7 @@
           <UiTag :variant="statusVariant(value)">{{ statusLabel(value) }}</UiTag>
         </template>
 
-        <template #actions="{ row }">
+        <template v-if="activeTab !== 'past'" #actions="{ row }">
           <UiButton variant="soft" size="sm" :to="`/admin/eventos/${row.id}`">
             <template #icon><Icon name="lucide:pencil" size="16" /></template>
             Editar
@@ -62,7 +62,7 @@ const activeTab = ref('upcoming')
 
 const tabs = [
   { value: 'upcoming', label: 'Próximos' },
-  { value: 'past', label: 'Pasados' },
+  { value: 'past', label: 'Historial' },
   { value: 'draft', label: 'Borradores' },
 ]
 
@@ -125,7 +125,8 @@ function formatDateTime(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-function goToEdit(row: Record<string, any>) {
+function handleRowClick(row: Record<string, any>) {
+  if (activeTab.value === 'past') return
   router.push(`/admin/eventos/${row.id}`)
 }
 </script>
