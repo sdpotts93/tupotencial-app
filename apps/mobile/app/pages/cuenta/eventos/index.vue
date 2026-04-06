@@ -152,15 +152,11 @@ const selectedAddon = ref<{ id: string; title: string; description: string | nul
 const dateFmt = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' })
 const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
 
-const user = useSupabaseUser()
-
-// Fetch user's registered event IDs
+// Fetch user's registered event IDs (RLS scopes to current user automatically)
 const { data: registeredEventIds } = useAsyncData('mobile-my-event-ids', async () => {
-  if (!user.value) return []
   const { data } = await client
     .from('event_registrations')
     .select('event_id')
-    .eq('user_id', user.value.id)
     .eq('status', 'registered')
   return (data ?? []).map(r => r.event_id)
 }, { lazy: true })

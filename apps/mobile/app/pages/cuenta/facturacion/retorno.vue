@@ -87,8 +87,8 @@ onMounted(async () => {
 
 <style scoped>
 .billing-return {
-  min-height: 100dvh; display: flex; align-items: center; justify-content: center;
-  padding: var(--space-6); background: var(--color-light);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-6);
 }
 
 .billing-return__content {

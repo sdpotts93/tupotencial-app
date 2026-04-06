@@ -121,9 +121,6 @@ img, video {
 }
 
 @media (min-width: 1024px) {
-  html {
-    font-size: 18px;
-  }
   .screen {
     padding-bottom: 0;
     background: transparent;

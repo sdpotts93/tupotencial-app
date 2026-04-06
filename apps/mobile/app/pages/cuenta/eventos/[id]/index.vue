@@ -80,7 +80,7 @@
 
           <!-- Registered -->
           <template v-else>
-            <UiButton variant="primary" block :to="`/cuenta/eventos/${id}/ver`">
+            <UiButton variant="outline" block :to="`/cuenta/eventos/${id}/ver`">
               {{ event.isLive ? 'Ver en vivo' : 'Ver evento' }}
             </UiButton>
             <UiButton
@@ -135,21 +135,13 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelado',
 }
 
-const user = useSupabaseUser()
-
 // Registration state
 const isRegistered = ref(false)
 const registering = ref(false)
 
 const { data: regData } = useAsyncData(`event-reg-${id}`, async () => {
-  if (!user.value) return null
-  const { data } = await client
-    .from('event_registrations')
-    .select('id, status')
-    .eq('event_id', id)
-    .eq('user_id', user.value.id)
-    .single()
-  return data
+  const { data } = await (client.rpc as any)('get_event_registration', { p_event_id: id })
+  return data?.[0] ?? null
 }, { lazy: true })
 
 watch(regData, (d) => {
@@ -157,22 +149,9 @@ watch(regData, (d) => {
 }, { immediate: true })
 
 async function register() {
-  if (!user.value) return
   registering.value = true
   try {
-    // Try insert first; if already exists, update status back to registered
-    const { error } = await client.from('event_registrations').insert({
-      event_id: id,
-      user_id: user.value.id,
-      status: 'registered',
-    })
-    if (error?.code === '23505') {
-      // Unique violation — row exists (previously cancelled), update it
-      await client.from('event_registrations')
-        .update({ status: 'registered' })
-        .eq('event_id', id)
-        .eq('user_id', user.value.id)
-    }
+    await (client.rpc as any)('register_for_event', { p_event_id: id })
     isRegistered.value = true
   } finally {
     registering.value = false
@@ -180,13 +159,9 @@ async function register() {
 }
 
 async function unregister() {
-  if (!user.value) return
   registering.value = true
   try {
-    await client.from('event_registrations')
-      .update({ status: 'cancelled' })
-      .eq('event_id', id)
-      .eq('user_id', user.value.id)
+    await (client.rpc as any)('unregister_from_event', { p_event_id: id })
     isRegistered.value = false
   } finally {
     registering.value = false
