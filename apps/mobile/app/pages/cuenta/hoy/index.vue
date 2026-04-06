@@ -713,7 +713,8 @@ const { data: activeProgramsData } = useAsyncData('hoy-programs', async () => {
     const prog = e.programs as any
     const pid = prog?.id ?? e.program_id
     const totalDays = dayCountMap[pid] ?? 0
-    const currentDay = checkinCountMap[pid] ?? 0
+    const completedDays = checkinCountMap[pid] ?? 0
+    const currentDay = Math.min(completedDays + 1, totalDays)
     return { id: pid, title: prog?.title ?? '', currentDay, totalDays }
   })
 }, { lazy: true, watch: [() => user.value?.id] })
