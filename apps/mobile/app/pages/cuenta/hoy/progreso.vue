@@ -97,7 +97,7 @@
       </section>
 
       <!-- Active programs (day__card style) -->
-      <section class="progress__programs">
+      <section v-if="activePrograms.length" class="progress__programs">
         <p class="eyebrow">PROGRAMAS ACTIVOS</p>
         <div class="progress__programs-list">
           <NuxtLink
