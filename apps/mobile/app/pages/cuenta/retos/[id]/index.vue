@@ -21,7 +21,7 @@
       </div>
       <section class="detail__days">
         <UiSkeleton variant="text" width="50%" height="10px" style="margin-bottom: var(--space-3);" />
-        <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+        <div style="display: flex; gap: var(--space-2);">
           <div v-for="i in 4" :key="i" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); background: rgba(var(--tint-rgb), 0.04); border-radius: var(--radius-lg);">
             <UiSkeleton variant="text" width="50px" height="14px" />
             <UiSkeleton variant="text" width="60%" height="12px" />
