@@ -197,7 +197,7 @@ const addonInfo = computed(() =>
 )
 
 async function enroll() {
-  await client.from('program_enrollments').insert({ program_id: id, user_id: user.value!.id, status: 'active' })
+  await client.from('program_enrollments').insert({ program_id: id, status: 'active' })
   await refreshEnrollment()
 }
 </script>

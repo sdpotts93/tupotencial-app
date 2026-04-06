@@ -554,7 +554,7 @@ export type Database = {
           id?: string
           payload?: Json
           type: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -713,7 +713,7 @@ export type Database = {
           created_at?: string
           form_id: string
           id?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           answers?: Json
@@ -813,7 +813,7 @@ export type Database = {
           id?: string
           post_id: string
           status?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           body?: string
@@ -846,7 +846,7 @@ export type Database = {
           id?: string
           post_id: string
           reaction: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -946,7 +946,7 @@ export type Database = {
           id?: string
           payload?: Json
           program_id: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -1060,7 +1060,7 @@ export type Database = {
           id?: string
           program_id: string
           status?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           enrolled_at?: string
@@ -1233,7 +1233,7 @@ export type Database = {
           current_streak?: number
           last_checkin_date?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           best_streak?: number

@@ -189,7 +189,7 @@ async function toggleLike() {
   if (post.value.liked) {
     await client.from('post_reactions').delete().eq('post_id', postId).eq('user_id', user.value.id)
   } else {
-    await client.from('post_reactions').insert({ post_id: postId, user_id: user.value.id, reaction: 'like' })
+    await client.from('post_reactions').insert({ post_id: postId, reaction: 'like' })
   }
   await refreshPost()
 }
@@ -204,7 +204,6 @@ async function submitComment() {
   try {
     await client.from('post_comments').insert({
       post_id: postId,
-      user_id: user.value.id,
       body: newComment.value.trim(),
     })
     newComment.value = ''

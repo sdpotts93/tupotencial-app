@@ -235,7 +235,7 @@ async function toggleReaction(id: string) {
   if (post.liked) {
     await client.from('post_reactions').delete().eq('post_id', id).eq('user_id', user.value.id)
   } else {
-    await client.from('post_reactions').insert({ post_id: id, user_id: user.value.id, reaction: 'like' })
+    await client.from('post_reactions').insert({ post_id: id, reaction: 'like' })
   }
   await refreshComunidad()
 }

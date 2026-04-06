@@ -503,7 +503,6 @@ async function maybeUpdateStreak() {
   const newBest = Math.max(newStreak, streak.value)
 
   await client.from('user_streaks').upsert({
-    user_id: uid,
     current_streak: newStreak,
     best_streak: newBest,
     last_checkin_date: today,
@@ -650,7 +649,6 @@ async function checkAutoCompleteAccion() {
   if (completed) {
     await client.from('daily_checkins').insert({
       date: today,
-      user_id: user.value.id,
       type: 'accion',
       payload: { outcome: 'done', daily_plan_id: dailyPlanData.value?.id ?? null },
     })
@@ -819,7 +817,6 @@ async function handleCheckin() {
   try {
     await client.from('daily_checkins').insert({
       date: today,
-      user_id: user.value!.id,
       type: 'checkin',
       payload: { mood: selectedMood.value, reflection: checkinReflection.value },
     })
@@ -857,7 +854,6 @@ async function handleAccion() {
   try {
     await client.from('daily_checkins').insert({
       date: today,
-      user_id: user.value!.id,
       type: 'accion',
       payload: { outcome: accionChoice.value, daily_plan_id: dailyPlanData.value?.id ?? null },
     })
@@ -907,14 +903,12 @@ async function handleFormSubmit() {
     // Save form submission
     await client.from('form_submissions').insert({
       form_id: actionPayload.value?.form_id,
-      user_id: user.value!.id,
       answers,
     })
 
     // Mark acción as done
     await client.from('daily_checkins').insert({
       date: today,
-      user_id: user.value!.id,
       type: 'accion',
       payload: { outcome: 'done', daily_plan_id: dailyPlanData.value?.id ?? null },
     })

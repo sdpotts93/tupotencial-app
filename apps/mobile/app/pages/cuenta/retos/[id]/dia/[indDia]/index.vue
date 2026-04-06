@@ -345,7 +345,6 @@ async function handleFormSubmit() {
 
     await client.from('program_checkins').upsert({
       program_id: programId,
-      user_id: user.value!.id,
       day_index: Number(dayIndex),
       payload: { reflection: reflection.value, completed_items: completedIds },
     }, { onConflict: 'program_id,user_id,day_index' })

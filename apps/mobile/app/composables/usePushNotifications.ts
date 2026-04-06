@@ -81,7 +81,6 @@ export function usePushNotifications() {
     await (client.from as any)('push_tokens')
       .upsert(
         {
-          user_id: user.value.id,
           token: pushToken,
           platform,
         },
