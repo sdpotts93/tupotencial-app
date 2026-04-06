@@ -2,7 +2,14 @@
   <Teleport to="body">
     <Transition name="sheet">
       <div v-if="modelValue" class="modal-backdrop" @click.self="close">
-        <div class="modal" role="dialog" :aria-label="title">
+        <div
+          ref="sheetRef"
+          class="modal"
+          role="dialog"
+          :aria-label="title"
+          :style="sheetStyle"
+          v-on="dragListeners"
+        >
           <div class="modal__handle" />
           <div v-if="title || showClose" class="modal__header">
             <h2 v-if="title" class="modal__title">{{ title }}</h2>
@@ -25,6 +32,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+
 interface Props {
   modelValue: boolean
   title?: string
@@ -37,9 +46,21 @@ withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
+const sheetRef = ref<HTMLElement | null>(null)
+
 function close() {
   emit('update:modelValue', false)
 }
+
+const { translateY, isDragging, dragListeners } = useSheetDrag(sheetRef, close)
+
+const sheetStyle = computed(() => {
+  if (translateY.value === 0) return {}
+  return {
+    transform: `translateY(${translateY.value}px)`,
+    transition: isDragging.value ? 'none' : 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
+  }
+})
 </script>
 
 <style scoped>
@@ -93,7 +114,7 @@ function close() {
   height: 4px;
   background: var(--color-border);
   border-radius: var(--radius-full);
-  margin: var(--space-3) auto var(--space-1);
+  margin: var(--space-3) auto var(--space-4);
 }
 
 .modal__header {

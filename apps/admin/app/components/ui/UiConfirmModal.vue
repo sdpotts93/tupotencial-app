@@ -6,7 +6,12 @@
         class="confirm-overlay"
         @click.self="handleCancel"
       >
-        <div class="confirm-sheet">
+        <div
+          ref="sheetRef"
+          class="confirm-sheet"
+          :style="sheetStyle"
+          v-on="dragListeners"
+        >
           <div class="confirm-sheet__header">
             <div class="confirm-sheet__handle" />
             <button class="confirm-sheet__close" aria-label="Cerrar" @click="handleCancel">
@@ -46,7 +51,11 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+
 const state = useConfirmState()
+
+const sheetRef = ref<HTMLElement | null>(null)
 
 function handleConfirm() {
   state.resolve?.(true)
@@ -59,6 +68,16 @@ function handleCancel() {
   state.open = false
   state.resolve = null
 }
+
+const { translateY, isDragging, dragListeners } = useSheetDrag(sheetRef, handleCancel)
+
+const sheetStyle = computed(() => {
+  if (translateY.value === 0) return {}
+  return {
+    transform: `translateY(${translateY.value}px)`,
+    transition: isDragging.value ? 'none' : 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
+  }
+})
 </script>
 
 <style scoped>
@@ -112,7 +131,7 @@ function handleCancel() {
   align-items: flex-start;
   justify-content: center;
   position: relative;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-8);
 }
 
 .confirm-sheet__handle {
