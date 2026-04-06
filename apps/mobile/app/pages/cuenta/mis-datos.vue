@@ -118,6 +118,13 @@ const segment = ref(user.value?.community_segment || '')
 const saving = ref(false)
 const formError = ref('')
 
+watch(() => user.value, (u) => {
+  if (u) {
+    if (!displayName.value) displayName.value = u.display_name || ''
+    if (!segment.value) segment.value = u.community_segment || ''
+  }
+}, { immediate: true })
+
 const segmentOptions = [
   { value: 'gabriel', label: 'Gabriel' },
   { value: 'carlotta', label: 'Carlotta' },
@@ -384,10 +391,6 @@ async function handleSave() {
   .profile__top-grid {
     max-width: 640px;
     margin: 0 auto;
-  }
-
-  .profile__top-right .profile__divider {
-    display: none;
   }
 
   /* Form: clean, no max-width constraint */
