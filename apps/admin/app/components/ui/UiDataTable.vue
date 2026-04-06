@@ -29,6 +29,11 @@
               {{ emptyText }}
             </td>
           </tr>
+          <tr v-else-if="!rows.length && loading">
+            <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__empty data-table__empty--loading">
+              &nbsp;
+            </td>
+          </tr>
           <tr v-for="(row, i) in rows" :key="row.id || i" class="data-table__row" @click="$emit('row-click', row)">
             <td
               v-for="(col, ci) in columns"
@@ -232,6 +237,10 @@ th.data-table__sticky-col {
   padding: var(--space-10) var(--space-4);
   color: var(--color-muted);
   font-size: var(--text-sm);
+}
+
+.data-table__empty--loading {
+  padding: var(--space-10) var(--space-4);
 }
 
 /* ─── Indeterminate progress bar ─── */

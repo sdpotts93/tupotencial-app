@@ -11,15 +11,22 @@ export async function useInfiniteTable<T>(
   const hasMore = ref(true)
   const loading = ref(false)
   const loadingMore = ref(false)
+  const error = ref<Error | null>(null)
   let currentPage = 0
 
   async function reset() {
     loading.value = true
+    error.value = null
     currentPage = 0
-    const data = await fetchFn({ from: 0, to: PAGE_SIZE - 1 })
-    rows.value = data
-    hasMore.value = data.length >= PAGE_SIZE
-    loading.value = false
+    try {
+      const data = await fetchFn({ from: 0, to: PAGE_SIZE - 1 })
+      rows.value = data
+      hasMore.value = data.length >= PAGE_SIZE
+    } catch (e: any) {
+      error.value = e
+    } finally {
+      loading.value = false
+    }
   }
 
   async function loadMore() {
@@ -34,8 +41,8 @@ export async function useInfiniteTable<T>(
   }
 
   // Initial load via useAsyncData (lazy for instant navigation)
-  const { data: initial, status } = useAsyncData(key, () => fetchFn({ from: 0, to: PAGE_SIZE - 1 }), { lazy: true })
-  const initialLoading = computed(() => status.value === 'pending')
+  const { data: initial, status: asyncStatus, error: asyncError } = useAsyncData(key, () => fetchFn({ from: 0, to: PAGE_SIZE - 1 }), { lazy: true })
+  const initialLoading = computed(() => asyncStatus.value === 'pending')
   watch(initial, (val) => {
     if (val) {
       rows.value = val
@@ -48,5 +55,13 @@ export async function useInfiniteTable<T>(
     watch(watchSources, () => reset())
   }
 
-  return { rows, hasMore, loading: computed(() => loading.value || initialLoading.value), loadingMore, loadMore, refresh: reset, status }
+  // status tracks only the initial load — not subsequent reloads from filters/search
+  // Use this for skeleton/error states. Use `loading` for the DataTable progress bar.
+  const combinedStatus = computed(() => {
+    if (asyncStatus.value === 'pending') return 'pending' as const
+    if (asyncError.value || (error.value && !rows.value.length)) return 'error' as const
+    return 'success' as const
+  })
+
+  return { rows, hasMore, loading: computed(() => loading.value || initialLoading.value), loadingMore, loadMore, refresh: reset, status: combinedStatus }
 }
