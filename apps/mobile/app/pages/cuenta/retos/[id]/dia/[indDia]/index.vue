@@ -120,7 +120,6 @@
     <UiModal
       v-model="showFormSheet"
       title="Check-in del día"
-      variant="drawer"
     >
       <Transition name="day-fade" mode="out-in">
         <div v-if="formSuccess" key="success" class="day__form-success">

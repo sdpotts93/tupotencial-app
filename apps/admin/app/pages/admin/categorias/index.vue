@@ -103,7 +103,7 @@
     </template>
 
     <!-- Create/Edit Modal -->
-    <UiModal v-model="showCreateModal" :title="editingCategory ? 'Editar categoría' : 'Nueva categoría'" variant="center" :show-handle="false">
+    <UiModal v-model="showCreateModal" :title="editingCategory ? 'Editar categoría' : 'Nueva categoría'">
       <div class="modal-form">
         <UiInput
           v-model="categoryForm.name"

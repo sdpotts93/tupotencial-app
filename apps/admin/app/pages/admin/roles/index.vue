@@ -103,7 +103,7 @@
     </UiDataTable>
 
     <!-- Edit Modal -->
-    <UiModal v-model="showEditModal" title="Editar administrador" variant="center" :show-handle="false">
+    <UiModal v-model="showEditModal" title="Editar administrador">
       <div class="modal-form">
         <UiInput
           :model-value="editForm.full_name"
@@ -131,7 +131,7 @@
     </UiModal>
 
     <!-- Invite Modal -->
-    <UiModal v-model="showInviteModal" title="Invitar administrador" variant="center" :show-handle="false">
+    <UiModal v-model="showInviteModal" title="Invitar administrador">
       <div class="modal-form">
         <UiInput
           v-model="inviteForm.email"

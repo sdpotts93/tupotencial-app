@@ -1394,6 +1394,12 @@ function closeAccionSheet() {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.hoy__continue-card:nth-child(n+2) {
+  display: none;
 }
 
 .hoy__continue-card {
@@ -1406,6 +1412,7 @@ function closeAccionSheet() {
   text-decoration: none;
   color: var(--color-text);
   transition: background var(--transition-fast);
+  min-width: 0;
 }
 
 @media (hover: hover) {
@@ -1449,9 +1456,7 @@ function closeAccionSheet() {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
 }
 
 .hoy__continue-meta {
@@ -2125,7 +2130,8 @@ function closeAccionSheet() {
   }
 
   .hoy__featured-img {
-    width: 250px;
+    max-width: 250px;
+    width: 50%;
     height: auto;
     aspect-ratio: auto;
     border-radius: var(--radius-lg);
@@ -2174,10 +2180,18 @@ function closeAccionSheet() {
   }
 
   .hoy__continue-card {
-    flex: 1;
+    flex: 0 0 calc(50% - var(--space-3) / 2);
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
     border-radius: var(--radius-lg);
+  }
+
+  .hoy__continue-card:nth-child(-n+2) {
+    display: flex;
+  }
+
+  .hoy__continue-card:nth-child(n+3) {
+    display: none;
   }
 
   @media (hover: hover) {
