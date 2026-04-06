@@ -1,19 +1,19 @@
 <template>
   <div class="screen">
-    <div class="screen__content">
-      <!-- Standard header -->
-      <header class="chat__header">
-        <button class="chat__back" aria-label="Volver" @click="navigateTo('/cuenta/ia')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <div class="chat__header-center">
-          <Icon :name="toneIcon" size="14" />
-          <h1 class="chat__header-title">{{ toneName }}</h1>
-        </div>
-      </header>
+    <!-- Standard header (always visible, outside scrollable area) -->
+    <header class="chat__header">
+      <button class="chat__back" aria-label="Volver" @click="navigateTo('/cuenta/ia')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="chat__header-center">
+        <Icon :name="toneIcon" size="14" />
+        <h1 class="chat__header-title">{{ toneName }}</h1>
+      </div>
+    </header>
 
+    <div class="screen__content">
       <p class="chat__disclaimer">No es consejo médico/terapéutico.</p>
 
       <template v-if="chatStatus === 'pending'">
@@ -428,15 +428,24 @@ async function retry() {
 </script>
 
 <style scoped>
-.screen__content { padding-bottom: 80px; }
+.screen {
+  display: flex;
+  flex-direction: column;
+}
+.screen__content { padding-bottom: 80px; flex: 1; }
 
 /* ─── Header (standard) ─── */
 .chat__header {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  margin-bottom: var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky, 10);
+  background: var(--color-white);
+  padding: var(--space-3) var(--space-5);
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(var(--tint-rgb), 0.08);
 }
 
 .chat__header-center {
@@ -630,7 +639,6 @@ p.chat__msg-body {
   left: 0;
   right: 0;
   z-index: var(--z-sticky, 10);
-  background: var(--color-white);
   border-top: none;
   padding: var(--space-3) var(--space-5);
 }
@@ -690,8 +698,6 @@ p.chat__msg-body {
   .screen {
     height: calc(100dvh - var(--topbar-height));
     min-height: auto;
-    display: flex;
-    flex-direction: column;
   }
 
   .screen__content {
@@ -705,11 +711,10 @@ p.chat__msg-body {
   }
 
   .chat__header {
-    display: none;
-  }
-
-  .chat__back {
-    display: none;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+    background: var(--color-desktop-bg);
   }
 
   .chat__disclaimer {
@@ -735,7 +740,6 @@ p.chat__msg-body {
   /* ─── Floating card input bar ─── */
   .chat__add {
     left: var(--sidebar-width);
-    background: var(--color-desktop-bg);
     border-top: none;
     padding: 0 var(--space-6) var(--space-5);
   }
