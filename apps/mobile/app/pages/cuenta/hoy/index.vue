@@ -180,7 +180,7 @@
                   transform="rotate(-90 18 18)"
                 />
               </svg>
-              <span class="hoy__continue-day">{{ prog.currentDay }}</span>
+              <span class="hoy__continue-day">{{ Math.round(prog.progressPct * 100) }}%</span>
             </div>
             <div class="hoy__continue-info">
               <span class="hoy__continue-name">{{ prog.title }}</span>
@@ -715,14 +715,14 @@ const { data: activeProgramsData } = useAsyncData('hoy-programs', async () => {
     const totalDays = dayCountMap[pid] ?? 0
     const completedDays = checkinCountMap[pid] ?? 0
     const currentDay = Math.min(completedDays + 1, totalDays)
-    return { id: pid, title: prog?.title ?? '', currentDay, totalDays }
+    return { id: pid, title: prog?.title ?? '', currentDay, completedDays, totalDays }
   })
 }, { lazy: true, watch: [() => user.value?.id] })
 
 const activePrograms = computed(() =>
   (activeProgramsData.value ?? []).map(p => ({
     ...p,
-    progressPct: p.totalDays > 0 ? p.currentDay / p.totalDays : 0,
+    progressPct: p.totalDays > 0 ? p.completedDays / p.totalDays : 0,
   })),
 )
 
