@@ -50,14 +50,19 @@
             :error="errors.email"
           />
 
-          <UiInput
-            v-model="password"
-            label="Contraseña"
-            type="password"
-            placeholder="Tu contraseña"
-            autocomplete="current-password"
-            :error="errors.password"
-          />
+          <div class="login__password-group">
+            <UiInput
+              v-model="password"
+              label="Contraseña"
+              type="password"
+              placeholder="Tu contraseña"
+              autocomplete="current-password"
+              :error="errors.password"
+            />
+            <NuxtLink to="/restablecer-contrasena" class="login__forgot-link">
+              ¿Olvidaste tu contraseña?
+            </NuxtLink>
+          </div>
 
           <p v-if="loginError" class="login__error">{{ loginError }}</p>
 
@@ -285,6 +290,24 @@ async function handleLogin() {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.login__password-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.login__forgot-link {
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  align-self: flex-end;
+}
+@media (hover: hover) {
+  .login__forgot-link:hover {
+    text-decoration: underline;
+  }
 }
 
 .login__error {

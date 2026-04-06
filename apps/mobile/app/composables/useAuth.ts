@@ -116,6 +116,17 @@ export function useAuth() {
     }
   }
 
+  async function requestPasswordReset(email: string) {
+    const redirectTo = `${window.location.origin}/nueva-contrasena`
+    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo })
+    if (error) throw error
+  }
+
+  async function updatePassword(newPassword: string) {
+    const { error } = await client.auth.updateUser({ password: newPassword })
+    if (error) throw error
+  }
+
   async function logout() {
     // Clean up push tokens before signing out (native only)
     try {
@@ -148,6 +159,8 @@ export function useAuth() {
     hasEntitlement,
     login,
     register,
+    requestPasswordReset,
+    updatePassword,
     logout,
     setSegment,
     updateProfile,

@@ -65,15 +65,19 @@
           </Transition>
 
           <Transition name="fade">
-            <UiInput
-              v-if="showPassword"
-              v-model="loginPassword"
-              label="Contraseña"
-              type="password"
-              placeholder="Tu contraseña"
-              autocomplete="current-password"
-              :error="loginErrors.password"
-            />
+            <div v-if="showPassword" class="login__password-group">
+              <UiInput
+                v-model="loginPassword"
+                label="Contraseña"
+                type="password"
+                placeholder="Tu contraseña"
+                autocomplete="current-password"
+                :error="loginErrors.password"
+              />
+              <NuxtLink to="/restablecer-contrasena" class="login__forgot-link">
+                ¿Olvidaste tu contraseña?
+              </NuxtLink>
+            </div>
           </Transition>
 
           <UiButton
@@ -478,6 +482,24 @@ async function handleRegister() {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.login__password-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.login__forgot-link {
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  align-self: flex-end;
+}
+@media (hover: hover) {
+  .login__forgot-link:hover {
+    text-decoration: underline;
+  }
 }
 
 .login__sheet-help {
