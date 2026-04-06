@@ -231,6 +231,7 @@ function formatDate(iso: string) {
 
 .dashboard__action {
   display: flex;
+  gap: var(--space-4);
   flex-direction: column;
   align-items: center;
   text-align: center;

@@ -195,21 +195,39 @@ const inviteForm = reactive({
 const { rows: adminUsers, hasMore, loading, loadingMore, loadMore, refresh, status } = await useInfiniteTable(
   'admin-roles',
   async ({ from, to }) => {
-    let query = client.from('admin_users').select('*, profiles:user_id(display_name, avatar_url)')
+    const { data: admins } = await client
+      .from('admin_users')
+      .select('*')
+      .range(from, to)
+      .order('created_at', { ascending: false })
 
+    const userIds = (admins ?? []).map(a => a.user_id)
+    if (!userIds.length) return []
+
+    let profilesQuery = client.from('profiles').select('id, display_name, avatar_url').in('id', userIds)
     if (search.value) {
-      query = query.ilike('profiles.display_name', `%${search.value}%`)
+      profilesQuery = profilesQuery.ilike('display_name', `%${search.value}%`)
     }
+    const { data: profiles } = await profilesQuery
 
-    const { data } = await query.range(from, to).order('created_at', { ascending: false })
-    return (data ?? []).map(a => ({
-      ...a,
-      full_name: (a.profiles as any)?.display_name ?? 'Sin nombre',
-      avatar_url: (a.profiles as any)?.avatar_url ?? null,
-      email: '\u2014',
-      status: 'active',
-      last_login: null as string | null,
-    }))
+    const profileMap = new Map((profiles ?? []).map(p => [p.id, p]))
+
+    // When searching, only keep admins whose profile matched
+    const filtered = search.value
+      ? (admins ?? []).filter(a => profileMap.has(a.user_id))
+      : (admins ?? [])
+
+    return filtered.map(a => {
+      const profile = profileMap.get(a.user_id)
+      return {
+        ...a,
+        full_name: profile?.display_name ?? 'Sin nombre',
+        avatar_url: profile?.avatar_url ?? null,
+        email: '\u2014',
+        status: 'active',
+        last_login: null as string | null,
+      }
+    })
   },
   [search],
 )
