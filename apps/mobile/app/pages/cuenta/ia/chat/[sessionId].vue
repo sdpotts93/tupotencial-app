@@ -715,6 +715,7 @@ p.chat__msg-body {
     width: 100%;
     margin: 0 auto;
     background: var(--color-desktop-bg);
+    border-bottom: none;
   }
 
   .chat__disclaimer {
