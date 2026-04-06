@@ -248,9 +248,10 @@
     </template>
 
     <!-- Check-in slideover -->
+    <Transition name="hoy-sheet">
     <div
+      v-if="activeSheet === 'checkin'"
       class="hoy__overlay"
-      :class="{ 'hoy__overlay--active': activeSheet === 'checkin' }"
       @click.self="activeSheet = 'none'"
     >
       <div class="hoy__sheet">
@@ -306,11 +307,13 @@
         </Transition>
       </div>
     </div>
+    </Transition>
 
     <!-- Acción del día slideover -->
+    <Transition name="hoy-sheet">
     <div
+      v-if="activeSheet === 'accion'"
       class="hoy__overlay"
-      :class="{ 'hoy__overlay--active': activeSheet === 'accion' }"
       @click.self="closeAccionSheet"
     >
       <div class="hoy__sheet">
@@ -438,6 +441,7 @@
         </Transition>
       </div>
     </div>
+    </Transition>
 
     <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
   </div>
@@ -1683,17 +1687,10 @@ function closeAccionSheet() {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(var(--tint-rgb), 0);
+  background: rgba(var(--tint-rgb), 0.4);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  pointer-events: none;
-  transition: background var(--transition-base);
-}
-
-.hoy__overlay--active {
-  background: rgba(var(--tint-rgb), 0.4);
-  pointer-events: auto;
 }
 
 .hoy__sheet {
@@ -1704,12 +1701,28 @@ function closeAccionSheet() {
   max-height: 85dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  transform: translateY(100%);
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.hoy__overlay--active .hoy__sheet {
-  transform: translateY(0);
+/* ─── Slide-up transition ─── */
+.hoy-sheet-enter-active {
+  transition: background 0.3s ease;
+}
+.hoy-sheet-enter-active .hoy__sheet {
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.hoy-sheet-leave-active {
+  transition: background 0.2s ease;
+}
+.hoy-sheet-leave-active .hoy__sheet {
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.hoy-sheet-enter-from,
+.hoy-sheet-leave-to {
+  background: rgba(var(--tint-rgb), 0);
+}
+.hoy-sheet-enter-from .hoy__sheet,
+.hoy-sheet-leave-to .hoy__sheet {
+  transform: translateY(100%);
 }
 
 .hoy__sheet-header {
@@ -2238,14 +2251,18 @@ function closeAccionSheet() {
     max-width: 480px;
     width: 100%;
     max-height: 80dvh;
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform 0.25s ease, opacity 0.25s ease;
   }
 
-  .hoy__overlay--active .hoy__sheet {
-    transform: scale(1);
-    opacity: 1;
+  .hoy-sheet-enter-active .hoy__sheet {
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+  .hoy-sheet-leave-active .hoy__sheet {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .hoy-sheet-enter-from .hoy__sheet,
+  .hoy-sheet-leave-to .hoy__sheet {
+    transform: scale(0.95);
+    opacity: 0;
   }
 
   .hoy__sheet-handle {

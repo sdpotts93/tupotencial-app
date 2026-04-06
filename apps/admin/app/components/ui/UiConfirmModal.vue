@@ -1,45 +1,47 @@
 <template>
   <Teleport to="body">
-    <div
-      class="confirm-overlay"
-      :class="{ 'confirm-overlay--active': state.open }"
-      @click.self="handleCancel"
-    >
-      <div class="confirm-sheet">
-        <div class="confirm-sheet__header">
-          <div class="confirm-sheet__handle" />
-          <button class="confirm-sheet__close" aria-label="Cerrar" @click="handleCancel">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <Transition name="confirm">
+      <div
+        v-if="state.open"
+        class="confirm-overlay"
+        @click.self="handleCancel"
+      >
+        <div class="confirm-sheet">
+          <div class="confirm-sheet__header">
+            <div class="confirm-sheet__handle" />
+            <button class="confirm-sheet__close" aria-label="Cerrar" @click="handleCancel">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="confirm-sheet__icon" :class="`confirm-sheet__icon--${state.variant}`">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
-          </button>
-        </div>
+          </div>
 
-        <div class="confirm-sheet__icon" :class="`confirm-sheet__icon--${state.variant}`">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
-          </svg>
-        </div>
+          <h2 class="confirm-sheet__title">{{ state.title }}</h2>
+          <p class="confirm-sheet__message">{{ state.message }}</p>
 
-        <h2 class="confirm-sheet__title">{{ state.title }}</h2>
-        <p class="confirm-sheet__message">{{ state.message }}</p>
-
-        <div class="confirm-sheet__actions">
-          <button class="confirm-sheet__btn confirm-sheet__btn--cancel" @click="handleCancel">
-            {{ state.cancelLabel }}
-          </button>
-          <button
-            class="confirm-sheet__btn"
-            :class="`confirm-sheet__btn--${state.variant}`"
-            @click="handleConfirm"
-          >
-            {{ state.confirmLabel }}
-          </button>
+          <div class="confirm-sheet__actions">
+            <button class="confirm-sheet__btn confirm-sheet__btn--cancel" @click="handleCancel">
+              {{ state.cancelLabel }}
+            </button>
+            <button
+              class="confirm-sheet__btn"
+              :class="`confirm-sheet__btn--${state.variant}`"
+              @click="handleConfirm"
+            >
+              {{ state.confirmLabel }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -65,20 +67,13 @@ function handleCancel() {
   position: fixed;
   inset: 0;
   z-index: 300;
-  background: rgba(var(--tint-rgb), 0);
+  background: rgba(var(--tint-rgb), 0.4);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  pointer-events: none;
-  transition: background 0.3s ease;
 }
 
-.confirm-overlay--active {
-  background: rgba(var(--tint-rgb), 0.4);
-  pointer-events: auto;
-}
-
-/* ─── Sheet (mobile-first, like hoy__sheet) ─── */
+/* ─── Sheet (mobile-first) ─── */
 .confirm-sheet {
   background: var(--color-white, #fff);
   color: var(--color-text);
@@ -86,13 +81,29 @@ function handleCancel() {
   padding: var(--space-2) var(--space-6) var(--space-8);
   max-height: 85dvh;
   overflow-y: auto;
-  transform: translateY(100%);
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   text-align: center;
 }
 
-.confirm-overlay--active .confirm-sheet {
-  transform: translateY(0);
+/* ─── Mobile slide-up transition ─── */
+.confirm-enter-active {
+  transition: background 0.3s ease;
+}
+.confirm-enter-active .confirm-sheet {
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.confirm-leave-active {
+  transition: background 0.2s ease;
+}
+.confirm-leave-active .confirm-sheet {
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.confirm-enter-from,
+.confirm-leave-to {
+  background: rgba(var(--tint-rgb), 0);
+}
+.confirm-enter-from .confirm-sheet,
+.confirm-leave-to .confirm-sheet {
+  transform: translateY(100%);
 }
 
 /* ─── Header ─── */
@@ -226,14 +237,18 @@ function handleCancel() {
     max-width: 400px;
     width: 100%;
     padding: var(--space-2) var(--space-8) var(--space-8);
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
   }
 
-  .confirm-overlay--active .confirm-sheet {
-    transform: scale(1);
-    opacity: 1;
+  .confirm-enter-active .confirm-sheet {
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
+  }
+  .confirm-leave-active .confirm-sheet {
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease;
+  }
+  .confirm-enter-from .confirm-sheet,
+  .confirm-leave-to .confirm-sheet {
+    transform: scale(0.95);
+    opacity: 0;
   }
 
   .confirm-sheet__handle {

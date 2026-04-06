@@ -1,10 +1,11 @@
 <template>
-  <div
-    class="ent__overlay"
-    :class="{ 'ent__overlay--active': modelValue }"
-    @click.self="close"
-  >
-    <div class="ent__sheet">
+  <Transition name="ent">
+    <div
+      v-if="modelValue"
+      class="ent__overlay"
+      @click.self="close"
+    >
+      <div class="ent__sheet">
       <div class="ent__sheet-header">
         <div class="ent__sheet-handle" />
         <button class="ent__sheet-close" aria-label="Cerrar" @click="close">
@@ -46,6 +47,7 @@
       </div>
     </div>
   </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -88,17 +90,10 @@ function goToAddon() {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(var(--tint-rgb), 0);
+  background: rgba(var(--tint-rgb), 0.4);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  pointer-events: none;
-  transition: background var(--transition-base);
-}
-
-.ent__overlay--active {
-  background: rgba(var(--tint-rgb), 0.4);
-  pointer-events: auto;
 }
 
 /* ─── Sheet ─── */
@@ -110,12 +105,28 @@ function goToAddon() {
   max-height: 85dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  transform: translateY(100%);
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.ent__overlay--active .ent__sheet {
-  transform: translateY(0);
+/* ─── Slide-up transition ─── */
+.ent-enter-active {
+  transition: background 0.3s ease;
+}
+.ent-enter-active .ent__sheet {
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.ent-leave-active {
+  transition: background 0.2s ease;
+}
+.ent-leave-active .ent__sheet {
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.ent-enter-from,
+.ent-leave-to {
+  background: rgba(var(--tint-rgb), 0);
+}
+.ent-enter-from .ent__sheet,
+.ent-leave-to .ent__sheet {
+  transform: translateY(100%);
 }
 
 /* ─── Header ─── */
@@ -206,14 +217,18 @@ function goToAddon() {
     max-width: 480px;
     width: 100%;
     max-height: 80dvh;
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform 0.25s ease, opacity 0.25s ease;
   }
 
-  .ent__overlay--active .ent__sheet {
-    transform: scale(1);
-    opacity: 1;
+  .ent-enter-active .ent__sheet {
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+  .ent-leave-active .ent__sheet {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .ent-enter-from .ent__sheet,
+  .ent-leave-to .ent__sheet {
+    transform: scale(0.95);
+    opacity: 0;
   }
 
   .ent__sheet-handle {
