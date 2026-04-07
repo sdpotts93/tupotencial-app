@@ -41,11 +41,13 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "http://127.0.0.1:3000"
+site_url = "http://localhost:3000"
 additional_redirect_urls = [
-  "http://127.0.0.1:3000",
-  "http://localhost:3000",
-  "capacitor://localhost",
+  "http://localhost:3000/**",
+  "http://localhost:3000/nueva-contrasena",
+  "http://127.0.0.1:3000/**",
+  "http://127.0.0.1:3000/nueva-contrasena",
+  "capacitor://localhost/**",
 ]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true

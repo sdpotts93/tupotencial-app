@@ -680,6 +680,12 @@ async function checkAutoCompleteAccion() {
     localStorage.removeItem(`hoy-content-done-${today}`)
     await refreshAccion()
     await maybeUpdateStreak()
+    // Show share modal when both retos are now complete
+    if (allRetosComplete.value) {
+      await new Promise(r => setTimeout(r, 600))
+      accionSuccess.value = true
+      activeSheet.value = 'accion'
+    }
   }
 }
 
