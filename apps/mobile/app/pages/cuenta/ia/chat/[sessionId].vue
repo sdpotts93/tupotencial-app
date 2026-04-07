@@ -8,7 +8,7 @@
         </svg>
       </button>
       <div class="chat__header-center">
-        <Icon :name="toneIcon" size="14" />
+        <img :src="coachAvatar" :alt="toneName" class="chat__header-avatar" />
         <h1 class="chat__header-title">{{ toneName }}</h1>
       </div>
     </header>
@@ -41,13 +41,17 @@
 
       <!-- Messages (comment-style) -->
       <div ref="messagesRef" class="chat__messages">
+        <div v-if="hasOlderMessages && !isNewSession" ref="olderSentinelRef" class="chat__load-older">
+          <UiSkeleton v-if="loadingOlder" variant="rect" width="100%" height="40px" style="border-radius: var(--radius-xl);" />
+        </div>
         <div
           v-for="msg in messages"
           :key="msg.id"
           class="chat__msg"
         >
           <div :class="['chat__msg-avatar', msg.role === 'assistant' ? 'chat__msg-avatar--coach' : '']">
-            <Icon v-if="msg.role === 'assistant'" :name="toneIcon" size="14" />
+            <img v-if="msg.role === 'assistant'" :src="coachAvatar" :alt="toneName" class="chat__msg-avatar-img" />
+            <img v-else-if="user?.avatar_url" :src="user.avatar_url" alt="Tú" class="chat__msg-avatar-img" />
             <span v-else>Tú</span>
           </div>
           <div class="chat__msg-content">
@@ -66,7 +70,7 @@
         <!-- Typing indicator (only before first chunk arrives) -->
         <div v-if="generating && !streamingStarted" class="chat__msg">
           <div class="chat__msg-avatar chat__msg-avatar--coach">
-            <Icon :name="toneIcon" size="14" />
+            <img :src="coachAvatar" :alt="toneName" class="chat__msg-avatar-img" />
           </div>
           <div class="chat__msg-content">
             <div class="chat__msg-top">
@@ -142,7 +146,8 @@ const isNewSession = computed(() => currentSessionId.value === 'new')
 // Tone — resolve from query param (new session) or from DB (existing)
 const toneParam = (route.query.tone as string) ?? 'carlotta'
 const toneName = ref(toneParam === 'gabriel' ? 'Gabriel' : 'Carlotta')
-const toneIcon = computed(() => toneName.value === 'Carlotta' ? 'lucide:flower' : 'lucide:waves')
+const { avatarUrl } = useCharacterAvatars()
+const coachAvatar = computed(() => avatarUrl(toneName.value.toLowerCase()))
 
 const generating = ref(false)
 const streamingStarted = ref(false)
@@ -221,6 +226,9 @@ function flushTypewriter() {
   typewriterTarget.value = null
 }
 
+const olderSentinelRef = ref<HTMLElement | null>(null)
+let olderObserver: IntersectionObserver | null = null
+
 onMounted(() => {
   // Listen for scroll to detect user scrolling up during streaming
   const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
@@ -230,10 +238,21 @@ onMounted(() => {
     window.addEventListener('scroll', onMessagesScroll, { passive: true })
   }
   scrollToBottom()
+
+  // Observe sentinel for loading older messages
+  olderObserver = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadOlderMessages() },
+    { rootMargin: '100px' },
+  )
+  watchEffect(() => {
+    olderObserver?.disconnect()
+    if (olderSentinelRef.value) olderObserver?.observe(olderSentinelRef.value)
+  })
 })
 
 onBeforeUnmount(() => {
   if (typewriterTimer) clearTimeout(typewriterTimer)
+  olderObserver?.disconnect()
   const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
   if (scrollParent) scrollParent.removeEventListener('scroll', onMessagesScroll)
   window.removeEventListener('scroll', onMessagesScroll)
@@ -262,14 +281,68 @@ const { data: sessionData, status: chatStatus, refresh: refreshChat } = useAsync
   return data
 }, { lazy: true })
 
+const MSG_PAGE_SIZE = 10
+
 const { data: dbMessages } = useAsyncData(`ai-messages-${currentSessionId.value}`, async () => {
   if (isNewSession.value) return []
+  // Fetch last N messages (desc) then reverse for chronological display
   const { data } = await client.from('ai_messages')
     .select('id, role, content, created_at')
     .eq('session_id', currentSessionId.value)
-    .order('created_at', { ascending: true })
-  return data ?? []
+    .order('created_at', { ascending: false })
+    .range(0, MSG_PAGE_SIZE - 1)
+  return (data ?? []).reverse()
 }, { lazy: true })
+
+const hasOlderMessages = ref(true)
+const loadingOlder = ref(false)
+
+async function loadOlderMessages() {
+  if (loadingOlder.value || !hasOlderMessages.value) return
+  const oldest = messages.value.find(m => m.id !== 'welcome')
+  if (!oldest) return
+
+  // Find the created_at of the oldest loaded message from DB
+  const oldestDb = dbMessages.value?.find(m => m.id === oldest.id)
+  if (!oldestDb) return
+
+  loadingOlder.value = true
+
+  const { data } = await client.from('ai_messages')
+    .select('id, role, content, created_at')
+    .eq('session_id', currentSessionId.value)
+    .lt('created_at', oldestDb.created_at)
+    .order('created_at', { ascending: false })
+    .range(0, MSG_PAGE_SIZE - 1)
+
+  const batch = (data ?? []).reverse()
+  hasOlderMessages.value = batch.length >= MSG_PAGE_SIZE
+
+  if (batch.length) {
+    // Preserve scroll position when prepending
+    const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
+    const prevHeight = scrollParent?.scrollHeight ?? document.documentElement.scrollHeight
+    const prevScroll = scrollParent ? scrollParent.scrollTop : window.scrollY
+
+    const older: ChatMessage[] = batch
+      .filter(m => m.role === 'user' || m.role === 'assistant')
+      .map(m => ({ id: m.id, role: m.role as 'user' | 'assistant', content: m.content, time: formatTime(m.created_at) }))
+
+    messages.value.unshift(...older)
+
+    nextTick(() => {
+      const newHeight = scrollParent?.scrollHeight ?? document.documentElement.scrollHeight
+      const diff = newHeight - prevHeight
+      if (scrollParent) {
+        scrollParent.scrollTop = prevScroll + diff
+      } else {
+        window.scrollTo(0, prevScroll + diff)
+      }
+    })
+  }
+
+  loadingOlder.value = false
+}
 
 watch([sessionData, dbMessages], () => {
   if (sessionData.value) {
@@ -277,6 +350,7 @@ watch([sessionData, dbMessages], () => {
   }
 
   if (dbMessages.value?.length) {
+    hasOlderMessages.value = dbMessages.value.length >= MSG_PAGE_SIZE
     messages.value = dbMessages.value
       .filter(m => m.role === 'user' || m.role === 'assistant')
       .map(m => ({
@@ -285,6 +359,8 @@ watch([sessionData, dbMessages], () => {
         content: m.content,
         time: formatTime(m.created_at),
       }))
+  } else {
+    hasOlderMessages.value = false
   }
 
   // Show welcome message if no messages yet
@@ -454,6 +530,13 @@ async function retry() {
   gap: var(--space-2);
 }
 
+.chat__header-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .chat__header-title {
   font-family: var(--font-eyebrow);
   font-size: 12px;
@@ -519,6 +602,13 @@ async function retry() {
 .chat__msg-avatar--coach {
   background: rgba(var(--tint-rgb), 0.04);
   color: var(--color-sand);
+}
+
+.chat__msg-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .chat__msg-content { flex: 1; min-width: 0; }

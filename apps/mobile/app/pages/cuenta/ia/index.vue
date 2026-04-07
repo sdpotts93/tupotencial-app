@@ -100,6 +100,9 @@
             </svg>
           </NuxtLink>
         </div>
+        <div v-if="hasMore" ref="sentinelRef" class="ai-home__sentinel">
+          <UiSkeleton v-if="loadingMore" variant="rect" width="100%" height="52px" style="border-radius: var(--radius-xl);" />
+        </div>
       </section>
 
       <!-- Actions -->
@@ -128,11 +131,51 @@ const { avatarUrl } = useCharacterAvatars()
 const selectedTone = ref<'carlotta' | 'gabriel'>('carlotta')
 const limitReached = ref(false)
 
+const PAGE_SIZE = 10
+
 const { data: rawSessions, refresh: refreshSessions, status: iaStatus } = useAsyncData('mobile-ai-sessions', async () => {
   if (!user.value?.id) return []
-  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value.id).order('created_at', { ascending: false })
+  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value.id).order('created_at', { ascending: false }).order('created_at', { referencedTable: 'ai_messages', ascending: true }).limit(1, { foreignTable: 'ai_messages' }).range(0, PAGE_SIZE - 1)
   return data ?? []
 }, { lazy: true, watch: [() => user.value?.id] })
+
+const extraSessions = ref<any[]>([])
+const offset = ref(PAGE_SIZE)
+const hasMore = ref(true)
+const loadingMore = ref(false)
+
+async function loadMore() {
+  if (loadingMore.value || !hasMore.value || !user.value?.id) return
+  loadingMore.value = true
+  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value.id).order('created_at', { ascending: false }).order('created_at', { referencedTable: 'ai_messages', ascending: true }).limit(1, { foreignTable: 'ai_messages' }).range(offset.value, offset.value + PAGE_SIZE - 1)
+  const batch = data ?? []
+  extraSessions.value.push(...batch)
+  offset.value += batch.length
+  hasMore.value = batch.length >= PAGE_SIZE
+  loadingMore.value = false
+}
+
+// Reset pagination when initial data refreshes
+watch(rawSessions, () => {
+  extraSessions.value = []
+  offset.value = PAGE_SIZE
+  hasMore.value = true
+})
+
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadMore() },
+    { rootMargin: '200px' },
+  )
+  watchEffect(() => {
+    observer?.disconnect()
+    if (sentinelRef.value) observer?.observe(sentinelRef.value)
+  })
+})
+onUnmounted(() => { observer?.disconnect() })
 
 // Check daily quota
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
@@ -146,16 +189,18 @@ watchEffect(() => {
   limitReached.value = (quota.value?.messages_used ?? 0) >= 20
 })
 
+function mapSession(s: any) {
+  const firstMsg = Array.isArray(s.ai_messages) ? s.ai_messages[0]?.content ?? '' : ''
+  return {
+    id: s.id,
+    preview: firstMsg.slice(0, 80) || 'Nueva conversación',
+    tone: s.tone ?? 'carlotta',
+    date: new Date(s.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }),
+  }
+}
+
 const sessions = computed(() =>
-  (rawSessions.value ?? []).map(s => {
-    const firstMsg = Array.isArray(s.ai_messages) ? s.ai_messages[0]?.content ?? '' : ''
-    return {
-      id: s.id,
-      preview: firstMsg.slice(0, 80) || 'Nueva conversación',
-      tone: s.tone ?? 'carlotta',
-      date: new Date(s.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }),
-    }
-  }),
+  [...(rawSessions.value ?? []), ...extraSessions.value].map(mapSession),
 )
 
 function startChat() {

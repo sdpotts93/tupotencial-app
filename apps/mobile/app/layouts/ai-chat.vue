@@ -27,6 +27,9 @@
             <span class="ai-sidebar__session-date">{{ session.date }}</span>
           </span>
         </NuxtLink>
+        <div v-if="hasMore" ref="sentinelRef" style="min-height: 1px;">
+          <UiSkeleton v-if="loadingMore" variant="rect" width="100%" height="40px" style="border-radius: var(--radius-md); margin: var(--space-2) var(--space-3);" />
+        </div>
       </div>
 
       <div class="ai-sidebar__bottom">
@@ -78,21 +81,62 @@ function isActiveSession(id: string) {
   return route.params.sessionId === id
 }
 
+const PAGE_SIZE = 10
+
 const { data: rawSessions } = await useAsyncData('ai-chat-sessions', async () => {
-  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value?.id ?? '').order('created_at', { ascending: false })
+  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value?.id ?? '').order('created_at', { ascending: false }).order('created_at', { referencedTable: 'ai_messages', ascending: true }).limit(1, { foreignTable: 'ai_messages' }).range(0, PAGE_SIZE - 1)
   return data ?? []
 })
 
+const extraSessions = ref<any[]>([])
+const offset = ref(PAGE_SIZE)
+const hasMore = ref(true)
+const loadingMore = ref(false)
+
+async function loadMore() {
+  if (loadingMore.value || !hasMore.value) return
+  loadingMore.value = true
+  const { data } = await client.from('ai_sessions').select('*, ai_messages(content)').eq('user_id', user.value?.id ?? '').order('created_at', { ascending: false }).order('created_at', { referencedTable: 'ai_messages', ascending: true }).limit(1, { foreignTable: 'ai_messages' }).range(offset.value, offset.value + PAGE_SIZE - 1)
+  const batch = data ?? []
+  extraSessions.value.push(...batch)
+  offset.value += batch.length
+  hasMore.value = batch.length >= PAGE_SIZE
+  loadingMore.value = false
+}
+
+watch(rawSessions, () => {
+  extraSessions.value = []
+  offset.value = PAGE_SIZE
+  hasMore.value = true
+})
+
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadMore() },
+    { rootMargin: '200px' },
+  )
+  watchEffect(() => {
+    observer?.disconnect()
+    if (sentinelRef.value) observer?.observe(sentinelRef.value)
+  })
+})
+onUnmounted(() => { observer?.disconnect() })
+
+function mapSession(s: any) {
+  const firstMsg = Array.isArray(s.ai_messages) ? s.ai_messages[0]?.content ?? '' : ''
+  return {
+    id: s.id,
+    preview: firstMsg.slice(0, 80) || 'Nueva conversación',
+    tone: s.tone ?? 'carlotta',
+    date: new Date(s.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }),
+  }
+}
+
 const sessions = computed(() =>
-  (rawSessions.value ?? []).map(s => {
-    const firstMsg = Array.isArray(s.ai_messages) ? s.ai_messages[0]?.content ?? '' : ''
-    return {
-      id: s.id,
-      preview: firstMsg.slice(0, 80) || 'Nueva conversación',
-      tone: s.tone ?? 'carlotta',
-      date: new Date(s.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }),
-    }
-  }),
+  [...(rawSessions.value ?? []), ...extraSessions.value].map(mapSession),
 )
 </script>
 
@@ -130,18 +174,13 @@ const sessions = computed(() =>
     background: var(--color-desktop-card);
     border-right: 1px solid var(--color-desktop-border);
     z-index: var(--z-fixed);
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: none;
-  }
-
-  .ai-sidebar::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
   }
 
   .ai-sidebar__top {
     padding: var(--space-5) var(--space-5) var(--space-4);
     flex-shrink: 0;
+    border-bottom: 1px solid var(--color-desktop-border);
   }
 
   .ai-sidebar__logo {
@@ -183,7 +222,14 @@ const sessions = computed(() =>
   /* ─── Sessions list ─── */
   .ai-sidebar__sessions {
     flex: 1;
+    min-height: 0;
     padding: 0 var(--space-3);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .ai-sidebar__sessions::-webkit-scrollbar {
+    display: none;
   }
 
   .ai-sidebar__section-title {
