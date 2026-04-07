@@ -10,8 +10,8 @@
       <!-- Tabs -->
       <UiTabs v-model="activeTab" :tabs="tabs" />
 
-      <!-- Loading skeleton -->
-      <div v-if="retosStatus === 'pending'" class="retos__list">
+      <!-- Loading skeleton (initial load only) -->
+      <div v-if="retosStatus === 'pending' && allPrograms.length === 0" class="retos__list">
         <div v-for="i in 3" :key="i" style="display: flex; flex-direction: column;">
           <UiSkeleton variant="rect" width="100%" height="0" radius="var(--radius-2xl)" style="padding-bottom: 75%; margin-bottom: var(--space-4);" />
           <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: var(--space-2);" />
@@ -22,7 +22,7 @@
       </div>
 
       <!-- Error state -->
-      <div v-else-if="retosStatus === 'error'">
+      <div v-else-if="retosStatus === 'error' && allPrograms.length === 0">
         <div class="retos__error">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 20 20" class="retos__error-icon"><path fill="currentColor" d="m12.876 8.17l.952 1.089a5.5 5.5 0 0 0-.966.414l-.295-.337l-.585.936a5.5 5.5 0 0 0-1.76 2.676a.5.5 0 0 1-.684-.256L7.495 7.79L6.26 10.696A.5.5 0 0 1 5.8 11H2.5a.5.5 0 0 1 0-1h2.97l1.57-3.696a.5.5 0 0 1 .922.004l2.127 5.106l1.987-3.179a.5.5 0 0 1 .8-.064m3.848-3.858a4.42 4.42 0 0 1 .978 4.702A2 2 0 0 0 17.5 9h-.889a3.415 3.415 0 0 0-.598-3.984A3.306 3.306 0 0 0 11.3 5l-.951.963a.5.5 0 0 1-.711 0l-.96-.97a3.3 3.3 0 0 0-4.706-.016C2.899 6.061 2.713 7.711 3.42 9H2.5q-.09 0-.18.01a4.4 4.4 0 0 1 .941-4.736a4.3 4.3 0 0 1 6.127.016l.605.61l.596-.603l.109-.106a4.306 4.306 0 0 1 6.026.121M4.856 12l4.784 4.847a.5.5 0 0 0 .712-.703l-4.146-4.2Q6.011 12 5.8 12zM20 14.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0M15.5 12a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5m0 5.125a.625.625 0 1 0 0-1.25a.625.625 0 0 0 0 1.25"/></svg>
           <h2 class="retos__error-title">No pudimos cargar los programas</h2>
@@ -34,7 +34,7 @@
       <!-- Programs list -->
       <div v-else class="retos__list">
         <div
-          v-for="item in filteredPrograms"
+          v-for="item in allPrograms"
           :key="item.id"
           :class="['retos__card', { 'retos__card--locked': isProgramLocked(item) }]"
           @click="handleCardClick(item)"
@@ -63,12 +63,23 @@
         </div>
       </div>
 
+      <!-- Infinite scroll sentinel -->
+      <div v-if="hasMore && retosStatus !== 'pending'" ref="sentinelRef" class="retos__sentinel">
+        <div v-for="i in 2" :key="i" style="display: flex; flex-direction: column;">
+          <UiSkeleton variant="rect" width="100%" height="0" radius="var(--radius-2xl)" style="padding-bottom: 75%; margin-bottom: var(--space-4);" />
+          <UiSkeleton variant="text" width="30%" height="10px" style="margin-bottom: var(--space-2);" />
+          <UiSkeleton variant="text" width="70%" height="20px" />
+        </div>
+      </div>
+
       <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const PAGE_SIZE = 20
+
 const router = useRouter()
 const { user, isSubscriber } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
@@ -85,26 +96,34 @@ const tabs = [
   { value: 'bootcamp', label: 'Bootcamps' },
 ]
 
-const { data: programs, status: retosStatus, refresh: refreshRetos } = useAsyncData('mobile-programs', async () => {
-  const { data: progs } = await client.from('programs').select('*').eq('is_active', true).order('created_at')
-  // Get program total days (no user needed)
-  const { data: days } = await client.from('program_days').select('program_id, day_index')
+async function fetchPage(tab: string, from: number, to: number) {
+  // Fetch programs page with optional type filter
+  let query = client.from('programs').select('*').eq('is_active', true).order('created_at')
+  if (tab !== 'all') query = query.eq('type', tab)
+  const { data: progs } = await query.range(from, to)
+
+  const programIds = (progs ?? []).map(p => p.id)
+  if (programIds.length === 0) return { items: [], hasMore: false }
+
+  // Fetch days + user data only for this batch
+  const { data: days } = await client.from('program_days').select('program_id, day_index').in('program_id', programIds)
   const totalDaysMap = new Map<string, number>()
   for (const d of days ?? []) {
     totalDaysMap.set(d.program_id, Math.max(totalDaysMap.get(d.program_id) ?? 0, d.day_index))
   }
-  // User-specific data (enrollments, checkins)
+
   let enrollMap = new Map<string, any>()
   const checkinMap = new Map<string, number>()
   if (user.value?.id) {
-    const { data: enrollments } = await client.from('program_enrollments').select('program_id, status').eq('user_id', user.value.id)
+    const { data: enrollments } = await client.from('program_enrollments').select('program_id, status').eq('user_id', user.value.id).in('program_id', programIds)
     enrollMap = new Map((enrollments ?? []).map(e => [e.program_id, e]))
-    const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value.id)
+    const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value.id).in('program_id', programIds)
     for (const c of checkins ?? []) {
       checkinMap.set(c.program_id, Math.max(checkinMap.get(c.program_id) ?? 0, c.day_index))
     }
   }
-  return (progs ?? []).map(p => {
+
+  const items = (progs ?? []).map(p => {
     const enrollment = enrollMap.get(p.id)
     const currentDay = checkinMap.get(p.id) ?? 0
     const totalDays = totalDaysMap.get(p.id) ?? 0
@@ -118,12 +137,65 @@ const { data: programs, status: retosStatus, refresh: refreshRetos } = useAsyncD
       progress: enrollment ? `Día ${currentDay}/${totalDays}` : null,
     }
   })
+
+  return { items, hasMore: items.length >= PAGE_SIZE }
+}
+
+// ── Initial load ──
+const { data: programs, status: retosStatus, refresh: refreshRetos } = useAsyncData('mobile-programs', async () => {
+  return fetchPage(activeTab.value, 0, PAGE_SIZE - 1)
 }, { watch: [() => user.value?.id], lazy: true })
 
-const filteredPrograms = computed(() => {
-  if (activeTab.value === 'all') return programs.value ?? []
-  return (programs.value ?? []).filter(p => p.type === activeTab.value)
+// ── Infinite scroll state ──
+const extraItems = ref<any[]>([])
+const hasMore = ref(false)
+const loadingMore = ref(false)
+const offset = ref(0)
+
+// Sync hasMore from initial load
+watch(programs, (val) => {
+  if (val) {
+    hasMore.value = val.hasMore
+    offset.value = val.items.length
+  }
 })
+
+const allPrograms = computed(() => [...(programs.value?.items ?? []), ...extraItems.value])
+
+async function loadMore() {
+  if (loadingMore.value || !hasMore.value) return
+  loadingMore.value = true
+  const result = await fetchPage(activeTab.value, offset.value, offset.value + PAGE_SIZE - 1)
+  extraItems.value.push(...result.items)
+  offset.value += result.items.length
+  hasMore.value = result.hasMore
+  loadingMore.value = false
+}
+
+// ── Reset on tab change ──
+watch(activeTab, () => {
+  extraItems.value = []
+  hasMore.value = false
+  offset.value = 0
+  refreshRetos()
+})
+
+// ── IntersectionObserver for sentinel ──
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadMore() },
+    { rootMargin: '200px' },
+  )
+  watchEffect(() => {
+    observer?.disconnect()
+    if (sentinelRef.value) observer?.observe(sentinelRef.value)
+  })
+})
+
+onBeforeUnmount(() => observer?.disconnect())
 
 function isProgramLocked(item: { entitlement_key: string | null; free: boolean }) {
   if (isLocked(item.entitlement_key)) return true
@@ -131,7 +203,7 @@ function isProgramLocked(item: { entitlement_key: string | null; free: boolean }
   return false
 }
 
-function handleCardClick(item: NonNullable<typeof programs.value>[number]) {
+function handleCardClick(item: { id: string; entitlement_key: string | null; free: boolean }) {
   if (isLocked(item.entitlement_key)) {
     selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
     showPurchaseModal.value = true
@@ -290,6 +362,14 @@ function handleCardClick(item: NonNullable<typeof programs.value>[number]) {
 
 .retos__card--locked {
   cursor: pointer;
+}
+
+/* ─── Infinite scroll sentinel ─── */
+.retos__sentinel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
 }
 
 /* ─── Error state ─── */
