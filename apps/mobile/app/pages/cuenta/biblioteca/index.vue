@@ -196,48 +196,6 @@
           </section>
         </template>
 
-        <!-- ═══════════ TAB: Programas ═══════════ -->
-        <template v-if="activeTab === 'programas'">
-          <p class="library__tab-intro">Contenido incluido en cada programa, reto o bootcamp.</p>
-
-          <section v-for="prog in programsWithContent" :key="prog.id" class="library__section">
-            <div class="section__header">
-              <div class="library__prog-header">
-                <h2 class="library__section-title library__section-title--prog">{{ prog.title }}</h2>
-                <div class="library__prog-tags">
-                  <span class="library__prog-badge">{{ prog.typeLabel }}</span>
-                  <span :class="['library__prog-status', prog.enrolled ? 'library__prog-status--inscrito' : (prog.free ? 'library__prog-status--gratis' : 'library__prog-status--core')]">
-                    {{ prog.enrolled ? 'Inscrito' : (prog.free ? 'Gratis' : 'Core') }}
-                  </span>
-                </div>
-              </div>
-              <NuxtLink :to="`/cuenta/retos/${prog.id}`" class="library__see-all">Ver programa</NuxtLink>
-            </div>
-            <div class="library__scroll">
-              <div
-                v-for="item in prog.items"
-                :key="item.id"
-                :class="['library__scroll-card', { 'library__scroll-card--locked': isContentLocked(item) }]"
-                @click="handleContentClick(item)"
-              >
-                <div class="library__scroll-img-wrap">
-                  <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
-                  <EntitlementLockBadge :locked="isContentLocked(item)" />
-                </div>
-                <div class="library__scroll-info">
-                  <span class="library__scroll-title">{{ item.title }}</span>
-                  <div class="library__scroll-meta-row">
-                    <span v-if="item.duration" class="library__scroll-duration">
-                      <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
-                    </span>
-                    <span v-if="item.typeLabel" class="library__type-tag">{{ item.typeLabel }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </template>
-
         <!-- ═══════════ TAB: Objetivos ═══════════ -->
         <template v-if="activeTab === 'objetivos'">
           <p class="library__tab-intro">Encuentra contenido según lo que quieres trabajar.</p>
@@ -270,7 +228,7 @@
 
 <script setup lang="ts">
 const router = useRouter()
-const { user, isSubscriber } = useAuth()
+const { isSubscriber } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 const client = useSupabaseClient()
 
@@ -283,7 +241,6 @@ const selectedAddon = ref<{ id: string; title: string; description: string | nul
 
 const tabs = [
   { value: 'categorias', label: 'Categorías' },
-  { value: 'programas', label: 'Programas' },
   { value: 'objetivos', label: 'Objetivos' },
 ]
 
@@ -493,51 +450,6 @@ function handleEventClick(ev: { id: string; entitlement_key: string | null; plan
   router.push(`/cuenta/contenido/${ev.id}`)
 }
 
-// ─── Tab: Programas ───
-const { data: programsWithContent } = useAsyncData('mobile-library-programs', async () => {
-  if (!user.value?.id) return []
-  const { data: progs } = await client.from('programs').select('id, type, title, plan, is_active').eq('is_active', true).order('created_at')
-  const { data: enrollments } = await client.from('program_enrollments').select('program_id').eq('user_id', user.value.id)
-  const enrolledIds = new Set((enrollments ?? []).map(e => e.program_id))
-  // Get content items linked to programs via program_days -> program_day_items -> content_items
-  const { data: dayItems } = await client
-    .from('program_day_items')
-    .select('program_days(program_id), content_items(id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan)')
-    .eq('type', 'content')
-    .order('position')
-  // Group content items by program_id
-  const typeLabelsMap: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' }
-  const progContentMap = new Map<string, any[]>()
-  for (const di of dayItems ?? []) {
-    const programId = (di.program_days as any)?.program_id
-    const item = di.content_items as any
-    if (!programId || !item) continue
-    const arr = progContentMap.get(programId) ?? []
-    // Avoid duplicates
-    if (!arr.some(existing => existing.id === item.id)) {
-      arr.push({
-        id: item.id,
-        title: item.title,
-        typeLabel: typeLabelsMap[item.type] ?? item.type,
-        duration: formatDuration(item.duration_seconds),
-        thumbnail: item.thumbnail_url ?? undefined,
-        entitlement_key: item.entitlement_key,
-        plan: item.plan,
-      })
-    }
-    progContentMap.set(programId, arr)
-  }
-  return (progs ?? []).filter(p => (progContentMap.get(p.id) ?? []).length > 0).map(p => ({
-    id: p.id,
-    type: p.type,
-    typeLabel: p.type.toUpperCase(),
-    title: p.title,
-    enrolled: enrolledIds.has(p.id),
-    free: p.plan === 'free',
-    items: progContentMap.get(p.id) ?? [],
-  }))
-}, { lazy: true, watch: [() => user.value?.id] })
-
 // ─── Tab: Objetivos ───
 const { data: objectives } = useAsyncData('mobile-library-objectives', async () => {
   const { data: objs } = await client
@@ -709,12 +621,7 @@ const { data: objectives } = useAsyncData('mobile-library-objectives', async () 
   font-weight: var(--weight-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-muted);
   margin-bottom: var(--space-3);
-}
-
-.library__section-title--prog {
-  margin-bottom: 0;
 }
 
 /* ─── Featured ─── */
@@ -892,63 +799,6 @@ const { data: objectives } = useAsyncData('mobile-library-objectives', async () 
   background: #ebebeb;
   padding: 1px var(--space-2);
   border-radius: var(--radius-full);
-}
-
-/* ─── Programs tab: header + badge ─── */
-.library__prog-header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.library__prog-tags {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-block: var(--space-1);
-}
-
-.library__prog-badge {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-eyebrow);
-  font-size: var(--eyebrow-sm);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-  background: var(--color-surface-alt);
-  color: var(--color-text-secondary);
-}
-
-.library__prog-status {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-eyebrow);
-  font-size: var(--eyebrow-sm);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
-
-.library__prog-status--core {
-  background: var(--color-gold-bg);
-  color: var(--color-gold);
-}
-
-.library__prog-status--gratis {
-  background: var(--color-silver-bg);
-  color: var(--color-silver);
-}
-
-.library__prog-status--inscrito {
-  background: var(--color-complete-bg);
-  color: var(--color-complete);
 }
 
 /* ─── Objectives tab: grid ─── */

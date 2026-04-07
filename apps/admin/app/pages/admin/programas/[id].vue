@@ -54,6 +54,7 @@
                   </template>
                   <template v-else-if="uploadedFile">
                     <div class="upload__preview">
+                      <img :src="coverPreview" alt="" class="upload__img-preview" />
                       <p class="upload__filename">{{ uploadedFile.name }}</p>
                       <p class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
                       <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
@@ -61,8 +62,8 @@
                   </template>
                   <template v-else>
                     <div class="upload__preview">
+                      <img :src="form.existing_media" alt="" class="upload__img-preview" />
                       <p class="upload__filename">{{ form.existing_media }}</p>
-                      <p class="upload__filesize">Archivo existente</p>
                       <button class="upload__remove" @click.stop="removeExistingMedia">Eliminar</button>
                     </div>
                   </template>
@@ -210,6 +211,7 @@ const tabs = [
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
+const coverPreview = ref('')
 const isDragging = ref(false)
 
 // ── Fetch existing program ──
@@ -383,24 +385,27 @@ function triggerFileInput() {
   fileInput.value?.click()
 }
 
+function setCoverFile(file: File) {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
+  uploadedFile.value = file
+  coverPreview.value = URL.createObjectURL(file)
+  form.existing_media = ''
+}
+
 function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement
-  if (target.files?.[0]) {
-    uploadedFile.value = target.files[0]
-    form.existing_media = ''
-  }
+  if (target.files?.[0]) setCoverFile(target.files[0])
 }
 
 function handleDrop(e: DragEvent) {
   isDragging.value = false
-  if (e.dataTransfer?.files?.[0]) {
-    uploadedFile.value = e.dataTransfer.files[0]
-    form.existing_media = ''
-  }
+  if (e.dataTransfer?.files?.[0]) setCoverFile(e.dataTransfer.files[0])
 }
 
 function removeFile() {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
   uploadedFile.value = null
+  coverPreview.value = ''
   if (fileInput.value) fileInput.value.value = ''
 }
 
@@ -627,6 +632,14 @@ async function handleDelete() {
 .upload__filesize {
   font-size: var(--text-xs);
   color: var(--color-muted);
+}
+
+.upload__img-preview {
+  max-width: 100%;
+  max-height: 160px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  margin-bottom: var(--space-2);
 }
 
 .upload__remove {
