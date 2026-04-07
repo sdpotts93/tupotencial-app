@@ -98,7 +98,7 @@ const tabs = [
 
 async function fetchPage(tab: string, from: number, to: number) {
   // Fetch programs page with optional type filter
-  let query = client.from('programs').select('*').eq('is_active', true).order('created_at')
+  let query = client.from('programs').select('*').eq('is_active', true).eq('status', 'published').order('created_at')
   if (tab !== 'all') query = query.eq('type', tab)
   const { data: progs } = await query.range(from, to)
 

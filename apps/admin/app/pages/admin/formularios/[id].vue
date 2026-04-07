@@ -123,7 +123,7 @@ function dbFieldsToLocal(dbFields: unknown): FormField[] {
   if (!Array.isArray(dbFields)) return []
   return dbFields.map((f: any) => ({
     question: f.question ?? '',
-    type: f.type === 'select' ? 'select' : 'text',
+    type: ['text', 'textarea', 'select', 'rating'].includes(f.type) ? f.type : 'text',
     optionsText: Array.isArray(f.options) ? f.options.join(', ') : '',
     required: f.required ?? false,
   }))
@@ -155,13 +155,15 @@ const statusOptions = [
 
 const fieldTypeOptions = [
   { value: 'text', label: 'Pregunta abierta' },
+  { value: 'textarea', label: 'Texto largo' },
   { value: 'select', label: 'Selección' },
+  { value: 'rating', label: 'Calificación (estrellas)' },
 ]
 
 // ── Field management ──
 interface FormField {
   question: string
-  type: 'text' | 'select'
+  type: 'text' | 'textarea' | 'select' | 'rating'
   optionsText: string
   required: boolean
 }

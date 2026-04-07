@@ -441,6 +441,7 @@ const { data: objectives } = useAsyncData('mobile-library-objectives', async () 
   const { data: objs } = await client
     .from('content_objectives')
     .select('id, title, slug, content_item_objectives(count)')
+    .eq('is_active', true)
     .order('position')
   return (objs ?? []).map((o: any) => ({
     slug: o.slug,

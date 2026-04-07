@@ -117,13 +117,15 @@ const statusOptions = [
 
 const fieldTypeOptions = [
   { value: 'text', label: 'Pregunta abierta' },
+  { value: 'textarea', label: 'Texto largo' },
   { value: 'select', label: 'Selección' },
+  { value: 'rating', label: 'Calificación (estrellas)' },
 ]
 
 // ── Field management ──
 interface FormField {
   question: string
-  type: 'text' | 'select'
+  type: 'text' | 'textarea' | 'select' | 'rating'
   optionsText: string
   required: boolean
 }

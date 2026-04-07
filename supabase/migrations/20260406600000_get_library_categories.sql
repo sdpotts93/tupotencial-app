@@ -41,6 +41,6 @@ AS $$
     ORDER BY cic.position
     LIMIT items_per_category
   ) li
-  WHERE cc.status = 'active'
+  WHERE cc.is_active = true
   ORDER BY cc.sort_order, li.position;
 $$;

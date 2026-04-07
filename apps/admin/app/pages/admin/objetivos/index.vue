@@ -14,7 +14,7 @@
           <UiSkeleton variant="rect" width="200px" height="36px" radius="var(--radius-md)" />
         </div>
         <div style="display: flex; flex-direction: column;">
-          <div v-for="i in 6" :key="i" style="display: grid; grid-template-columns: 40px 1fr 1fr 1fr auto; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-light); align-items: center;">
+          <div v-for="i in 6" :key="i" style="display: grid; grid-template-columns: 40px 1fr 1fr auto 1fr auto; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-light); align-items: center;">
             <UiSkeleton variant="rect" width="16px" height="16px" radius="var(--radius-sm)" />
             <UiSkeleton variant="text" width="70%" height="14px" />
             <UiSkeleton variant="text" width="50%" height="14px" />
@@ -52,6 +52,7 @@
             <span class="obj-header__drag" />
             <span class="obj-header__name">Nombre</span>
             <span class="obj-header__slug">Slug</span>
+            <span class="obj-header__status">Estado</span>
             <span class="obj-header__count">Contenidos</span>
             <span class="obj-header__actions" />
           </div>
@@ -79,6 +80,9 @@
             </span>
             <span class="obj-row__name">{{ obj.name }}</span>
             <span class="obj-row__slug">{{ obj.slug }}</span>
+            <span class="obj-row__status">
+              <UiTag :variant="obj.is_active ? 'success' : 'default'">{{ obj.is_active ? 'Activo' : 'Inactivo' }}</UiTag>
+            </span>
             <span class="obj-row__count">{{ obj.content_count }} elementos</span>
             <span class="obj-row__actions" @click.stop>
               <UiButton variant="soft" size="sm" @click="editObjective(obj)">
@@ -104,6 +108,11 @@
           v-model="objectiveForm.name"
           label="Nombre"
           placeholder="Nombre del objetivo"
+        />
+        <UiSelect
+          v-model="objectiveForm.is_active"
+          label="Estado"
+          :options="[{ value: 'true', label: 'Activo' }, { value: 'false', label: 'Inactivo' }]"
         />
       </div>
       <p v-if="formError" class="form-error">{{ formError }}</p>
@@ -132,6 +141,7 @@ const formError = ref('')
 
 const objectiveForm = reactive({
   name: '',
+  is_active: 'true',
 })
 
 function slugify(text: string) {
@@ -216,6 +226,7 @@ async function onDragEnd() {
 function editObjective(row: Record<string, any>) {
   editingObjective.value = row
   objectiveForm.name = row.name
+  objectiveForm.is_active = String(row.is_active)
   showCreateModal.value = true
 }
 
@@ -224,17 +235,18 @@ async function saveObjective() {
   formError.value = ''
   try {
     const slug = slugify(objectiveForm.name)
+    const isActive = objectiveForm.is_active === 'true'
 
     if (editingObjective.value) {
       await client
         .from('content_objectives')
-        .update({ title: objectiveForm.name, slug })
+        .update({ title: objectiveForm.name, slug, is_active: isActive })
         .eq('id', editingObjective.value.id)
     } else {
       const maxPosition = (objectives.value ?? []).reduce((max, o) => Math.max(max, o.position ?? 0), 0)
       await client
         .from('content_objectives')
-        .insert({ title: objectiveForm.name, slug, position: maxPosition + 1 })
+        .insert({ title: objectiveForm.name, slug, is_active: isActive, position: maxPosition + 1 })
     }
 
     await refresh()
@@ -242,6 +254,7 @@ async function saveObjective() {
     showCreateModal.value = false
     editingObjective.value = null
     objectiveForm.name = ''
+    objectiveForm.is_active = 'true'
   } catch {
     formError.value = 'Error al guardar. Intenta de nuevo.'
     toast.show('Error al guardar', 'error')
@@ -289,7 +302,7 @@ async function handleDelete(row: Record<string, any>) {
 /* ─── List (shared grid) ─── */
 .obj-list {
   display: grid;
-  grid-template-columns: 40px 1fr 1fr 1fr auto;
+  grid-template-columns: 40px 1fr 1fr auto 1fr auto;
   overflow: auto;
   flex: 1 1 auto;
   min-height: 0;
