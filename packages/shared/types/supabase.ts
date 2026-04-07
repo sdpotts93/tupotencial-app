@@ -435,6 +435,42 @@ export type Database = {
           },
         ]
       }
+      content_item_objectives: {
+        Row: {
+          content_item_id: string
+          id: string
+          objective_id: string
+          position: number
+        }
+        Insert: {
+          content_item_id: string
+          id?: string
+          objective_id: string
+          position?: number
+        }
+        Update: {
+          content_item_id?: string
+          id?: string
+          objective_id?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_item_objectives_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "content_objectives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_item_objectives_content_item_id_fkey"
+            columns: ["content_item_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_items: {
         Row: {
           available_from: string | null

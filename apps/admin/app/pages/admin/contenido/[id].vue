@@ -190,12 +190,31 @@
               </div>
             </div>
 
-            <UiSelect
-              v-model="form.objective_id"
-              label="Objetivo"
-              :options="objectiveOptions"
-              placeholder="Selecciona el objetivo"
-            />
+            <div class="multi-select">
+              <label class="multi-select__label">Objetivos</label>
+              <div ref="objContainerRef" class="multi-select__wrapper">
+                <button type="button" class="multi-select__trigger" :class="{ 'multi-select__trigger--open': objDropdownOpen }" @click="objDropdownOpen = !objDropdownOpen">
+                  <span :class="['multi-select__value', { 'multi-select__value--placeholder': !form.objective_ids.length }]">
+                    {{ form.objective_ids.length ? `${form.objective_ids.length} seleccionado${form.objective_ids.length > 1 ? 's' : ''}` : 'Selecciona objetivos' }}
+                  </span>
+                  <svg class="multi-select__chevron" :class="{ 'multi-select__chevron--open': objDropdownOpen }" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <div v-if="objDropdownOpen" class="multi-select__dropdown">
+                  <label v-for="opt in objectiveOptions" :key="opt.value" class="multi-select__option">
+                    <input type="checkbox" :value="opt.value" v-model="form.objective_ids" class="multi-select__checkbox" />
+                    <span>{{ opt.label }}</span>
+                  </label>
+                </div>
+              </div>
+              <div v-if="form.objective_ids.length" class="multi-select__pills">
+                <span v-for="oid in form.objective_ids" :key="oid" class="multi-select__pill">
+                  {{ objectiveOptions.find(o => o.value === oid)?.label }}
+                  <button type="button" class="multi-select__pill-remove" @click="form.objective_ids = form.objective_ids.filter(id => id !== oid)">&times;</button>
+                </span>
+              </div>
+            </div>
 
             <UiInput
               v-model="form.duration"
@@ -276,6 +295,8 @@ const saving = ref(false)
 const deleting = ref(false)
 const catDropdownOpen = ref(false)
 const catContainerRef = ref<HTMLElement>()
+const objDropdownOpen = ref(false)
+const objContainerRef = ref<HTMLElement>()
 const formError = ref('')
 const errors = reactive({ title: '', introduction: '', body: '', vimeo_url: '', audio_file: '', scheduled_at: '' })
 
@@ -290,6 +311,12 @@ const { data: itemCategories } = await useAsyncData(`content-categories-${id}`, 
   if (isNew) return []
   const { data } = await client.from('content_item_categories').select('category_id').eq('content_item_id', id)
   return (data ?? []).map(d => d.category_id)
+})
+
+const { data: itemObjectives } = await useAsyncData(`content-objectives-${id}`, async () => {
+  if (isNew) return []
+  const { data } = await client.from('content_item_objectives').select('objective_id').eq('content_item_id', id)
+  return (data ?? []).map(d => d.objective_id)
 })
 
 // ── Fetch categories & objectives for dropdowns ──
@@ -311,7 +338,7 @@ const form = reactive({
     : (contentItem.value?.description ?? ''),
   content_type: contentItem.value?.type ?? 'video',
   category_ids: itemCategories.value ?? [] as string[],
-  objective_id: contentItem.value?.objective_id ?? '',
+  objective_ids: itemObjectives.value ?? [] as string[],
   duration: contentItem.value?.duration_seconds ? `${contentItem.value.duration_seconds}` : '',
   segment: contentItem.value?.plan ?? 'free',
   entitlement_key: contentItem.value?.entitlement_key ?? '',
@@ -334,11 +361,14 @@ const segmentOptions = [
   { value: 'core', label: 'Core' },
 ]
 
-// Close category dropdown on click outside
+// Close dropdowns on click outside
 if (import.meta.client) {
   document.addEventListener('mousedown', (e: MouseEvent) => {
     if (catDropdownOpen.value && catContainerRef.value && !catContainerRef.value.contains(e.target as Node)) {
       catDropdownOpen.value = false
+    }
+    if (objDropdownOpen.value && objContainerRef.value && !objContainerRef.value.contains(e.target as Node)) {
+      objDropdownOpen.value = false
     }
   })
 }
@@ -540,7 +570,7 @@ async function handleSave() {
       status: form.status,
       published_at: form.status === 'published' ? new Date().toISOString() : null,
       entitlement_key: form.entitlement_key || null,
-      objective_id: form.objective_id || null,
+      objective_id: form.objective_ids.length ? form.objective_ids[0] : null,
       available_from: form.scheduled_at ? form.scheduled_at.toISOString() : null,
       available_to: form.unpublished_at ? form.unpublished_at.toISOString() : null,
       duration_seconds: parseDuration(form.duration),
@@ -549,10 +579,17 @@ async function handleSave() {
 
     if (isNew) {
       const { data: inserted } = await client.from('content_items').insert({ ...payload, type: form.content_type }).select('id').single()
-      if (inserted && form.category_ids.length) {
-        await client.from('content_item_categories').insert(
-          form.category_ids.map(cid => ({ content_item_id: inserted.id, category_id: cid })),
-        )
+      if (inserted) {
+        if (form.category_ids.length) {
+          await client.from('content_item_categories').insert(
+            form.category_ids.map(cid => ({ content_item_id: inserted.id, category_id: cid })),
+          )
+        }
+        if (form.objective_ids.length) {
+          await client.from('content_item_objectives').insert(
+            form.objective_ids.map(oid => ({ content_item_id: inserted.id, objective_id: oid })),
+          )
+        }
       }
     } else {
       await client.from('content_items').update(payload).eq('id', id)
@@ -561,6 +598,13 @@ async function handleSave() {
       if (form.category_ids.length) {
         await client.from('content_item_categories').insert(
           form.category_ids.map(cid => ({ content_item_id: id, category_id: cid })),
+        )
+      }
+      // Update junction objectives
+      await client.from('content_item_objectives').delete().eq('content_item_id', id)
+      if (form.objective_ids.length) {
+        await client.from('content_item_objectives').insert(
+          form.objective_ids.map(oid => ({ content_item_id: id, objective_id: oid })),
         )
       }
     }
@@ -584,6 +628,7 @@ async function handleDelete() {
     deleting.value = true
     try {
       await client.from('content_item_categories').delete().eq('content_item_id', id)
+      await client.from('content_item_objectives').delete().eq('content_item_id', id)
       await client.from('content_items').delete().eq('id', id)
       navigateTo('/admin/contenido')
     } catch {

@@ -62,6 +62,11 @@
             </div>
           </div>
         </div>
+
+        <!-- Infinite scroll sentinel -->
+        <div v-if="hasMore" ref="sentinelRef" class="cat__sentinel">
+          <UiSkeleton v-for="i in 2" :key="i" variant="rect" width="100%" height="72px" radius="var(--radius-lg)" />
+        </div>
       </template>
 
       <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
@@ -70,6 +75,8 @@
 </template>
 
 <script setup lang="ts">
+const PAGE_SIZE = 50
+
 const route = useRoute()
 const router = useRouter()
 const slug = route.params.slug as string
@@ -86,49 +93,90 @@ function formatDuration(seconds: number | null) {
   return `${m} min`
 }
 
+const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' }
+
+function mapItem(ic: any) {
+  const item = ic.content_items as any
+  if (!item) return null
+  return {
+    id: item.id,
+    title: item.title,
+    duration: formatDuration(item.duration_seconds),
+    typeLabel: typeLabels[item.type] ?? item.type,
+    thumbnail: item.thumbnail_url ?? undefined,
+    entitlement_key: item.entitlement_key,
+    plan: item.plan,
+  }
+}
+
+// ── Initial load: category + first page ──
 const { data: categoryData, status: catStatus, refresh: refreshCategory } = await useAsyncData(`category-${slug}`, async () => {
-  // Fetch the category by slug
   const { data: cat } = await client
     .from('content_categories')
     .select('id, title, slug')
     .eq('slug', slug)
     .single()
-  if (!cat) return { title: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), items: [] }
+  if (!cat) return { title: slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), categoryId: null, items: [], hasMore: false }
 
-  // Fetch content items linked to this category
   const { data: itemCats } = await client
     .from('content_item_categories')
     .select('position, content_items(id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan)')
     .eq('category_id', cat.id)
     .order('position')
+    .range(0, PAGE_SIZE - 1)
 
-  const items = (itemCats ?? [])
-    .map(ic => {
-      const item = ic.content_items as any
-      if (!item) return null
-      const durationLabel = formatDuration(item.duration_seconds)
-      const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' }
-      const typeLabel = typeLabels[item.type] ?? item.type
-      return {
-        id: item.id,
-        title: item.title,
-        duration: durationLabel,
-        typeLabel,
-        thumbnail: item.thumbnail_url ?? undefined,
-        entitlement_key: item.entitlement_key,
-        plan: item.plan,
-      }
-    })
-    .filter((x): x is NonNullable<typeof x> => x != null)
+  const items = (itemCats ?? []).map(mapItem).filter((x): x is NonNullable<typeof x> => x != null)
 
-  return { title: cat.title, items }
+  return { title: cat.title, categoryId: cat.id, items, hasMore: items.length >= PAGE_SIZE }
 })
 
 const category = computed(() => ({
   title: categoryData.value?.title ?? slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
 }))
 
-const items = computed(() => categoryData.value?.items ?? [])
+// ── Infinite scroll state ──
+const extraItems = ref<NonNullable<ReturnType<typeof mapItem>>[]>([])
+const hasMore = ref(categoryData.value?.hasMore ?? false)
+const loadingMore = ref(false)
+const offset = ref(categoryData.value?.items.length ?? 0)
+
+const items = computed(() => [...(categoryData.value?.items ?? []), ...extraItems.value])
+
+async function loadMore() {
+  const categoryId = categoryData.value?.categoryId
+  if (!categoryId || loadingMore.value || !hasMore.value) return
+  loadingMore.value = true
+
+  const { data: itemCats } = await client
+    .from('content_item_categories')
+    .select('position, content_items(id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan)')
+    .eq('category_id', categoryId)
+    .order('position')
+    .range(offset.value, offset.value + PAGE_SIZE - 1)
+
+  const batch = (itemCats ?? []).map(mapItem).filter((x): x is NonNullable<typeof x> => x != null)
+  extraItems.value.push(...batch)
+  offset.value += batch.length
+  hasMore.value = batch.length >= PAGE_SIZE
+  loadingMore.value = false
+}
+
+// ── IntersectionObserver for sentinel ──
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadMore() },
+    { rootMargin: '200px' },
+  )
+  watchEffect(() => {
+    observer?.disconnect()
+    if (sentinelRef.value) observer?.observe(sentinelRef.value)
+  })
+})
+
+onBeforeUnmount(() => observer?.disconnect())
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) return true
@@ -265,6 +313,14 @@ function handleItemClick(item: { id: string; entitlement_key: string | null; pla
   font-weight: var(--weight-bold);
   letter-spacing: 0.04em;
   color: var(--color-sand);
+}
+
+/* ─── Infinite scroll sentinel ─── */
+.cat__sentinel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
 }
 
 /* ─── Error state ─── */

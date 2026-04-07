@@ -95,6 +95,7 @@ const pageTitle = computed(() => {
   if (path === '/admin' || path === '/admin/') return 'Inicio'
   if (path.startsWith('/admin/contenido')) return 'Biblioteca'
   if (path.startsWith('/admin/categorias')) return 'Categorías'
+  if (path.startsWith('/admin/objetivos')) return 'Objetivos'
   if (path.startsWith('/admin/programas')) return 'Programas'
   if (path.startsWith('/admin/formularios')) return 'Formularios'
   if (path.startsWith('/admin/imagenes')) return 'Imágenes'
@@ -155,6 +156,11 @@ const sections: NavSection[] = [
         label: 'Categorías',
         to: '/admin/categorias',
         icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="6.5" x2="21" y2="6.5"/><line x1="14" y1="17.5" x2="21" y2="17.5"/></svg>',
+      },
+      {
+        label: 'Objetivos',
+        to: '/admin/objetivos',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
       },
       {
         label: 'Formularios',

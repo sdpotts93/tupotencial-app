@@ -132,6 +132,13 @@ export interface ContentItemCategory {
   position: number;
 }
 
+export interface ContentItemObjective {
+  id: string;
+  content_item_id: string;
+  objective_id: string;
+  position: number;
+}
+
 export interface Form {
   id: string;
   title: string;

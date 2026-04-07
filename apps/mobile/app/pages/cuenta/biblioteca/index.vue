@@ -335,39 +335,25 @@ const filteredResults = computed(() => searchResults.value)
 
 // ─── Tab: Categorías ───
 const { data: categoriesData, status: biblioStatus, refresh: refreshBiblio } = useAsyncData('mobile-library-categories', async () => {
-  // Fetch categories
-  const { data: cats } = await client
-    .from('content_categories')
-    .select('id, title, slug')
-    .eq('status', 'active')
-    .order('sort_order')
-  // Fetch content items with their category links
-  const { data: itemCats } = await client
-    .from('content_item_categories')
-    .select('category_id, position, content_items(id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key, status)')
-    .order('position', { ascending: false })
-  // Group items by category
-  const catItemsMap = new Map<string, any[]>()
-  for (const ic of itemCats ?? []) {
-    const item = ic.content_items as any
-    if (!item || item.status !== 'published') continue
-    const arr = catItemsMap.get(ic.category_id) ?? []
-    arr.push({
-      id: item.id,
-      title: item.title,
-      typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[item.type] ?? item.type,
-      duration: formatDuration(item.duration_seconds),
-      thumbnail: item.thumbnail_url ?? undefined,
-      entitlement_key: item.entitlement_key,
-      plan: item.plan,
+  const { data: rows, error } = await client.rpc('get_library_categories' as any, { items_per_category: 10 })
+  if (error) throw error
+
+  const catMap = new Map<string, { title: string; slug: string; items: any[] }>()
+  for (const r of rows ?? []) {
+    if (!catMap.has(r.category_id)) {
+      catMap.set(r.category_id, { title: r.category_title, slug: r.category_slug, items: [] })
+    }
+    catMap.get(r.category_id)!.items.push({
+      id: r.item_id,
+      title: r.item_title,
+      typeLabel: ({ video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' } as Record<string, string>)[r.item_type] ?? r.item_type,
+      duration: formatDuration(r.duration_seconds),
+      thumbnail: r.thumbnail_url ?? undefined,
+      entitlement_key: r.entitlement_key,
+      plan: r.item_plan,
     })
-    catItemsMap.set(ic.category_id, arr)
   }
-  return (cats ?? []).filter(cat => (catItemsMap.get(cat.id) ?? []).length > 0).map(cat => ({
-    title: cat.title,
-    slug: cat.slug,
-    items: catItemsMap.get(cat.id) ?? [],
-  }))
+  return Array.from(catMap.values())
 }, { lazy: true })
 const categories = computed(() => categoriesData.value ?? [])
 
@@ -392,7 +378,7 @@ const featuredItem = computed(() => {
 const recordedEvents = computed(() => {
   const cat = categories.value.find(c => c.slug === 'eventos-grabados')
   if (!cat) return []
-  return cat.items.slice(0, 5).map((item: any) => ({
+  return cat.items.map((item: any) => ({
     id: item.id,
     title: item.title,
     duration: item.duration,
@@ -454,15 +440,14 @@ function handleEventClick(ev: { id: string; entitlement_key: string | null; plan
 const { data: objectives } = useAsyncData('mobile-library-objectives', async () => {
   const { data: objs } = await client
     .from('content_objectives')
-    .select('id, title, slug, content_items(count)')
-    .eq('content_items.status', 'published')
+    .select('id, title, slug, content_item_objectives(count)')
     .order('position')
   return (objs ?? []).map((o: any) => ({
     slug: o.slug,
     title: o.title,
     description: '',
     icon: 'lucide:target',
-    count: o.content_items?.[0]?.count ?? 0,
+    count: o.content_item_objectives?.[0]?.count ?? 0,
   }))
 }, { lazy: true })
 </script>

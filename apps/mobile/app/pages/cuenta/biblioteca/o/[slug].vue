@@ -65,6 +65,11 @@
             </div>
           </div>
         </div>
+
+        <!-- Infinite scroll sentinel -->
+        <div v-if="hasMore" ref="sentinelRef" class="obj__sentinel">
+          <UiSkeleton v-for="i in 2" :key="i" variant="rect" width="100%" height="72px" radius="var(--radius-lg)" />
+        </div>
       </template>
 
       <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
@@ -73,6 +78,8 @@
 </template>
 
 <script setup lang="ts">
+const PAGE_SIZE = 50
+
 const route = useRoute()
 const router = useRouter()
 const client = useSupabaseClient()
@@ -83,7 +90,6 @@ const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 const showPurchaseModal = ref(false)
 const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 
-// ── Fetch objective + content in one call (avoids SSR auth race) ──
 const typeLabels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo', link: 'Enlace' }
 
 function formatDuration(seconds: number | null): string {
@@ -92,33 +98,39 @@ function formatDuration(seconds: number | null): string {
   return `${mins} min`
 }
 
+function mapItem(r: any) {
+  const item = r.content_items as any
+  if (!item || item.status !== 'published') return null
+  return {
+    id: item.id,
+    title: item.title,
+    duration: formatDuration(item.duration_seconds),
+    typeLabel: typeLabels[item.type] ?? item.type,
+    thumbnail: item.thumbnail_url ?? undefined,
+    entitlement_key: item.entitlement_key,
+    plan: item.plan,
+  }
+}
+
+// ── Initial load: objective + first page ──
 const { data: pageData, status: objStatus, refresh: refreshObjective } = await useAsyncData(`objective-page-${slug}`, async () => {
   const { data: obj } = await client
     .from('content_objectives')
     .select('id, title, slug')
     .eq('slug', slug)
     .single()
-  if (!obj) return { objective: null, items: [] }
+  if (!obj) return { objective: null, objectiveId: null, items: [], hasMore: false }
 
-  const { data: contentItems } = await client
-    .from('content_items')
-    .select('id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan')
+  const { data: junctionRows } = await client
+    .from('content_item_objectives')
+    .select('position, content_items(id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan, status)')
     .eq('objective_id', obj.id)
-    .eq('status', 'published')
-    .order('created_at', { ascending: false })
+    .order('position')
+    .range(0, PAGE_SIZE - 1)
 
-  return {
-    objective: obj,
-    items: (contentItems ?? []).map(item => ({
-      id: item.id,
-      title: item.title,
-      duration: formatDuration(item.duration_seconds),
-      typeLabel: typeLabels[item.type] ?? item.type,
-      thumbnail: item.thumbnail_url ?? undefined,
-      entitlement_key: item.entitlement_key,
-      plan: item.plan,
-    })),
-  }
+  const items = (junctionRows ?? []).map(mapItem).filter((x): x is NonNullable<typeof x> => x != null)
+
+  return { objective: obj, objectiveId: obj.id, items, hasMore: (junctionRows ?? []).length >= PAGE_SIZE }
 })
 
 const objective = computed(() => {
@@ -129,7 +141,49 @@ const objective = computed(() => {
   }
 })
 
-const items = computed(() => pageData.value?.items ?? [])
+// ── Infinite scroll state ──
+const extraItems = ref<NonNullable<ReturnType<typeof mapItem>>[]>([])
+const hasMore = ref(pageData.value?.hasMore ?? false)
+const loadingMore = ref(false)
+const offset = ref(PAGE_SIZE)
+
+const items = computed(() => [...(pageData.value?.items ?? []), ...extraItems.value])
+
+async function loadMore() {
+  const objectiveId = pageData.value?.objectiveId
+  if (!objectiveId || loadingMore.value || !hasMore.value) return
+  loadingMore.value = true
+
+  const { data: junctionRows } = await client
+    .from('content_item_objectives')
+    .select('position, content_items(id, title, type, duration_seconds, thumbnail_url, entitlement_key, plan, status)')
+    .eq('objective_id', objectiveId)
+    .order('position')
+    .range(offset.value, offset.value + PAGE_SIZE - 1)
+
+  const batch = (junctionRows ?? []).map(mapItem).filter((x): x is NonNullable<typeof x> => x != null)
+  extraItems.value.push(...batch)
+  offset.value += (junctionRows ?? []).length
+  hasMore.value = (junctionRows ?? []).length >= PAGE_SIZE
+  loadingMore.value = false
+}
+
+// ── IntersectionObserver for sentinel ──
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadMore() },
+    { rootMargin: '200px' },
+  )
+  watchEffect(() => {
+    observer?.disconnect()
+    if (sentinelRef.value) observer?.observe(sentinelRef.value)
+  })
+})
+
+onBeforeUnmount(() => observer?.disconnect())
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) return true
@@ -274,6 +328,14 @@ function handleItemClick(item: { id: string; entitlement_key: string | null; pla
   font-weight: var(--weight-bold);
   letter-spacing: 0.04em;
   color: var(--color-sand);
+}
+
+/* ─── Infinite scroll sentinel ─── */
+.obj__sentinel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
 }
 
 /* ─── Error state ─── */

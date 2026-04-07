@@ -71,6 +71,11 @@
           :options="categoryFilterOptions"
           placeholder="Categoría"
         />
+        <UiSelect
+          v-model="filterObjective"
+          :options="objectiveFilterOptions"
+          placeholder="Objetivo"
+        />
       </template>
 
       <template #cell-status="{ value }">
@@ -89,6 +94,14 @@
         <span v-if="value.length" class="category-cell">
           <span class="category-cell__name">{{ categoryName(value[0]) }}</span>
           <span v-if="value.length > 1" class="category-cell__more" :data-tooltip="value.slice(1).map(categoryName).join(', ')" @click.stop>+{{ value.length - 1 }}</span>
+        </span>
+        <span v-else style="color: var(--color-muted);">—</span>
+      </template>
+
+      <template #cell-objective="{ value }">
+        <span v-if="value.length" class="category-cell">
+          <span class="category-cell__name">{{ objectiveName(value[0]) }}</span>
+          <span v-if="value.length > 1" class="category-cell__more" :data-tooltip="value.slice(1).map(objectiveName).join(', ')" @click.stop>+{{ value.length - 1 }}</span>
         </span>
         <span v-else style="color: var(--color-muted);">—</span>
       </template>
@@ -136,6 +149,7 @@ const filterStatus = ref('')
 const filterType = ref('')
 const filterSegment = ref('')
 const filterCategory = ref('')
+const filterObjective = ref('')
 
 const statusOptions = [
   { value: '', label: 'Todos los estados' },
@@ -169,6 +183,15 @@ const categoryFilterOptions = computed(() => [
   ...(categories.value ?? []).map(c => ({ value: c.id, label: c.title })),
 ])
 
+const { data: objectivesData } = await useAsyncData('admin-content-objectives', async () => {
+  const { data } = await client.from('content_objectives').select('id, title').order('position')
+  return data ?? []
+})
+const objectiveFilterOptions = computed(() => [
+  { value: '', label: 'Todos los objetivos' },
+  ...(objectivesData.value ?? []).map(o => ({ value: o.id, label: o.title })),
+])
+
 const entitlementLabels: Record<string, string> = {
   vip: 'VIP',
   mentoria_grupal: 'Mentoría grupal',
@@ -182,6 +205,7 @@ const columns = [
   { key: 'content_type', label: 'Tipo' },
   { key: 'segment', label: 'Plan' },
   { key: 'category', label: 'Categoría' },
+  { key: 'objective', label: 'Objetivo' },
   { key: 'entitlement_key', label: 'Complemento' },
   { key: 'status', label: 'Estado' },
   { key: 'published_at', label: 'Publicación' },
@@ -190,16 +214,20 @@ const columns = [
 const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await useInfiniteTable(
   'admin-content',
   async ({ from, to }) => {
-    const selectStr = filterCategory.value
-      ? '*, content_item_categories!inner(category_id)'
-      : '*, content_item_categories(category_id)'
-    let query = client.from('content_items').select(selectStr)
+    const catJoin = filterCategory.value
+      ? 'content_item_categories!inner(category_id)'
+      : 'content_item_categories(category_id)'
+    const objJoin = filterObjective.value
+      ? 'content_item_objectives!inner(objective_id)'
+      : 'content_item_objectives(objective_id)'
+    let query = client.from('content_items').select(`*, ${catJoin}, ${objJoin}`)
 
     if (search.value) query = query.ilike('title', `%${search.value}%`)
     if (filterStatus.value) query = query.eq('status', filterStatus.value)
     if (filterType.value) query = query.eq('type', filterType.value)
     if (filterSegment.value) query = query.eq('plan', filterSegment.value)
     if (filterCategory.value) query = query.eq('content_item_categories.category_id', filterCategory.value)
+    if (filterObjective.value) query = query.eq('content_item_objectives.objective_id', filterObjective.value)
 
     const { data } = await query.range(from, to).order('created_at', { ascending: false })
     return (data ?? []).map(item => ({
@@ -207,9 +235,10 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
       content_type: item.type,
       segment: item.plan,
       category: ((item.content_item_categories as any) ?? []).map((c: any) => c.category_id),
+      objective: ((item.content_item_objectives as any) ?? []).map((o: any) => o.objective_id),
     }))
   },
-  [search, filterStatus, filterType, filterSegment, filterCategory],
+  [search, filterStatus, filterType, filterSegment, filterCategory, filterObjective],
 )
 
 function statusVariant(status: string) {
@@ -230,6 +259,11 @@ function typeLabel(type: string) {
 function categoryName(id: string | null) {
   if (!id) return null
   return (categories.value ?? []).find(c => c.id === id)?.title ?? null
+}
+
+function objectiveName(id: string | null) {
+  if (!id) return null
+  return (objectivesData.value ?? []).find(o => o.id === id)?.title ?? null
 }
 
 function formatDate(iso: string) {
