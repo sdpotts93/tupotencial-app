@@ -16,6 +16,7 @@ EVENT_COVER_URL="${SUPABASE_URL}/storage/v1/object/public/event-covers/defaults/
 PROGRAM_COVER_URL="${SUPABASE_URL}/storage/v1/object/public/program-covers/defaults/default-cover.jpg"
 CARLOTTA_AVATAR_URL="${SUPABASE_URL}/storage/v1/object/public/character-avatars/carlotta/avatar.png"
 GABRIEL_AVATAR_URL="${SUPABASE_URL}/storage/v1/object/public/character-avatars/gabriel/avatar.png"
+HOY_FEATURED_URL="${SUPABASE_URL}/storage/v1/object/public/content-covers/hoy/featured-default.jpg"
 
 echo "Uploading default covers..."
 
@@ -42,6 +43,14 @@ curl -s -X POST \
   -H "Authorization: Bearer ${SERVICE_KEY}" \
   -H "Content-Type: image/jpeg" \
   --data-binary @apps/mobile/public/images/lib-2.jpg
+
+echo "Uploading hoy featured image..."
+
+curl -s -X POST \
+  "${SUPABASE_URL}/storage/v1/object/content-covers/hoy/featured-default.jpg" \
+  -H "Authorization: Bearer ${SERVICE_KEY}" \
+  -H "Content-Type: image/jpeg" \
+  --data-binary @apps/mobile/public/images/rojo-carlotta.jpg
 
 echo "Uploading character avatars..."
 
@@ -96,6 +105,15 @@ curl -s -X PATCH \
   -H "Prefer: return=minimal" \
   -d "{\"cover_url\": \"${PROGRAM_COVER_URL}\"}"
 
+# Hoy featured image (merge featured_img_url into existing hoy_defaults JSON)
+curl -s -X PATCH \
+  "${SUPABASE_URL}/rest/v1/app_settings?key=eq.hoy_defaults" \
+  -H "Authorization: Bearer ${SERVICE_KEY}" \
+  -H "apikey: ${SERVICE_KEY}" \
+  -H "Content-Type: application/json" \
+  -H "Prefer: return=minimal" \
+  -d "{\"value\": {\"phrase_text\": \"Cada día es una nueva oportunidad para cuidar de ti.\", \"phrase_author\": \"gabriel\", \"action_type\": \"talk_to_ai\", \"content_id\": \"\", \"form_id\": \"\", \"badge_title\": \"Día completado\", \"badge_subtitle\": \"Sigue así, vas genial\", \"featured_img_url\": \"${HOY_FEATURED_URL}\"}}"
+
 # Character avatars
 curl -s -X PATCH \
   "${SUPABASE_URL}/rest/v1/app_settings?key=eq.character_avatars" \
@@ -111,5 +129,6 @@ echo "  Content:   ${CONTENT_COVER_URL}"
 echo "  Addons:    ${ADDON_COVER_URL}"
 echo "  Events:    ${EVENT_COVER_URL}"
 echo "  Programs:  ${PROGRAM_COVER_URL}"
+echo "  Hoy feat:  ${HOY_FEATURED_URL}"
 echo "  Carlotta:  ${CARLOTTA_AVATAR_URL}"
 echo "  Gabriel:   ${GABRIEL_AVATAR_URL}"

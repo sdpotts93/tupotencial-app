@@ -170,6 +170,40 @@
             :error="defaultErrors.form_id"
           />
 
+          <div class="featured-img-field">
+            <span class="eyebrow">Portada de acción del día</span>
+            <div
+              class="img-card__dropzone"
+              :class="{ 'img-card__dropzone--active': isDraggingFeatured }"
+              @dragover.prevent="isDraggingFeatured = true"
+              @dragleave="isDraggingFeatured = false"
+              @drop.prevent="handleFeaturedDrop"
+              @click="featuredInput?.click()"
+            >
+              <input
+                ref="featuredInput"
+                type="file"
+                accept="image/*"
+                class="img-card__input"
+                @change="handleFeaturedFileChange"
+              />
+              <template v-if="featuredPreview || (!featuredCleared && defaults.featured_img_url)">
+                <img
+                  :src="featuredPreview || defaults.featured_img_url"
+                  alt="Portada acción del día"
+                  class="img-card__preview"
+                />
+                <button class="img-card__remove" @click.stop="clearFeatured">Eliminar</button>
+              </template>
+              <div v-else class="img-card__placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <p class="img-card__hint">Arrastra o selecciona</p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </UiCard>
 
@@ -473,6 +507,16 @@ async function handleSaveConfig() {
 
   savingConfig.value = true
   try {
+    // Upload featured image if changed
+    if (featuredFile.value) {
+      defaults.featured_img_url = await uploadFeaturedImg(featuredFile.value)
+      featuredFile.value = null
+      featuredPreview.value = ''
+    } else if (featuredCleared.value) {
+      defaults.featured_img_url = ''
+      featuredCleared.value = false
+    }
+
     const now = new Date().toISOString()
     const { error } = await client.from('app_settings').upsert([
       { key: 'hoy_defaults', value: { ...defaults }, updated_at: now },
@@ -523,6 +567,7 @@ const defaults = reactive({
   form_id: '',
   badge_title: '',
   badge_subtitle: '',
+  featured_img_url: '',
   ...savedConfig.value?.hoy_defaults,
 })
 
@@ -560,6 +605,48 @@ watch(() => defaults.action_type, () => {
   defaults.content_id = ''
   defaults.form_id = ''
 })
+
+// ── Featured image (portada acción del día) ──
+const isDraggingFeatured = ref(false)
+const featuredInput = ref<HTMLInputElement | null>(null)
+const featuredFile = ref<File | null>(null)
+const featuredPreview = ref('')
+const featuredCleared = ref(false)
+
+function setFeaturedFile(file: File) {
+  featuredFile.value = file
+  featuredPreview.value = URL.createObjectURL(file)
+  featuredCleared.value = false
+}
+
+function handleFeaturedFileChange(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  setFeaturedFile(file)
+}
+
+function handleFeaturedDrop(event: DragEvent) {
+  isDraggingFeatured.value = false
+  const file = event.dataTransfer?.files[0]
+  if (!file || !file.type.startsWith('image/')) return
+  setFeaturedFile(file)
+}
+
+function clearFeatured() {
+  featuredFile.value = null
+  featuredPreview.value = ''
+  featuredCleared.value = true
+  if (featuredInput.value) featuredInput.value.value = ''
+}
+
+async function uploadFeaturedImg(file: File): Promise<string> {
+  const ext = file.name.split('.').pop() ?? 'jpg'
+  const path = `hoy/featured-${Date.now()}.${ext}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
 
 // ── Contenido Reciente config ──
 const searchWrapperRef = ref<HTMLElement | null>(null)
@@ -1085,6 +1172,75 @@ function goToDateFromRow(row: Record<string, any>) {
 
 .explore-add__row > :first-child {
   flex: 1;
+}
+
+/* ── Featured Image Uploader ── */
+.featured-img-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.img-card__dropzone {
+  position: relative;
+  border: 2px dashed var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 180px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.img-card__dropzone--active {
+  border-color: var(--color-primary);
+  background: rgba(var(--tint-rgb), 0.04);
+}
+
+.img-card__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.img-card__preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.img-card__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted);
+}
+
+.img-card__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.img-card__remove {
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+}
+
+@media (hover: hover) {
+  .img-card__dropzone:hover {
+    border-color: var(--color-text-secondary);
+  }
 }
 
 @media (hover: hover) {

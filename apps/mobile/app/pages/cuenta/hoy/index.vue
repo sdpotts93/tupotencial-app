@@ -135,7 +135,7 @@
       <div class="hoy__duo-row">
         <section class="hoy__featured">
           <button class="hoy__featured-card" :disabled="!!todayAccion" @click="handleRetoTap('accion')">
-            <img src="/images/rojo-carlotta.jpg" alt="" class="hoy__featured-img" />
+            <img :src="featuredImgUrl" alt="" class="hoy__featured-img" />
             <div class="hoy__featured-info">
               <div v-if="!todayAccion" class="hoy__featured-eyebrow-row">
                 <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
@@ -523,6 +523,7 @@ const { data: hoyPage, status: hoyStatus, refresh: refreshHoyPage } = useAsyncDa
 }, { lazy: true })
 
 const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
+const featuredImgUrl = computed(() => (hoyDefaults.value.featured_img_url as string) || '/images/rojo-carlotta.jpg')
 const dailyPlanData = computed(() => hoyPage.value?.daily_plan)
 // Resolve action type: daily plan overrides defaults; normalize default values to plan values
 const normalizeActionType = (t: string | undefined) => {

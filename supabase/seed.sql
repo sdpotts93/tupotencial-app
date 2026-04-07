@@ -1893,7 +1893,7 @@ INSERT INTO public.app_settings (key, value)
 VALUES
   (
     'hoy_defaults',
-    '{"phrase_text": "Cada día es una nueva oportunidad para cuidar de ti.", "phrase_author": "gabriel", "action_type": "talk_to_ai", "content_id": "", "form_id": "", "badge_title": "Día completado", "badge_subtitle": "Sigue así, vas genial"}'::jsonb
+    '{"phrase_text": "Cada día es una nueva oportunidad para cuidar de ti.", "phrase_author": "gabriel", "action_type": "talk_to_ai", "content_id": "", "form_id": "", "badge_title": "Día completado", "badge_subtitle": "Sigue así, vas genial", "featured_img_url": ""}'::jsonb
   ),
   (
     'hoy_recent_content',
