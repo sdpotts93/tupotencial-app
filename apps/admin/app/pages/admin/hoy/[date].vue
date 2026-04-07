@@ -42,6 +42,7 @@
             label="Contenido"
             :options="contentOptions"
             placeholder="Selecciona contenido"
+            :error="errors.content_id"
           />
 
           <!-- Formulario -->
@@ -51,6 +52,7 @@
             label="Formulario"
             :options="formOptions"
             placeholder="Selecciona formulario"
+            :error="errors.form_id"
           />
 
           <!-- Talk to AI: no extra fields -->
@@ -95,6 +97,7 @@ const toast = useToast()
 const dateParam = computed(() => route.params.date as string)
 const saving = ref(false)
 const formError = ref('')
+const errors = reactive({ content_id: '', form_id: '' })
 
 // ── Fetch existing daily plan for this date ──
 const { data: existingPlan } = await useAsyncData(`daily-plan-${dateParam.value}`, async () => {
@@ -148,6 +151,8 @@ const formOptions = computed(() =>
 watch(() => form.action_type, () => {
   form.content_id = ''
   form.form_id = ''
+  errors.content_id = ''
+  errors.form_id = ''
 })
 
 function formatDate(iso: string) {
@@ -162,6 +167,21 @@ function formatDate(iso: string) {
 async function handleSave() {
   saving.value = true
   formError.value = ''
+
+  errors.content_id = ''
+  errors.form_id = ''
+
+  if (form.action_type === 'content' && !form.content_id) {
+    errors.content_id = 'El contenido es obligatorio'
+    saving.value = false
+    return
+  }
+  if (form.action_type === 'form' && !form.form_id) {
+    errors.form_id = 'El formulario es obligatorio'
+    saving.value = false
+    return
+  }
+
   try {
     const actionPayload: Record<string, any> = {
       quote_text: form.phrase_text,

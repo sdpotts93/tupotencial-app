@@ -267,9 +267,28 @@
         <Transition name="fade" mode="out-in">
           <!-- Success state -->
           <div v-if="checkinSuccess" key="success" class="hoy__checkin-success">
-            <div class="hoy__checkin-success-badge"><Icon name="lucide:check-circle" size="48" /></div>
-            <p class="hoy__checkin-success-streak">Check-in completado</p>
-            <p class="hoy__checkin-success-msg">Ahora completa tu acción del día para sumar a tu racha.</p>
+            <template v-if="allRetosComplete">
+              <div class="hoy__checkin-success-badge"><Icon name="lucide:trophy" size="48" /></div>
+              <p class="hoy__checkin-success-streak">{{ streak }} días</p>
+              <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
+              <UiButton block variant="outline" style="margin-bottom: var(--space-3);" @click="showShareBadge = true">
+                <template #icon><Icon name="lucide:share-2" size="18" /></template>
+                Compartir logro
+              </UiButton>
+              <ShareBadge
+                v-model="showShareBadge"
+                eyebrow="CHECK-IN DIARIO"
+                :action-title="dailyPlan.title"
+                :streak-count="streak"
+                :share-text="dailyPlan.badgeShareText"
+                outcome="done"
+              />
+            </template>
+            <template v-else>
+              <div class="hoy__checkin-success-badge"><Icon name="lucide:check-circle" size="48" /></div>
+              <p class="hoy__checkin-success-streak">Check-in completado</p>
+              <p class="hoy__checkin-success-msg">Ahora completa tu acción del día para sumar a tu racha.</p>
+            </template>
             <UiButton block variant="secondary" @click="closeCheckinSheet">Listo</UiButton>
           </div>
 
@@ -333,25 +352,24 @@
             <template v-if="allRetosComplete">
               <p class="hoy__checkin-success-streak">{{ streak }} días</p>
               <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
+              <UiButton block variant="outline" style="margin-bottom: var(--space-3);" @click="showShareBadge = true">
+                <template #icon><Icon name="lucide:share-2" size="18" /></template>
+                Compartir logro
+              </UiButton>
+              <ShareBadge
+                v-model="showShareBadge"
+                :eyebrow="dailyPlan.eyebrow"
+                :action-title="dailyPlan.title"
+                :streak-count="streak"
+                :share-text="dailyPlan.badgeShareText"
+                :outcome="accionChoice!"
+              />
             </template>
             <template v-else>
-              <p class="hoy__checkin-success-streak">{{ accionChoice === 'done' ? 'Acción completada' : 'Listo para mañana' }}</p>
-              <p class="hoy__checkin-success-msg">{{ accionChoice === 'done' ? 'Excelente trabajo hoy. Cada acción cuenta.' : 'No pasa nada. Mañana es una nueva oportunidad.' }}</p>
+              <p class="hoy__checkin-success-streak">Acción completada</p>
+              <p class="hoy__checkin-success-msg">Ahora completa tu check-in para sumar a tu racha.</p>
             </template>
-
-            <UiButton block variant="outline" @click="showShareBadge = true">
-              <template #icon><Icon name="lucide:share-2" size="18" /></template>
-              Compartir logro
-            </UiButton>
-
-            <ShareBadge
-              v-model="showShareBadge"
-              :eyebrow="dailyPlan.eyebrow"
-              :action-title="dailyPlan.title"
-              :streak-count="streak"
-              :share-text="dailyPlan.badgeShareText"
-              :outcome="accionChoice!"
-            />
+            <UiButton block variant="secondary" @click="closeAccionSheet">Listo</UiButton>
           </div>
 
           <!-- Form action type: render form fields -->
@@ -1873,7 +1891,7 @@ function closeAccionSheet() {
   font-size: var(--title-lg);
   color: var(--color-text);
   line-height: var(--leading-tight);
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-4);
 }
 
 .hoy__checkin-success-msg {

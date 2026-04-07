@@ -255,11 +255,11 @@ onBeforeUnmount(() => {
 .select-field__backdrop {
   position: fixed;
   inset: 0;
-  z-index: 99;
+  z-index: 999;
 }
 
 .select-field__dropdown {
-  z-index: 100;
+  z-index: 1000;
   background: var(--color-input-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
