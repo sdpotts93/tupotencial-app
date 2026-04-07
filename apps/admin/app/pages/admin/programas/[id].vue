@@ -234,7 +234,7 @@ const { data: dbDays } = await useAsyncData(`program-days-${id}`, async () => {
 
 // ── Fetch content items and forms for dropdowns ──
 const { data: contentItemsList } = await useAsyncData('program-content-items', async () => {
-  const { data } = await client.from('content_items').select('id, title, entitlement_key').order('title')
+  const { data } = await client.from('content_items').select('id, title, entitlement_key').eq('status', 'published').order('title')
   return data ?? []
 })
 
@@ -472,7 +472,7 @@ async function handleSave() {
       .from('program_days')
       .insert({
         program_id: programId,
-        day_index: i,
+        day_index: i + 1,
         title: day.title || null,
         description: day.description || null,
       })

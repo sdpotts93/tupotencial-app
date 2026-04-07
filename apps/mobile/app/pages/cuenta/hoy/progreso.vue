@@ -117,6 +117,29 @@
           </NuxtLink>
         </div>
       </section>
+
+      <!-- Completed programs -->
+      <section v-if="completedPrograms.length" class="progress__programs">
+        <p class="eyebrow">PROGRAMAS COMPLETADOS</p>
+        <div class="progress__programs-list">
+          <NuxtLink
+            v-for="prog in completedPrograms"
+            :key="prog.id"
+            :to="`/cuenta/retos/${prog.id}`"
+            class="progress__card progress__card--completed"
+          >
+            <img :src="prog.img" :alt="prog.title" class="progress__card-img" />
+            <div class="progress__card-body">
+              <span class="progress__card-title">{{ prog.title }}</span>
+              <span class="progress__card-meta progress__card-meta--done">{{ prog.totalDays }} de {{ prog.totalDays }} días</span>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" class="progress__card-check">
+              <circle cx="10" cy="10" r="9" stroke="var(--color-complete)" stroke-width="1.5"/>
+              <path d="M6 10.5l2.5 2.5L14 7.5" stroke="var(--color-complete)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </NuxtLink>
+        </div>
+      </section>
       </template>
     </div>
   </div>
@@ -169,19 +192,24 @@ const { data: activeEnrollments } = useAsyncData('mobile-active-programs', async
     for (const c of checkins ?? []) {
       if (c.program_id === pid && c.run === e.run) completedDays.add(c.day_index)
     }
+    const allComplete = totalDays > 0 && completedDays.size >= totalDays
     return {
       id: pid,
       title: prog?.title ?? '',
       currentDay: getCurrentDay(e.enrolled_at, completedDays, totalDays),
       totalDays,
+      completedCount: completedDays.size,
+      allComplete,
       img: prog?.cover_url ?? null,
     }
   })
 }, { watch: [() => user.value?.id], lazy: true })
 
-const activeProgramsCount = computed(() => activeEnrollments.value?.length ?? 0)
+const activeProgramsCount = computed(() => activePrograms.value.length)
 
-const activePrograms = computed(() => activeEnrollments.value ?? [])
+const activePrograms = computed(() => (activeEnrollments.value ?? []).filter(p => !p.allComplete))
+
+const completedPrograms = computed(() => (activeEnrollments.value ?? []).filter(p => p.allComplete))
 
 // ─── Today's completion check ───
 const now = new Date()
@@ -394,9 +422,6 @@ const { data: contentViewed } = useAsyncData('mobile-content-viewed', async () =
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
   color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .progress__card-meta {
@@ -413,6 +438,14 @@ const { data: contentViewed } = useAsyncData('mobile-content-viewed', async () =
 .progress__card-chevron {
   flex-shrink: 0;
   color: var(--color-muted);
+}
+
+.progress__card-check {
+  flex-shrink: 0;
+}
+
+.progress__card-meta--done {
+  color: var(--color-complete);
 }
 
 /* ─── Error state ─── */

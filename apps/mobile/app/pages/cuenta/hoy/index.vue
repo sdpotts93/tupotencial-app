@@ -268,8 +268,8 @@
           <!-- Success state -->
           <div v-if="checkinSuccess" key="success" class="hoy__checkin-success">
             <template v-if="allRetosComplete">
-              <div class="hoy__checkin-success-badge"><Icon name="lucide:trophy" size="48" /></div>
-              <p class="hoy__checkin-success-streak">{{ streak }} días</p>
+              <div class="hoy__checkin-success-badge"><ClientOnly><DotLottieVue src="/lottie/trophy-confetti.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" /></ClientOnly></div>
+              <p class="hoy__checkin-success-streak">Racha de {{ streak }} {{ streak === 1 ? 'día' : 'días' }}</p>
               <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
               <UiButton block variant="outline" style="margin-bottom: var(--space-3);" @click="showShareBadge = true">
                 <template #icon><Icon name="lucide:share-2" size="18" /></template>
@@ -285,7 +285,7 @@
               />
             </template>
             <template v-else>
-              <div class="hoy__checkin-success-badge"><Icon name="lucide:check-circle" size="48" /></div>
+              <div class="hoy__checkin-success-badge"><ClientOnly><DotLottieVue src="/lottie/success.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" /></ClientOnly></div>
               <p class="hoy__checkin-success-streak">Check-in completado</p>
               <p class="hoy__checkin-success-msg">Ahora completa tu acción del día para sumar a tu racha.</p>
             </template>
@@ -348,9 +348,14 @@
         <Transition name="fade" mode="out-in">
           <!-- Success state -->
           <div v-if="accionSuccess" key="success" class="hoy__checkin-success">
-            <div class="hoy__checkin-success-badge"><Icon :name="allRetosComplete ? 'lucide:trophy' : 'lucide:check-circle'" size="48" /></div>
+            <div class="hoy__checkin-success-badge">
+              <ClientOnly>
+                <DotLottieVue v-if="allRetosComplete" src="/lottie/trophy-confetti.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" />
+                <DotLottieVue v-else src="/lottie/success.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" />
+              </ClientOnly>
+            </div>
             <template v-if="allRetosComplete">
-              <p class="hoy__checkin-success-streak">{{ streak }} días</p>
+              <p class="hoy__checkin-success-streak">Racha de {{ streak }} {{ streak === 1 ? 'día' : 'días' }}</p>
               <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
               <UiButton block variant="outline" style="margin-bottom: var(--space-3);" @click="showShareBadge = true">
                 <template #icon><Icon name="lucide:share-2" size="18" /></template>
@@ -466,6 +471,8 @@
 </template>
 
 <script setup lang="ts">
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+
 const client = useSupabaseClient()
 const router = useRouter()
 const { user, isSubscriber } = useAuth()
@@ -725,15 +732,19 @@ const { data: activeProgramsData } = useAsyncData('hoy-programs', async () => {
 
   const programIds = enrollments.map(e => (e.programs as any)?.id ?? e.program_id)
 
-  // Count total days per program
-  const { data: days } = await client.from('program_days').select('program_id').in('program_id', programIds)
+  // Count total days and items per program day
+  const { data: days } = await client.from('program_days').select('program_id, day_index, program_day_items(id)').in('program_id', programIds)
   const dayCountMap: Record<string, number> = {}
+  // Map: programId -> dayIndex -> totalItemCount
+  const dayItemCountMap: Record<string, Record<number, number>> = {}
   for (const d of days ?? []) {
     dayCountMap[d.program_id] = (dayCountMap[d.program_id] ?? 0) + 1
+    if (!dayItemCountMap[d.program_id]) dayItemCountMap[d.program_id] = {}
+    dayItemCountMap[d.program_id]![d.day_index] = (d.program_day_items as any[])?.length ?? 0
   }
 
   // Get user's checkins per program (filtered by current run)
-  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index, run').eq('user_id', user.value.id).in('program_id', programIds)
+  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index, run, payload').eq('user_id', user.value.id).in('program_id', programIds)
 
   const { getCurrentDay } = useProgramProgression()
   return enrollments.map(e => {
@@ -742,7 +753,13 @@ const { data: activeProgramsData } = useAsyncData('hoy-programs', async () => {
     const totalDays = dayCountMap[pid] ?? 0
     const completedDays = new Set<number>()
     for (const c of checkins ?? []) {
-      if (c.program_id === pid && c.run === e.run) completedDays.add(c.day_index)
+      if (c.program_id === pid && c.run === e.run) {
+        const completedItems: string[] = (c.payload as any)?.completed_items ?? []
+        const totalItems = dayItemCountMap[pid]?.[c.day_index] ?? 0
+        if (totalItems > 0 && completedItems.length >= totalItems) {
+          completedDays.add(c.day_index)
+        }
+      }
     }
     const currentDay = getCurrentDay(e.enrolled_at, completedDays, totalDays)
     return { id: pid, title: prog?.title ?? '', currentDay, completedDays: completedDays.size, totalDays }
@@ -750,10 +767,12 @@ const { data: activeProgramsData } = useAsyncData('hoy-programs', async () => {
 }, { lazy: true, watch: [() => user.value?.id] })
 
 const activePrograms = computed(() =>
-  (activeProgramsData.value ?? []).map(p => ({
-    ...p,
-    progressPct: p.totalDays > 0 ? p.completedDays / p.totalDays : 0,
-  })),
+  (activeProgramsData.value ?? [])
+    .filter(p => !(p.totalDays > 0 && p.completedDays >= p.totalDays))
+    .map(p => ({
+      ...p,
+      progressPct: p.totalDays > 0 ? p.completedDays / p.totalDays : 0,
+    })),
 )
 
 // ─── Latest from biblioteca (resolved by RPC based on admin config) ───
@@ -1438,9 +1457,6 @@ function closeAccionSheet() {
   overflow: hidden;
 }
 
-.hoy__continue-card:nth-child(n+2) {
-  display: none;
-}
 
 .hoy__continue-card {
   display: flex;
@@ -2253,9 +2269,6 @@ function closeAccionSheet() {
     display: flex;
   }
 
-  .hoy__continue-card:nth-child(n+3) {
-    display: none;
-  }
 
   @media (hover: hover) {
     .hoy__continue-card:hover {

@@ -115,63 +115,114 @@
         </div>
       </section>
 
-      <!-- Completar día CTA -->
-      <div v-if="hasForm && !isDayComplete" class="day__cta">
-        <UiButton block variant="secondary" @click="showFormSheet = true">
-          Completar día
-        </UiButton>
-      </div>
-
       </template>
     </div>
 
-    <!-- Slideover feedback form -->
-    <UiModal
-      v-model="showFormSheet"
-      title="Check-in del día"
+    <!-- Celebration sheet -->
+    <Transition name="day-sheet">
+    <div
+      v-if="showFormSheet"
+      class="day__overlay"
+      @click.self="closeFormSheet"
     >
-      <Transition name="day-fade" mode="out-in">
-        <div v-if="formSuccess" key="success" class="day__form-success">
-          <div class="day__form-success-badge"><Icon name="lucide:trophy" size="48" /></div>
-          <p class="day__form-success-title">¡Día completado!</p>
-          <p class="day__form-success-msg">Excelente trabajo hoy.</p>
+      <div class="day__sheet">
+        <div class="day__sheet-header">
+          <div class="day__sheet-handle" />
+          <button class="day__sheet-close" aria-label="Cerrar" @click="closeFormSheet">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
         </div>
 
-        <div v-else key="form">
-          <p class="day__form-desc">Comparte tu reflexión de hoy sobre este tema.</p>
-          <UiTextarea
-            v-model="reflection"
-            label="Tu reflexión"
-            placeholder="Escribe aquí lo que agradeces hoy..."
-            :rows="5"
-          />
-        </div>
-      </Transition>
+        <Transition name="fade" mode="out-in">
+          <div v-if="formSuccess" key="success" class="day__checkin-success">
+            <div class="day__checkin-success-badge">
+              <ClientOnly>
+                <DotLottieVue v-if="programCompleted" src="/lottie/trophy.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" />
+                <DotLottieVue v-else src="/lottie/success.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" />
+              </ClientOnly>
+            </div>
+            <p class="day__checkin-success-title">{{ programCompleted ? '¡Programa completado!' : '¡Día completado!' }}</p>
+            <p class="day__checkin-success-msg">{{ programCompleted ? '¡Felicidades! Completaste todos los días.' : 'Excelente trabajo hoy.' }}</p>
+            <UiButton block variant="secondary" @click="closeFormSheet">Listo</UiButton>
+          </div>
 
-      <template #footer>
-        <UiButton
-          v-if="!formSuccess"
-          block
-          :loading="formLoading"
-          :disabled="!reflection.trim()"
-          @click="handleFormSubmit"
-        >
-          Enviar check-in
-        </UiButton>
-        <UiButton
-          v-else
-          block
-          variant="secondary"
-          @click="closeFormSheet"
-        >
-          Listo
-        </UiButton>
-      </template>
-    </UiModal>
+          <div v-else-if="hasFormActivity" key="form">
+            <h1 class="day__sheet-title">{{ formActivity?.title ?? 'Check-in del día' }}</h1>
+            <p v-if="formActivity?.description" class="day__sheet-subtitle">{{ formActivity.description }}</p>
+
+            <div v-if="formActivity?.formFields?.length" class="day__form-fields">
+              <template v-for="(field, idx) in formActivity.formFields" :key="idx">
+                <UiInput
+                  v-if="field.type === 'text' || field.type === 'email'"
+                  :label="field.question || field.label"
+                  :type="field.type"
+                  :required="field.required"
+                  :error="formFieldErrors[idx]"
+                  :model-value="formAnswers[idx] ?? ''"
+                  @update:model-value="formAnswers[idx] = $event"
+                />
+                <UiTextarea
+                  v-else-if="field.type === 'textarea'"
+                  :label="field.question || field.label"
+                  :required="field.required"
+                  :error="formFieldErrors[idx]"
+                  :model-value="formAnswers[idx] ?? ''"
+                  :rows="3"
+                  @update:model-value="formAnswers[idx] = $event"
+                />
+                <UiSelect
+                  v-else-if="field.type === 'select'"
+                  :label="field.question || field.label"
+                  :required="field.required"
+                  :error="formFieldErrors[idx]"
+                  :model-value="formAnswers[idx] ?? ''"
+                  :options="(field.options ?? []).map((o: string) => ({ value: o, label: o }))"
+                  placeholder="Selecciona una opción"
+                  @update:model-value="formAnswers[idx] = $event"
+                />
+                <div v-else-if="field.type === 'rating'" class="day__form-rating">
+                  <label class="day__form-label">{{ field.question || field.label }}<span v-if="field.required" class="day__form-required">*</span></label>
+                  <div class="day__form-rating-stars">
+                    <button
+                      v-for="star in 5"
+                      :key="star"
+                      class="day__form-rating-star"
+                      :class="{ 'day__form-rating-star--active': Number(formAnswers[idx] ?? 0) >= star }"
+                      @click="formAnswers[idx] = String(star)"
+                    >
+                      <Icon name="lucide:star" size="28" />
+                    </button>
+                  </div>
+                  <p v-if="formFieldErrors[idx]" class="day__form-field-error">{{ formFieldErrors[idx] }}</p>
+                </div>
+              </template>
+            </div>
+
+            <div v-else>
+              <UiTextarea
+                v-model="reflection"
+                label="Tu reflexión"
+                placeholder="Escribe aquí lo que agradeces hoy..."
+                :rows="5"
+              />
+            </div>
+
+            <UiButton block variant="secondary" :loading="formLoading" :disabled="formActivity?.formFields?.length ? !isFormValid : !reflection.trim()" style="margin-top: var(--space-6);" @click="handleFormSubmit">
+              Enviar
+            </UiButton>
+          </div>
+        </Transition>
+      </div>
+    </div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+
 definePageMeta({ layout: 'blank' })
 
 type ProgramType = 'reto' | 'bootcamp' | 'programa'
@@ -187,6 +238,8 @@ interface DayActivity {
   duration?: string
   done: boolean
   to?: string
+  formId?: string
+  formFields?: any[]
 }
 
 function activityTypeLabel(activity: DayActivity): string {
@@ -275,7 +328,7 @@ const { data: dayData, status: dayStatus, refresh: refreshDay } = useAsyncData(`
   // Fetch day items with linked content and forms
   const { data: dayItems } = await client
     .from('program_day_items')
-    .select('id, type, position, content_item_id, form_id, content_items(id, title, description, type, duration_seconds, thumbnail_url)')
+    .select('id, type, position, content_item_id, form_id, content_items(id, title, description, type, duration_seconds, thumbnail_url), forms(id, title, description, fields)')
     .eq('program_day_id', day.id)
     .order('position')
 
@@ -327,13 +380,16 @@ const { data: dayData, status: dayStatus, refresh: refreshDay } = useAsyncData(`
       }
     }
     // form
+    const form = (di as any).forms as any
     return {
       id: di.id,
       type: 'form' as ActivityType,
-      title: 'Check-in del día',
-      description: 'Comparte tu reflexión.',
+      title: form?.title ?? 'Check-in del día',
+      description: form?.description ?? 'Comparte tu reflexión.',
       thumbnail: '',
       done: completedItems.has(di.id),
+      formId: form?.id ?? di.form_id,
+      formFields: (form?.fields as any[]) ?? [],
     }
   })
 
@@ -346,7 +402,6 @@ const { data: dayData, status: dayStatus, refresh: refreshDay } = useAsyncData(`
   }
 }, { lazy: true, watch: [() => user.value?.id] })
 
-const programType = computed<ProgramType>(() => dayData.value?.programType ?? 'reto')
 const totalDays = computed(() => dayData.value?.totalDays ?? 0)
 const dayTitle = computed(() => dayData.value?.title ?? '')
 const dayDescription = computed(() => dayData.value?.description ?? '')
@@ -355,14 +410,21 @@ watch(() => dayData.value?.activities, (acts) => {
   if (acts) activities.value = acts
 }, { immediate: true })
 
-const hasForm = computed(() => {
-  if (programType.value === 'bootcamp') return true
-  return activities.value.some(a => a.type === 'form')
+const hasFormActivity = computed(() => activities.value.some(a => a.type === 'form'))
+const formActivity = computed(() => activities.value.find(a => a.type === 'form'))
+
+const formAnswers = reactive<Record<number, string>>({})
+const formFieldErrors = reactive<Record<number, string>>({})
+
+const isFormValid = computed(() => {
+  const fields = formActivity.value?.formFields ?? []
+  if (!fields.length) return false
+  return fields.every((f: any, idx: number) => !f.required || (formAnswers[idx] ?? '').trim() !== '')
 })
 
 const isDayComplete = computed(() => {
-  const formAct = activities.value.find(a => a.type === 'form')
-  return formAct ? formAct.done : false
+  if (!activities.value.length) return false
+  return activities.value.every(a => a.done)
 })
 
 // Form sheet state
@@ -370,6 +432,39 @@ const showFormSheet = ref(false)
 const reflection = ref('')
 const formLoading = ref(false)
 const formSuccess = ref(false)
+const programCompleted = ref(false)
+
+// Force fresh data and check for celebration after refetch
+async function refetchAndCelebrate() {
+  await refreshDay()
+  // After fresh data, check activities directly from the updated dayData
+  const data = dayData.value
+  if (!data?.activities?.length) return
+  const allDone = data.activities.every((a: any) => a.done)
+  if (!allDone) return
+  if (data.activities.some((a: any) => a.type === 'form')) return
+  // Update the activities ref so the UI shows checkmarks before modal
+  activities.value = data.activities
+  await nextTick()
+  formSuccess.value = true
+  showFormSheet.value = true
+  checkProgramCompletion()
+}
+
+onMounted(() => refetchAndCelebrate())
+
+async function checkProgramCompletion() {
+  const { data: allCheckins } = await client
+    .from('program_checkins')
+    .select('day_index')
+    .eq('program_id', programId)
+    .eq('user_id', user.value!.id)
+    .eq('run', currentRun.value)
+  const completedCount = new Set(allCheckins?.map(c => c.day_index)).size
+  if (completedCount >= (dayData.value?.totalDays ?? Infinity)) {
+    programCompleted.value = true
+  }
+}
 
 function handleActivityClick(activity: DayActivity) {
   if (activity.type === 'form') {
@@ -378,22 +473,57 @@ function handleActivityClick(activity: DayActivity) {
 }
 
 async function handleFormSubmit() {
+  // Validate dynamic form fields
+  const fields = formActivity.value?.formFields ?? []
+  if (fields.length) {
+    Object.keys(formFieldErrors).forEach(k => delete formFieldErrors[Number(k)])
+    let valid = true
+    fields.forEach((f: any, idx: number) => {
+      if (f.required && !(formAnswers[idx] ?? '').trim()) {
+        formFieldErrors[idx] = 'Este campo es obligatorio'
+        valid = false
+      }
+    })
+    if (!valid) return
+  }
+
   formLoading.value = true
   try {
-    // Record checkin for this program day
+    // Build payload
     const completedIds = activities.value.filter(a => a.done).map(a => a.id)
-    const formAct = activities.value.find(a => a.type === 'form')
+    const formAct = formActivity.value
     if (formAct) completedIds.push(formAct.id)
+
+    const payload: Record<string, any> = { completed_items: completedIds }
+    if (fields.length) {
+      const answers: Record<string, string> = {}
+      fields.forEach((f: any, idx: number) => { answers[f.question || f.label || `field_${idx}`] = formAnswers[idx] ?? '' })
+      payload.form_answers = answers
+
+      // Save form submission
+      if (formAct?.formId) {
+        await client.from('form_submissions').insert({
+          form_id: formAct.formId,
+          payload: answers,
+        })
+      }
+    } else {
+      payload.reflection = reflection.value
+    }
 
     await client.from('program_checkins').upsert({
       program_id: programId,
       day_index: Number(dayIndex),
       run: currentRun.value,
-      payload: { reflection: reflection.value, completed_items: completedIds },
+      payload,
     }, { onConflict: 'program_id,user_id,day_index,run' })
 
     formSuccess.value = true
     if (formAct) formAct.done = true
+
+    // Invalidate parent page cache so badges/button update on back navigation
+    clearNuxtData(`program-checkins-${programId}`)
+    clearNuxtData(`program-enrollment-${programId}`)
 
     // Check if all program days are now complete
     const { data: allCheckins } = await client
@@ -404,6 +534,7 @@ async function handleFormSubmit() {
       .eq('run', currentRun.value)
     const completedCount = new Set(allCheckins?.map(c => c.day_index)).size
     if (completedCount >= (dayData.value?.totalDays ?? Infinity)) {
+      programCompleted.value = true
       await client
         .from('program_enrollments')
         .update({ status: 'completed' })
@@ -422,6 +553,7 @@ function closeFormSheet() {
   setTimeout(() => {
     reflection.value = ''
     formSuccess.value = false
+    programCompleted.value = false
   }, 400)
 }
 </script>
@@ -591,27 +723,170 @@ function closeFormSheet() {
   display: flex;
 }
 
-/* ─── CTA ─── */
-.day__cta { margin-bottom: var(--space-4); }
+/* ─── Celebration sheet (matches hoy pattern) ─── */
+.day__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(var(--tint-rgb), 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
 
-/* ─── Form slideover content ─── */
-.day__form-desc {
-  font-size: var(--text-sm);
+.day__sheet {
+  background: var(--color-accent);
   color: var(--color-text);
-  opacity: 0.6;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  padding: var(--space-2) var(--space-6) var(--space-10);
+  max-height: 85dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.day__sheet-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+  margin-bottom: var(--space-8);
+}
+
+.day__sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  margin-top: var(--space-2);
+}
+
+.day__sheet-close {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.day__sheet-title {
+  font-family: var(--font-title);
+  font-size: var(--title-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.day__sheet-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-4);
 }
 
-.day__form-success {
+/* ─── Form fields ─── */
+.day__form-fields {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: var(--space-6) 0;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.day__form-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: rgba(var(--tint-rgb), 0.7);
+  margin-bottom: var(--space-2);
+  display: block;
+}
+.day__form-rating-stars {
+  display: flex;
+  gap: var(--space-2);
+}
+.day__form-rating-star {
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  color: rgba(var(--tint-rgb), 0.2);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.day__form-rating-star--active,
+.day__form-rating-star.day__form-rating-star--active {
+  color: var(--color-yellow);
+}
+.day__form-rating-star--active :deep(.iconify),
+.day__form-rating-star.day__form-rating-star--active :deep(.iconify) {
+  --star-filled: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='black' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--star-filled);
+  mask-image: var(--star-filled);
+}
+@media (hover: hover) {
+  .day__form-rating-star:hover,
+  .day__form-rating-star:has(~ .day__form-rating-star:hover) {
+    color: color-mix(in srgb, var(--color-yellow) 40%, transparent);
+  }
+  .day__form-rating-star:hover :deep(.iconify),
+  .day__form-rating-star:has(~ .day__form-rating-star:hover) :deep(.iconify) {
+    --star-filled: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='black' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z'/%3E%3C/svg%3E");
+    -webkit-mask-image: var(--star-filled);
+    mask-image: var(--star-filled);
+  }
+  .day__form-rating-star.day__form-rating-star--active:hover,
+  .day__form-rating-star.day__form-rating-star--active:has(~ .day__form-rating-star:hover) {
+    color: var(--color-yellow);
+  }
+}
+.day__form-required {
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+.day__form-field-error {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+  margin-top: var(--space-1);
 }
 
-.day__form-success-badge {
+/* ─── Fade transition (form → success) ─── */
+.fade-enter-active { transition: opacity 0.25s ease, transform 0.25s ease; }
+.fade-leave-active { transition: opacity 0.15s ease; }
+.fade-enter-from { opacity: 0; transform: translateY(8px); }
+.fade-leave-to { opacity: 0; }
+
+/* ─── Sheet transition ─── */
+.day-sheet-enter-active {
+  transition: background 0.3s ease;
+}
+.day-sheet-enter-active .day__sheet {
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.day-sheet-leave-active {
+  transition: background 0.2s ease;
+}
+.day-sheet-leave-active .day__sheet {
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.day-sheet-enter-from,
+.day-sheet-leave-to {
+  background: rgba(var(--tint-rgb), 0);
+}
+.day-sheet-enter-from .day__sheet,
+.day-sheet-leave-to .day__sheet {
+  transform: translateY(100%);
+}
+
+/* ─── Success state ─── */
+.day__checkin-success {
+  text-align: center;
+  padding: var(--space-6) 0 var(--space-2);
+}
+
+.day__checkin-success-badge {
   margin-bottom: var(--space-3);
   color: var(--color-primary);
   animation: day-success-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -623,27 +898,39 @@ function closeFormSheet() {
   100% { transform: scale(1); opacity: 1; }
 }
 
-.day__form-success-title {
+.day__checkin-success-title {
   font-family: var(--font-title);
-  font-size: var(--title-sm);
-  font-weight: var(--weight-bold);
+  font-size: var(--title-lg);
   color: var(--color-text);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-4);
 }
 
-.day__form-success-msg {
-  font-size: var(--text-base);
-  color: var(--color-text);
-  opacity: 0.6;
+.day__checkin-success-msg {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-5);
 }
 
-/* ─── Form transition ─── */
-.day-fade-enter-active,
-.day-fade-leave-active {
+/* ─── Fade transition ─── */
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.2s ease;
 }
-.day-fade-enter-from,
-.day-fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day__overlay,
+  .day__sheet,
+  .fade-enter-active,
+  .fade-leave-active,
+  .day__checkin-success-badge {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
 
 /* ─── Desktop ─── */
@@ -669,6 +956,35 @@ function closeFormSheet() {
 
   .day__card:active {
     background: var(--color-desktop-card);
+  }
+
+  /* Sheet becomes centered modal on desktop */
+  .day__overlay {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .day__sheet {
+    border-radius: var(--radius-xl);
+    max-width: 480px;
+    width: 100%;
+    max-height: 80dvh;
+  }
+
+  .day-sheet-enter-active .day__sheet {
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+  .day-sheet-leave-active .day__sheet {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .day-sheet-enter-from .day__sheet,
+  .day-sheet-leave-to .day__sheet {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  .day__sheet-handle {
+    display: none;
   }
 }
 

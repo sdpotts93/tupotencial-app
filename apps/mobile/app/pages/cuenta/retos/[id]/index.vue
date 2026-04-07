@@ -81,9 +81,11 @@
           <template v-else>
             <UiButton v-if="!program.enrolled" variant="outline" block @click="enroll">Inscribirme</UiButton>
             <template v-else-if="program.allComplete">
-              <UiButton variant="outline" block disabled>Programa completado ✓</UiButton>
-              <UiButton variant="outline" block style="margin-top: var(--space-2);" @click="restart">Repetir programa</UiButton>
+              <UiButton variant="outline" block @click="restart">Repetir programa</UiButton>
             </template>
+            <UiButton v-else-if="completedDays.has(program.currentDay)" variant="outline" block :to="`/cuenta/retos/${id}/dia/${program.currentDay}`">
+              Día {{ program.currentDay }} completado ✓
+            </UiButton>
             <UiButton v-else variant="outline" block :to="`/cuenta/retos/${id}/dia/${program.currentDay}`">
               Continuar — Día {{ program.currentDay }}
             </UiButton>
@@ -102,6 +104,7 @@
           <span v-else :class="['detail__tag', program.allComplete ? 'detail__tag--inscrito' : (program.enrolled ? 'detail__tag--inscrito' : (program.free ? 'detail__tag--gratis' : 'detail__tag--core'))]">
             {{ program.allComplete ? 'Completado' : (program.enrolled ? 'Inscrito' : (program.free ? 'Gratis' : 'Core')) }}
           </span>
+          <span v-if="program.previouslyCompleted && !program.allComplete" class="detail__tag detail__tag--completed-before">Completado anteriormente</span>
           <UiTag>{{ program.totalDays }} días</UiTag>
         </div>
       </div>
@@ -120,7 +123,10 @@
           :to="day.unlocked && !locked ? `/cuenta/retos/${id}/dia/${day.index}` : undefined"
         >
           <template #suffix>
-            <span v-if="day.done && day.unlocked && !locked" class="detail__done">Completado ✓</span>
+            <svg v-if="day.done && day.unlocked && !locked" width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" style="fill: var(--color-complete); fill-opacity: 0.2; stroke: var(--color-complete)" stroke-width="1.5"/>
+              <path d="M8 12l3 3 5-5" style="stroke: var(--color-complete)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <svg v-else-if="!day.unlocked || locked" class="detail__lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
             </svg>
@@ -152,10 +158,14 @@ const { data: programData, status: programStatus, refresh: refreshProgram } = us
   return data
 }, { lazy: true })
 
-// ── Fetch program days ──
+// ── Fetch program days with item counts ──
 const { data: programDays } = useAsyncData(`program-days-${id}`, async () => {
-  const { data } = await client.from('program_days').select('day_index, title').eq('program_id', id).order('day_index')
-  return data ?? []
+  const { data } = await client.from('program_days').select('id, day_index, title, program_day_items(id)').eq('program_id', id).order('day_index')
+  return (data ?? []).map(d => ({
+    day_index: d.day_index,
+    title: d.title,
+    itemCount: (d.program_day_items as any[])?.length ?? 0,
+  }))
 }, { lazy: true })
 
 // ── Fetch enrollment status ──
@@ -170,12 +180,27 @@ const currentRun = computed(() => enrollment.value?.run ?? 1)
 
 // ── Fetch checkin progress (filtered by current run) ──
 const { data: checkins, refresh: refreshCheckins } = useAsyncData(`program-checkins-${id}`, async () => {
-  if (!user.value?.id || !enrollment.value) return []
-  const { data } = await client.from('program_checkins').select('day_index').eq('program_id', id).eq('user_id', user.value.id).eq('run', currentRun.value)
+  if (!user.value?.id) return []
+  const { data } = await client.from('program_checkins').select('day_index, payload').eq('program_id', id).eq('user_id', user.value.id).eq('run', currentRun.value)
   return data ?? []
 }, { lazy: true, watch: [() => user.value?.id, currentRun] })
 
-const completedDays = computed(() => new Set((checkins.value ?? []).map(c => c.day_index)))
+// Refresh checkins whenever enrollment loads/changes (handles back-navigation after clearNuxtData)
+watch(enrollment, () => { if (enrollment.value) refreshCheckins() })
+
+// A day is only "completed" when all its items have been checked off
+const completedDays = computed(() => {
+  const done = new Set<number>()
+  const itemCounts = new Map((programDays.value ?? []).map(d => [d.day_index, d.itemCount]))
+  for (const c of (checkins.value ?? [])) {
+    const completedItems: string[] = (c.payload as any)?.completed_items ?? []
+    const totalItems = itemCounts.get(c.day_index) ?? 0
+    if (totalItems > 0 && completedItems.length >= totalItems) {
+      done.add(c.day_index)
+    }
+  }
+  return done
+})
 const totalDays = computed(() => programDays.value?.length ?? 0)
 const currentDay = computed(() =>
   getCurrentDay(enrolledAt.value, completedDays.value, totalDays.value),
@@ -196,6 +221,7 @@ const program = computed(() => {
     free: p?.plan === 'free',
     currentDay: currentDay.value,
     allComplete: allComplete.value,
+    previouslyCompleted: currentRun.value > 1,
     entitlement_key: (p?.entitlement_key ?? null) as string | null,
     description: p?.description ?? '',
     thumbnail: p?.cover_url ?? null,
@@ -224,12 +250,16 @@ async function enroll() {
 
 async function restart() {
   if (!enrollment.value) return
-  await client.from('program_enrollments').update({
+  const { error } = await client.from('program_enrollments').update({
     enrolled_at: new Date().toISOString(),
     status: 'active',
     run: currentRun.value + 1,
   }).eq('program_id', id).eq('user_id', user.value!.id)
+  if (error) return
+  clearNuxtData(`program-enrollment-${id}`)
+  clearNuxtData(`program-checkins-${id}`)
   await refreshEnrollment()
+  await nextTick()
   await refreshCheckins()
 }
 </script>
@@ -309,7 +339,7 @@ async function restart() {
 }
 
 /* ─── Actions ─── */
-.detail__actions { margin: var(--space-5) 0; }
+.detail__actions { margin: var(--space-5) 0; display: flex; flex-direction: column; align-items: start; gap: var(--space-3); }
 
 /* ─── Description ─── */
 .detail__description {
@@ -355,6 +385,11 @@ async function restart() {
   color: var(--color-complete);
 }
 
+.detail__tag--completed-before {
+  background: rgba(59, 130, 246, 0.1);
+  color: rgb(59, 130, 246);
+}
+
 .detail__tag--locked {
   background: var(--color-surface-alt);
   color: var(--color-muted);
@@ -366,10 +401,6 @@ async function restart() {
 }
 
 /* ─── Completed badge ─── */
-.detail__done {
-  font-size: var(--text-xs);
-  color: var(--color-complete);
-}
 
 .detail__lock-icon {
   color: var(--color-muted);

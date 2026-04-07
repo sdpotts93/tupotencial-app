@@ -54,10 +54,10 @@
                 </svg>
                 Complemento
               </span>
-              <span v-else :class="['retos__tag', item.enrolled ? 'retos__tag--inscrito' : (item.free ? 'retos__tag--gratis' : 'retos__tag--core')]">
-                {{ item.enrolled ? 'Inscrito' : (item.free ? 'Gratis' : 'Core') }}
+              <span v-else :class="['retos__tag', item.allComplete ? 'retos__tag--inscrito' : (item.enrolled ? 'retos__tag--inscrito' : (item.free ? 'retos__tag--gratis' : 'retos__tag--core'))]">
+                {{ item.allComplete ? 'Completado' : (item.enrolled ? 'Inscrito' : (item.free ? 'Gratis' : 'Core')) }}
               </span>
-              <span v-if="item.progress" class="retos__progress-text">{{ item.progress }}</span>
+              <span v-if="item.progress && !item.allComplete" class="retos__progress-text">{{ item.progress }}</span>
             </div>
           </div>
         </div>
@@ -134,15 +134,16 @@ async function fetchPage(tab: string, from: number, to: number) {
     const currentDay = enrollment
       ? getCurrentDay(enrollment.enrolled_at, completedDays, totalDays)
       : 0
-    const isComplete = enrollment?.status === 'completed'
+    const allComplete = !!enrollment && totalDays > 0 && completedDays.size >= totalDays
     return {
       ...p,
       typeLabel: p.type.toUpperCase(),
       img: p.cover_url ?? undefined,
       duration: `${totalDays} días`,
       enrolled: !!enrollment,
+      allComplete,
       free: p.plan === 'free',
-      progress: isComplete ? 'Completado' : (enrollment ? `Día ${currentDay}/${totalDays}` : null),
+      progress: allComplete ? 'Completado' : (enrollment ? `Día ${currentDay}/${totalDays}` : null),
     }
   })
 
@@ -290,6 +291,9 @@ function handleCardClick(item: { id: string; entitlement_key: string | null; fre
 
 .retos__card-info {
   padding: var(--space-4) var(--space-1) 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .retos__card-eyebrow {
@@ -307,7 +311,7 @@ function handleCardClick(item: { id: string; entitlement_key: string | null; fre
   font-family: var(--font-title);
   font-size: var(--title-md);
   color: var(--color-text);
-  margin: 0 0 var(--space-1);
+  margin: 0 0 var(--space-3);
   line-height: var(--leading-snug);
 }
 
@@ -322,7 +326,8 @@ function handleCardClick(item: { id: string; entitlement_key: string | null; fre
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-4);
 }
 
 .retos__progress-text {
