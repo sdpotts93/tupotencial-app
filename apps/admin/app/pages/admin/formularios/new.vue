@@ -50,7 +50,7 @@
 
               <UiSelect
                 v-model="field.type"
-                label="Tipo"
+                label="Tipo de respuesta"
                 :options="fieldTypeOptions"
               />
 
@@ -116,7 +116,7 @@ const statusOptions = [
 ]
 
 const fieldTypeOptions = [
-  { value: 'text', label: 'Pregunta abierta' },
+  { value: 'text', label: 'Texto corto' },
   { value: 'textarea', label: 'Texto largo' },
   { value: 'select', label: 'Selección' },
   { value: 'rating', label: 'Calificación (estrellas)' },
