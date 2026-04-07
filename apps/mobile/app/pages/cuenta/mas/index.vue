@@ -45,7 +45,10 @@
 
       <!-- Profile header -->
       <div class="more__profile">
-        <div class="more__avatar"><span>{{ initials }}</span></div>
+        <div class="more__avatar">
+          <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="more__avatar-img" />
+          <span v-else>{{ initials }}</span>
+        </div>
         <div class="more__info">
           <h2 class="more__name">{{ user?.display_name || user?.email?.split('@')[0] || 'Sin nombre' }}</h2>
           <UiTag v-if="isSubscriber" variant="accent" size="md">Core</UiTag>
@@ -179,15 +182,22 @@ function handleLogout() {
 }
 
 .more__avatar {
-  width: 56px; 
-  height: 56px; 
-  border-radius: 50%; 
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   background: var(--color-sand);
-  display: flex; align-items: center; 
+  display: flex; align-items: center;
   justify-content: center;
   font-family: var(--font-title);
   font-weight: var(--weight-semibold);
   color: var(--color-dark);
+  overflow: hidden;
+}
+
+.more__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .more__info { display: flex; flex-direction: column; gap: var(--space-1); }

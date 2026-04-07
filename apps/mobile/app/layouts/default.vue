@@ -13,7 +13,8 @@
           <span>{{ streak }}</span>
         </NuxtLink>
         <div class="app-topbar__avatar" @click="navigateTo('/cuenta/mis-datos')">
-          {{ initials }}
+          <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="app-topbar__avatar-img" />
+          <template v-else>{{ initials }}</template>
         </div>
       </div>
     </header>
@@ -227,6 +228,13 @@ const desktopBottomItems = [
     color: var(--color-dark);
     cursor: pointer;
     transition: box-shadow var(--transition-fast);
+    overflow: hidden;
+  }
+
+  .app-topbar__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   @media (hover: hover) {

@@ -69,7 +69,10 @@
 
       <template #cell-full_name="{ value, row }">
         <div class="user-cell">
-          <div class="user-cell__avatar">{{ value?.charAt(0) ?? '?' }}</div>
+          <div class="user-cell__avatar">
+            <img v-if="row.avatar_url" :src="row.avatar_url" alt="" class="user-cell__avatar-img" />
+            <template v-else>{{ value?.charAt(0) ?? '?' }}</template>
+          </div>
           <div>
             <span class="user-cell__name">{{ value }}</span>
             <span class="user-cell__email">{{ row.email }}</span>
@@ -238,6 +241,13 @@ function goToUser(row: any) {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.user-cell__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-cell__name {

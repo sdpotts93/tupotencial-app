@@ -52,16 +52,25 @@
         <!-- Left column: Avatar + Form -->
         <div class="profile__top-left">
           <!-- Avatar with camera overlay -->
-          <div class="profile__avatar-area">
+          <div class="profile__avatar-area" role="button" tabindex="0" aria-label="Subir foto" @click="!uploading && fileInput?.click()">
             <div class="profile__avatar">
-              <span class="profile__avatar-initials">{{ initials }}</span>
+              <img v-if="avatarUrl" :src="avatarUrl" alt="" class="profile__avatar-img" />
+              <span v-else class="profile__avatar-initials">{{ initials }}</span>
             </div>
-            <button type="button" class="profile__camera" aria-label="Subir foto">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="profile__camera" :class="{ 'profile__camera--uploading': uploading }">
+              <svg v-if="!uploading" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
                 <circle cx="12" cy="13" r="4"/>
               </svg>
-            </button>
+              <span v-else class="profile__camera-spinner" />
+            </div>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              class="profile__file-input"
+              @change="handleFileSelect"
+            />
           </div>
 
           <!-- Form -->
@@ -115,13 +124,17 @@ const toast = useToast()
 
 const displayName = ref(user.value?.display_name || '')
 const segment = ref(user.value?.community_segment || '')
+const avatarUrl = ref(user.value?.avatar_url || '')
 const saving = ref(false)
+const uploading = ref(false)
 const formError = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
 
 watch(() => user.value, (u) => {
   if (u) {
     if (!displayName.value) displayName.value = u.display_name || ''
     if (!segment.value) segment.value = u.community_segment || ''
+    if (!avatarUrl.value && u.avatar_url) avatarUrl.value = u.avatar_url
   }
 }, { immediate: true })
 
@@ -149,6 +162,45 @@ const { data: vipAccesos, status: profileStatus, refresh: refreshProfile } = use
     img: (p.addons as any)?.cover_url ?? null,
   }))
 }, { lazy: true, watch: [() => user.value?.id] })
+
+async function handleFileSelect(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file || !user.value) return
+
+  if (file.size > 5 * 1024 * 1024) {
+    formError.value = 'La imagen no puede superar 5 MB'
+    return
+  }
+
+  uploading.value = true
+  formError.value = ''
+
+  try {
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${user.value.id}/avatar.${ext}`
+
+    const { error: uploadErr } = await client.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, contentType: file.type })
+
+    if (uploadErr) throw uploadErr
+
+    const { data: urlData } = client.storage.from('avatars').getPublicUrl(path)
+    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`
+
+    await updateProfile({ avatar_url: publicUrl })
+    avatarUrl.value = publicUrl
+    toast.show('Foto actualizada', 'success')
+  } catch (err) {
+    console.error('Avatar upload error:', err)
+    formError.value = 'No se pudo subir la imagen'
+    toast.show('Error al subir foto', 'error')
+  } finally {
+    uploading.value = false
+    if (fileInput.value) fileInput.value.value = ''
+  }
+}
 
 async function handleSave() {
   formError.value = ''
@@ -213,6 +265,7 @@ async function handleSave() {
   position: relative;
   width: fit-content;
   margin-bottom: var(--space-6);
+  cursor: pointer;
 }
 
 .profile__avatar {
@@ -223,6 +276,14 @@ async function handleSave() {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.profile__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .profile__avatar-initials {
@@ -230,6 +291,27 @@ async function handleSave() {
   font-size: var(--title-lg);
   font-weight: var(--weight-semibold);
   color: var(--color-dark);
+}
+
+.profile__file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.profile__camera-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(var(--tint-rgb), 0.2);
+  border-top-color: var(--color-text);
+  border-radius: 50%;
+  animation: avatar-spin 0.6s linear infinite;
+}
+
+@keyframes avatar-spin {
+  to { transform: rotate(360deg); }
 }
 
 .profile__camera {

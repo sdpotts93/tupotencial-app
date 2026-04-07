@@ -14,18 +14,18 @@
 
     <div class="profile-setup__card">
       <!-- Avatar with camera overlay -->
-      <div class="profile-setup__avatar-area">
+      <div class="profile-setup__avatar-area" role="button" tabindex="0" aria-label="Subir foto" @click="!uploading && fileInput?.click()">
         <div class="profile-setup__avatar">
           <img v-if="avatarUrl" :src="avatarUrl" alt="" class="profile-setup__avatar-img" />
           <span v-else class="profile-setup__avatar-initials">{{ initials }}</span>
         </div>
-        <button type="button" class="profile-setup__camera" aria-label="Subir foto" :disabled="uploading" @click="fileInput?.click()">
+        <div class="profile-setup__camera" :class="{ 'profile-setup__camera--uploading': uploading }">
           <svg v-if="!uploading" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
             <circle cx="12" cy="13" r="4"/>
           </svg>
           <span v-else class="profile-setup__camera-spinner" />
-        </button>
+        </div>
         <input
           ref="fileInput"
           type="file"
@@ -209,6 +209,7 @@ async function handleSave() {
   position: relative;
   width: fit-content;
   margin-bottom: var(--space-6);
+  cursor: pointer;
 }
 
 .profile-setup__avatar {
