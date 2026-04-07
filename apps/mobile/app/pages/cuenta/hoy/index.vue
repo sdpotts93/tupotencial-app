@@ -134,12 +134,12 @@
       <!-- Featured + Mensaje: side-by-side on desktop -->
       <div class="hoy__duo-row">
         <section class="hoy__featured">
-          <button class="hoy__featured-card" @click="activeSheet = 'accion'">
+          <button class="hoy__featured-card" :disabled="!!todayAccion" @click="handleRetoTap('accion')">
             <img src="/images/rojo-carlotta.jpg" alt="" class="hoy__featured-img" />
             <div class="hoy__featured-info">
-              <div class="hoy__featured-eyebrow-row">
+              <div v-if="!todayAccion" class="hoy__featured-eyebrow-row">
                 <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
-                <Icon v-if="!todayAccion" name="lucide:arrow-up-right" size="16" class="hoy__featured-arrow" />
+                <Icon name="lucide:arrow-up-right" size="16" class="hoy__featured-arrow" />
               </div>
               <h3 class="hoy__featured-name" :class="{ 'hoy__featured-name--done': !!todayAccion }">{{ dailyPlan.title }}</h3>
             </div>
@@ -254,7 +254,7 @@
       class="hoy__overlay"
       @click.self="activeSheet = 'none'"
     >
-      <div class="hoy__sheet">
+      <div ref="checkinSheetRef" class="hoy__sheet" :style="checkinSheetStyle" v-on="checkinDragListeners">
         <div class="hoy__sheet-header">
           <div class="hoy__sheet-handle" />
           <button class="hoy__sheet-close" aria-label="Cerrar" @click="activeSheet = 'none'">
@@ -316,7 +316,7 @@
       class="hoy__overlay"
       @click.self="closeAccionSheet"
     >
-      <div class="hoy__sheet">
+      <div ref="accionSheetRef" class="hoy__sheet" :style="accionSheetStyle" v-on="accionDragListeners">
         <div class="hoy__sheet-header">
           <div class="hoy__sheet-handle" />
           <button class="hoy__sheet-close" aria-label="Cerrar" @click="closeAccionSheet">
@@ -801,6 +801,20 @@ const activities = computed(() => {
 
 // ─── Sheet state ───
 const activeSheet = ref<'none' | 'checkin' | 'accion'>('none')
+const checkinSheetRef = ref<HTMLElement | null>(null)
+const accionSheetRef = ref<HTMLElement | null>(null)
+
+const { translateY: checkinTranslateY, isDragging: checkinDragging, dragListeners: checkinDragListeners } = useSheetDrag(checkinSheetRef, () => { activeSheet.value = 'none' })
+const checkinSheetStyle = computed(() => {
+  if (checkinTranslateY.value === 0) return {}
+  return { transform: `translateY(${checkinTranslateY.value}px)`, transition: checkinDragging.value ? 'none' : 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)' }
+})
+
+const { translateY: accionTranslateY, isDragging: accionDragging, dragListeners: accionDragListeners } = useSheetDrag(accionSheetRef, closeAccionSheet)
+const accionSheetStyle = computed(() => {
+  if (accionTranslateY.value === 0) return {}
+  return { transform: `translateY(${accionTranslateY.value}px)`, transition: accionDragging.value ? 'none' : 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)' }
+})
 
 // ─── Check-in state ───
 const selectedMood = ref<string | null>(null)
@@ -1735,7 +1749,7 @@ function closeAccionSheet() {
   align-items: flex-start;
   justify-content: center;
   position: relative;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .hoy__sheet-handle {

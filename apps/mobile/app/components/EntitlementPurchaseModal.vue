@@ -5,7 +5,7 @@
       class="ent__overlay"
       @click.self="close"
     >
-      <div class="ent__sheet">
+      <div ref="sheetRef" class="ent__sheet" :style="sheetStyle" v-on="dragListeners">
       <div class="ent__sheet-header">
         <div class="ent__sheet-handle" />
         <button class="ent__sheet-close" aria-label="Cerrar" @click="close">
@@ -51,6 +51,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+
 interface AddonInfo {
   id: string
   title: string
@@ -66,9 +68,21 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const isSubscriptionGate = computed(() => props.addon?.id === 'core' || props.addon?.id === 'free')
 
+const sheetRef = ref<HTMLElement | null>(null)
+
 function close() {
   emit('update:modelValue', false)
 }
+
+const { translateY, isDragging, dragListeners } = useSheetDrag(sheetRef, close)
+
+const sheetStyle = computed(() => {
+  if (translateY.value === 0) return {}
+  return {
+    transform: `translateY(${translateY.value}px)`,
+    transition: isDragging.value ? 'none' : 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
+  }
+})
 
 function goToAddon() {
   emit('update:modelValue', false)
@@ -135,7 +149,7 @@ function goToAddon() {
   align-items: flex-start;
   justify-content: center;
   position: relative;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .ent__sheet-handle {
