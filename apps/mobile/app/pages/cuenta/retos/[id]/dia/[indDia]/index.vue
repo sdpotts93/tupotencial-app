@@ -315,7 +315,10 @@ const programType = computed<ProgramType>(() => dayData.value?.programType ?? 'r
 const totalDays = computed(() => dayData.value?.totalDays ?? 0)
 const dayTitle = computed(() => dayData.value?.title ?? '')
 const dayDescription = computed(() => dayData.value?.description ?? '')
-const activities = ref<DayActivity[]>(dayData.value?.activities ?? [])
+const activities = ref<DayActivity[]>([])
+watch(() => dayData.value?.activities, (acts) => {
+  if (acts) activities.value = acts
+}, { immediate: true })
 
 const hasForm = computed(() => {
   if (programType.value === 'bootcamp') return true
