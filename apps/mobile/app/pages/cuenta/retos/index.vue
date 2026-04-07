@@ -36,19 +36,19 @@
         <div
           v-for="item in filteredPrograms"
           :key="item.id"
-          :class="['retos__card', { 'retos__card--locked': isLocked(item.entitlement_key) }]"
+          :class="['retos__card', { 'retos__card--locked': isProgramLocked(item) }]"
           @click="handleCardClick(item)"
         >
           <div class="retos__card-img-wrap">
             <img :src="item.img" alt="" class="retos__card-img" />
-            <EntitlementLockBadge :locked="isLocked(item.entitlement_key)" />
+            <EntitlementLockBadge :locked="isProgramLocked(item)" />
           </div>
           <div class="retos__card-info">
             <span class="retos__card-eyebrow">{{ item.typeLabel }} · {{ item.duration }}</span>
             <h3 class="retos__card-name">{{ item.title }}</h3>
             <p class="retos__card-desc">{{ item.description }}</p>
             <div class="retos__card-footer">
-              <span v-if="isLocked(item.entitlement_key)" class="retos__tag retos__tag--locked">
+              <span v-if="isProgramLocked(item)" class="retos__tag retos__tag--locked">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
                 </svg>
@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 const router = useRouter()
-const { user } = useAuth()
+const { user, isSubscriber } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 const client = useSupabaseClient()
 
@@ -125,9 +125,20 @@ const filteredPrograms = computed(() => {
   return (programs.value ?? []).filter(p => p.type === activeTab.value)
 })
 
+function isProgramLocked(item: { entitlement_key: string | null; free: boolean }) {
+  if (isLocked(item.entitlement_key)) return true
+  if (!item.free && !isSubscriber.value) return true
+  return false
+}
+
 function handleCardClick(item: NonNullable<typeof programs.value>[number]) {
   if (isLocked(item.entitlement_key)) {
     selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  if (!item.free && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este contenido.' }
     showPurchaseModal.value = true
     return
   }

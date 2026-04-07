@@ -53,12 +53,12 @@
               <div
                 v-for="item in filteredResults"
                 :key="item.id"
-                :class="['library__search-item', { 'library__search-item--locked': isLocked(item.entitlement_key) }]"
+                :class="['library__search-item', { 'library__search-item--locked': isContentLocked(item) }]"
                 @click="handleSearchClick(item)"
               >
                 <div class="library__search-item-thumb-wrap">
                   <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__search-item-thumb" />
-                  <EntitlementLockBadge :locked="isLocked(item.entitlement_key)" />
+                  <EntitlementLockBadge :locked="isContentLocked(item)" />
                 </div>
                 <div class="library__search-item-body">
                   <h3 class="library__search-item-name">{{ item.title }}</h3>
@@ -139,7 +139,7 @@
           </section>
 
           <!-- Categories -->
-          <section v-for="cat in categories" :key="cat.slug" class="library__section">
+          <section v-for="cat in categories.filter(c => c.slug !== 'eventos-grabados')" :key="cat.slug" class="library__section">
             <div class="section__header">
               <h2 class="library__section-title">{{ cat.title }}</h2>
               <NuxtLink :to="`/cuenta/biblioteca/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
@@ -148,12 +148,12 @@
               <div
                 v-for="item in cat.items"
                 :key="item.id"
-                :class="['library__scroll-card', { 'library__scroll-card--locked': isLocked(item.entitlement_key) }]"
+                :class="['library__scroll-card', { 'library__scroll-card--locked': isContentLocked(item) }]"
                 @click="handleContentClick(item)"
               >
                 <div class="library__scroll-img-wrap">
                   <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
-                  <EntitlementLockBadge :locked="isLocked(item.entitlement_key)" />
+                  <EntitlementLockBadge :locked="isContentLocked(item)" />
                 </div>
                 <div class="library__scroll-info">
                   <span class="library__scroll-title">{{ item.title }}</span>
@@ -306,7 +306,7 @@ function formatDuration(seconds: number | null) {
 }
 
 // ─── Database-powered search via Postgres full-text search ───
-const searchResults = ref<{ id: string; title: string; duration: string | null; typeLabel: string; category: string; thumbnail: string; entitlement_key: string | null }[]>([])
+const searchResults = ref<{ id: string; title: string; duration: string | null; typeLabel: string; category: string; thumbnail: string; entitlement_key: string | null; plan?: string }[]>([])
 const searchLoading = ref(false)
 const searchError = ref<string | null>(null)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
@@ -322,6 +322,7 @@ function mapResults(rows: any[]) {
     category: c.category_title ?? '',
     thumbnail: c.thumbnail_url ?? undefined,
     entitlement_key: c.entitlement_key ?? null,
+    plan: c.plan ?? undefined,
   }))
 }
 
@@ -336,7 +337,7 @@ async function performSearch(q: string) {
     // ILIKE fallback on title for partial/exact matches the FTS may miss
     const { data: likeData, error: likeErr } = await client
       .from('content_items')
-      .select('id, title, type, duration_seconds, thumbnail_url, entitlement_key')
+      .select('id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key')
       .eq('status', 'published')
       .ilike('title', `%${q}%`)
       .limit(20)
@@ -387,7 +388,7 @@ const { data: categoriesData, status: biblioStatus, refresh: refreshBiblio } = u
   const { data: itemCats } = await client
     .from('content_item_categories')
     .select('category_id, position, content_items(id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key, status)')
-    .order('position')
+    .order('position', { ascending: false })
   // Group items by category
   const catItemsMap = new Map<string, any[]>()
   for (const ic of itemCats ?? []) {
@@ -431,31 +432,18 @@ const featuredItem = computed(() => {
   return firstCat?.items?.[0] ?? null
 })
 
-const { data: recordedEvents } = useAsyncData('mobile-library-recorded-events', async () => {
-  const { data: cat } = await client
-    .from('content_categories')
-    .select('id')
-    .eq('slug', 'eventos-grabados')
-    .single()
+const recordedEvents = computed(() => {
+  const cat = categories.value.find(c => c.slug === 'eventos-grabados')
   if (!cat) return []
-  const { data: itemCats } = await client
-    .from('content_item_categories')
-    .select('position, content_items(id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key, status, created_at)')
-    .eq('category_id', cat.id)
-    .order('position')
-    .limit(5)
-  return (itemCats ?? [])
-    .map(ic => ic.content_items as any)
-    .filter((item: any) => item && item.status === 'published')
-    .map((item: any) => ({
-      id: item.id,
-      title: item.title,
-      duration: formatDuration(item.duration_seconds),
-      img: item.thumbnail_url ?? undefined,
-      entitlement_key: item.entitlement_key,
-      plan: item.plan ?? undefined,
-    }))
-}, { lazy: true })
+  return cat.items.slice(0, 5).map((item: any) => ({
+    id: item.id,
+    title: item.title,
+    duration: item.duration,
+    img: item.thumbnail ?? undefined,
+    entitlement_key: item.entitlement_key,
+    plan: item.plan ?? undefined,
+  }))
+})
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) return true
@@ -477,9 +465,14 @@ function handleContentClick(item: { id: string; entitlement_key: string | null; 
   router.push(`/cuenta/contenido/${item.id}`)
 }
 
-function handleSearchClick(item: { id: string; entitlement_key: string | null }) {
+function handleSearchClick(item: { id: string; entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) {
     selectedAddon.value = getAddonForEntitlement(item.entitlement_key!)
+    showPurchaseModal.value = true
+    return
+  }
+  if (item.plan === 'core' && !isSubscriber.value) {
+    selectedAddon.value = { id: 'core', title: 'Plan Core', description: 'Suscríbete al plan Core para acceder a este contenido.' }
     showPurchaseModal.value = true
     return
   }
@@ -547,25 +540,17 @@ const { data: programsWithContent } = useAsyncData('mobile-library-programs', as
 
 // ─── Tab: Objetivos ───
 const { data: objectives } = useAsyncData('mobile-library-objectives', async () => {
-  const { data: objs } = await client.from('content_objectives').select('id, title, slug').order('position')
-  // Count published content per objective
-  const { data: items } = await client
-    .from('content_items')
-    .select('id, objective_id')
-    .eq('status', 'published')
-    .not('objective_id', 'is', null)
-  const countMap = new Map<string, number>()
-  for (const item of items ?? []) {
-    if (item.objective_id) {
-      countMap.set(item.objective_id, (countMap.get(item.objective_id) ?? 0) + 1)
-    }
-  }
-  return (objs ?? []).map(o => ({
+  const { data: objs } = await client
+    .from('content_objectives')
+    .select('id, title, slug, content_items(count)')
+    .eq('content_items.status', 'published')
+    .order('position')
+  return (objs ?? []).map((o: any) => ({
     slug: o.slug,
     title: o.title,
     description: '',
     icon: 'lucide:target',
-    count: countMap.get(o.id) ?? 0,
+    count: o.content_items?.[0]?.count ?? 0,
   }))
 }, { lazy: true })
 </script>

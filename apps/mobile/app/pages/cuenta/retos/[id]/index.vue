@@ -132,7 +132,7 @@ definePageMeta({ layout: 'blank' })
 const route = useRoute()
 const client = useSupabaseClient()
 const id = route.params.id as string
-const { user } = useAuth()
+const { user, isSubscriber } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 
 const showPurchaseModal = ref(false)
@@ -191,7 +191,11 @@ const program = computed(() => {
   }
 })
 
-const locked = computed(() => isLocked(program.value.entitlement_key))
+const locked = computed(() => {
+  if (isLocked(program.value.entitlement_key)) return true
+  if (!program.value.free && !isSubscriber.value) return true
+  return false
+})
 const addonInfo = computed(() =>
   program.value.entitlement_key ? getAddonForEntitlement(program.value.entitlement_key) : null,
 )

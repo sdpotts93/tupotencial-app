@@ -164,12 +164,31 @@
               placeholder="Selecciona el tipo"
             />
 
-            <UiSelect
-              v-model="form.category_id"
-              label="Categoría"
-              :options="categoryOptions"
-              placeholder="Selecciona la categoría"
-            />
+            <div class="multi-select">
+              <label class="multi-select__label">Categorías</label>
+              <div ref="catContainerRef" class="multi-select__wrapper">
+                <button type="button" class="multi-select__trigger" :class="{ 'multi-select__trigger--open': catDropdownOpen }" @click="catDropdownOpen = !catDropdownOpen">
+                  <span :class="['multi-select__value', { 'multi-select__value--placeholder': !form.category_ids.length }]">
+                    {{ form.category_ids.length ? `${form.category_ids.length} seleccionada${form.category_ids.length > 1 ? 's' : ''}` : 'Selecciona categorías' }}
+                  </span>
+                  <svg class="multi-select__chevron" :class="{ 'multi-select__chevron--open': catDropdownOpen }" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <div v-if="catDropdownOpen" class="multi-select__dropdown">
+                  <label v-for="opt in categoryOptions" :key="opt.value" class="multi-select__option">
+                    <input type="checkbox" :value="opt.value" v-model="form.category_ids" class="multi-select__checkbox" />
+                    <span>{{ opt.label }}</span>
+                  </label>
+                </div>
+              </div>
+              <div v-if="form.category_ids.length" class="multi-select__pills">
+                <span v-for="cid in form.category_ids" :key="cid" class="multi-select__pill">
+                  {{ categoryOptions.find(o => o.value === cid)?.label }}
+                  <button type="button" class="multi-select__pill-remove" @click="form.category_ids = form.category_ids.filter(id => id !== cid)">&times;</button>
+                </span>
+              </div>
+            </div>
 
             <UiSelect
               v-model="form.objective_id"
@@ -255,6 +274,8 @@ const coverPreview = ref('')
 const isCoverDragging = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
+const catDropdownOpen = ref(false)
+const catContainerRef = ref<HTMLElement>()
 const formError = ref('')
 const errors = reactive({ title: '', introduction: '', body: '', vimeo_url: '', audio_file: '', scheduled_at: '' })
 
@@ -265,10 +286,10 @@ const { data: contentItem } = await useAsyncData(`content-${id}`, async () => {
   return data
 })
 
-const { data: itemCategory } = await useAsyncData(`content-category-${id}`, async () => {
-  if (isNew) return null
-  const { data } = await client.from('content_item_categories').select('category_id').eq('content_item_id', id).limit(1).single()
-  return data
+const { data: itemCategories } = await useAsyncData(`content-categories-${id}`, async () => {
+  if (isNew) return []
+  const { data } = await client.from('content_item_categories').select('category_id').eq('content_item_id', id)
+  return (data ?? []).map(d => d.category_id)
 })
 
 // ── Fetch categories & objectives for dropdowns ──
@@ -289,7 +310,7 @@ const form = reactive({
     ? (contentItem.value?.body ?? '')
     : (contentItem.value?.description ?? ''),
   content_type: contentItem.value?.type ?? 'video',
-  category_id: itemCategory.value?.category_id ?? '',
+  category_ids: itemCategories.value ?? [] as string[],
   objective_id: contentItem.value?.objective_id ?? '',
   duration: contentItem.value?.duration_seconds ? `${contentItem.value.duration_seconds}` : '',
   segment: contentItem.value?.plan ?? 'free',
@@ -312,6 +333,15 @@ const segmentOptions = [
   { value: 'free', label: 'Gratuito' },
   { value: 'core', label: 'Core' },
 ]
+
+// Close category dropdown on click outside
+if (import.meta.client) {
+  document.addEventListener('mousedown', (e: MouseEvent) => {
+    if (catDropdownOpen.value && catContainerRef.value && !catContainerRef.value.contains(e.target as Node)) {
+      catDropdownOpen.value = false
+    }
+  })
+}
 
 const entitlementOptions = [
   { value: '', label: 'Sin restricción (abierto)' },
@@ -519,15 +549,19 @@ async function handleSave() {
 
     if (isNew) {
       const { data: inserted } = await client.from('content_items').insert({ ...payload, type: form.content_type }).select('id').single()
-      if (inserted && form.category_id) {
-        await client.from('content_item_categories').insert({ content_item_id: inserted.id, category_id: form.category_id })
+      if (inserted && form.category_ids.length) {
+        await client.from('content_item_categories').insert(
+          form.category_ids.map(cid => ({ content_item_id: inserted.id, category_id: cid })),
+        )
       }
     } else {
       await client.from('content_items').update(payload).eq('id', id)
-      // Update junction category
-      if (form.category_id) {
-        await client.from('content_item_categories').delete().eq('content_item_id', id)
-        await client.from('content_item_categories').insert({ content_item_id: id, category_id: form.category_id })
+      // Update junction categories
+      await client.from('content_item_categories').delete().eq('content_item_id', id)
+      if (form.category_ids.length) {
+        await client.from('content_item_categories').insert(
+          form.category_ids.map(cid => ({ content_item_id: id, category_id: cid })),
+        )
       }
     }
     navigateTo('/admin/contenido')
@@ -562,6 +596,50 @@ async function handleDelete() {
 </script>
 
 <style scoped>
+/* ── Multi-select categories ── */
+.multi-select { display: flex; flex-direction: column; gap: var(--space-1); }
+.multi-select__label { font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--color-text); }
+.multi-select__wrapper { position: relative; }
+.multi-select__trigger {
+  appearance: none; display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: var(--color-input-bg); border: 1.5px solid transparent;
+  box-shadow: 0px 0px 2px var(--color-input-shadow); border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4); font-family: var(--font-body); font-size: var(--text-md);
+  color: var(--color-text); cursor: pointer; text-align: left;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.multi-select__trigger:focus,
+.multi-select__trigger--open { border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-input-focus-ring); outline: none; }
+.multi-select__value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.multi-select__value--placeholder { color: var(--color-placeholder); }
+.multi-select__chevron { flex-shrink: 0; color: var(--color-muted); transition: transform var(--transition-fast); }
+.multi-select__chevron--open { transform: rotate(180deg); }
+.multi-select__dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 100;
+  background: var(--color-input-bg); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  max-height: 256px; overflow-y: auto; padding: var(--space-1) 0;
+}
+.multi-select__option {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: 10px var(--space-3); cursor: pointer; font-size: var(--text-md);
+  transition: background var(--transition-fast);
+}
+.multi-select__option:hover { background: #f3f4f6; }
+.multi-select__checkbox { accent-color: var(--color-primary); }
+.multi-select__pills { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+.multi-select__pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--color-primary-light, #e0e7ff); color: var(--color-primary);
+  font-size: var(--text-xs); font-weight: var(--weight-medium);
+  padding: 2px 8px; border-radius: var(--radius-full);
+}
+.multi-select__pill-remove {
+  background: none; border: none; color: inherit; cursor: pointer;
+  font-size: 14px; line-height: 1; padding: 0; opacity: 0.7;
+}
+.multi-select__pill-remove:hover { opacity: 1; }
+
 .form-layout {
   display: grid;
   grid-template-columns: 1fr 320px;

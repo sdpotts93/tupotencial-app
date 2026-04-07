@@ -86,7 +86,10 @@
       </template>
 
       <template #cell-category="{ value }">
-        <span v-if="categoryName(value)" style="white-space: nowrap;">{{ categoryName(value) }}</span>
+        <span v-if="value.length" class="category-cell">
+          <span class="category-cell__name">{{ categoryName(value[0]) }}</span>
+          <span v-if="value.length > 1" class="category-cell__more" :data-tooltip="value.slice(1).map(categoryName).join(', ')" @click.stop>+{{ value.length - 1 }}</span>
+        </span>
         <span v-else style="color: var(--color-muted);">—</span>
       </template>
 
@@ -203,7 +206,7 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
       ...item,
       content_type: item.type,
       segment: item.plan,
-      category: (item.content_item_categories as any)?.[0]?.category_id ?? null,
+      category: ((item.content_item_categories as any) ?? []).map((c: any) => c.category_id),
     }))
   },
   [search, filterStatus, filterType, filterSegment, filterCategory],
@@ -349,5 +352,52 @@ function goToEdit(row: Record<string, any>) {
   color: var(--color-muted);
   max-width: 28ch;
   line-height: var(--leading-normal);
+}
+
+.category-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+.category-cell__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-cell__more {
+  position: relative;
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-primary);
+  background: var(--color-primary-light, #e0e7ff);
+  padding: 4px 6px 1px;
+  border-radius: var(--radius-full);
+  cursor: default;
+}
+
+.category-cell__more::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-text, #1a1a1a);
+  color: #fff;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-normal);
+  padding: 4px 8px;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 10;
+}
+
+.category-cell__more:hover::after {
+  opacity: 1;
 }
 </style>
