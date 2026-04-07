@@ -66,14 +66,14 @@
             :class="['onboarding-opt', { 'onboarding-opt--selected': selectedTone === 'carlotta' }]"
             @click="selectedTone = 'carlotta'"
           >
-            <span class="onboarding-opt__icon"><Icon name="lucide:flower" size="20" /></span>
+            <span class="onboarding-opt__icon"><img :src="avatarUrl('carlotta')" alt="Carlotta" class="onboarding-opt__avatar" /></span>
             <span class="onboarding-opt__label">Carlotta</span>
           </button>
           <button
             :class="['onboarding-opt', { 'onboarding-opt--selected': selectedTone === 'gabriel' }]"
             @click="selectedTone = 'gabriel'"
           >
-            <span class="onboarding-opt__icon"><Icon name="lucide:waves" size="20" /></span>
+            <span class="onboarding-opt__icon"><img :src="avatarUrl('gabriel')" alt="Gabriel" class="onboarding-opt__avatar" /></span>
             <span class="onboarding-opt__label">Gabriel</span>
           </button>
         </div>
@@ -123,6 +123,7 @@ definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
 const { user } = useAuth()
+const { avatarUrl } = useCharacterAvatars()
 
 const selectedTone = ref<'carlotta' | 'gabriel'>('carlotta')
 const limitReached = ref(false)
@@ -259,6 +260,13 @@ function startChat() {
   width: 24px;
   text-align: center;
   color: var(--color-sand);
+}
+
+.onboarding-opt__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
 }
 
 .onboarding-opt__label {

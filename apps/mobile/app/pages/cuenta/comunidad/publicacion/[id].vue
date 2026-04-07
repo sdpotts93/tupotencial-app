@@ -116,6 +116,7 @@ definePageMeta({ layout: 'blank' })
 const route = useRoute()
 const client = useSupabaseClient()
 const { user } = useAuth()
+const { avatarUrl } = useCharacterAvatars()
 const toast = useToast()
 const postId = route.params.id as string
 
@@ -141,7 +142,7 @@ function isVideo(url: string) {
 
 // Load post data
 const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
-const segmentAvatar: Record<string, string> = { gabriel: '/images/gabriel.png', carlotta: '/images/carlotta.png' }
+
 
 const { data: postData, refresh: refreshPost, status: postStatus } = useAsyncData(`post-${postId}`, async () => {
   const { data } = await client
@@ -153,7 +154,7 @@ const { data: postData, refresh: refreshPost, status: postStatus } = useAsyncDat
   return {
     ...data,
     author: segmentAuthor[data.community_segment ?? ''] ?? 'Gabriel',
-    avatar: segmentAvatar[data.community_segment ?? ''] ?? '/images/gabriel.png',
+    avatar: avatarUrl(data.community_segment ?? 'gabriel'),
     reactions: ((data.post_reactions as any) ?? []).length,
     liked: ((data.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
     timeAgo: formatTimeAgo(data.created_at),

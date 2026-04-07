@@ -123,6 +123,7 @@ const columns = [
 ]
 
 const client = useSupabaseClient()
+const { avatarUrl } = useCharacterAvatars()
 const { canEdit } = useAdminAuth()
 const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
 
@@ -168,7 +169,7 @@ function goToEdit(row: Record<string, any>) {
 }
 
 function authorAvatar(name: string) {
-  return name === 'Carlotta' ? '/images/carlotta.png' : '/images/gabriel.png'
+  return avatarUrl(name.toLowerCase())
 }
 
 const confirm = useConfirm()

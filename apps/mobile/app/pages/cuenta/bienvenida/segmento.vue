@@ -22,7 +22,10 @@
           :style="{ animationDelay: `${i * 70}ms` }"
           @click="toggleOption(opt.value)"
         >
-          <span class="onboarding-opt__icon"><Icon :name="opt.icon" size="20" /></span>
+          <span class="onboarding-opt__icon">
+            <img v-if="(opt as any).avatar" :src="(opt as any).avatar" :alt="opt.label" class="onboarding-opt__avatar" />
+            <Icon v-else :name="opt.icon" size="20" />
+          </span>
           <span class="onboarding-opt__label">{{ opt.label }}</span>
         </button>
       </div>
@@ -54,6 +57,7 @@ definePageMeta({ layout: 'auth' })
 
 const { setSegment, user } = useAuth()
 const supabase = useSupabaseClient()
+const { avatarUrl } = useCharacterAvatars()
 
 const step = ref(0)
 
@@ -86,8 +90,8 @@ const steps = [
     question: 'Elige tu voz guía',
     key: 'segment',
     options: [
-      { value: 'gabriel', icon: 'lucide:waves', label: 'Gabriel — Disciplina consciente' },
-      { value: 'carlotta', icon: 'lucide:flower', label: 'Carlotta — Bienestar emocional' },
+      { value: 'gabriel', icon: 'lucide:waves', label: 'Gabriel — Disciplina consciente', avatar: avatarUrl('gabriel') },
+      { value: 'carlotta', icon: 'lucide:flower', label: 'Carlotta — Bienestar emocional', avatar: avatarUrl('carlotta') },
       { value: 'conjunta', icon: 'lucide:sparkles', label: 'Combinada — Equilibrio integral' },
     ],
   },
@@ -305,6 +309,13 @@ async function handleContinue() {
   width: 24px;
   text-align: center;
   color: var(--color-sand);
+}
+
+.onboarding-opt__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
 }
 
 .onboarding-opt__label {

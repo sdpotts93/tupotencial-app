@@ -138,6 +138,7 @@
 <script setup lang="ts">
 const { user } = useAuth()
 const client = useSupabaseClient()
+const { avatarUrl } = useCharacterAvatars()
 
 const activeFilter = ref('all')
 
@@ -199,7 +200,6 @@ function formatTimeAgo(dateStr: string) {
 }
 
 const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
-const segmentAvatar: Record<string, string> = { gabriel: '/images/gabriel.png', carlotta: '/images/carlotta.png' }
 
 const { data: posts, refresh: refreshComunidad, status: comunidadStatus } = useAsyncData('mobile-posts', async () => {
   const { data } = await client
@@ -210,7 +210,7 @@ const { data: posts, refresh: refreshComunidad, status: comunidadStatus } = useA
   return (data ?? []).map(p => ({
     ...p,
     author: segmentAuthor[p.community_segment ?? ''] ?? 'Gabriel',
-    avatar: segmentAvatar[p.community_segment ?? ''] ?? '/images/gabriel.png',
+    avatar: avatarUrl(p.community_segment ?? 'gabriel'),
     reactions: ((p.post_reactions as any) ?? []).length,
     liked: ((p.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
     comments: (p.post_comments as any)?.[0]?.count ?? 0,

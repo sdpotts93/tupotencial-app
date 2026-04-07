@@ -151,7 +151,7 @@
             <Icon name="lucide:quote" size="18" class="hoy__mensaje-icon" />
             <p class="hoy__mensaje-text">{{ mensajeDelDia.text }}</p>
             <div class="hoy__mensaje-author">
-              <img :src="`/images/${mensajeDelDia.author}.png`" :alt="mensajeDelDia.author" class="hoy__mensaje-avatar" />
+              <img :src="avatarUrl(mensajeDelDia.author)" :alt="mensajeDelDia.author" class="hoy__mensaje-avatar" />
               <span class="hoy__mensaje-name">{{ mensajeDelDia.author === 'gabriel' ? 'Gabriel' : 'Carlotta' }}</span>
             </div>
           </div>
@@ -452,6 +452,7 @@ const client = useSupabaseClient()
 const router = useRouter()
 const { user, isSubscriber } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+const { avatarUrl } = useCharacterAvatars()
 
 const showPurchaseModal = ref(false)
 const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)

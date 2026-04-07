@@ -165,6 +165,7 @@ definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const client = useSupabaseClient()
+const { avatarUrl } = useCharacterAvatars()
 const id = route.params.id as string
 const isNew = id === 'new'
 const toast = useToast()
@@ -238,9 +239,7 @@ const statusOptions = [
   { value: 'draft', label: 'Borrador' },
 ]
 
-const authorAvatar = computed(() =>
-  form.author === 'Carlotta' ? '/images/carlotta.png' : '/images/gabriel.png',
-)
+const authorAvatar = computed(() => avatarUrl(form.author.toLowerCase()))
 
 const comments = ref<any[]>([])
 watch(rawComments, (val) => { comments.value = val ?? [] }, { immediate: true })

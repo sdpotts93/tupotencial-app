@@ -14,6 +14,8 @@ CONTENT_COVER_URL="${SUPABASE_URL}/storage/v1/object/public/content-covers/defau
 ADDON_COVER_URL="${SUPABASE_URL}/storage/v1/object/public/addon-covers/defaults/default-cover.jpg"
 EVENT_COVER_URL="${SUPABASE_URL}/storage/v1/object/public/event-covers/defaults/default-cover.jpg"
 PROGRAM_COVER_URL="${SUPABASE_URL}/storage/v1/object/public/program-covers/defaults/default-cover.jpg"
+CARLOTTA_AVATAR_URL="${SUPABASE_URL}/storage/v1/object/public/character-avatars/carlotta/avatar.png"
+GABRIEL_AVATAR_URL="${SUPABASE_URL}/storage/v1/object/public/character-avatars/gabriel/avatar.png"
 
 echo "Uploading default covers..."
 
@@ -40,6 +42,20 @@ curl -s -X POST \
   -H "Authorization: Bearer ${SERVICE_KEY}" \
   -H "Content-Type: image/jpeg" \
   --data-binary @apps/mobile/public/images/lib-2.jpg
+
+echo "Uploading character avatars..."
+
+curl -s -X POST \
+  "${SUPABASE_URL}/storage/v1/object/character-avatars/carlotta/avatar.png" \
+  -H "Authorization: Bearer ${SERVICE_KEY}" \
+  -H "Content-Type: image/png" \
+  --data-binary @apps/mobile/public/images/carlotta.png
+
+curl -s -X POST \
+  "${SUPABASE_URL}/storage/v1/object/character-avatars/gabriel/avatar.png" \
+  -H "Authorization: Bearer ${SERVICE_KEY}" \
+  -H "Content-Type: image/png" \
+  --data-binary @apps/mobile/public/images/gabriel.png
 
 echo ""
 echo "Setting cover URLs on seed data..."
@@ -80,9 +96,20 @@ curl -s -X PATCH \
   -H "Prefer: return=minimal" \
   -d "{\"cover_url\": \"${PROGRAM_COVER_URL}\"}"
 
+# Character avatars
+curl -s -X PATCH \
+  "${SUPABASE_URL}/rest/v1/app_settings?key=eq.character_avatars" \
+  -H "Authorization: Bearer ${SERVICE_KEY}" \
+  -H "apikey: ${SERVICE_KEY}" \
+  -H "Content-Type: application/json" \
+  -H "Prefer: return=minimal" \
+  -d "{\"value\": {\"carlotta_avatar_url\": \"${CARLOTTA_AVATAR_URL}\", \"gabriel_avatar_url\": \"${GABRIEL_AVATAR_URL}\"}}"
+
 echo ""
 echo "Done."
-echo "  Content:  ${CONTENT_COVER_URL}"
-echo "  Addons:   ${ADDON_COVER_URL}"
-echo "  Events:   ${EVENT_COVER_URL}"
-echo "  Programs: ${PROGRAM_COVER_URL}"
+echo "  Content:   ${CONTENT_COVER_URL}"
+echo "  Addons:    ${ADDON_COVER_URL}"
+echo "  Events:    ${EVENT_COVER_URL}"
+echo "  Programs:  ${PROGRAM_COVER_URL}"
+echo "  Carlotta:  ${CARLOTTA_AVATAR_URL}"
+echo "  Gabriel:   ${GABRIEL_AVATAR_URL}"

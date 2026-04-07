@@ -104,6 +104,7 @@ definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
 const toast = useToast()
+const { avatarUrl } = useCharacterAvatars()
 const saving = ref(false)
 const formError = ref('')
 const errors = reactive({ body: '' })
@@ -125,9 +126,7 @@ const statusOptions = [
   { value: 'published', label: 'Publicar ahora' },
 ]
 
-const authorAvatar = computed(() =>
-  form.author === 'Carlotta' ? '/images/carlotta.png' : '/images/gabriel.png',
-)
+const authorAvatar = computed(() => avatarUrl(form.author.toLowerCase()))
 
 // ── Media upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
