@@ -76,9 +76,9 @@
 
       <!-- Comments -->
       <section class="post-detail__comments">
-        <p class="eyebrow">COMENTARIOS ({{ comments.length }})</p>
+        <p class="eyebrow">COMENTARIOS ({{ totalCommentCount }})</p>
         <div class="post-detail__comment-list">
-          <div v-for="comment in comments" :key="comment.id" class="comment">
+          <div v-for="comment in allComments" :key="comment.id" class="comment">
             <div class="comment__avatar"><span>{{ comment.initials }}</span></div>
             <div class="comment__content">
               <div class="comment__top">
@@ -87,6 +87,17 @@
                 <span class="comment__time">{{ comment.timeAgo }}</span>
               </div>
               <p class="comment__body">{{ comment.body }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Infinite scroll sentinel -->
+        <div v-if="hasMoreComments" ref="commentSentinelRef" class="post-detail__comment-sentinel">
+          <div v-for="i in 2" :key="i" style="display: flex; gap: var(--space-3); padding: var(--space-3) 0;">
+            <UiSkeleton variant="circle" width="28px" height="28px" />
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <UiSkeleton variant="text" width="30%" height="10px" />
+              <UiSkeleton variant="text" width="80%" height="12px" />
             </div>
           </div>
         </div>
@@ -166,23 +177,90 @@ const post = computed(() => postData.value ?? {
 })
 
 // Load comments
-const { data: commentsData, refresh: refreshComments } = useAsyncData(`post-comments-${postId}`, async () => {
+const COMMENT_PAGE_SIZE = 20
+
+function mapComment(c: any) {
+  return {
+    id: c.id,
+    author: (c.profiles as any)?.display_name ?? 'Anónimo',
+    initials: getInitials((c.profiles as any)?.display_name ?? 'A'),
+    body: c.body,
+    timeAgo: formatTimeAgo(c.created_at),
+  }
+}
+
+const { data: commentsData } = useAsyncData(`post-comments-${postId}`, async () => {
   const { data } = await client
     .from('post_comments')
     .select('*, profiles:user_id(display_name)')
     .eq('post_id', postId)
     .eq('status', 'published')
     .order('created_at', { ascending: true })
-  return (data ?? []).map(c => ({
-    id: c.id,
-    author: (c.profiles as any)?.display_name ?? 'Anónimo',
-    initials: getInitials((c.profiles as any)?.display_name ?? 'A'),
-    body: c.body,
-    timeAgo: formatTimeAgo(c.created_at),
-  }))
+    .range(0, COMMENT_PAGE_SIZE - 1)
+  const items = (data ?? []).map(mapComment)
+  return { items, hasMore: items.length >= COMMENT_PAGE_SIZE }
 }, { lazy: true })
 
-const comments = computed(() => commentsData.value ?? [])
+// ── Comment pagination state ──
+const extraComments = ref<any[]>([])
+const hasMoreComments = ref(false)
+const loadingMoreComments = ref(false)
+const commentOffset = ref(0)
+
+watch(() => commentsData.value, (val) => {
+  extraComments.value = []
+  hasMoreComments.value = val?.hasMore ?? false
+  commentOffset.value = val?.items.length ?? 0
+}, { immediate: true })
+
+const allComments = computed(() => [...(commentsData.value?.items ?? []), ...extraComments.value])
+
+// Total count: use post_comments count from post query if available, otherwise use loaded length
+const { data: commentCountData } = useAsyncData(`post-comment-count-${postId}`, async () => {
+  const { count } = await client
+    .from('post_comments')
+    .select('*', { count: 'exact', head: true })
+    .eq('post_id', postId)
+    .eq('status', 'published')
+  return count ?? 0
+}, { lazy: true })
+const totalCommentCount = computed(() => commentCountData.value ?? allComments.value.length)
+
+async function loadMoreComments() {
+  if (loadingMoreComments.value || !hasMoreComments.value) return
+  loadingMoreComments.value = true
+
+  const { data } = await client
+    .from('post_comments')
+    .select('*, profiles:user_id(display_name)')
+    .eq('post_id', postId)
+    .eq('status', 'published')
+    .order('created_at', { ascending: true })
+    .range(commentOffset.value, commentOffset.value + COMMENT_PAGE_SIZE - 1)
+
+  const batch = (data ?? []).map(mapComment)
+  extraComments.value.push(...batch)
+  commentOffset.value += batch.length
+  hasMoreComments.value = batch.length >= COMMENT_PAGE_SIZE
+  loadingMoreComments.value = false
+}
+
+// ── IntersectionObserver for comment sentinel ──
+const commentSentinelRef = ref<HTMLElement | null>(null)
+let commentObserver: IntersectionObserver | null = null
+
+onMounted(() => {
+  commentObserver = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadMoreComments() },
+    { rootMargin: '200px' },
+  )
+  watchEffect(() => {
+    commentObserver?.disconnect()
+    if (commentSentinelRef.value) commentObserver?.observe(commentSentinelRef.value)
+  })
+})
+
+onBeforeUnmount(() => commentObserver?.disconnect())
 
 // Toggle like
 async function toggleLike() {
@@ -203,12 +281,14 @@ async function submitComment() {
   if (!newComment.value.trim() || !user.value?.id || submitting.value) return
   submitting.value = true
   try {
-    await client.from('post_comments').insert({
+    const { data: inserted } = await client.from('post_comments').insert({
       post_id: postId,
       body: newComment.value.trim(),
-    })
+    }).select('*, profiles:user_id(display_name)').single()
     newComment.value = ''
-    await refreshComments()
+    if (inserted) {
+      extraComments.value.push(mapComment(inserted))
+    }
   } catch {
     toast.show('Error al publicar comentario', 'error')
   } finally {

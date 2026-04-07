@@ -61,7 +61,7 @@
 
           <!-- Community feed -->
           <div class="community__feed">
-            <article v-for="post in filteredPosts" :key="post.id" class="post" @click="navigateTo(`/cuenta/comunidad/publicacion/${post.id}`)">
+            <article v-for="post in allPosts" :key="post.id" class="post" @click="navigateTo(`/cuenta/comunidad/publicacion/${post.id}`)">
               <div class="post__header">
                 <img :src="post.avatar" alt="" class="post__avatar" />
                 <div class="post__meta">
@@ -89,6 +89,21 @@
                 </span>
               </div>
             </article>
+          </div>
+
+          <!-- Infinite scroll sentinel -->
+          <div v-if="hasMore" ref="sentinelRef" class="community__sentinel">
+            <div v-for="i in 2" :key="i" style="padding-bottom: var(--space-5); border-bottom: 1px solid rgba(var(--tint-rgb), 0.06);">
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                <UiSkeleton variant="circle" width="36px" height="36px" />
+                <div style="flex: 1;">
+                  <UiSkeleton variant="text" width="30%" height="12px" style="margin-bottom: 4px;" />
+                  <UiSkeleton variant="text" width="20%" height="10px" />
+                </div>
+              </div>
+              <UiSkeleton variant="text" width="80%" height="14px" style="margin-bottom: var(--space-2);" />
+              <UiSkeleton variant="text" width="100%" height="12px" />
+            </div>
           </div>
         </div>
 
@@ -136,6 +151,8 @@
 </template>
 
 <script setup lang="ts">
+const PAGE_SIZE = 20
+
 const { user } = useAuth()
 const client = useSupabaseClient()
 const { avatarUrl } = useCharacterAvatars()
@@ -147,6 +164,8 @@ const filters = [
   { value: 'Gabriel', label: 'Gabriel' },
   { value: 'Carlotta', label: 'Carlotta' },
 ]
+
+const filterSegmentMap: Record<string, string> = { Gabriel: 'gabriel', Carlotta: 'carlotta' }
 
 const shortcuts = [
   {
@@ -201,13 +220,20 @@ function formatTimeAgo(dateStr: string) {
 
 const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta' }
 
-const { data: posts, refresh: refreshComunidad, status: comunidadStatus } = useAsyncData('mobile-posts', async () => {
-  const { data } = await client
+function buildPostQuery() {
+  let query = client
     .from('posts')
     .select('*, post_reactions(user_id, reaction), post_comments(count)')
     .eq('status', 'published')
-    .order('created_at', { ascending: false })
-  return (data ?? []).map(p => ({
+
+  const segment = filterSegmentMap[activeFilter.value]
+  if (segment) query = query.eq('community_segment', segment)
+
+  return query.order('created_at', { ascending: false })
+}
+
+function mapPost(p: any) {
+  return {
     ...p,
     author: segmentAuthor[p.community_segment ?? ''] ?? 'Gabriel',
     avatar: avatarUrl(p.community_segment ?? 'gabriel'),
@@ -215,22 +241,65 @@ const { data: posts, refresh: refreshComunidad, status: comunidadStatus } = useA
     liked: ((p.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
     comments: (p.post_comments as any)?.[0]?.count ?? 0,
     timeAgo: formatTimeAgo(p.created_at),
-  }))
-}, { lazy: true })
+  }
+}
 
-const filteredPosts = computed(() => {
-  if (activeFilter.value === 'all') return posts.value ?? []
-  return (posts.value ?? []).filter(p => p.author === activeFilter.value)
+const { data: postsData, refresh: refreshComunidad, status: comunidadStatus } = useAsyncData('mobile-posts', async () => {
+  const { data } = await buildPostQuery().range(0, PAGE_SIZE - 1)
+  const items = (data ?? []).map(mapPost)
+  return { items, hasMore: items.length >= PAGE_SIZE }
+}, { lazy: true, watch: [activeFilter] })
+
+// ── Infinite scroll state ──
+const extraPosts = ref<any[]>([])
+const hasMore = ref(false)
+const loadingMore = ref(false)
+const offset = ref(0)
+
+watch(() => postsData.value, (val) => {
+  extraPosts.value = []
+  hasMore.value = val?.hasMore ?? false
+  offset.value = val?.items.length ?? 0
+}, { immediate: true })
+
+const allPosts = computed(() => [...(postsData.value?.items ?? []), ...extraPosts.value])
+const recentPosts = computed(() => (postsData.value?.items ?? []).slice(0, 4))
+
+async function loadMore() {
+  if (loadingMore.value || !hasMore.value) return
+  loadingMore.value = true
+
+  const { data } = await buildPostQuery().range(offset.value, offset.value + PAGE_SIZE - 1)
+  const batch = (data ?? []).map(mapPost)
+  extraPosts.value.push(...batch)
+  offset.value += batch.length
+  hasMore.value = batch.length >= PAGE_SIZE
+  loadingMore.value = false
+}
+
+// ── IntersectionObserver for sentinel ──
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadMore() },
+    { rootMargin: '200px' },
+  )
+  watchEffect(() => {
+    observer?.disconnect()
+    if (sentinelRef.value) observer?.observe(sentinelRef.value)
+  })
 })
 
-const recentPosts = computed(() => (posts.value ?? []).slice(0, 4))
+onBeforeUnmount(() => observer?.disconnect())
 
 function isVideo(url: string) {
   return /\.(mp4|mov|webm)(\?|$)/i.test(url)
 }
 
 async function toggleReaction(id: string) {
-  const post = (posts.value ?? []).find(p => p.id === id)
+  const post = allPosts.value.find((p: any) => p.id === id)
   if (!post || !user.value?.id) return
   if (post.liked) {
     await client.from('post_reactions').delete().eq('post_id', id).eq('user_id', user.value.id)
