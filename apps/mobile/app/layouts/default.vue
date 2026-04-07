@@ -12,7 +12,7 @@
           <Icon name="lucide:flame" size="14" class="app-topbar__streak-icon" />
           <span>{{ streak }}</span>
         </NuxtLink>
-        <div class="app-topbar__avatar" @click="navigateTo('/cuenta/mis-datos')">
+        <div class="app-topbar__avatar" @click="navigateTo('/cuenta/mas')">
           <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="app-topbar__avatar-img" />
           <template v-else>{{ initials }}</template>
         </div>
