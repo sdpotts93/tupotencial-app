@@ -974,6 +974,7 @@ export type Database = {
           id: string
           payload: Json
           program_id: string
+          run: number
           user_id: string
         }
         Insert: {
@@ -982,6 +983,7 @@ export type Database = {
           id?: string
           payload?: Json
           program_id: string
+          run?: number
           user_id?: string
         }
         Update: {
@@ -990,6 +992,7 @@ export type Database = {
           id?: string
           payload?: Json
           program_id?: string
+          run?: number
           user_id?: string
         }
         Relationships: [
@@ -1088,6 +1091,7 @@ export type Database = {
           enrolled_at: string
           id: string
           program_id: string
+          run: number
           status: string
           user_id: string
         }
@@ -1095,6 +1099,7 @@ export type Database = {
           enrolled_at?: string
           id?: string
           program_id: string
+          run?: number
           status?: string
           user_id?: string
         }
@@ -1102,6 +1107,7 @@ export type Database = {
           enrolled_at?: string
           id?: string
           program_id?: string
+          run?: number
           status?: string
           user_id?: string
         }

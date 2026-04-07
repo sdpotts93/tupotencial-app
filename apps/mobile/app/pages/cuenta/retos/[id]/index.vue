@@ -80,7 +80,11 @@
           </template>
           <template v-else>
             <UiButton v-if="!program.enrolled" variant="outline" block @click="enroll">Inscribirme</UiButton>
-            <UiButton variant="outline" v-else block :to="`/cuenta/retos/${id}/dia/${program.currentDay}`">
+            <template v-else-if="program.allComplete">
+              <UiButton variant="outline" block disabled>Programa completado ✓</UiButton>
+              <UiButton variant="outline" block style="margin-top: var(--space-2);" @click="restart">Repetir programa</UiButton>
+            </template>
+            <UiButton v-else variant="outline" block :to="`/cuenta/retos/${id}/dia/${program.currentDay}`">
               Continuar — Día {{ program.currentDay }}
             </UiButton>
           </template>
@@ -95,8 +99,8 @@
             </svg>
             Complemento
           </span>
-          <span v-else :class="['detail__tag', program.enrolled ? 'detail__tag--inscrito' : (program.free ? 'detail__tag--gratis' : 'detail__tag--core')]">
-            {{ program.enrolled ? 'Inscrito' : (program.free ? 'Gratis' : 'Core') }}
+          <span v-else :class="['detail__tag', program.allComplete ? 'detail__tag--inscrito' : (program.enrolled ? 'detail__tag--inscrito' : (program.free ? 'detail__tag--gratis' : 'detail__tag--core'))]">
+            {{ program.allComplete ? 'Completado' : (program.enrolled ? 'Inscrito' : (program.free ? 'Gratis' : 'Core')) }}
           </span>
           <UiTag>{{ program.totalDays }} días</UiTag>
         </div>
@@ -110,12 +114,16 @@
         <UiListItem
           v-for="day in program.days"
           :key="day.index"
+          :class="{ 'detail__day--locked': !day.unlocked || locked }"
           :label="`Día ${day.index}`"
           :description="day.title"
-          :to="locked ? undefined : `/cuenta/retos/${id}/dia/${day.index}`"
+          :to="day.unlocked && !locked ? `/cuenta/retos/${id}/dia/${day.index}` : undefined"
         >
-          <template v-if="day.done && !locked" #suffix>
-            <span class="detail__done">Completado ✓</span>
+          <template #suffix>
+            <span v-if="day.done && day.unlocked && !locked" class="detail__done">Completado ✓</span>
+            <svg v-else-if="!day.unlocked || locked" class="detail__lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
           </template>
         </UiListItem>
       </UiList>
@@ -134,6 +142,7 @@ const client = useSupabaseClient()
 const id = route.params.id as string
 const { user, isSubscriber } = useAuth()
 const { isLocked, getAddonForEntitlement } = useEntitlementGating()
+const { isDayUnlocked, getCurrentDay } = useProgramProgression()
 
 const showPurchaseModal = ref(false)
 
@@ -152,23 +161,28 @@ const { data: programDays } = useAsyncData(`program-days-${id}`, async () => {
 // ── Fetch enrollment status ──
 const { data: enrollment, refresh: refreshEnrollment } = useAsyncData(`program-enrollment-${id}`, async () => {
   if (!user.value?.id) return null
-  const { data } = await client.from('program_enrollments').select('id').eq('program_id', id).eq('user_id', user.value.id).maybeSingle()
+  const { data } = await client.from('program_enrollments').select('id, enrolled_at, status, run').eq('program_id', id).eq('user_id', user.value.id).maybeSingle()
   return data
 }, { lazy: true, watch: [() => user.value?.id] })
 
-// ── Fetch checkin progress ──
-const { data: checkins } = useAsyncData(`program-checkins-${id}`, async () => {
-  if (!user.value?.id) return []
-  const { data } = await client.from('program_checkins').select('day_index').eq('program_id', id).eq('user_id', user.value.id)
+const enrolledAt = computed(() => enrollment.value?.enrolled_at ?? null)
+const currentRun = computed(() => enrollment.value?.run ?? 1)
+
+// ── Fetch checkin progress (filtered by current run) ──
+const { data: checkins, refresh: refreshCheckins } = useAsyncData(`program-checkins-${id}`, async () => {
+  if (!user.value?.id || !enrollment.value) return []
+  const { data } = await client.from('program_checkins').select('day_index').eq('program_id', id).eq('user_id', user.value.id).eq('run', currentRun.value)
   return data ?? []
-}, { lazy: true, watch: [() => user.value?.id] })
+}, { lazy: true, watch: [() => user.value?.id, currentRun] })
 
 const completedDays = computed(() => new Set((checkins.value ?? []).map(c => c.day_index)))
 const totalDays = computed(() => programDays.value?.length ?? 0)
-const currentDay = computed(() => {
-  const maxDone = Math.max(0, ...Array.from(completedDays.value))
-  return Math.min(maxDone + 1, totalDays.value)
-})
+const currentDay = computed(() =>
+  getCurrentDay(enrolledAt.value, completedDays.value, totalDays.value),
+)
+const allComplete = computed(() =>
+  !!enrollment.value && completedDays.value.size >= totalDays.value && totalDays.value > 0,
+)
 
 const program = computed(() => {
   const p = programData.value
@@ -178,8 +192,10 @@ const program = computed(() => {
     duration: `${totalDays.value} días`,
     totalDays: totalDays.value,
     enrolled: !!enrollment.value,
+    enrollmentStatus: enrollment.value?.status ?? null,
     free: p?.plan === 'free',
     currentDay: currentDay.value,
+    allComplete: allComplete.value,
     entitlement_key: (p?.entitlement_key ?? null) as string | null,
     description: p?.description ?? '',
     thumbnail: p?.cover_url ?? null,
@@ -187,6 +203,7 @@ const program = computed(() => {
       index: d.day_index,
       title: d.title ?? '',
       done: completedDays.value.has(d.day_index),
+      unlocked: !!enrollment.value && isDayUnlocked(d.day_index, enrolledAt.value),
     })),
   }
 })
@@ -203,6 +220,17 @@ const addonInfo = computed(() =>
 async function enroll() {
   await client.from('program_enrollments').insert({ program_id: id, status: 'active' })
   await refreshEnrollment()
+}
+
+async function restart() {
+  if (!enrollment.value) return
+  await client.from('program_enrollments').update({
+    enrolled_at: new Date().toISOString(),
+    status: 'active',
+    run: currentRun.value + 1,
+  }).eq('program_id', id).eq('user_id', user.value!.id)
+  await refreshEnrollment()
+  await refreshCheckins()
 }
 </script>
 
@@ -341,6 +369,20 @@ async function enroll() {
 .detail__done {
   font-size: var(--text-xs);
   color: var(--color-complete);
+}
+
+.detail__lock-icon {
+  color: var(--color-muted);
+  opacity: 0.4;
+}
+
+.detail__day--locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.detail__day--locked:hover {
+  background: transparent;
 }
 
 /* ─── Day list ─── */

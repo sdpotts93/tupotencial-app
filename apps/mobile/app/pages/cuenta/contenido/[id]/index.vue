@@ -157,6 +157,16 @@ onMounted(() => {
     const today = new Date().toISOString().slice(0, 10)
     localStorage.setItem(`hoy-content-done-${today}`, id)
   }
+
+  // Mark program day item as completed when navigating from a program day
+  const dayItemId = route.query.dayItemId as string | undefined
+  const programIdParam = route.query.programId as string | undefined
+  const dayIndexParam = route.query.dayIndex as string | undefined
+  const runParam = route.query.run as string | undefined
+  if (dayItemId && programIdParam && dayIndexParam && runParam) {
+    const { markDayItemCompleted } = useDayItemCompletion()
+    markDayItemCompleted({ programId: programIdParam, dayIndex: Number(dayIndexParam), dayItemId, run: Number(runParam) })
+  }
 })
 </script>
 

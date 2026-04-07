@@ -720,7 +720,7 @@ function handleRetoTap(type: 'checkin' | 'accion') {
 // ─── Active programs ───
 const { data: activeProgramsData } = useAsyncData('hoy-programs', async () => {
   if (!user.value?.id) return []
-  const { data: enrollments } = await client.from('program_enrollments').select('program_id, programs(id, title)').eq('user_id', user.value.id).eq('status', 'active')
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id, enrolled_at, run, programs(id, title)').eq('user_id', user.value.id).eq('status', 'active')
   if (!enrollments?.length) return []
 
   const programIds = enrollments.map(e => (e.programs as any)?.id ?? e.program_id)
@@ -732,20 +732,20 @@ const { data: activeProgramsData } = useAsyncData('hoy-programs', async () => {
     dayCountMap[d.program_id] = (dayCountMap[d.program_id] ?? 0) + 1
   }
 
-  // Get user's checkins per program
-  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value.id).in('program_id', programIds)
-  const checkinCountMap: Record<string, number> = {}
-  for (const c of checkins ?? []) {
-    checkinCountMap[c.program_id] = (checkinCountMap[c.program_id] ?? 0) + 1
-  }
+  // Get user's checkins per program (filtered by current run)
+  const { data: checkins } = await client.from('program_checkins').select('program_id, day_index, run').eq('user_id', user.value.id).in('program_id', programIds)
 
+  const { getCurrentDay } = useProgramProgression()
   return enrollments.map(e => {
     const prog = e.programs as any
     const pid = prog?.id ?? e.program_id
     const totalDays = dayCountMap[pid] ?? 0
-    const completedDays = checkinCountMap[pid] ?? 0
-    const currentDay = Math.min(completedDays + 1, totalDays)
-    return { id: pid, title: prog?.title ?? '', currentDay, completedDays, totalDays }
+    const completedDays = new Set<number>()
+    for (const c of checkins ?? []) {
+      if (c.program_id === pid && c.run === e.run) completedDays.add(c.day_index)
+    }
+    const currentDay = getCurrentDay(e.enrolled_at, completedDays, totalDays)
+    return { id: pid, title: prog?.title ?? '', currentDay, completedDays: completedDays.size, totalDays }
   })
 }, { lazy: true, watch: [() => user.value?.id] })
 

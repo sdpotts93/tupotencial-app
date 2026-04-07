@@ -113,20 +113,28 @@ async function fetchPage(tab: string, from: number, to: number) {
   }
 
   let enrollMap = new Map<string, any>()
-  const checkinMap = new Map<string, number>()
+  let allCheckins: { program_id: string; day_index: number; run: number }[] = []
   if (user.value?.id) {
-    const { data: enrollments } = await client.from('program_enrollments').select('program_id, status').eq('user_id', user.value.id).in('program_id', programIds)
+    const { data: enrollments } = await client.from('program_enrollments').select('program_id, status, enrolled_at, run').eq('user_id', user.value.id).in('program_id', programIds)
     enrollMap = new Map((enrollments ?? []).map(e => [e.program_id, e]))
-    const { data: checkins } = await client.from('program_checkins').select('program_id, day_index').eq('user_id', user.value.id).in('program_id', programIds)
-    for (const c of checkins ?? []) {
-      checkinMap.set(c.program_id, Math.max(checkinMap.get(c.program_id) ?? 0, c.day_index))
-    }
+    const { data: checkins } = await client.from('program_checkins').select('program_id, day_index, run').eq('user_id', user.value.id).in('program_id', programIds)
+    allCheckins = checkins ?? []
   }
 
+  const { getCurrentDay } = useProgramProgression()
   const items = (progs ?? []).map(p => {
     const enrollment = enrollMap.get(p.id)
-    const currentDay = checkinMap.get(p.id) ?? 0
     const totalDays = totalDaysMap.get(p.id) ?? 0
+    const completedDays = new Set<number>()
+    for (const c of allCheckins) {
+      if (c.program_id === p.id && enrollment && c.run === enrollment.run) {
+        completedDays.add(c.day_index)
+      }
+    }
+    const currentDay = enrollment
+      ? getCurrentDay(enrollment.enrolled_at, completedDays, totalDays)
+      : 0
+    const isComplete = enrollment?.status === 'completed'
     return {
       ...p,
       typeLabel: p.type.toUpperCase(),
@@ -134,7 +142,7 @@ async function fetchPage(tab: string, from: number, to: number) {
       duration: `${totalDays} días`,
       enrolled: !!enrollment,
       free: p.plan === 'free',
-      progress: enrollment ? `Día ${currentDay}/${totalDays}` : null,
+      progress: isComplete ? 'Completado' : (enrollment ? `Día ${currentDay}/${totalDays}` : null),
     }
   })
 

@@ -39,6 +39,15 @@
       </template>
       <template v-else>
 
+      <!-- Completed badge -->
+      <div v-if="isDayComplete" class="day__completed-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" style="fill: var(--color-complete); fill-opacity: 0.2; stroke: var(--color-complete)" stroke-width="1.5"/>
+          <path d="M8 12l3 3 5-5" style="stroke: var(--color-complete)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Día completado</span>
+      </div>
+
       <h2 class="title title--lg">{{ dayTitle }}</h2>
       <p class="day__desc">{{ dayDescription }}</p>
 
@@ -107,7 +116,7 @@
       </section>
 
       <!-- Completar día CTA -->
-      <div v-if="hasForm" class="day__cta">
+      <div v-if="hasForm && !isDayComplete" class="day__cta">
         <UiButton block variant="secondary" @click="showFormSheet = true">
           Completar día
         </UiButton>
@@ -123,10 +132,7 @@
     >
       <Transition name="day-fade" mode="out-in">
         <div v-if="formSuccess" key="success" class="day__form-success">
-          <svg class="day__form-success-icon" width="48" height="48" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" style="fill: var(--color-complete); fill-opacity: 0.2; stroke: var(--color-complete)" stroke-width="1.5"/>
-            <path d="M8 12l3 3 5-5" style="stroke: var(--color-complete)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <div class="day__form-success-badge"><Icon name="lucide:trophy" size="48" /></div>
           <p class="day__form-success-title">¡Día completado!</p>
           <p class="day__form-success-msg">Excelente trabajo hoy.</p>
         </div>
@@ -174,7 +180,7 @@ type ActivityType = 'media' | 'ai' | 'form'
 interface DayActivity {
   id: string
   type: ActivityType
-  mediaType?: 'video' | 'audio' | 'text'
+  mediaType?: 'video' | 'audio' | 'article'
   title: string
   description: string
   thumbnail: string
@@ -186,7 +192,7 @@ interface DayActivity {
 function activityTypeLabel(activity: DayActivity): string {
   if (activity.type === 'ai') return 'Coach IA'
   if (activity.type === 'form') return 'Check-in'
-  const labels: Record<string, string> = { video: 'Video', audio: 'Audio', text: 'Artículo' }
+  const labels: Record<string, string> = { video: 'Video', audio: 'Audio', article: 'Artículo' }
   return labels[activity.mediaType ?? ''] ?? ''
 }
 
@@ -196,7 +202,7 @@ function activityIcon(activity: DayActivity): string {
   switch (activity.mediaType) {
     case 'video': return 'lucide:video'
     case 'audio': return 'lucide:headphones'
-    case 'text': return 'lucide:file-text'
+    case 'article': return 'lucide:file-text'
     default: return 'lucide:file'
   }
 }
@@ -213,6 +219,30 @@ const client = useSupabaseClient()
 const toast = useToast()
 const programId = route.params.id as string
 const dayIndex = route.params.indDia as string
+const { isDayUnlocked } = useProgramProgression()
+
+// ── Enrollment guard ──
+const { data: enrollment } = useAsyncData(`enrollment-guard-${programId}`, async () => {
+  if (!user.value?.id) return null
+  const { data } = await client
+    .from('program_enrollments')
+    .select('id, enrolled_at, run')
+    .eq('program_id', programId)
+    .eq('user_id', user.value.id)
+    .maybeSingle()
+  return data
+}, { lazy: true, watch: [() => user.value?.id] })
+
+const currentRun = computed(() => enrollment.value?.run ?? 1)
+
+watchEffect(() => {
+  if (enrollment.value === undefined) return // still loading
+  if (!enrollment.value) {
+    navigateTo(`/cuenta/retos/${programId}`, { replace: true })
+  } else if (!isDayUnlocked(Number(dayIndex), enrollment.value.enrolled_at)) {
+    navigateTo(`/cuenta/retos/${programId}`, { replace: true })
+  }
+})
 
 const { data: dayData, status: dayStatus, refresh: refreshDay } = useAsyncData(`program-day-${programId}-${dayIndex}`, async () => {
   if (!user.value?.id) return null
@@ -256,30 +286,35 @@ const { data: dayData, status: dayStatus, refresh: refreshDay } = useAsyncData(`
     .eq('program_id', programId)
     .eq('day_index', Number(dayIndex))
     .eq('user_id', user.value.id)
+    .eq('run', currentRun.value)
     .maybeSingle()
 
   const completedItems = new Set<string>(
     ((checkin?.payload as any)?.completed_items as string[]) ?? [],
   )
 
+  const dayCtx = `dayItemId=%ID%&programId=${programId}&dayIndex=${dayIndex}&run=${currentRun.value}`
+
   const acts: DayActivity[] = (dayItems ?? []).map(di => {
     const content = di.content_items as any
     if (di.type === 'content' && content) {
+      const itemCtx = dayCtx.replace('%ID%', di.id)
       return {
         id: di.id,
         type: 'media' as ActivityType,
-        mediaType: content.type as 'video' | 'audio' | 'text',
+        mediaType: content.type as 'video' | 'audio' | 'article',
         title: content.title,
         description: content.description ?? '',
         thumbnail: content.thumbnail_url ?? null,
         duration: formatDuration(content.duration_seconds),
         done: completedItems.has(di.id),
-        to: content.type === 'text'
-          ? `/cuenta/contenido/${content.id}`
-          : `/cuenta/contenido/${content.id}/reproducir`,
+        to: content.type === 'article'
+          ? `/cuenta/contenido/${content.id}?${itemCtx}`
+          : `/cuenta/contenido/${content.id}/reproducir?${itemCtx}`,
       }
     }
     if (di.type === 'ai_prompt') {
+      const itemCtx = dayCtx.replace('%ID%', di.id)
       return {
         id: di.id,
         type: 'ai' as ActivityType,
@@ -288,7 +323,7 @@ const { data: dayData, status: dayStatus, refresh: refreshDay } = useAsyncData(`
         thumbnail: '',
         duration: '5 min',
         done: completedItems.has(di.id),
-        to: '/cuenta/ia',
+        to: `/cuenta/ia?${itemCtx}`,
       }
     }
     // form
@@ -325,6 +360,11 @@ const hasForm = computed(() => {
   return activities.value.some(a => a.type === 'form')
 })
 
+const isDayComplete = computed(() => {
+  const formAct = activities.value.find(a => a.type === 'form')
+  return formAct ? formAct.done : false
+})
+
 // Form sheet state
 const showFormSheet = ref(false)
 const reflection = ref('')
@@ -348,11 +388,28 @@ async function handleFormSubmit() {
     await client.from('program_checkins').upsert({
       program_id: programId,
       day_index: Number(dayIndex),
+      run: currentRun.value,
       payload: { reflection: reflection.value, completed_items: completedIds },
-    }, { onConflict: 'program_id,user_id,day_index' })
+    }, { onConflict: 'program_id,user_id,day_index,run' })
 
     formSuccess.value = true
     if (formAct) formAct.done = true
+
+    // Check if all program days are now complete
+    const { data: allCheckins } = await client
+      .from('program_checkins')
+      .select('day_index')
+      .eq('program_id', programId)
+      .eq('user_id', user.value!.id)
+      .eq('run', currentRun.value)
+    const completedCount = new Set(allCheckins?.map(c => c.day_index)).size
+    if (completedCount >= (dayData.value?.totalDays ?? Infinity)) {
+      await client
+        .from('program_enrollments')
+        .update({ status: 'completed' })
+        .eq('program_id', programId)
+        .eq('user_id', user.value!.id)
+    }
   } catch {
     toast.show('Error al guardar', 'error')
   } finally {
@@ -407,6 +464,23 @@ function closeFormSheet() {
 .day__counter {
   position: absolute;
   right: 0;
+}
+
+/* ─── Completed badge ─── */
+.day__completed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-family: var(--font-eyebrow);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-complete);
+  background: rgba(var(--color-complete-rgb, 46, 160, 67), 0.1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-3);
 }
 
 /* ─── Day info ─── */
@@ -537,7 +611,17 @@ function closeFormSheet() {
   gap: var(--space-3);
 }
 
-.day__form-success-icon { flex-shrink: 0; }
+.day__form-success-badge {
+  margin-bottom: var(--space-3);
+  color: var(--color-primary);
+  animation: day-success-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes day-success-bounce {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 .day__form-success-title {
   font-family: var(--font-title);
