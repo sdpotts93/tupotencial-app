@@ -107,9 +107,9 @@
         <!-- Past -->
         <section class="events__section">
           <p class="eyebrow">PASADOS</p>
-          <div v-if="pastEvents?.length" class="events__past-list">
+          <div v-if="allPastEvents.length" class="events__past-list">
             <div
-              v-for="event in pastEvents"
+              v-for="event in allPastEvents"
               :key="event.id"
               :class="['events__past-card', { 'events__past-card--locked': isEventLocked(event) }]"
               @click="handleRecordedClick(event)"
@@ -127,7 +127,18 @@
               </svg>
             </div>
           </div>
-          <div v-else class="events__empty">
+
+          <!-- Infinite scroll sentinel -->
+          <div v-if="pastHasMore" ref="pastSentinelRef" class="events__past-sentinel">
+            <div v-for="i in 2" :key="i" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0;">
+              <UiSkeleton variant="rect" width="56px" height="56px" radius="var(--radius-lg)" />
+              <div style="flex: 1;">
+                <UiSkeleton variant="text" width="60%" height="14px" style="margin-bottom: 4px;" />
+                <UiSkeleton variant="text" width="40%" height="10px" />
+              </div>
+            </div>
+          </div>
+          <div v-if="!allPastEvents.length && !pastHasMore" class="events__empty">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="events__empty-icon"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
             <p class="events__empty-text">Aún no hay eventos pasados</p>
           </div>
@@ -141,6 +152,8 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
+
+const PAST_PAGE_SIZE = 20
 
 const router = useRouter()
 const client = useSupabaseClient()
@@ -191,19 +204,20 @@ const upcomingEvents = computed(() =>
   upcomingMapped.value.filter(e => !myEventIds.value.has(e.id)),
 )
 
-const { data: pastEvents } = useAsyncData('mobile-events-recorded', async () => {
+const { data: pastEventsData } = useAsyncData('mobile-events-recorded', async () => {
   const { data: cat } = await client
     .from('content_categories')
     .select('id')
     .eq('slug', 'eventos-grabados')
     .single()
-  if (!cat) return []
+  if (!cat) return { categoryId: null, items: [], hasMore: false }
   const { data: itemCats } = await client
     .from('content_item_categories')
     .select('position, content_items(id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key, status)')
     .eq('category_id', cat.id)
     .order('position')
-  return (itemCats ?? [])
+    .range(0, PAST_PAGE_SIZE - 1)
+  const items = (itemCats ?? [])
     .map(ic => ic.content_items as any)
     .filter((item: any) => item && item.status === 'published')
     .map((item: any) => ({
@@ -213,7 +227,67 @@ const { data: pastEvents } = useAsyncData('mobile-events-recorded', async () => 
       entitlement_key: item.entitlement_key,
       plan: item.plan,
     }))
+  return { categoryId: cat.id, items, hasMore: items.length >= PAST_PAGE_SIZE }
 }, { lazy: true })
+
+// ── Past events infinite scroll ──
+const extraPastEvents = ref<any[]>([])
+const pastHasMore = ref(false)
+const pastLoadingMore = ref(false)
+const pastOffset = ref(0)
+
+watch(() => pastEventsData.value, (val) => {
+  extraPastEvents.value = []
+  pastHasMore.value = val?.hasMore ?? false
+  pastOffset.value = val?.items.length ?? 0
+}, { immediate: true })
+
+const allPastEvents = computed(() => [...(pastEventsData.value?.items ?? []), ...extraPastEvents.value])
+
+async function loadMorePast() {
+  const categoryId = pastEventsData.value?.categoryId
+  if (!categoryId || pastLoadingMore.value || !pastHasMore.value) return
+  pastLoadingMore.value = true
+
+  const { data: itemCats } = await client
+    .from('content_item_categories')
+    .select('position, content_items(id, title, type, plan, duration_seconds, thumbnail_url, entitlement_key, status)')
+    .eq('category_id', categoryId)
+    .order('position')
+    .range(pastOffset.value, pastOffset.value + PAST_PAGE_SIZE - 1)
+
+  const batch = (itemCats ?? [])
+    .map(ic => ic.content_items as any)
+    .filter((item: any) => item && item.status === 'published')
+    .map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      img: item.thumbnail_url ?? undefined,
+      entitlement_key: item.entitlement_key,
+      plan: item.plan,
+    }))
+  extraPastEvents.value.push(...batch)
+  pastOffset.value += batch.length
+  pastHasMore.value = batch.length >= PAST_PAGE_SIZE
+  pastLoadingMore.value = false
+}
+
+// ── IntersectionObserver for past events sentinel ──
+const pastSentinelRef = ref<HTMLElement | null>(null)
+let pastObserver: IntersectionObserver | null = null
+
+onMounted(() => {
+  pastObserver = new IntersectionObserver(
+    (entries) => { if (entries[0]?.isIntersecting) loadMorePast() },
+    { rootMargin: '200px' },
+  )
+  watchEffect(() => {
+    pastObserver?.disconnect()
+    if (pastSentinelRef.value) pastObserver?.observe(pastSentinelRef.value)
+  })
+})
+
+onBeforeUnmount(() => pastObserver?.disconnect())
 
 function isEventLocked(event: { entitlement_key: string | null; plan?: string | null }) {
   if (isLocked(event.entitlement_key)) return true
