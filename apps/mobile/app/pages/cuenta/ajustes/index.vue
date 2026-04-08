@@ -12,17 +12,12 @@
       </header>
 
       <UiList>
-        <UiListItem label="Notificaciones" description="Gestionar permisos y preferencias" clickable>
-          <template #icon>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          </template>
-        </UiListItem>
-        <UiListItem label="Términos y condiciones" clickable>
+        <UiListItem label="Términos y condiciones" clickable @click="navigateTo('/terminos')">
           <template #icon>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
           </template>
         </UiListItem>
-        <UiListItem label="Política de privacidad" clickable>
+        <UiListItem label="Política de privacidad" clickable @click="navigateTo('/privacidad')">
           <template #icon>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </template>

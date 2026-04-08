@@ -77,6 +77,10 @@
           >
             Crear cuenta
           </UiButton>
+
+          <p class="register__legal">
+            Al crear tu cuenta aceptas los <NuxtLink to="/terminos" class="register__legal-link">términos y condiciones</NuxtLink> y confirmas que leíste el <NuxtLink to="/privacidad" class="register__legal-link">aviso de privacidad</NuxtLink>.
+          </p>
         </form>
 
         <!-- Desktop-only: login link -->
@@ -310,6 +314,20 @@ async function handleRegister() {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.register__legal {
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: var(--leading-normal);
+  margin-top: var(--space-2);
+}
+
+.register__legal-link {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .register__sheet-help {

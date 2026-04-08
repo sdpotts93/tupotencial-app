@@ -19,7 +19,7 @@
           No tengo cuenta
         </UiButton>
         <p class="login__legal">
-          Al continuar aceptas <NuxtLink to="/terms" class="login__legal-link">términos de uso</NuxtLink> y confirmas que leíste el <NuxtLink to="/privacy" class="login__legal-link">aviso de privacidad</NuxtLink>.
+          Al continuar aceptas los <NuxtLink to="/terminos" class="login__legal-link">términos y condiciones</NuxtLink> y confirmas que leíste el <NuxtLink to="/privacidad" class="login__legal-link">aviso de privacidad</NuxtLink>.
         </p>
       </div>
     </div>
@@ -75,15 +75,16 @@
           >
             Continuar
           </UiButton>
+
+          <p class="login__legal">
+            Al continuar aceptas los <NuxtLink to="/terminos" class="login__legal-link">términos y condiciones</NuxtLink> y confirmas que leíste el <NuxtLink to="/privacidad" class="login__legal-link">aviso de privacidad</NuxtLink>.
+          </p>
         </form>
 
-        <!-- Desktop-only: register link + legal -->
+        <!-- Desktop-only: register link -->
         <div class="login__desktop-links">
           <p class="login__register-link">
             ¿No tienes cuenta? <NuxtLink to="/registro">Regístrate</NuxtLink>
-          </p>
-          <p class="login__desktop-legal">
-            Al continuar aceptas <NuxtLink to="/terms" class="login__legal-link">términos de uso</NuxtLink> y confirmas que leíste el <NuxtLink to="/privacy" class="login__legal-link">aviso de privacidad</NuxtLink>.
           </p>
         </div>
 
@@ -335,12 +336,13 @@ async function handleRegister() {
 .login__legal {
   text-align: center;
   font-size: var(--text-xs);
-  color: var(--color-dark-lighter);
+  color: var(--color-muted);
   line-height: var(--leading-normal);
   margin-top: var(--space-2);
 }
 
 .login__legal-link {
+  color: var(--color-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -578,16 +580,6 @@ async function handleRegister() {
     }
   }
 
-  .login__desktop-legal {
-    font-size: var(--text-xs);
-    color: var(--color-muted);
-    margin-top: var(--space-3);
-    line-height: var(--leading-normal);
-  }
-
-  .login__desktop-legal .login__legal-link {
-    color: var(--color-primary);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

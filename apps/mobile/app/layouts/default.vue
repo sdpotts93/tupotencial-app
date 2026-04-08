@@ -1,5 +1,5 @@
 <template>
-  <div class="app-layout">
+  <div :class="['app-layout', { 'app-layout--hide-mobile-nav': route.meta.hideBottomNav }]">
     <UiBottomNav :items="navItems" :sections="desktopSections" :bottom-items="desktopBottomItems" />
 
     <!-- Desktop top bar -->
@@ -25,15 +25,9 @@
 </template>
 
 <script setup lang="ts">
-const client = useSupabaseClient()
 const { user } = useAuth()
+const { streak } = useStreak()
 const route = useRoute()
-
-const { data: streakData } = await useAsyncData('default-layout-streak', async () => {
-  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value?.id ?? '').maybeSingle()
-  return data?.current_streak ?? 0
-}, { watch: [() => user.value?.id] })
-const streak = computed(() => streakData.value ?? 0)
 
 const initials = computed(() => {
   const name = user.value?.display_name || '?'
@@ -139,6 +133,17 @@ const desktopBottomItems = [
   min-height: 100dvh;
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   background: var(--color-white);
+}
+
+/* Hide bottom nav on mobile for detail pages */
+@media (max-width: 1023px) {
+  .app-layout--hide-mobile-nav {
+    padding-bottom: 0;
+  }
+
+  .app-layout--hide-mobile-nav :deep(.bottom-nav) {
+    display: none !important;
+  }
 }
 
 /* Desktop top bar: hidden on mobile */

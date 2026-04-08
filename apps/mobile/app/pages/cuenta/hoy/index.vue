@@ -496,12 +496,7 @@ const greeting = computed(() => {
 })
 
 // ─── Streak ───
-const { data: streakData, refresh: refreshStreak } = useAsyncData('hoy-streak', async () => {
-  if (!user.value?.id) return null
-  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value.id).maybeSingle()
-  return data?.current_streak ?? 0
-}, { lazy: true, watch: [() => user.value?.id] })
-const streak = computed(() => streakData.value ?? 0)
+const { streak, refreshStreak } = useStreak()
 
 const streakMessage = computed(() => {
   const next = streak.value

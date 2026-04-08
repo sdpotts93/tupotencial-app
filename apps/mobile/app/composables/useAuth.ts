@@ -70,6 +70,7 @@ export function useAuth() {
       const uid = u.id ?? (u as any).sub as string | undefined
       if (!uid) return // guard against incomplete user object
       if (user.value?.id === uid) return // already loaded
+      if (loading.value) return // fetch already in-flight — skip duplicate
       loading.value = true
       try {
         const ok = await fetchProfile(uid)

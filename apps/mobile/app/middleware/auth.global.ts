@@ -14,7 +14,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const isAuthed = isLoggedIn.value || hasSession
 
   // ---- Public routes (no auth required) ----
-  const publicRoutes = ['/iniciar-sesion', '/registro', '/precios', '/restablecer-contrasena', '/nueva-contrasena']
+  const publicRoutes = ['/iniciar-sesion', '/registro', '/precios', '/restablecer-contrasena', '/nueva-contrasena', '/terminos', '/privacidad']
   if (publicRoutes.some(r => path === r || path.startsWith(r + '/'))) return
 
   // ---- Root redirect ----

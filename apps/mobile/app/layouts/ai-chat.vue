@@ -64,13 +64,8 @@
 <script setup lang="ts">
 const client = useSupabaseClient()
 const { user } = useAuth()
+const { streak } = useStreak()
 const route = useRoute()
-
-const { data: streakData } = await useAsyncData('ai-chat-streak', async () => {
-  const { data } = await client.from('user_streaks').select('current_streak').eq('user_id', user.value?.id ?? '').maybeSingle()
-  return data?.current_streak ?? 0
-})
-const streak = computed(() => streakData.value ?? 0)
 
 const initials = computed(() => {
   const name = user.value?.display_name || '?'
