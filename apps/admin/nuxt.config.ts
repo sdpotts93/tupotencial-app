@@ -34,7 +34,19 @@ export default defineNuxtConfig({
     '~/assets/css/datepicker-overrides.css',
   ],
 
-  modules: ['@nuxt/icon', '@nuxtjs/supabase'],
+  site: {
+    url: 'https://admin.tupotencial.app',
+  },
+
+  modules: ['@nuxt/icon', '@nuxtjs/supabase', '@nuxtjs/robots', '@nuxtjs/sitemap'],
+
+  robots: {
+    disallow: ['/'],
+  },
+
+  sitemap: {
+    enabled: false,
+  },
 
   supabase: {
     redirect: false,

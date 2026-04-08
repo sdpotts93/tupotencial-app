@@ -42,7 +42,19 @@ export default defineNuxtConfig({
     '~/assets/css/transitions.css',
   ],
 
-  modules: ['@nuxt/icon', '@nuxtjs/supabase'],
+  site: {
+    url: 'https://tupotencial.app',
+  },
+
+  modules: ['@nuxt/icon', '@nuxtjs/supabase', '@nuxtjs/robots', '@nuxtjs/sitemap'],
+
+  robots: {
+    disallow: ['/'],
+  },
+
+  sitemap: {
+    enabled: false,
+  },
 
   supabase: {
     redirect: false,
