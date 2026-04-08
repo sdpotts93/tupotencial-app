@@ -266,7 +266,7 @@ export interface Event {
   id: string;
   title: string;
   description: string | null;
-  start_at: string;
+  start_at: string | null;
   end_at: string | null;
   duration: string | null;
   community_segment: CommunitySegment | null;

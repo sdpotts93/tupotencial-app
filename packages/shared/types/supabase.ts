@@ -1,3 +1,4 @@
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -459,17 +460,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "content_item_objectives_objective_id_fkey"
-            columns: ["objective_id"]
-            isOneToOne: false
-            referencedRelation: "content_objectives"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "content_item_objectives_content_item_id_fkey"
             columns: ["content_item_id"]
             isOneToOne: false
             referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_item_objectives_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "content_objectives"
             referencedColumns: ["id"]
           },
         ]
@@ -486,6 +487,7 @@ export type Database = {
           duration_seconds: number | null
           entitlement_key: string | null
           external_url: string | null
+          fts: unknown
           id: string
           media_url: string | null
           objective_id: string | null
@@ -498,6 +500,7 @@ export type Database = {
           type: string
           updated_at: string | null
           updated_by: string | null
+          vimeo_id: string | null
         }
         Insert: {
           available_from?: string | null
@@ -510,6 +513,7 @@ export type Database = {
           duration_seconds?: number | null
           entitlement_key?: string | null
           external_url?: string | null
+          fts?: unknown
           id?: string
           media_url?: string | null
           objective_id?: string | null
@@ -522,6 +526,7 @@ export type Database = {
           type: string
           updated_at?: string | null
           updated_by?: string | null
+          vimeo_id?: string | null
         }
         Update: {
           available_from?: string | null
@@ -534,6 +539,7 @@ export type Database = {
           duration_seconds?: number | null
           entitlement_key?: string | null
           external_url?: string | null
+          fts?: unknown
           id?: string
           media_url?: string | null
           objective_id?: string | null
@@ -546,6 +552,7 @@ export type Database = {
           type?: string
           updated_at?: string | null
           updated_by?: string | null
+          vimeo_id?: string | null
         }
         Relationships: [
           {
@@ -560,18 +567,21 @@ export type Database = {
       content_objectives: {
         Row: {
           id: string
+          is_active: boolean
           position: number
           slug: string
           title: string
         }
         Insert: {
           id?: string
+          is_active?: boolean
           position?: number
           slug: string
           title: string
         }
         Update: {
           id?: string
+          is_active?: boolean
           position?: number
           slug?: string
           title?: string
@@ -592,7 +602,7 @@ export type Database = {
           date: string
           id?: string
           payload?: Json
-          type: string
+          type?: string
           user_id?: string
         }
         Update: {
@@ -603,7 +613,15 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "daily_checkins_profile_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       daily_plans: {
         Row: {
@@ -655,6 +673,7 @@ export type Database = {
           created_at: string
           event_id: string
           id: string
+          reminder_sent_at: string | null
           status: string
           user_id: string
         }
@@ -662,13 +681,15 @@ export type Database = {
           created_at?: string
           event_id: string
           id?: string
+          reminder_sent_at?: string | null
           status?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
           event_id?: string
           id?: string
+          reminder_sent_at?: string | null
           status?: string
           user_id?: string
         }
@@ -693,7 +714,7 @@ export type Database = {
           entitlement_key: string | null
           id: string
           plan: string | null
-          start_at: string
+          start_at: string | null
           status: string
           title: string
           updated_at: string | null
@@ -711,7 +732,7 @@ export type Database = {
           entitlement_key?: string | null
           id?: string
           plan?: string | null
-          start_at: string
+          start_at?: string | null
           status?: string
           title: string
           updated_at?: string | null
@@ -729,7 +750,7 @@ export type Database = {
           entitlement_key?: string | null
           id?: string
           plan?: string | null
-          start_at?: string
+          start_at?: string | null
           status?: string
           title?: string
           updated_at?: string | null
@@ -745,6 +766,8 @@ export type Database = {
           created_at: string
           form_id: string
           id: string
+          program_id: string | null
+          source: string | null
           user_id: string
         }
         Insert: {
@@ -752,6 +775,8 @@ export type Database = {
           created_at?: string
           form_id: string
           id?: string
+          program_id?: string | null
+          source?: string | null
           user_id?: string
         }
         Update: {
@@ -759,6 +784,8 @@ export type Database = {
           created_at?: string
           form_id?: string
           id?: string
+          program_id?: string | null
+          source?: string | null
           user_id?: string
         }
         Relationships: [
@@ -767,6 +794,20 @@ export type Database = {
             columns: ["form_id"]
             isOneToOne: false
             referencedRelation: "forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_profile_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_submissions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
             referencedColumns: ["id"]
           },
         ]
@@ -870,6 +911,13 @@ export type Database = {
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "post_comments_user_profile_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       post_reactions: {
@@ -941,31 +989,51 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_profile_fk"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
           avatar_url: string | null
-          community_segment: string
+          community_segment: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
+          onboarding_focus: string[] | null
+          onboarding_motivation: string[] | null
+          onboarding_time: string | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
-          community_segment: string
+          community_segment?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id: string
+          onboarding_focus?: string[] | null
+          onboarding_motivation?: string[] | null
+          onboarding_time?: string | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
-          community_segment?: string
+          community_segment?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
+          onboarding_focus?: string[] | null
+          onboarding_motivation?: string[] | null
+          onboarding_time?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -999,6 +1067,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "program_checkins_profile_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "program_checkins_program_id_fkey"
             columns: ["program_id"]
@@ -1178,32 +1253,59 @@ export type Database = {
         }
         Relationships: []
       }
+      push_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          token: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscription_plans: {
         Row: {
-          id: string
-          title: string
-          description: string | null
-          price: number
-          interval: string
           cover_url: string | null
+          description: string | null
+          id: string
+          interval: string
+          price: number
+          title: string
           updated_at: string | null
         }
         Insert: {
-          id: string
-          title: string
-          description?: string | null
-          price?: number
-          interval?: string
           cover_url?: string | null
+          description?: string | null
+          id: string
+          interval?: string
+          price?: number
+          title: string
           updated_at?: string | null
         }
         Update: {
-          id?: string
-          title?: string
-          description?: string | null
-          price?: number
-          interval?: string
           cover_url?: string | null
+          description?: string | null
+          id?: string
+          interval?: string
+          price?: number
+          title?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -1294,31 +1396,57 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_hoy_page: {
-        Args: { p_date?: string }
-        Returns: Json
-      }
-      count_completed_days: { Args: Record<PropertyKey, never>; Returns: number }
-      get_subscriber_user_ids: { Args: Record<PropertyKey, never>; Returns: string[] }
       check_email_exists: { Args: { p_email: string }; Returns: boolean }
-      is_admin: { Args: never; Returns: boolean }
-      search_content: {
-        Args: { search_query: string; max_results?: number }
+      complete_program: { Args: { p_program_id: string }; Returns: undefined }
+      count_completed_days: { Args: never; Returns: number }
+      get_event_registration: {
+        Args: { p_event_id: string }
         Returns: {
           id: string
-          title: string
-          type: string
-          duration_seconds: number | null
-          thumbnail_url: string | null
-          entitlement_key: string | null
-          category_title: string | null
-          rank: number
+          status: string
         }[]
       }
-      complete_program: {
-        Args: { p_program_id: string }
+      get_hoy_page: { Args: { p_date?: string }; Returns: Json }
+      get_library_categories: {
+        Args: { items_per_category?: number }
+        Returns: {
+          category_id: string
+          category_slug: string
+          category_title: string
+          duration_seconds: number
+          entitlement_key: string
+          item_id: string
+          item_plan: string
+          item_position: number
+          item_title: string
+          item_type: string
+          thumbnail_url: string
+        }[]
+      }
+      get_secure_content: { Args: { p_content_id: string }; Returns: Json }
+      get_secure_event: { Args: { p_event_id: string }; Returns: Json }
+      get_subscriber_user_ids: { Args: never; Returns: string[] }
+      is_admin: { Args: never; Returns: boolean }
+      register_for_event: { Args: { p_event_id: string }; Returns: undefined }
+      search_content: {
+        Args: { max_results?: number; search_query: string }
+        Returns: {
+          category_title: string
+          duration_seconds: number
+          entitlement_key: string
+          id: string
+          rank: number
+          thumbnail_url: string
+          title: string
+          type: string
+        }[]
+      }
+      unregister_from_event: {
+        Args: { p_event_id: string }
         Returns: undefined
       }
+      user_has_entitlement: { Args: { p_key: string }; Returns: boolean }
+      user_is_subscriber: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

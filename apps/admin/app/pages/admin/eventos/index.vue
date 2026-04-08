@@ -56,7 +56,7 @@
         </template>
 
         <template #cell-starts_at="{ value }">
-          {{ formatDateTime(value) }}
+          {{ value ? formatDateTime(value) : '—' }}
         </template>
 
         <template #cell-plan="{ value }">
@@ -122,26 +122,15 @@
       <template #footer>
         <div class="vimeo-import__footer">
           <span v-if="vimeoEvents.length" class="vimeo-import__count">{{ selectedEventIds.size }} seleccionados</span>
-          <div class="vimeo-import__actions">
-            <UiButton
-              variant="soft"
-              size="sm"
-              :disabled="selectedEventIds.size === 0 || vimeoImporting"
-              :loading="vimeoImporting"
-              @click="importSelectedEvents('draft')"
-            >
-              Como borrador
-            </UiButton>
-            <UiButton
-              variant="primary-outline"
-              size="sm"
-              :disabled="selectedEventIds.size === 0 || vimeoImporting"
-              :loading="vimeoImporting"
-              @click="importSelectedEvents('published')"
-            >
-              Importar y publicar
-            </UiButton>
-          </div>
+          <UiButton
+            variant="primary-outline"
+            size="sm"
+            :disabled="selectedEventIds.size === 0 || vimeoImporting"
+            :loading="vimeoImporting"
+            @click="importSelectedEvents"
+          >
+            Importar como borrador
+          </UiButton>
         </div>
       </template>
     </UiModal>
@@ -266,7 +255,7 @@ function toggleEventSelect(id: string) {
   else selectedEventIds.add(id)
 }
 
-async function importSelectedEvents(status: 'draft' | 'published') {
+async function importSelectedEvents() {
   vimeoImporting.value = true
   const toast = useToast()
   try {
@@ -276,16 +265,14 @@ async function importSelectedEvents(status: 'draft' | 'published') {
       description: e.description?.slice(0, 500) || null,
       vimeo_live_event_id: e.vimeo_live_event_id,
       cover_url: e.thumbnail,
-      duration: String(Math.round(e.duration_seconds / 60) || 60),
       plan: 'free' as const,
-      status,
-      start_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'draft' as const,
     }))
     const { error } = await client.from('events').insert(payloads)
     if (error) throw error
-    const label = status === 'published' ? 'publicados' : 'importados como borrador'
-    toast.show(`${selected.length} evento(s) ${label}`, 'success')
+    toast.show(`${selected.length} evento(s) importados como borrador`, 'success')
     showVimeoModal.value = false
+    activeTab.value = 'draft'
     refresh()
   } catch {
     useToast().show('Error al importar eventos', 'error')

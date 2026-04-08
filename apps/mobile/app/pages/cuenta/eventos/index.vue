@@ -175,7 +175,7 @@ const { data: registeredEventIds } = useAsyncData('mobile-my-event-ids', async (
 }, { lazy: true })
 
 const { data: events, status: eventosStatus, refresh: refreshEventos } = useAsyncData('mobile-events', async () => {
-  const { data } = await client.from('events').select('id, title, description, start_at, cover_url, entitlement_key, plan, status').in('status', ['published']).order('start_at')
+  const { data } = await client.from('events').select('id, title, description, start_at, cover_url, entitlement_key, plan, status').in('status', ['published']).not('start_at', 'is', null).not('duration', 'is', null).order('start_at')
   return data ?? []
 }, { lazy: true })
 

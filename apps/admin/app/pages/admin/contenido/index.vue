@@ -422,7 +422,6 @@ async function importSelectedVideos(status: 'draft' | 'published') {
     const now = new Date().toISOString()
     const payloads = selected.map(v => ({
       title: v.title,
-      subtitle: v.description?.slice(0, 500) || null,
       description: v.description || v.title,
       type: 'video' as const,
       vimeo_id: v.vimeo_id,

@@ -6,6 +6,7 @@ interface VimeoVideo {
   description: string | null
   duration: number
   type: string
+  status: string
   pictures: { sizes: { link: string; width: number }[] }
   created_time: string
   link: string
@@ -56,7 +57,7 @@ export default defineEventHandler(async (event) => {
 
   while (!done) {
     const res = await $fetch<VimeoResponse>(
-      `https://api.vimeo.com/me/videos?fields=uri,name,description,duration,type,pictures.sizes,created_time,link&per_page=${perPage}&page=${page}&sort=date&direction=desc`,
+      `https://api.vimeo.com/me/videos?fields=uri,name,description,duration,type,status,pictures.sizes,created_time,link&per_page=${perPage}&page=${page}&sort=date&direction=desc`,
       { headers: { Authorization: `Bearer ${token}` } },
     )
 
@@ -67,8 +68,9 @@ export default defineEventHandler(async (event) => {
         done = true
         break
       }
-      // Skip live events — those belong in /admin/eventos
-      if (v.type === 'live') continue
+      // Skip active/pending live events — those belong in /admin/eventos
+      // But allow ended live streams (available with duration) as video recordings
+      if (v.type === 'live' && !(v.status === 'available' && v.duration > 0)) continue
       const thumb = v.pictures.sizes.find(s => s.width === 640)
         ?? v.pictures.sizes[v.pictures.sizes.length - 1]
       newVideos.push({
