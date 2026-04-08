@@ -239,7 +239,7 @@ const { data: contentItemsList } = await useAsyncData('program-content-items', a
 })
 
 const { data: formsList } = await useAsyncData('program-forms', async () => {
-  const { data } = await client.from('forms').select('id, title').order('title')
+  const { data } = await client.from('forms').select('id, title').eq('status', 'active').order('title')
   return data ?? []
 })
 

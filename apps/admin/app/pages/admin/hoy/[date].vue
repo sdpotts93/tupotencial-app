@@ -131,12 +131,12 @@ const actionTypeOptions = [
 
 // ── Fetch content items and forms for dropdowns ──
 const { data: contentItemsList } = await useAsyncData('daily-plan-content-items', async () => {
-  const { data } = await client.from('content_items').select('id, title').order('title')
+  const { data } = await client.from('content_items').select('id, title').eq('status', 'published').order('title')
   return data ?? []
 })
 
 const { data: formsList } = await useAsyncData('daily-plan-forms', async () => {
-  const { data } = await client.from('forms').select('id, title').order('title')
+  const { data } = await client.from('forms').select('id, title').eq('status', 'active').order('title')
   return data ?? []
 })
 

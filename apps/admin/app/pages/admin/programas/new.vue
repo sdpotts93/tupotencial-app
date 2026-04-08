@@ -201,12 +201,12 @@ const isDragging = ref(false)
 
 // ── Fetch content items and forms for dropdowns ──
 const { data: contentItemsList } = await useAsyncData('program-content-items', async () => {
-  const { data } = await client.from('content_items').select('id, title, entitlement_key').order('title')
+  const { data } = await client.from('content_items').select('id, title, entitlement_key').eq('status', 'published').order('title')
   return data ?? []
 })
 
 const { data: formsList } = await useAsyncData('program-forms', async () => {
-  const { data } = await client.from('forms').select('id, title').order('title')
+  const { data } = await client.from('forms').select('id, title').eq('status', 'active').order('title')
   return data ?? []
 })
 
