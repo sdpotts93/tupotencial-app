@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   // Capacitor requires a static SPA build; web uses SSR
   ssr: !isCapacitor,
   nitro: {
-    preset: isCapacitor ? 'static' : 'cloudflare',
+    preset: isCapacitor ? 'static' : 'cloudflare-module',
   },
 
   devtools: { enabled: !isCapacitor },
