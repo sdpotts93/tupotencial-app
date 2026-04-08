@@ -85,6 +85,7 @@
           <br /><button class="pricing__restore" @click="handleRestore">Restaurar compras</button>
         </template>
       </p>
+
     </div>
   </div>
 </template>
@@ -123,14 +124,14 @@ const plans = computed(() =>
   })),
 )
 
-// ── RevenueCat paywall (native + web) ──
-const { presentPaywall, restorePurchases } = useRevenueCat()
+// ── RevenueCat purchase (native + web) ──
+const { purchaseCurrentOffering, restorePurchases } = useRevenueCat()
 const paywallLoading = ref(false)
 
 async function openPaywall() {
   paywallLoading.value = true
   try {
-    const result = await presentPaywall()
+    const result = await purchaseCurrentOffering()
     if (result === 'purchased' || result === 'restored') {
       await refreshSub()
     }
@@ -373,6 +374,7 @@ async function handleRestore() {
   color: var(--color-text);
   line-height: var(--leading-snug);
 }
+
 
 .sub__error-desc {
   font-size: var(--text-sm);

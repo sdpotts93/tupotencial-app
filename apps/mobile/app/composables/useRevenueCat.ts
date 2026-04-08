@@ -29,7 +29,7 @@ export function useRevenueCat() {
     } else {
       const { Purchases } = await import('@revenuecat/purchases-js')
       const userId = appUserId ?? Purchases.generateRevenueCatAnonymousAppUserId()
-      webInstance = Purchases.configure(apiKey, userId)
+      webInstance = Purchases.configure({ apiKey, appUserId: userId })
     }
 
     configured.value = true
@@ -43,11 +43,10 @@ export function useRevenueCat() {
       const { Purchases } = await import('@revenuecat/purchases-capacitor')
       await Purchases.logIn({ appUserID: userId })
     } else {
-      // Web SDK: reconfigure with the real user ID
       const { Purchases } = await import('@revenuecat/purchases-js')
       const config = useRuntimeConfig()
       const apiKey = config.public.revenueCatApiKey as string
-      webInstance = Purchases.configure(apiKey, userId)
+      webInstance = Purchases.configure({ apiKey, appUserId: userId })
     }
   }
 
@@ -59,16 +58,15 @@ export function useRevenueCat() {
       const { Purchases } = await import('@revenuecat/purchases-capacitor')
       await Purchases.logOut()
     } else {
-      // Web SDK: reconfigure with anonymous user
       const { Purchases } = await import('@revenuecat/purchases-js')
       const config = useRuntimeConfig()
       const apiKey = config.public.revenueCatApiKey as string
       const anonId = Purchases.generateRevenueCatAnonymousAppUserId()
-      webInstance = Purchases.configure(apiKey, anonId)
+      webInstance = Purchases.configure({ apiKey, appUserId: anonId })
     }
   }
 
-  // ── Check "Tu Potencial Pro" entitlement ──
+  // ── Check entitlement ──
   async function isProEntitled(): Promise<boolean> {
     if (!configured.value) return false
 
@@ -107,82 +105,41 @@ export function useRevenueCat() {
     }
   }
 
-  // ── Present RevenueCat paywall ──
-  // Native: opens native paywall modal via RevenueCatUI
-  // Web: opens RevenueCat web paywall overlay
-  async function presentPaywall(): Promise<'purchased' | 'restored' | 'cancelled' | 'error'> {
-    if (!configured.value) return 'error'
-
-    try {
-      if (isNative()) {
-        const { RevenueCatUI, PAYWALL_RESULT } = await import('@revenuecat/purchases-capacitor-ui')
-        const { result } = await RevenueCatUI.presentPaywall()
-        switch (result) {
-          case PAYWALL_RESULT.PURCHASED: return 'purchased'
-          case PAYWALL_RESULT.RESTORED: return 'restored'
-          case PAYWALL_RESULT.NOT_PRESENTED:
-          case PAYWALL_RESULT.ERROR: return 'error'
-          case PAYWALL_RESULT.CANCELLED:
-          default: return 'cancelled'
-        }
-      } else {
-        if (!webInstance) return 'error'
-        const offerings = await webInstance.getOfferings()
-        const currentOffering = offerings.current
-        if (!currentOffering) {
-          console.error('[RevenueCat] No current offering configured')
-          return 'error'
-        }
-        const { customerInfo } = await webInstance.presentPaywall({ offering: currentOffering })
-        const hasPro = ENTITLEMENT_ID in customerInfo.entitlements.active
-        return hasPro ? 'purchased' : 'cancelled'
-      }
-    } catch (e) {
-      console.error('[RevenueCat] Paywall error:', e)
-      return 'error'
-    }
-  }
-
-  // ── Present paywall for a specific offering ──
-  async function presentPaywallForOffering(offeringId: string): Promise<'purchased' | 'restored' | 'cancelled' | 'error'> {
+  // ── Purchase the current offering's first package ──
+  // Native: opens App Store / Play Store purchase sheet directly
+  // Web: calls purchase() directly with locale support
+  async function purchaseCurrentOffering(): Promise<'purchased' | 'restored' | 'cancelled' | 'error'> {
     if (!configured.value) return 'error'
 
     try {
       if (isNative()) {
         const { Purchases } = await import('@revenuecat/purchases-capacitor')
-        const { RevenueCatUI, PAYWALL_RESULT } = await import('@revenuecat/purchases-capacitor-ui')
-        const { offerings } = await Purchases.getOfferings()
-        const offering = offerings.all[offeringId]
-        if (!offering) {
-          console.error(`[RevenueCat] Offering "${offeringId}" not found`)
+        const offerings = await Purchases.getOfferings()
+        const pkg = offerings.current?.availablePackages[0]
+        if (!pkg) {
+          console.error('[RevenueCat] No package available')
           return 'error'
         }
-        const { result } = await RevenueCatUI.presentPaywallIfNeeded({
-          requiredEntitlementIdentifier: ENTITLEMENT_ID,
-          offering,
-        })
-        switch (result) {
-          case PAYWALL_RESULT.PURCHASED: return 'purchased'
-          case PAYWALL_RESULT.RESTORED: return 'restored'
-          case PAYWALL_RESULT.NOT_PRESENTED:
-          case PAYWALL_RESULT.ERROR: return 'error'
-          case PAYWALL_RESULT.CANCELLED:
-          default: return 'cancelled'
-        }
+        const { customerInfo } = await Purchases.purchasePackage({ aPackage: pkg })
+        const hasPro = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined'
+        return hasPro ? 'purchased' : 'cancelled'
       } else {
         if (!webInstance) return 'error'
         const offerings = await webInstance.getOfferings()
-        const offering = offerings.all[offeringId]
-        if (!offering) {
-          console.error(`[RevenueCat] Offering "${offeringId}" not found`)
+        const pkg = offerings.current?.availablePackages[0]
+        if (!pkg) {
+          console.error('[RevenueCat] No package available')
           return 'error'
         }
-        const { customerInfo } = await webInstance.presentPaywall({ offering })
+        const { customerInfo } = await webInstance.purchase({
+          rcPackage: pkg,
+          selectedLocale: 'es',
+        })
         const hasPro = ENTITLEMENT_ID in customerInfo.entitlements.active
         return hasPro ? 'purchased' : 'cancelled'
       }
     } catch (e) {
-      console.error('[RevenueCat] Paywall error:', e)
+      console.error('[RevenueCat] Purchase error:', e)
       return 'error'
     }
   }
@@ -194,8 +151,7 @@ export function useRevenueCat() {
     try {
       if (isNative()) {
         const { Purchases } = await import('@revenuecat/purchases-capacitor')
-        const { offerings } = await Purchases.getOfferings()
-        return offerings
+        return await Purchases.getOfferings()
       } else {
         if (!webInstance) return null
         return await webInstance.getOfferings()
@@ -220,7 +176,7 @@ export function useRevenueCat() {
     }
   }
 
-  // ── Present Customer Center (native: RevenueCatUI, web: RevenueCat billing portal) ──
+  // ── Present Customer Center (native: RevenueCatUI, web: management URL) ──
   async function presentCustomerCenter(): Promise<void> {
     if (!configured.value) return
 
@@ -229,7 +185,6 @@ export function useRevenueCat() {
         const { RevenueCatUI } = await import('@revenuecat/purchases-capacitor-ui')
         await RevenueCatUI.presentCustomerCenter()
       } else {
-        // Web: open RevenueCat's management URL (Stripe Customer Portal via RC)
         if (!webInstance) return
         const customerInfo = await webInstance.getCustomerInfo()
         const managementUrl = customerInfo.managementURL
@@ -249,8 +204,7 @@ export function useRevenueCat() {
     logout,
     isProEntitled,
     getCustomerInfo,
-    presentPaywall,
-    presentPaywallForOffering,
+    purchaseCurrentOffering,
     getOfferings,
     restorePurchases,
     presentCustomerCenter,
