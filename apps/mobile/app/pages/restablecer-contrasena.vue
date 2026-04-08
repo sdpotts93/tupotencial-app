@@ -11,7 +11,7 @@
         <template v-if="!sent">
           <h1 class="reset__sheet-title">Restablecer contraseña</h1>
           <p class="reset__sheet-subtitle">Ingresa tu correo y te enviaremos un enlace para crear una nueva contraseña.</p>
-
+          
           <form class="reset__form" @submit.prevent="handleSubmit">
             <UiInput
               v-model="email"
