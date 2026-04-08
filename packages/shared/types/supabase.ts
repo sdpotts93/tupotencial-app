@@ -1315,6 +1315,10 @@ export type Database = {
           rank: number
         }[]
       }
+      complete_program: {
+        Args: { p_program_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

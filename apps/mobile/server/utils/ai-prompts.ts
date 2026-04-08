@@ -133,7 +133,7 @@ export function buildContextMessages(
   // Trim from oldest to fit token budget
   let totalTokens = recent.reduce((sum, m) => sum + estimateTokens(m.content), 0)
   while (totalTokens > MAX_HISTORY_TOKENS && recent.length > 2) {
-    totalTokens -= estimateTokens(recent[0].content)
+    totalTokens -= estimateTokens(recent[0]!.content)
     recent = recent.slice(1)
   }
 

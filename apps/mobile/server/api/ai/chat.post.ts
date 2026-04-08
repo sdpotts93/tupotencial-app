@@ -119,22 +119,15 @@ export default defineEventHandler(async (event) => {
     openai.chat.completions.create({
       model: 'gpt-5-mini',
       messages: [
-        { role: 'system', content: SUMMARY_PROMPT },
+        { role: 'developer', content: SUMMARY_PROMPT },
         { role: 'user', content: conversationText },
       ],
     }).then(async (summaryResponse) => {
-      const usage = summaryResponse.usage
-      console.log(`[AI Summary] Tokens — prompt: ${usage?.prompt_tokens}, completion: ${usage?.completion_tokens}, total: ${usage?.total_tokens}`)
-      console.log(`[AI Summary] Finish reason: ${summaryResponse.choices[0]?.finish_reason}`)
       const raw = summaryResponse.choices[0]?.message?.content?.trim()
       if (raw) {
-        const { error: updateErr } = await client.from('ai_sessions')
+        await client.from('ai_sessions')
           .update({ summary: raw })
           .eq('id', activeSessionId)
-        if (updateErr) console.warn('[AI Summary] Failed to save:', updateErr.message)
-        else console.log(`[AI Summary] Saved: ${raw.slice(0, 80)}...`)
-      } else {
-        console.warn(`[AI Summary] Empty response`)
       }
     }).catch((err) => {
       console.warn('[AI Summary] Failed:', err instanceof Error ? err.message : err)
