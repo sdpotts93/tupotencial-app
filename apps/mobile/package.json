@@ -32,6 +32,7 @@
     "@nuxtjs/supabase": "^2.0.4",
     "@revenuecat/purchases-capacitor": "^12.3.2",
     "@revenuecat/purchases-capacitor-ui": "^12.3.2",
+    "@revenuecat/purchases-js": "^1.30.0",
     "@vimeo/player": "^2.30.3",
     "dompurify": "^3.3.3",
     "firebase": "^12.11.0",

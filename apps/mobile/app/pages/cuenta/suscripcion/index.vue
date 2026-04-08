@@ -60,10 +60,7 @@
             <UiButton variant="outline" block disabled>Plan actual</UiButton>
           </template>
           <template v-else-if="plan.id === 'core'">
-            <UiButton v-if="isNative" block class="pricing__cta-core" :loading="paywallLoading" @click="openNativePaywall">
-              Suscribirme a Core
-            </UiButton>
-            <UiButton v-else block class="pricing__cta-core" :loading="checkoutLoading" @click="startCheckout">
+            <UiButton block class="pricing__cta-core" :loading="paywallLoading" @click="openPaywall">
               Suscribirme a Core
             </UiButton>
           </template>
@@ -82,11 +79,11 @@
 
       </template>
 
-      <p v-if="isNative" class="pricing__note">
-        <button class="pricing__restore" @click="handleRestore">Restaurar compras</button>
-      </p>
-      <p v-else class="pricing__note">
-        Pago seguro con Stripe. Cancela en cualquier momento.
+      <p class="pricing__note">
+        Pago seguro. Cancela en cualquier momento.
+        <template v-if="isNative">
+          <br /><button class="pricing__restore" @click="handleRestore">Restaurar compras</button>
+        </template>
       </p>
     </div>
   </div>
@@ -98,7 +95,6 @@ definePageMeta({ layout: 'default' })
 const client = useSupabaseClient()
 const { isSubscriber } = useAuth()
 const { isNative } = useNativePlatform()
-const config = useRuntimeConfig()
 
 // Fetch both plans + benefits for each
 const { data: plansData, status: subStatus, refresh: refreshSub } = useAsyncData('suscripcion-plans', async () => {
@@ -127,11 +123,11 @@ const plans = computed(() =>
   })),
 )
 
-// ── Native paywall (RevenueCat) ──
+// ── RevenueCat paywall (native + web) ──
 const { presentPaywall, restorePurchases } = useRevenueCat()
 const paywallLoading = ref(false)
 
-async function openNativePaywall() {
+async function openPaywall() {
   paywallLoading.value = true
   try {
     const result = await presentPaywall()
@@ -146,42 +142,6 @@ async function openNativePaywall() {
 async function handleRestore() {
   const info = await restorePurchases()
   if (info) await refreshSub()
-}
-
-// ── Web checkout flow (Stripe) ──
-const checkoutLoading = ref(false)
-
-async function startCheckout() {
-  const { data: { session } } = await client.auth.getSession()
-  if (!session) {
-    navigateTo('/iniciar-sesion?redirect=/cuenta/suscripcion')
-    return
-  }
-
-  const workerUrl = config.public.stripeWorkerUrl
-  if (!workerUrl) return
-
-  checkoutLoading.value = true
-  try {
-    const res = await fetch(`${workerUrl}/create-checkout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        returnUrl: window.location.origin + '/cuenta/facturacion/retorno',
-      }),
-    })
-    const data = await res.json()
-    if (data.url) {
-      window.location.href = data.url
-    }
-  } catch (err) {
-    console.error('Checkout error:', err)
-  } finally {
-    checkoutLoading.value = false
-  }
 }
 </script>
 

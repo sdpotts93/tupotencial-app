@@ -77,12 +77,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           </template>
         </UiListItem>
-        <UiListItem v-if="isSubscriber && isNative" label="Gestionar suscripción" description="Cambiar plan, restaurar o cancelar" @click="openCustomerCenter">
-          <template #icon>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          </template>
-        </UiListItem>
-        <UiListItem v-else-if="isSubscriber" label="Gestionar suscripción" description="Cambiar método de pago o cancelar" @click="openPortal">
+        <UiListItem v-if="isSubscriber" label="Gestionar suscripción" description="Cambiar plan, método de pago o cancelar" @click="openCustomerCenter">
           <template #icon>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           </template>
@@ -126,11 +121,8 @@
 
 <script setup lang="ts">
 const { user, isSubscriber, logout } = useAuth()
-const { isNative } = useNativePlatform()
 const client = useSupabaseClient()
-const config = useRuntimeConfig()
 const { presentCustomerCenter } = useRevenueCat()
-const portalLoading = ref(false)
 
 async function openCustomerCenter() {
   await presentCustomerCenter()
@@ -148,34 +140,6 @@ const { data: currentPlan, status: masStatus, refresh: refreshMas } = useAsyncDa
 }, { lazy: true, watch: [isSubscriber] })
 
 const currentPlanName = computed(() => currentPlan.value?.title ?? (isSubscriber.value ? 'Core' : 'Gratis'))
-
-async function openPortal() {
-  const { data: { session } } = await client.auth.getSession()
-  if (!session) return
-
-  const workerUrl = config.public.stripeWorkerUrl
-  if (!workerUrl) return
-
-  portalLoading.value = true
-  try {
-    const res = await fetch(`${workerUrl}/create-portal-session`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        returnUrl: window.location.origin + '/cuenta/mas',
-      }),
-    })
-    const data = await res.json()
-    if (data.url) {
-      window.location.href = data.url
-    }
-  } finally {
-    portalLoading.value = false
-  }
-}
 
 function handleLogout() {
   logout()

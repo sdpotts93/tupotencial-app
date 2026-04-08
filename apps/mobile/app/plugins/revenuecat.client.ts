@@ -1,11 +1,8 @@
-// RevenueCat SDK initialization — runs once on native app boot.
-// Configures the SDK and identifies the current user if logged in.
-
-import { Capacitor } from '@capacitor/core'
+// RevenueCat SDK initialization — runs on both native and web.
+// Native: configures Capacitor plugin, then identifies user
+// Web: configures JS SDK with user ID (or anonymous)
 
 export default defineNuxtPlugin(async () => {
-  if (!Capacitor.isNativePlatform()) return
-
   const config = useRuntimeConfig()
   const apiKey = config.public.revenueCatApiKey as string
   if (!apiKey) {
@@ -13,11 +10,13 @@ export default defineNuxtPlugin(async () => {
     return
   }
 
-  const { configure, login } = useRevenueCat()
-  await configure(apiKey)
-
-  // If the user is already logged in, identify them with RevenueCat
   const supaUser = useSupabaseUser()
+  const { configure, login } = useRevenueCat()
+
+  // Configure with the user's ID if already logged in, or anonymous for web
+  await configure(apiKey, supaUser.value?.id ?? undefined)
+
+  // If user is logged in, identify them with RevenueCat
   if (supaUser.value?.id) {
     await login(supaUser.value.id)
   }

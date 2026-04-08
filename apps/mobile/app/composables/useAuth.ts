@@ -1,7 +1,6 @@
 // Auth composable — powered by @nuxtjs/supabase
-// Integrates with RevenueCat on native for IAP entitlements
+// Integrates with RevenueCat for subscription entitlements (native IAP + web)
 import { useState, navigateTo, watch, computed } from '#imports'
-import { Capacitor } from '@capacitor/core'
 
 export interface AuthUser {
   id: string
@@ -42,18 +41,16 @@ export function useAuth() {
     let isSubscriber = subRes.data?.status === 'active' || subRes.data?.status === 'trialing'
     const entitlements = (entRes.data ?? []).map(e => e.entitlement_key)
 
-    // On native, also check RevenueCat for IAP-based entitlements
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const { login: rcLogin, isProEntitled } = useRevenueCat()
-        await rcLogin(uid)
-        const hasPro = await isProEntitled()
-        if (hasPro) {
-          isSubscriber = true
-          if (!entitlements.includes('pro')) entitlements.push('pro')
-        }
-      } catch { /* RevenueCat not configured yet — non-critical */ }
-    }
+    // Also check RevenueCat for entitlements (native IAP + web Stripe via RC)
+    try {
+      const { login: rcLogin, isProEntitled } = useRevenueCat()
+      await rcLogin(uid)
+      const hasPro = await isProEntitled()
+      if (hasPro) {
+        isSubscriber = true
+        if (!entitlements.includes('pro')) entitlements.push('pro')
+      }
+    } catch { /* RevenueCat not configured yet — non-critical */ }
 
     user.value = {
       id: uid,
@@ -153,13 +150,11 @@ export function useAuth() {
       await unregister()
     } catch { /* non-critical */ }
 
-    // Log out of RevenueCat (native only)
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const { logout: rcLogout } = useRevenueCat()
-        await rcLogout()
-      } catch { /* non-critical */ }
-    }
+    // Log out of RevenueCat
+    try {
+      const { logout: rcLogout } = useRevenueCat()
+      await rcLogout()
+    } catch { /* non-critical */ }
 
     await client.auth.signOut()
     user.value = null
