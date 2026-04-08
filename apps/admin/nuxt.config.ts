@@ -6,6 +6,10 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
+  nitro: {
+    preset: 'cloudflare-pages',
+  },
+
   devtools: { enabled: true },
 
   app: {
