@@ -122,15 +122,26 @@
       <template #footer>
         <div class="vimeo-import__footer">
           <span v-if="vimeoEvents.length" class="vimeo-import__count">{{ selectedEventIds.size }} seleccionados</span>
-          <UiButton
-            variant="primary-outline"
-            size="sm"
-            :disabled="selectedEventIds.size === 0 || vimeoImporting"
-            :loading="vimeoImporting"
-            @click="importSelectedEvents"
-          >
-            Importar como borrador
-          </UiButton>
+          <div class="vimeo-import__actions">
+            <UiButton
+              variant="soft"
+              size="sm"
+              :disabled="selectedEventIds.size === 0 || vimeoImporting"
+              :loading="vimeoImporting"
+              @click="importSelectedEvents('draft')"
+            >
+              Como borrador
+            </UiButton>
+            <UiButton
+              variant="primary-outline"
+              size="sm"
+              :disabled="selectedEventIds.size === 0 || vimeoImporting"
+              :loading="vimeoImporting"
+              @click="importSelectedEvents('published')"
+            >
+              Importar y publicar
+            </UiButton>
+          </div>
         </div>
       </template>
     </UiModal>
@@ -254,7 +265,7 @@ function toggleEventSelect(id: string) {
   else selectedEventIds.add(id)
 }
 
-async function importSelectedEvents() {
+async function importSelectedEvents(status: 'draft' | 'published') {
   vimeoImporting.value = true
   const toast = useToast()
   try {
@@ -265,12 +276,13 @@ async function importSelectedEvents() {
       vimeo_live_event_id: e.vimeo_live_event_id,
       cover_url: e.thumbnail,
       plan: 'free' as const,
-      status: 'draft' as const,
+      status,
       start_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     }))
     const { error } = await client.from('events').insert(payloads)
     if (error) throw error
-    toast.show(`${selected.length} evento(s) importados como borrador`, 'success')
+    const label = status === 'published' ? 'publicados' : 'importados como borrador'
+    toast.show(`${selected.length} evento(s) ${label}`, 'success')
     showVimeoModal.value = false
     refresh()
   } catch {
@@ -431,10 +443,19 @@ async function importSelectedEvents() {
 
 .vimeo-import__footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: var(--space-3);
   width: 100%;
+}
+
+.vimeo-import__actions {
+  display: flex;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.vimeo-import__actions > * {
+  flex: 1;
 }
 
 .vimeo-import__count {

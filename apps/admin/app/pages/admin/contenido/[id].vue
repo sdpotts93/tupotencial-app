@@ -21,7 +21,7 @@
               label="Introducción"
               placeholder="Escribe una breve introducción..."
               :rows="3"
-              :required="form.content_type !== 'article'"
+              :required="false"
               :error="errors.introduction"
             />
 
@@ -538,7 +538,6 @@ async function handleSave() {
 
   let hasError = false
   if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
-  if (form.content_type !== 'article' && !form.introduction.trim()) { errors.introduction = 'La introducción es obligatoria'; hasError = true }
   if (form.content_type === 'article' && !form.body.trim()) { errors.body = 'El contenido del artículo es obligatorio'; hasError = true }
   if (form.content_type !== 'article' && !form.body.trim()) { errors.body = 'El texto es obligatorio'; hasError = true }
   if (form.content_type === 'video' && !extractVimeoId(form.vimeo_url)) { errors.vimeo_url = 'La URL de Vimeo es obligatoria'; hasError = true }

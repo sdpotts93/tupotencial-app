@@ -177,15 +177,26 @@
       <template #footer>
         <div class="vimeo-import__footer">
           <span v-if="newVimeoVideos.length" class="vimeo-import__count">{{ selectedVimeoIds.size }} seleccionados</span>
-          <UiButton
-            variant="primary-outline"
-            size="sm"
-            :disabled="selectedVimeoIds.size === 0 || vimeoImporting"
-            :loading="vimeoImporting"
-            @click="importSelectedVideos"
-          >
-            Importar como borrador
-          </UiButton>
+          <div class="vimeo-import__actions">
+            <UiButton
+              variant="soft"
+              size="sm"
+              :disabled="selectedVimeoIds.size === 0 || vimeoImporting"
+              :loading="vimeoImporting"
+              @click="importSelectedVideos('draft')"
+            >
+              Como borrador
+            </UiButton>
+            <UiButton
+              variant="primary-outline"
+              size="sm"
+              :disabled="selectedVimeoIds.size === 0 || vimeoImporting"
+              :loading="vimeoImporting"
+              @click="importSelectedVideos('published')"
+            >
+              Importar y publicar
+            </UiButton>
+          </div>
         </div>
       </template>
     </UiModal>
@@ -403,24 +414,28 @@ function formatDuration(seconds: number) {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
-async function importSelectedVideos() {
+async function importSelectedVideos(status: 'draft' | 'published') {
   vimeoImporting.value = true
   const toast = useToast()
   try {
     const selected = vimeoVideos.value.filter(v => selectedVimeoIds.has(v.vimeo_id))
+    const now = new Date().toISOString()
     const payloads = selected.map(v => ({
       title: v.title,
       subtitle: v.description?.slice(0, 500) || null,
+      description: v.description || v.title,
       type: 'video' as const,
       vimeo_id: v.vimeo_id,
       duration_seconds: v.duration_seconds,
       thumbnail_url: v.thumbnail,
       plan: 'free' as const,
-      status: 'draft' as const,
+      status,
+      published_at: status === 'published' ? now : null,
     }))
     const { error } = await client.from('content_items').insert(payloads)
     if (error) throw error
-    toast.show(`${selected.length} video(s) importados como borrador`, 'success')
+    const label = status === 'published' ? 'publicados' : 'importados como borrador'
+    toast.show(`${selected.length} video(s) ${label}`, 'success')
     showVimeoModal.value = false
     refresh()
   } catch {
@@ -651,10 +666,19 @@ async function importSelectedVideos() {
 
 .vimeo-import__footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: var(--space-3);
   width: 100%;
+}
+
+.vimeo-import__actions {
+  display: flex;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.vimeo-import__actions > * {
+  flex: 1;
 }
 
 .vimeo-import__count {

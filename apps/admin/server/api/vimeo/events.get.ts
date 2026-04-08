@@ -1,19 +1,21 @@
 import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 
-interface VimeoLiveEvent {
+interface VimeoVideo {
   uri: string
-  title: string
-  stream_description: string | null
-  stream_privacy: { view: string }
+  name: string
+  description: string | null
+  duration: number
+  type: string
+  pictures: { sizes: { link: string; width: number }[] }
   created_time: string
-  pictures: { sizes: { link: string; width: number }[] } | null
+  link: string
 }
 
 interface VimeoResponse {
   total: number
   page: number
   per_page: number
-  data: VimeoLiveEvent[]
+  data: VimeoVideo[]
 }
 
 export default defineEventHandler(async (event) => {
@@ -45,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
   const existingIds = new Set((existing ?? []).map((r: any) => r.vimeo_live_event_id))
 
-  // Fetch live events from Vimeo sorted by date desc — stop when we hit a known one
+  // Fetch from /me/videos filtered to type=live, sorted by date desc
   const newEvents: { vimeo_live_event_id: string; title: string; description: string | null; thumbnail: string | null }[] = []
   let page = 1
   const perPage = 100
@@ -53,22 +55,23 @@ export default defineEventHandler(async (event) => {
 
   while (!done) {
     const res = await $fetch<VimeoResponse>(
-      `https://api.vimeo.com/me/live_events?fields=uri,title,stream_description,stream_privacy,created_time,pictures.sizes&per_page=${perPage}&page=${page}&direction=desc`,
+      `https://api.vimeo.com/me/videos?fields=uri,name,description,duration,type,pictures.sizes,created_time,link&filter=live&per_page=${perPage}&page=${page}&sort=date&direction=desc`,
       { headers: { Authorization: `Bearer ${token}` } },
     )
 
-    for (const e of res.data) {
-      const liveId = e.uri.replace('/me/live_events/', '').replace('/users/', '').split('/live_events/').pop()!
-      if (existingIds.has(liveId)) {
+    for (const v of res.data) {
+      if (v.type !== 'live') continue
+      const vimeoId = v.uri.replace('/videos/', '')
+      if (existingIds.has(vimeoId)) {
         done = true
         break
       }
-      const thumb = e.pictures?.sizes.find(s => s.width === 640)
-        ?? e.pictures?.sizes[e.pictures.sizes.length - 1]
+      const thumb = v.pictures.sizes.find(s => s.width === 640)
+        ?? v.pictures.sizes[v.pictures.sizes.length - 1]
       newEvents.push({
-        vimeo_live_event_id: liveId,
-        title: e.title,
-        description: e.stream_description,
+        vimeo_live_event_id: vimeoId,
+        title: v.name,
+        description: v.description,
         thumbnail: thumb?.link ?? null,
       })
     }
