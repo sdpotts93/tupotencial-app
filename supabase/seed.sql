@@ -16,7 +16,7 @@ VALUES
     'a0000000-0000-4000-8000-000000000001',
     'authenticated',
     'authenticated',
-    'mariana.lopez@example.com',
+    'steven@kigo.studio',
     '$2a$10$QSmHMywaHs4u/afgW18.reSnbjELxDFUhW2y3dm8yFq0sM..8coai',
     '2025-11-10T08:02:00.000Z',
     '2025-11-10T08:00:00.000Z',
@@ -98,7 +98,7 @@ WHERE id IN (
 -- ── 1b. Auth identities (required by GoTrue for email/password login) ────────
 INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
 VALUES
-  ('a0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', '{"sub":"a0000000-0000-4000-8000-000000000001","email":"mariana.lopez@example.com"}'::jsonb, 'email', '2025-11-10T08:02:00.000Z', '2025-11-10T08:00:00.000Z', '2025-11-10T08:00:00.000Z'),
+  ('a0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', '{"sub":"a0000000-0000-4000-8000-000000000001","email":"steven@kigo.studio"}'::jsonb, 'email', '2025-11-10T08:02:00.000Z', '2025-11-10T08:00:00.000Z', '2025-11-10T08:00:00.000Z'),
   ('a0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000002', '{"sub":"a0000000-0000-4000-8000-000000000002","email":"diego.ramirez@example.com"}'::jsonb, 'email', '2025-12-01T14:35:00.000Z', '2025-12-01T14:30:00.000Z', '2025-12-01T14:30:00.000Z'),
   ('a0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000003', '{"sub":"a0000000-0000-4000-8000-000000000003","email":"sofia.hernandez@example.com"}'::jsonb, 'email', '2026-01-05T09:20:00.000Z', '2026-01-05T09:15:00.000Z', '2026-01-05T09:15:00.000Z'),
   ('a0000000-0000-4000-8000-000000000004', 'a0000000-0000-4000-8000-000000000004', 'a0000000-0000-4000-8000-000000000004', '{"sub":"a0000000-0000-4000-8000-000000000004","email":"carlos.mendoza@example.com"}'::jsonb, 'email', '2026-01-20T11:50:00.000Z', '2026-01-20T11:45:00.000Z', '2026-01-20T11:45:00.000Z'),
@@ -1772,7 +1772,7 @@ VALUES
     'fc000000-0000-4000-8000-000000000003',
     'fb000000-0000-4000-8000-000000000002',
     'a0000000-0000-4000-8000-000000000001',
-    '{"nombre": "Mariana López", "email": "mariana.lopez@example.com", "restriccion": "Vegetariano", "notas": "Llego el viernes por la noche"}'::jsonb,
+    '{"nombre": "Mariana López", "email": "steven@kigo.studio", "restriccion": "Vegetariano", "notas": "Llego el viernes por la noche"}'::jsonb,
     'daily_action', NULL,
     '2026-02-22T12:00:00.000Z'
   );

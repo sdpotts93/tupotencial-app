@@ -68,3 +68,4 @@ Append one line per completed task:
 2026-03-21 00:00 America/Mexico_City — Database-level library search: Postgres full-text search (Spanish tsvector + GIN index + search_content RPC + debounced frontend)
 2026-03-21 00:10 America/Mexico_City — Wire addon purchase flow: /create-addon-checkout worker endpoint + webhook handler for addon_purchases + entitlements + Comprar button
 2026-03-21 00:15 America/Mexico_City — Stripe customer portal: /create-portal-session worker endpoint + "Gestionar suscripción" link on /cuenta/mas
+2026-04-08 22:20 America/Mexico_City — Replace Stripe subscription worker with RevenueCat webhook sync, add webhook event migration, and switch web subscription purchase flow to RevenueCat

@@ -1,4 +1,4 @@
-name = "tupotencial-stripe-webhooks"
+name = "tupotencial-revenuecat-webhooks"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
@@ -7,4 +7,4 @@ SUPABASE_URL = "https://geeasiskunssknfwqoko.supabase.co"
 
 # Secrets (set via wrangler secret put):
 # SUPABASE_SERVICE_ROLE_KEY
-# STRIPE_SECRET_KEY
+# REVENUECAT_WEBHOOK_AUTH

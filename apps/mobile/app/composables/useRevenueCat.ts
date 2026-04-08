@@ -18,6 +18,23 @@ function isNative() {
 }
 
 export function useRevenueCat() {
+  async function syncAttributes(userId: string, email?: string | null) {
+    if (isNative()) {
+      const { Purchases } = await import('@revenuecat/purchases-capacitor')
+      await Purchases.setAttributes({ supabase_user_id: userId })
+      if (email) {
+        await Purchases.setEmail({ email })
+      }
+      return
+    }
+
+    if (!webInstance) return
+    await webInstance.setAttributes({
+      $email: email ?? null,
+      supabase_user_id: userId,
+    })
+  }
+
   // ── Configure SDK (call once at app boot via plugin) ──
   async function configure(apiKey: string, appUserId?: string) {
     if (configured.value) return
@@ -36,18 +53,24 @@ export function useRevenueCat() {
   }
 
   // ── Identify user (call after login) ──
-  async function login(userId: string) {
+  async function login(userId: string, email?: string | null) {
     if (!configured.value) return
 
     if (isNative()) {
       const { Purchases } = await import('@revenuecat/purchases-capacitor')
       await Purchases.logIn({ appUserID: userId })
     } else {
-      const { Purchases } = await import('@revenuecat/purchases-js')
-      const config = useRuntimeConfig()
-      const apiKey = config.public.revenueCatApiKey as string
-      webInstance = Purchases.configure({ apiKey, appUserId: userId })
+      if (!webInstance) {
+        const { Purchases } = await import('@revenuecat/purchases-js')
+        const config = useRuntimeConfig()
+        const apiKey = config.public.revenueCatApiKey as string
+        webInstance = Purchases.configure({ apiKey, appUserId: userId })
+      } else {
+        await webInstance.changeUser(userId)
+      }
     }
+
+    await syncAttributes(userId, email)
   }
 
   // ── Log out (call on sign-out) ──

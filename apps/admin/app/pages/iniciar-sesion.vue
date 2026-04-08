@@ -76,9 +76,6 @@
           </UiButton>
         </form>
 
-        <p class="login__sheet-help">
-          Credenciales de prueba: <strong>mariana.lopez@example.com / admin123</strong>
-        </p>
       </div>
     </div>
   </div>

@@ -94,7 +94,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
-const { isSubscriber } = useAuth()
+const { isSubscriber, refreshProfile } = useAuth()
 const { isNative } = useNativePlatform()
 
 // Fetch both plans + benefits for each
@@ -128,12 +128,29 @@ const plans = computed(() =>
 const { purchaseCurrentOffering, restorePurchases } = useRevenueCat()
 const paywallLoading = ref(false)
 
+async function waitForSubscriptionSync() {
+  const maxAttempts = 10
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await refreshProfile()
+    await refreshSub()
+
+    if (isSubscriber.value) {
+      return true
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 1500))
+  }
+
+  return false
+}
+
 async function openPaywall() {
   paywallLoading.value = true
   try {
     const result = await purchaseCurrentOffering()
     if (result === 'purchased' || result === 'restored') {
-      await refreshSub()
+      await waitForSubscriptionSync()
     }
   } finally {
     paywallLoading.value = false
@@ -142,7 +159,7 @@ async function openPaywall() {
 
 async function handleRestore() {
   const info = await restorePurchases()
-  if (info) await refreshSub()
+  if (info) await waitForSubscriptionSync()
 }
 </script>
 

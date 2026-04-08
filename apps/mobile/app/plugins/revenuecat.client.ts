@@ -18,6 +18,6 @@ export default defineNuxtPlugin(async () => {
 
   // If user is logged in, identify them with RevenueCat
   if (supaUser.value?.id) {
-    await login(supaUser.value.id)
+    await login(supaUser.value.id, supaUser.value.email ?? null)
   }
 })

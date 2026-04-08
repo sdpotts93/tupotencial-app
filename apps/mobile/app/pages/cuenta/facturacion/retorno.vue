@@ -48,7 +48,7 @@
         <h1 class="title title--lg">Hubo un problema</h1>
         <p>No pudimos confirmar tu pago. Si crees que es un error, contacta a soporte.</p>
         <p><strong>soporte@tupotencial.app</strong></p>
-        <UiButton block variant="outline" to="/cuenta/complementos">Volver a VIP</UiButton>
+        <UiButton block variant="outline" to="/cuenta/suscripcion">Volver a suscripción</UiButton>
       </div>
     </div>
   </div>

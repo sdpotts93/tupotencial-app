@@ -38,18 +38,14 @@ export function useAuth() {
       client.from('admin_users').select('role').eq('user_id', uid).maybeSingle(),
     ])
     if (profileRes.error || !profileRes.data) return false
-    let isSubscriber = subRes.data?.status === 'active' || subRes.data?.status === 'trialing'
+    const isSubscriber = subRes.data?.status === 'active' || subRes.data?.status === 'trialing'
     const entitlements = (entRes.data ?? []).map(e => e.entitlement_key)
 
-    // Also check RevenueCat for entitlements (native IAP + web Stripe via RC)
+    // Identify the signed-in user with RevenueCat, but keep Supabase as the
+    // access source of truth for the app.
     try {
-      const { login: rcLogin, isProEntitled } = useRevenueCat()
-      await rcLogin(uid)
-      const hasPro = await isProEntitled()
-      if (hasPro) {
-        isSubscriber = true
-        if (!entitlements.includes('pro')) entitlements.push('pro')
-      }
+      const { login: rcLogin } = useRevenueCat()
+      await rcLogin(uid, supaUser.value?.email ?? null)
     } catch { /* RevenueCat not configured yet — non-critical */ }
 
     user.value = {
@@ -64,6 +60,23 @@ export function useAuth() {
       is_admin: !!adminRes.data,
     }
     return true
+  }
+
+  async function refreshProfile(): Promise<boolean> {
+    const uid = supaUser.value?.id ?? (supaUser.value as any)?.sub as string | undefined
+    if (!uid) {
+      user.value = null
+      return false
+    }
+
+    if (loading.value) return !!user.value
+
+    loading.value = true
+    try {
+      return await fetchProfile(uid)
+    } finally {
+      loading.value = false
+    }
   }
 
   // Register the supaUser watcher ONCE across all useAuth() calls.
@@ -178,6 +191,7 @@ export function useAuth() {
     isLoggedIn,
     isOnboarded,
     isSubscriber,
+    refreshProfile,
     hasEntitlement,
     login,
     register,

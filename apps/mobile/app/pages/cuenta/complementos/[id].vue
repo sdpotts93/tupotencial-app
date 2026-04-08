@@ -72,9 +72,12 @@
             <p class="addon__native-note">Las compras se realizan desde la versión web en tupotencial.com</p>
           </template>
           <template v-else>
-            <UiButton variant="outline" block :loading="purchasing" @click="handlePurchase">
-              Comprar
-            </UiButton>
+            <div class="addon__web-note">
+              <UiButton variant="outline" block disabled>
+                Compra no disponible
+              </UiButton>
+              <p>Estamos migrando los complementos a RevenueCat. Por ahora este complemento no se puede comprar desde la web.</p>
+            </div>
           </template>
         </div>
 
@@ -112,58 +115,8 @@ const addon = computed(() => ({
   priceLabel: formatPrice(rawAddon.value?.price ?? 0),
   img: rawAddon.value?.cover_url ?? undefined,
   owned: isOwned.value ?? false,
-  stripePriceId: rawAddon.value?.stripe_price_id ?? null,
 }))
 
-// ── Purchase flow ──
-const config = useRuntimeConfig()
-const purchasing = ref(false)
-
-async function handlePurchase() {
-  const { data: { session } } = await client.auth.getSession()
-  if (!session) {
-    navigateTo('/iniciar-sesion?redirect=' + route.fullPath)
-    return
-  }
-
-  const workerUrl = config.public.stripeWorkerUrl
-  if (!workerUrl) {
-    console.error('STRIPE_WORKER_URL not configured')
-    return
-  }
-
-  if (!addon.value.stripePriceId) {
-    console.error('Addon has no Stripe Price ID configured')
-    return
-  }
-
-  purchasing.value = true
-  try {
-    const res = await fetch(`${workerUrl}/create-addon-checkout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        addonId: route.params.id,
-        stripePriceId: addon.value.stripePriceId,
-        returnUrl: window.location.origin + '/cuenta/complementos',
-      }),
-    })
-
-    const data = await res.json()
-    if (data.url) {
-      window.location.href = data.url
-    } else {
-      console.error('Addon checkout error:', data.error)
-    }
-  } catch (err) {
-    console.error('Addon checkout error:', err)
-  } finally {
-    purchasing.value = false
-  }
-}
 </script>
 
 <style scoped>
@@ -266,6 +219,19 @@ async function handlePurchase() {
 .addon__price-note {
   font-size: var(--text-sm);
   color: var(--color-muted);
+}
+
+.addon__web-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.addon__web-note p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: var(--leading-relaxed);
 }
 
 /* ─── Actions ─── */

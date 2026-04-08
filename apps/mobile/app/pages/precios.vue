@@ -34,7 +34,7 @@
           <p class="pricing__plan-price">$399 <span>MXN/mes</span></p>
           <p class="pricing__plan-desc">Acceso completo a programas, comunidad y herramientas de cambio.</p>
           <UiButton v-if="!isNative" block class="pricing__cta-core" :disabled="checkoutLoading" @click="startCheckout">
-            {{ checkoutLoading ? 'Redirigiendo...' : 'Empezar Core' }}
+            {{ checkoutLoading ? 'Procesando...' : 'Empezar Core' }}
           </UiButton>
           <p v-else class="pricing__native-note">Suscríbete desde tupotencial.com para acceder al plan Core.</p>
           <div class="pricing__divider" />
@@ -50,7 +50,7 @@
       </div>
 
       <p v-if="!isNative" class="pricing__note">
-        Pago seguro con Stripe. Cancela en cualquier momento. Los add-ons y experiencias se adquieren por separado.
+        Pago seguro. Cancela en cualquier momento. Los add-ons y experiencias se adquieren por separado.
       </p>
     </div>
   </div>
@@ -60,9 +60,24 @@
 definePageMeta({ layout: false })
 
 const supabase = useSupabaseClient()
-const config = useRuntimeConfig()
 const { isNative } = useNativePlatform()
+const { refreshProfile, isSubscriber } = useAuth()
+const { purchaseCurrentOffering } = useRevenueCat()
 const checkoutLoading = ref(false)
+
+async function waitForSubscriptionSync() {
+  const maxAttempts = 10
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await refreshProfile()
+    if (isSubscriber.value) {
+      return true
+    }
+    await new Promise(resolve => setTimeout(resolve, 1500))
+  }
+
+  return false
+}
 
 async function startCheckout() {
   const { data: { session } } = await supabase.auth.getSession()
@@ -72,30 +87,11 @@ async function startCheckout() {
     return
   }
 
-  const workerUrl = config.public.stripeWorkerUrl
-  if (!workerUrl) {
-    console.error('STRIPE_WORKER_URL not configured')
-    return
-  }
-
   checkoutLoading.value = true
   try {
-    const res = await fetch(`${workerUrl}/create-checkout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        returnUrl: window.location.origin + '/cuenta/mis-datos',
-      }),
-    })
-
-    const data = await res.json()
-    if (data.url) {
-      window.location.href = data.url
-    } else {
-      console.error('Checkout error:', data.error)
+    const result = await purchaseCurrentOffering()
+    if (result === 'purchased' || result === 'restored') {
+      await waitForSubscriptionSync()
     }
   } catch (err) {
     console.error('Checkout error:', err)
