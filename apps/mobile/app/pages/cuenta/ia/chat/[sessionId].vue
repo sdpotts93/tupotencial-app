@@ -104,6 +104,9 @@
 
     <!-- Fixed input bar (community post style) -->
     <div class="chat__add safe-bottom">
+      <p v-if="messagesRemaining != null && messagesRemaining > 0 && messagesRemaining <= 5 && !limitReached" class="chat__remaining">
+        {{ messagesRemaining === 1 ? 'Te queda 1 mensaje hoy' : `Te quedan ${messagesRemaining} mensajes hoy` }}
+      </p>
       <div class="chat__add-inner">
         <input
           v-model="inputText"
@@ -126,14 +129,24 @@
 
 <script setup lang="ts">
 import { marked } from 'marked'
-import DOMPurify from 'dompurify'
 
 // Configure marked for inline rendering (no wrapping <p> tags)
 marked.setOptions({ breaks: true })
 
+// DOMPurify requires a DOM — lazy-load on client only
+let _DOMPurify: typeof import('dompurify').default | undefined
+async function getDOMPurify() {
+  if (!_DOMPurify) {
+    const m = await import('dompurify')
+    _DOMPurify = m.default
+  }
+  return _DOMPurify
+}
+if (import.meta.client) getDOMPurify()
+
 function renderMarkdown(text: string): string {
   const raw = marked.parse(text, { async: false }) as string
-  return DOMPurify.sanitize(raw)
+  return _DOMPurify ? _DOMPurify.sanitize(raw) as string : raw
 }
 
 definePageMeta({ layout: 'ai-chat', pageTransition: false })
@@ -157,6 +170,26 @@ const limitReached = ref(false)
 const inputText = ref('')
 const error = ref(false)
 const lastFailedMessage = ref('')
+const messagesRemaining = ref<number | null>(null)
+const MAX_DAILY_MESSAGES = 20
+
+// ─── Fetch quota on load ───
+if (import.meta.client) {
+  watch(() => user.value?.id, (uid) => {
+    if (!uid) return
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
+    client.from('ai_quotas')
+      .select('messages_used')
+      .eq('user_id', uid)
+      .eq('day', today)
+      .maybeSingle()
+      .then(({ data }) => {
+        const used = data?.messages_used ?? 0
+        messagesRemaining.value = MAX_DAILY_MESSAGES - used
+        if (messagesRemaining.value <= 0) limitReached.value = true
+      })
+  }, { immediate: true })
+}
 
 // ─── Auto-scroll ───
 const messagesRef = ref<HTMLElement | null>(null)
@@ -456,6 +489,9 @@ async function sendMessage(text?: string) {
             }
           } else if (data.type === 'done') {
             assistantMsg.id = data.messageId ?? assistantMsg.id
+            if (data.messages_remaining != null) {
+              messagesRemaining.value = data.messages_remaining
+            }
             if (data.sessionId && isNewSession.value) {
               currentSessionId.value = data.sessionId
               window.history.replaceState(null, '', `/cuenta/ia/chat/${data.sessionId}`)
@@ -733,6 +769,13 @@ p.chat__msg-body {
   z-index: var(--z-sticky, 10);
   border-top: none;
   padding: var(--space-3) var(--space-5);
+}
+
+.chat__remaining {
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  margin: 0 0 var(--space-2);
 }
 
 .chat__add-inner {

@@ -218,7 +218,7 @@ function handleLogout() {
 
 /* Plan tier tag colors */
 .more__info :deep(.tag--accent) { width: fit-content; background: var(--color-gold-bg); color: var(--color-gold); }
-.more__info :deep(.tag--default) {  background: var(--color-silver-bg); color: var(--color-text-secondary); }
+.more__info :deep(.tag--default) {  background: var(--color-silver-bg); color: var(--color-text-secondary); width: fit-content; }
 
 /* ─── Desktop SaaS ─── */
 @media (min-width: 1024px) {

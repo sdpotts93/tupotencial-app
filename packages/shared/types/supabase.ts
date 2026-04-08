@@ -246,6 +246,7 @@ export type Database = {
           created_at: string
           id: string
           status: string
+          summary: string | null
           tone: string
           user_id: string
         }
@@ -253,6 +254,7 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string
+          summary?: string | null
           tone: string
           user_id: string
         }
@@ -260,6 +262,7 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string
+          summary?: string | null
           tone?: string
           user_id?: string
         }
