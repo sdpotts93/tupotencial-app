@@ -231,6 +231,7 @@ interface VimeoEvent {
   vimeo_live_event_id: string
   title: string
   description: string | null
+  duration_seconds: number
   thumbnail: string | null
 }
 
@@ -275,6 +276,7 @@ async function importSelectedEvents(status: 'draft' | 'published') {
       description: e.description?.slice(0, 500) || null,
       vimeo_live_event_id: e.vimeo_live_event_id,
       cover_url: e.thumbnail,
+      duration: String(Math.round(e.duration_seconds / 60) || 60),
       plan: 'free' as const,
       status,
       start_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),

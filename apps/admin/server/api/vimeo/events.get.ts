@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
   const existingIds = new Set((existing ?? []).map((r: any) => r.vimeo_live_event_id))
 
   // Fetch from /me/videos filtered to type=live, sorted by date desc
-  const newEvents: { vimeo_live_event_id: string; title: string; description: string | null; thumbnail: string | null }[] = []
+  const newEvents: { vimeo_live_event_id: string; title: string; description: string | null; duration_seconds: number; thumbnail: string | null }[] = []
   let page = 1
   const perPage = 100
   let done = false
@@ -72,6 +72,7 @@ export default defineEventHandler(async (event) => {
         vimeo_live_event_id: vimeoId,
         title: v.name,
         description: v.description,
+        duration_seconds: v.duration,
         thumbnail: thumb?.link ?? null,
       })
     }

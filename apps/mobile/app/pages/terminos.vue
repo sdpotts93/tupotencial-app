@@ -17,7 +17,7 @@
         <p>Al descargar, instalar o utilizar la aplicación móvil Tu Potencial ("la Aplicación"), aceptas quedar vinculado por estos Términos y Condiciones ("Términos"). Si no estás de acuerdo con alguna parte de estos Términos, no debes utilizar la Aplicación.</p>
         <p>La Aplicación es operada por Tu Potencial ("nosotros", "nos" o "nuestro"). Nos reservamos el derecho de modificar estos Términos en cualquier momento. Te notificaremos de cambios significativos a través de la Aplicación o por correo electrónico.</p>
       </section>
-
+    
       <section class="legal__section">
         <h2>2. Descripción del servicio</h2>
         <p>Tu Potencial es un sistema de acompañamiento diario para transformar cuerpo, mente y propósito. La Aplicación ofrece:</p>
