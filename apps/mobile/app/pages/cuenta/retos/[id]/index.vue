@@ -19,6 +19,7 @@
           </div>
         </div>
       </div>
+  
       <section class="detail__days">
         <UiSkeleton variant="text" width="50%" height="10px" style="margin-bottom: var(--space-3);" />
         <div style="display: flex; gap: var(--space-2);">
