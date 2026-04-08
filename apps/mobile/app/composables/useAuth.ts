@@ -1,5 +1,7 @@
 // Auth composable — powered by @nuxtjs/supabase
+// Integrates with RevenueCat on native for IAP entitlements
 import { useState, navigateTo, watch, computed } from '#imports'
+import { Capacitor } from '@capacitor/core'
 
 export interface AuthUser {
   id: string
@@ -37,15 +39,31 @@ export function useAuth() {
       client.from('admin_users').select('role').eq('user_id', uid).maybeSingle(),
     ])
     if (profileRes.error || !profileRes.data) return false
+    let isSubscriber = subRes.data?.status === 'active' || subRes.data?.status === 'trialing'
+    const entitlements = (entRes.data ?? []).map(e => e.entitlement_key)
+
+    // On native, also check RevenueCat for IAP-based entitlements
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { login: rcLogin, isProEntitled } = useRevenueCat()
+        await rcLogin(uid)
+        const hasPro = await isProEntitled()
+        if (hasPro) {
+          isSubscriber = true
+          if (!entitlements.includes('pro')) entitlements.push('pro')
+        }
+      } catch { /* RevenueCat not configured yet — non-critical */ }
+    }
+
     user.value = {
       id: uid,
       email: supaUser.value?.email ?? '',
       display_name: profileRes.data?.display_name ?? '',
       avatar_url: profileRes.data?.avatar_url ?? null,
       community_segment: (profileRes.data?.community_segment as AuthUser['community_segment']) ?? null,
-      is_subscriber: subRes.data?.status === 'active' || subRes.data?.status === 'trialing',
+      is_subscriber: isSubscriber,
       subscription_status: subRes.data?.status ?? null,
-      entitlements: (entRes.data ?? []).map(e => e.entitlement_key),
+      entitlements,
       is_admin: !!adminRes.data,
     }
     return true
@@ -134,6 +152,14 @@ export function useAuth() {
       const { unregister } = usePushNotifications()
       await unregister()
     } catch { /* non-critical */ }
+
+    // Log out of RevenueCat (native only)
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { logout: rcLogout } = useRevenueCat()
+        await rcLogout()
+      } catch { /* non-critical */ }
+    }
 
     await client.auth.signOut()
     user.value = null

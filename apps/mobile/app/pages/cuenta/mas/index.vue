@@ -77,7 +77,12 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           </template>
         </UiListItem>
-        <UiListItem v-if="isSubscriber && !isNative" label="Gestionar suscripción" description="Cambiar método de pago o cancelar" @click="openPortal">
+        <UiListItem v-if="isSubscriber && isNative" label="Gestionar suscripción" description="Cambiar plan, restaurar o cancelar" @click="openCustomerCenter">
+          <template #icon>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </template>
+        </UiListItem>
+        <UiListItem v-else-if="isSubscriber" label="Gestionar suscripción" description="Cambiar método de pago o cancelar" @click="openPortal">
           <template #icon>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           </template>
@@ -124,7 +129,12 @@ const { user, isSubscriber, logout } = useAuth()
 const { isNative } = useNativePlatform()
 const client = useSupabaseClient()
 const config = useRuntimeConfig()
+const { presentCustomerCenter } = useRevenueCat()
 const portalLoading = ref(false)
+
+async function openCustomerCenter() {
+  await presentCustomerCenter()
+}
 
 const initials = computed(() => {
   const name = user.value?.display_name || user.value?.email?.split('@')[0] || '?'

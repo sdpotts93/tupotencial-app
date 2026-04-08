@@ -60,10 +60,12 @@
             <UiButton variant="outline" block disabled>Plan actual</UiButton>
           </template>
           <template v-else-if="plan.id === 'core'">
-            <UiButton v-if="!isNative" block class="pricing__cta-core" :loading="checkoutLoading" @click="startCheckout">
+            <UiButton v-if="isNative" block class="pricing__cta-core" :loading="paywallLoading" @click="openNativePaywall">
               Suscribirme a Core
             </UiButton>
-            <p v-else class="pricing__native-note">Suscríbete desde tupotencial.com para acceder al plan Core.</p>
+            <UiButton v-else block class="pricing__cta-core" :loading="checkoutLoading" @click="startCheckout">
+              Suscribirme a Core
+            </UiButton>
           </template>
           <template v-else>
             <UiButton variant="outline" block disabled>Plan base</UiButton>
@@ -80,7 +82,10 @@
 
       </template>
 
-      <p v-if="!isNative" class="pricing__note">
+      <p v-if="isNative" class="pricing__note">
+        <button class="pricing__restore" @click="handleRestore">Restaurar compras</button>
+      </p>
+      <p v-else class="pricing__note">
         Pago seguro con Stripe. Cancela en cualquier momento.
       </p>
     </div>
@@ -122,7 +127,28 @@ const plans = computed(() =>
   })),
 )
 
-// ── Checkout flow ──
+// ── Native paywall (RevenueCat) ──
+const { presentPaywall, restorePurchases } = useRevenueCat()
+const paywallLoading = ref(false)
+
+async function openNativePaywall() {
+  paywallLoading.value = true
+  try {
+    const result = await presentPaywall()
+    if (result === 'purchased' || result === 'restored') {
+      await refreshSub()
+    }
+  } finally {
+    paywallLoading.value = false
+  }
+}
+
+async function handleRestore() {
+  const info = await restorePurchases()
+  if (info) await refreshSub()
+}
+
+// ── Web checkout flow (Stripe) ──
 const checkoutLoading = ref(false)
 
 async function startCheckout() {
@@ -326,11 +352,14 @@ async function startCheckout() {
   color: var(--color-gold);
 }
 
-.pricing__native-note {
-  font-size: var(--text-sm);
+.pricing__restore {
+  background: none;
+  border: none;
   color: var(--color-muted);
-  text-align: center;
-  line-height: var(--leading-relaxed);
+  font-size: var(--text-xs);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
 }
 
 .pricing__note {

@@ -73,6 +73,7 @@ export default defineNuxtConfig({
     public: {
       isNative: isCapacitor,
       stripeWorkerUrl: process.env.STRIPE_WORKER_URL || '',
+      revenueCatApiKey: process.env.REVENUECAT_API_KEY || '',
     },
   },
 
