@@ -1,10 +1,11 @@
-import { serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
+import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 
 interface VimeoVideo {
   uri: string
   name: string
   description: string | null
   duration: number
+  type: string
   pictures: { sizes: { link: string; width: number }[] }
   created_time: string
   link: string
@@ -18,15 +19,17 @@ interface VimeoResponse {
 }
 
 export default defineEventHandler(async (event) => {
-  // Auth check
-  const user = await serverSupabaseUser(event)
-  if (!user) throw createError({ statusCode: 401, message: 'No autenticado' })
+  // Auth check — use serverSupabaseClient to pick up sb-admin cookie
+  const client = await serverSupabaseClient(event)
+  const { data: claimsData, error: claimsError } = await client.auth.getClaims()
+  const uid = (claimsData?.claims as any)?.sub
+  if (claimsError || !uid) throw createError({ statusCode: 401, message: 'No autenticado' })
 
   const serviceClient = serverSupabaseServiceRole(event)
   const { data: adminRow } = await serviceClient
     .from('admin_users')
     .select('role')
-    .eq('user_id', user.id)
+    .eq('user_id', uid)
     .single()
 
   if (!adminRow || !['admin', 'editor'].includes(adminRow.role)) {
@@ -53,7 +56,7 @@ export default defineEventHandler(async (event) => {
 
   while (!done) {
     const res = await $fetch<VimeoResponse>(
-      `https://api.vimeo.com/me/videos?fields=uri,name,description,duration,pictures.sizes,created_time,link&per_page=${perPage}&page=${page}&sort=date&direction=desc`,
+      `https://api.vimeo.com/me/videos?fields=uri,name,description,duration,type,pictures.sizes,created_time,link&per_page=${perPage}&page=${page}&sort=date&direction=desc`,
       { headers: { Authorization: `Bearer ${token}` } },
     )
 
@@ -64,6 +67,8 @@ export default defineEventHandler(async (event) => {
         done = true
         break
       }
+      // Skip live events — those belong in /admin/eventos
+      if (v.type === 'live') continue
       const thumb = v.pictures.sizes.find(s => s.width === 640)
         ?? v.pictures.sizes[v.pictures.sizes.length - 1]
       newVideos.push({
