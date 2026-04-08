@@ -24,6 +24,7 @@
             <li>Biblioteca limitada (rutinas y meditaciones básicas)</li>
           </ul>
         </div>
+        
         <!-- Core -->
         <div class="pricing__plan pricing__plan--core">
           <div class="pricing__plan-header">
