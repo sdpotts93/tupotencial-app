@@ -63,6 +63,7 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    vimeoToken: '',
     public: {},
   },
 

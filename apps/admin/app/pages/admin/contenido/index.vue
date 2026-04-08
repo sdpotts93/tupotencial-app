@@ -3,6 +3,10 @@
     <div class="page-header">
       <h1 class="page-header__title">Contenido</h1>
       <div class="page-header__actions">
+        <UiButton v-if="canEdit" variant="soft" size="sm" @click="openVimeoImport">
+          <template #icon><Icon name="lucide:download" size="16" /></template>
+          Importar desde Vimeo
+        </UiButton>
         <UiButton v-if="canEdit" variant="primary-outline" size="sm" to="/admin/contenido/new">+ Crear contenido</UiButton>
       </div>
     </div>
@@ -136,6 +140,55 @@
         </UiButton>
       </template>
     </UiDataTable>
+    <!-- Vimeo import modal -->
+    <UiModal v-model="showVimeoModal" title="Importar desde Vimeo" :show-close="true">
+      <div v-if="vimeoLoading" class="vimeo-import__loading">
+        <UiSkeleton v-for="i in 4" :key="i" variant="rect" width="100%" height="64px" radius="var(--radius-md)" />
+      </div>
+      <div v-else-if="vimeoError" class="vimeo-import__error">
+        <p>{{ vimeoError }}</p>
+        <UiButton variant="primary-outline" size="sm" @click="fetchVimeoVideos">Reintentar</UiButton>
+      </div>
+      <template v-else>
+        <p v-if="newVimeoVideos.length === 0" class="vimeo-import__empty">
+          Todos los videos de Vimeo ya han sido importados.
+        </p>
+        <div v-else class="vimeo-import__list">
+          <label
+            v-for="video in newVimeoVideos"
+            :key="video.vimeo_id"
+            class="vimeo-import__item"
+            :class="{ 'vimeo-import__item--selected': selectedVimeoIds.has(video.vimeo_id) }"
+          >
+            <input
+              type="checkbox"
+              :checked="selectedVimeoIds.has(video.vimeo_id)"
+              class="vimeo-import__checkbox"
+              @change="toggleVimeoSelect(video.vimeo_id)"
+            />
+            <img v-if="video.thumbnail" :src="video.thumbnail" alt="" class="vimeo-import__thumb" />
+            <div class="vimeo-import__info">
+              <span class="vimeo-import__title">{{ video.title }}</span>
+              <span class="vimeo-import__meta">{{ formatDuration(video.duration_seconds) }}</span>
+            </div>
+          </label>
+        </div>
+      </template>
+      <template #footer>
+        <div class="vimeo-import__footer">
+          <span v-if="newVimeoVideos.length" class="vimeo-import__count">{{ selectedVimeoIds.size }} seleccionados</span>
+          <UiButton
+            variant="primary-outline"
+            size="sm"
+            :disabled="selectedVimeoIds.size === 0 || vimeoImporting"
+            :loading="vimeoImporting"
+            @click="importSelectedVideos"
+          >
+            Importar como borrador
+          </UiButton>
+        </div>
+      </template>
+    </UiModal>
   </div>
 </template>
 
@@ -301,6 +354,81 @@ async function toggleFeatured(id: string) {
 function goToEdit(row: Record<string, any>) {
   router.push(`/admin/contenido/${row.id}`)
 }
+
+// ── Vimeo import ──
+interface VimeoVideo {
+  vimeo_id: string
+  title: string
+  description: string | null
+  duration_seconds: number
+  thumbnail: string | null
+}
+
+const showVimeoModal = ref(false)
+const vimeoLoading = ref(false)
+const vimeoError = ref('')
+const vimeoImporting = ref(false)
+const vimeoVideos = ref<VimeoVideo[]>([])
+const selectedVimeoIds = reactive(new Set<string>())
+
+const newVimeoVideos = computed(() => vimeoVideos.value)
+
+async function fetchVimeoVideos() {
+  vimeoLoading.value = true
+  vimeoError.value = ''
+  try {
+    const res = await $fetch<{ videos: VimeoVideo[] }>('/api/vimeo/videos')
+    vimeoVideos.value = res.videos
+  } catch (e: any) {
+    vimeoError.value = e?.data?.message || 'Error al obtener videos de Vimeo'
+  } finally {
+    vimeoLoading.value = false
+  }
+}
+
+function openVimeoImport() {
+  showVimeoModal.value = true
+  selectedVimeoIds.clear()
+  fetchVimeoVideos()
+}
+
+function toggleVimeoSelect(id: string) {
+  if (selectedVimeoIds.has(id)) selectedVimeoIds.delete(id)
+  else selectedVimeoIds.add(id)
+}
+
+function formatDuration(seconds: number) {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+async function importSelectedVideos() {
+  vimeoImporting.value = true
+  const toast = useToast()
+  try {
+    const selected = vimeoVideos.value.filter(v => selectedVimeoIds.has(v.vimeo_id))
+    const payloads = selected.map(v => ({
+      title: v.title,
+      subtitle: v.description?.slice(0, 500) || null,
+      type: 'video' as const,
+      vimeo_id: v.vimeo_id,
+      duration_seconds: v.duration_seconds,
+      thumbnail_url: v.thumbnail,
+      plan: 'free' as const,
+      status: 'draft' as const,
+    }))
+    const { error } = await client.from('content_items').insert(payloads)
+    if (error) throw error
+    toast.show(`${selected.length} video(s) importados como borrador`, 'success')
+    showVimeoModal.value = false
+    refresh()
+  } catch {
+    useToast().show('Error al importar videos', 'error')
+  } finally {
+    vimeoImporting.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -433,5 +561,104 @@ function goToEdit(row: Record<string, any>) {
 
 .category-cell__more:hover::after {
   opacity: 1;
+}
+
+/* ─── Vimeo import modal ─── */
+.vimeo-import__loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.vimeo-import__error {
+  text-align: center;
+  color: var(--color-danger);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+}
+
+.vimeo-import__empty {
+  text-align: center;
+  color: var(--color-muted);
+  padding: var(--space-6) 0;
+  font-size: var(--text-sm);
+}
+
+.vimeo-import__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.vimeo-import__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+@media (hover: hover) {
+  .vimeo-import__item:hover {
+    background: var(--color-surface-alt);
+  }
+}
+
+.vimeo-import__item--selected {
+  background: rgba(var(--tint-rgb), 0.06);
+}
+
+.vimeo-import__checkbox {
+  flex-shrink: 0;
+  accent-color: var(--color-tint);
+}
+
+.vimeo-import__thumb {
+  width: 80px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.vimeo-import__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vimeo-import__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vimeo-import__meta {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.vimeo-import__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.vimeo-import__count {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
 }
 </style>
