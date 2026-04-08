@@ -136,6 +136,9 @@ function scheduleValidation() {
 
 async function handleRegister() {
   errors.email = undefined; errors.password = undefined; errors.confirm = undefined
+  email.value = email.value.trim()
+  password.value = password.value.trim()
+  confirmPassword.value = confirmPassword.value.trim()
   if (!email.value) { errors.email = 'Ingresa tu correo electrónico'; return }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) { errors.email = 'Correo electrónico no válido'; return }
   if (password.value.length < 8) { errors.password = 'Mínimo 8 caracteres'; return }

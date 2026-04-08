@@ -126,12 +126,14 @@
 
 <script setup lang="ts">
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 // Configure marked for inline rendering (no wrapping <p> tags)
 marked.setOptions({ breaks: true })
 
 function renderMarkdown(text: string): string {
-  return marked.parse(text, { async: false }) as string
+  const raw = marked.parse(text, { async: false }) as string
+  return DOMPurify.sanitize(raw)
 }
 
 definePageMeta({ layout: 'ai-chat', pageTransition: false })

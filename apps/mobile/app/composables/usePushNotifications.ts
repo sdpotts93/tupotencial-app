@@ -60,8 +60,8 @@ export function usePushNotifications() {
     // Listen for notification tap (app opened from notification)
     await PushNotifications.addListener('pushNotificationActionPerformed', (action: ActionPerformed) => {
       const data = action.notification.data
-      // Deep link based on notification data
-      if (data?.route) {
+      // Deep link based on notification data (only allow relative paths)
+      if (data?.route && typeof data.route === 'string' && data.route.startsWith('/')) {
         navigateTo(data.route)
       }
     })

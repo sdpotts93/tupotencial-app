@@ -80,8 +80,8 @@
           <UiTag v-if="content.duration">{{ content.duration }}</UiTag>
         </div>
 
-        <!-- Article body: rendered HTML from Tiptap WYSIWYG -->
-        <div v-if="content.type === 'article' && content.body" class="detail__body" v-html="content.body" />
+        <!-- Article body: rendered HTML from Tiptap WYSIWYG (sanitized) -->
+        <div v-if="content.type === 'article' && content.body" class="detail__body" v-html="sanitizeHtml(content.body)" />
       </div>
     </div>
     </template>
@@ -89,7 +89,13 @@
 </template>
 
 <script setup lang="ts">
+import DOMPurify from 'dompurify'
+
 definePageMeta({ layout: 'blank' })
+
+function sanitizeHtml(html: string): string {
+  return DOMPurify.sanitize(html)
+}
 
 const route = useRoute()
 const id = route.params.id as string

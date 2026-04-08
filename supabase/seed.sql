@@ -842,35 +842,35 @@ VALUES
     'e1000000-0000-4000-8000-000000000001',
     '2026-02-21',
     'a0000000-0000-4000-8000-000000000001',
-    '{"completed": true, "reflection": "Lo hice durante mi descanso del trabajo. Me di cuenta de que estaba conteniendo la respiración."}'::jsonb,
+    '{"mood": "good", "reflection": "Lo hice durante mi descanso del trabajo. Me di cuenta de que estaba conteniendo la respiración."}'::jsonb,
     '2026-02-21T15:30:00.000Z'
   ),
   (
     'e1000000-0000-4000-8000-000000000002',
     '2026-02-22',
     'a0000000-0000-4000-8000-000000000001',
-    '{"completed": true, "reflection": "Me vi siendo más paciente con mi familia. Esa es mi mejor versión."}'::jsonb,
+    '{"mood": "great", "reflection": "Me vi siendo más paciente con mi familia. Esa es mi mejor versión."}'::jsonb,
     '2026-02-22T08:15:00.000Z'
   ),
   (
     'e1000000-0000-4000-8000-000000000003',
     '2026-02-23',
     'a0000000-0000-4000-8000-000000000001',
-    '{"completed": true, "journal_entries": ["Agradezco este tiempo para mí.", "Quiero soltar la necesidad de control.", "Hoy quiero ser más amable conmigo."]}'::jsonb,
+    '{"mood": "ok", "reflection": "Agradezco este tiempo para mí. Hoy quiero ser más amable conmigo."}'::jsonb,
     '2026-02-23T09:00:00.000Z'
   ),
   (
     'e1000000-0000-4000-8000-000000000004',
     '2026-02-23',
     'a0000000-0000-4000-8000-000000000002',
-    '{"completed": true, "mood": "tranquilo"}'::jsonb,
+    '{"mood": "good", "reflection": "Me siento tranquilo hoy."}'::jsonb,
     '2026-02-23T10:30:00.000Z'
   ),
   (
     'e1000000-0000-4000-8000-000000000005',
     '2026-02-24',
     'a0000000-0000-4000-8000-000000000003',
-    '{"completed": true, "reflection": "La meditación me ayudó a centrarme antes del día."}'::jsonb,
+    '{"mood": "great", "reflection": "La meditación me ayudó a centrarme antes del día."}'::jsonb,
     '2026-02-24T07:45:00.000Z'
   );
 
@@ -1750,13 +1750,14 @@ VALUES
 
 -- ── 31. Form submissions ─────────────────────────────────────────────────────
 
-INSERT INTO public.form_submissions (id, form_id, user_id, answers, created_at)
+INSERT INTO public.form_submissions (id, form_id, user_id, answers, source, program_id, created_at)
 VALUES
   (
     'fc000000-0000-4000-8000-000000000001',
     'fb000000-0000-4000-8000-000000000001',
     'a0000000-0000-4000-8000-000000000001',
     '{"satisfaction": 5, "improvement": "Más contenido de meditación", "most_used": "Meditaciones"}'::jsonb,
+    'daily_action', NULL,
     '2026-02-20T10:00:00.000Z'
   ),
   (
@@ -1764,6 +1765,7 @@ VALUES
     'fb000000-0000-4000-8000-000000000001',
     'a0000000-0000-4000-8000-000000000003',
     '{"satisfaction": 4, "improvement": "", "most_used": "Comunidad"}'::jsonb,
+    'program', 'd0000000-0000-4000-8000-000000000001',
     '2026-02-21T15:00:00.000Z'
   ),
   (
@@ -1771,6 +1773,7 @@ VALUES
     'fb000000-0000-4000-8000-000000000002',
     'a0000000-0000-4000-8000-000000000001',
     '{"nombre": "Mariana López", "email": "mariana.lopez@example.com", "restriccion": "Vegetariano", "notas": "Llego el viernes por la noche"}'::jsonb,
+    'daily_action', NULL,
     '2026-02-22T12:00:00.000Z'
   );
 

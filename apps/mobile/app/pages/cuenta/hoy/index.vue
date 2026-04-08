@@ -968,6 +968,7 @@ async function handleFormSubmit() {
     await client.from('form_submissions').insert({
       form_id: actionPayload.value?.form_id,
       answers,
+      source: 'daily_action',
     })
 
     // Mark acción as done

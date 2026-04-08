@@ -51,34 +51,21 @@
             placeholder="Ingresa tu correo"
             autocomplete="email"
             :error="loginErrors.email"
-            @update:model-value="onLoginEmailChange"
           />
 
-          <Transition name="fade">
-            <div v-if="emailNotFound" class="login__not-found">
-              <p class="login__not-found-text">Usuario no encontrado</p>
-              <p class="login__not-found-hint">
-                ¿Aún no tienes cuenta?
-                <button type="button" class="login__not-found-link" @click="goToRegister">Regístrate aquí</button>
-              </p>
-            </div>
-          </Transition>
-
-          <Transition name="fade">
-            <div v-if="showPassword" class="login__password-group">
-              <UiInput
-                v-model="loginPassword"
-                label="Contraseña"
-                type="password"
-                placeholder="Tu contraseña"
-                autocomplete="current-password"
-                :error="loginErrors.password"
-              />
-              <NuxtLink to="/restablecer-contrasena" class="login__forgot-link">
-                ¿Olvidaste tu contraseña?
-              </NuxtLink>
-            </div>
-          </Transition>
+          <div class="login__password-group">
+            <UiInput
+              v-model="loginPassword"
+              label="Contraseña"
+              type="password"
+              placeholder="Tu contraseña"
+              autocomplete="current-password"
+              :error="loginErrors.password"
+            />
+            <NuxtLink to="/restablecer-contrasena" class="login__forgot-link">
+              ¿Olvidaste tu contraseña?
+            </NuxtLink>
+          </div>
 
           <UiButton
             type="submit"
@@ -187,8 +174,6 @@ const toast = useToast()
 const activeSheet = ref<'none' | 'login' | 'register'>('none')
 
 // ─── Login state ───
-const showPassword = ref(false)
-const emailNotFound = ref(false)
 const loginEmail = ref('')
 const loginPassword = ref('')
 const loginLoading = ref(false)
@@ -200,20 +185,6 @@ const regPassword = ref('')
 const regConfirm = ref('')
 const regLoading = ref(false)
 const regErrors = reactive<{ email?: string; password?: string; confirm?: string }>({})
-
-function onLoginEmailChange() {
-  emailNotFound.value = false
-  showPassword.value = false
-}
-
-function goToRegister() {
-  if (window.innerWidth >= 1024) {
-    navigateTo({ path: '/registro', query: { email: loginEmail.value } })
-  } else {
-    regEmail.value = loginEmail.value
-    activeSheet.value = 'register'
-  }
-}
 
 // Debounced live validation for register form
 let regValidateTimer: ReturnType<typeof setTimeout> | null = null
@@ -241,30 +212,11 @@ function scheduleRegValidation() {
 
 async function handleLogin() {
   loginErrors.value = {}
-  emailNotFound.value = false
+  loginEmail.value = loginEmail.value.trim()
+  loginPassword.value = loginPassword.value.trim()
 
   if (!loginEmail.value) {
     loginErrors.value.email = 'Ingresa tu correo electrónico'
-    return
-  }
-
-  if (!showPassword.value) {
-    // Check if the email exists before revealing the password field
-    loginLoading.value = true
-    try {
-      const client = useSupabaseClient()
-      const { data: exists } = await (client.rpc as any)('check_email_exists', { p_email: loginEmail.value })
-      if (!exists) {
-        emailNotFound.value = true
-        return
-      }
-      showPassword.value = true
-    } catch {
-      // If the check fails, fall through and show password anyway
-      showPassword.value = true
-    } finally {
-      loginLoading.value = false
-    }
     return
   }
 
@@ -295,6 +247,9 @@ async function handleLogin() {
 
 async function handleRegister() {
   regErrors.email = undefined; regErrors.password = undefined; regErrors.confirm = undefined
+  regEmail.value = regEmail.value.trim()
+  regPassword.value = regPassword.value.trim()
+  regConfirm.value = regConfirm.value.trim()
   if (!regEmail.value) { regErrors.email = 'Ingresa tu correo electrónico'; return }
   if (regPassword.value.length < 8) { regErrors.password = 'Mínimo 8 caracteres'; return }
   if (regPassword.value !== regConfirm.value) { regErrors.confirm = 'Las contraseñas no coinciden'; return }
@@ -539,40 +494,6 @@ async function handleRegister() {
   display: none;
 }
 
-/* ─── "User not found" tooltip ─── */
-.login__not-found {}
-
-.login__not-found-text {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-danger);
-  margin-bottom: var(--space-1);
-}
-
-.login__not-found-hint {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-}
-
-.login__not-found-link {
-  background: none;
-  border: none;
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-primary);
-  cursor: pointer;
-  padding: 0;
-}
-@media (hover: hover) {
-  .login__not-found-link:hover {
-    text-decoration: underline;
-  }
-}
-
-/* ─── Fade transition for password field ─── */
-.fade-enter-active { transition: opacity 0.25s ease, transform 0.25s ease; }
-.fade-enter-from { opacity: 0; transform: translateY(8px); }
 
 /* ─── Tablet (768px–1023px) ─── */
 @media (min-width: 768px) and (max-width: 1023px) {

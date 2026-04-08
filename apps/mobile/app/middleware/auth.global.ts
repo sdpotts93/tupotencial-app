@@ -9,15 +9,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const path = to.path
 
-  // Use both app state and supabase session to determine auth.
-  // Also check for the presence of an auth cookie as a fallback —
-  // the page:start hook in @nuxtjs/supabase can temporarily null out
-  // supaUser during client-side navigation while cookies are still valid.
+  // Use both app state and verified supabase session to determine auth.
   const hasSession = !!supaUser.value
-  const hasAuthCookie = import.meta.client
-    ? document.cookie.includes('sb-') && document.cookie.includes('-auth-token')
-    : hasSession
-  const isAuthed = isLoggedIn.value || hasSession || hasAuthCookie
+  const isAuthed = isLoggedIn.value || hasSession
 
   // ---- Public routes (no auth required) ----
   const publicRoutes = ['/iniciar-sesion', '/registro', '/precios', '/restablecer-contrasena', '/nueva-contrasena']

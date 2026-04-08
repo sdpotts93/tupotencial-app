@@ -98,6 +98,8 @@ const pageTitle = computed(() => {
   if (path.startsWith('/admin/objetivos')) return 'Objetivos'
   if (path.startsWith('/admin/programas')) return 'Programas'
   if (path.startsWith('/admin/formularios')) return 'Formularios'
+  if (path.startsWith('/admin/feedback')) return 'Feedback'
+  if (path.startsWith('/admin/checkins')) return 'Check-ins'
   if (path.startsWith('/admin/imagenes')) return 'Imágenes'
   if (path.startsWith('/admin/hoy')) return 'Hoy'
   if (path.startsWith('/admin/comunidad')) return 'Comunidad'
@@ -196,6 +198,21 @@ const sections: NavSection[] = [
         label: 'Suscripciones',
         to: '/admin/suscripciones',
         icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4h4v-4z"/></svg>',
+      },
+    ],
+  },
+  {
+    title: 'Actividad',
+    items: [
+      {
+        label: 'Feedback',
+        to: '/admin/feedback',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+      },
+      {
+        label: 'Check-ins',
+        to: '/admin/checkins',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
       },
     ],
   },

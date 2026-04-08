@@ -504,7 +504,9 @@ async function handleFormSubmit() {
       if (formAct?.formId) {
         await client.from('form_submissions').insert({
           form_id: formAct.formId,
-          payload: answers,
+          answers,
+          source: 'program',
+          program_id: programId,
         })
       }
     } else {
@@ -525,21 +527,10 @@ async function handleFormSubmit() {
     clearNuxtData(`program-checkins-${programId}`)
     clearNuxtData(`program-enrollment-${programId}`)
 
-    // Check if all program days are now complete
-    const { data: allCheckins } = await client
-      .from('program_checkins')
-      .select('day_index')
-      .eq('program_id', programId)
-      .eq('user_id', user.value!.id)
-      .eq('run', currentRun.value)
-    const completedCount = new Set(allCheckins?.map(c => c.day_index)).size
-    if (completedCount >= (dayData.value?.totalDays ?? Infinity)) {
+    // Check if all program days are now complete (server validates)
+    const { error: completeErr } = await client.rpc('complete_program', { p_program_id: programId })
+    if (!completeErr) {
       programCompleted.value = true
-      await client
-        .from('program_enrollments')
-        .update({ status: 'completed' })
-        .eq('program_id', programId)
-        .eq('user_id', user.value!.id)
     }
   } catch {
     toast.show('Error al guardar', 'error')

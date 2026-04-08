@@ -91,8 +91,8 @@
           <span class="progress__stat-label">Programas activos</span>
         </div>
         <div class="progress__stat">
-          <span class="progress__stat-value progress__stat-value--content">{{ contentViewed }}</span>
-          <span class="progress__stat-label">Contenidos vistos</span>
+          <span class="progress__stat-value progress__stat-value--content">{{ completedPrograms.length }}</span>
+          <span class="progress__stat-label">Programas completados</span>
         </div>
       </section>
 
@@ -168,7 +168,7 @@ const { data: completedDays } = useAsyncData('mobile-completed-days', async () =
 
 const { data: activeEnrollments } = useAsyncData('mobile-active-programs', async () => {
   if (!user.value?.id) return []
-  const { data: enrollments } = await client.from('program_enrollments').select('program_id, enrolled_at, run, programs(id, title, type, cover_url)').eq('user_id', user.value.id).eq('status', 'active')
+  const { data: enrollments } = await client.from('program_enrollments').select('program_id, enrolled_at, run, status, programs(id, title, type, cover_url)').eq('user_id', user.value.id).in('status', ['active', 'completed'])
   if (!enrollments?.length) return []
 
   const programIds = enrollments.map(e => (e.programs as any)?.id ?? e.program_id)
@@ -184,25 +184,62 @@ const { data: activeEnrollments } = useAsyncData('mobile-active-programs', async
   const { data: checkins } = await client.from('program_checkins').select('program_id, day_index, run').eq('user_id', user.value.id).in('program_id', programIds)
 
   const { getCurrentDay } = useProgramProgression()
-  return enrollments.map(e => {
+
+  // Build checkins grouped by program + run
+  const checkinsByRun: Record<string, Set<number>> = {}
+  for (const c of checkins ?? []) {
+    const key = `${c.program_id}:${c.run}`
+    if (!checkinsByRun[key]) checkinsByRun[key] = new Set()
+    checkinsByRun[key].add(c.day_index)
+  }
+
+  const results: Array<{ id: string; title: string; currentDay: number; totalDays: number; completedCount: number; allComplete: boolean; img?: string }> = []
+
+  for (const e of enrollments) {
     const prog = e.programs as any
     const pid = prog?.id ?? e.program_id
     const totalDays = dayCountMap[pid] ?? 0
-    const completedDays = new Set<number>()
-    for (const c of checkins ?? []) {
-      if (c.program_id === pid && c.run === e.run) completedDays.add(c.day_index)
+    const currentRunDays = checkinsByRun[`${pid}:${e.run}`] ?? new Set<number>()
+    const currentRunComplete = e.status === 'completed' || (totalDays > 0 && currentRunDays.size >= totalDays)
+
+    // Check if any previous run was fully completed
+    let hasCompletedRun = false
+    if (e.run > 1) {
+      for (let r = 1; r < e.run; r++) {
+        const prevDays = checkinsByRun[`${pid}:${r}`]
+        if (prevDays && totalDays > 0 && prevDays.size >= totalDays) {
+          hasCompletedRun = true
+          break
+        }
+      }
     }
-    const allComplete = totalDays > 0 && completedDays.size >= totalDays
-    return {
+
+    // Current run entry (active or completed)
+    results.push({
       id: pid,
       title: prog?.title ?? '',
-      currentDay: getCurrentDay(e.enrolled_at, completedDays, totalDays),
+      currentDay: getCurrentDay(e.enrolled_at, currentRunDays, totalDays),
       totalDays,
-      completedCount: completedDays.size,
-      allComplete,
-      img: prog?.cover_url ?? null,
+      completedCount: currentRunDays.size,
+      allComplete: currentRunComplete,
+      img: prog?.cover_url ?? undefined,
+    })
+
+    // Add a separate completed entry for a past run if currently active on a new run
+    if (hasCompletedRun && !currentRunComplete) {
+      results.push({
+        id: pid,
+        title: prog?.title ?? '',
+        currentDay: totalDays,
+        totalDays,
+        completedCount: totalDays,
+        allComplete: true,
+        img: prog?.cover_url ?? undefined,
+      })
     }
-  })
+  }
+
+  return results
 }, { watch: [() => user.value?.id], lazy: true })
 
 const activeProgramsCount = computed(() => activePrograms.value.length)
@@ -235,13 +272,6 @@ const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
 const badgeTitle = computed(() => hoyPage.value?.daily_plan?.badge_title || hoyDefaults.value.badge_title || 'Día completado')
 const badgeSubtitle = computed(() => hoyPage.value?.daily_plan?.badge_subtitle || hoyDefaults.value.badge_subtitle || null)
 
-// Content viewed count (count content_item_categories or benefit_clicks as a proxy; fallback to 0)
-const { data: contentViewed } = useAsyncData('mobile-content-viewed', async () => {
-  if (!user.value?.id) return 0
-  // No dedicated content_views table; count the user's unique form_submissions as an activity proxy
-  const { count } = await client.from('form_submissions').select('id', { count: 'exact', head: true }).eq('user_id', user.value.id)
-  return count ?? 0
-}, { watch: [() => user.value?.id], lazy: true })
 </script>
 
 <style scoped>

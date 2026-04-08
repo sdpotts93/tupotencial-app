@@ -29,6 +29,7 @@
     "@nuxt/icon": "^2.2.1",
     "@nuxtjs/supabase": "^2.0.4",
     "@vimeo/player": "^2.30.3",
+    "dompurify": "^3.3.3",
     "firebase": "^12.11.0",
     "html-to-image": "^1.11.13",
     "marked": "^17.0.4",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@types/dompurify": "^3.0.5",
     "typescript": "^5.9.3"
   }
 }
