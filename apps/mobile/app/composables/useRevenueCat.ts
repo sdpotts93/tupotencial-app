@@ -6,6 +6,7 @@ import { Capacitor } from '@capacitor/core'
 import type { Purchases as PurchasesWeb } from '@revenuecat/purchases-js'
 
 const ENTITLEMENT_ID = 'core'
+type PurchaseOutcome = 'purchased' | 'restored' | 'cancelled' | 'error'
 
 /** Whether the SDK has been configured (once per app lifecycle). */
 const configured = ref(false)
@@ -192,10 +193,51 @@ export function useRevenueCat() {
     }
   }
 
+  async function ensureWebPurchaseIdentity() {
+    if (isNative() || !configured.value || !webInstance) return null
+
+    const client = useSupabaseClient()
+    const { data: { session } } = await client.auth.getSession()
+    const sessionUserId = session?.user?.id
+    const sessionEmail = normalizeEmail(session?.user?.email)
+
+    if (sessionUserId) {
+      await login(sessionUserId, sessionEmail)
+      if (sessionEmail) {
+        await client.from('profiles').update({ email: sessionEmail }).eq('id', sessionUserId)
+      }
+    }
+
+    return { sessionEmail }
+  }
+
+  async function purchaseWebPackage(
+    resolvePackage: (offerings: Awaited<ReturnType<PurchasesWeb['getOfferings']>>) => { rcPackage: any, expectedEntitlementId?: string | null } | null,
+  ): Promise<PurchaseOutcome> {
+    if (!webInstance) return 'error'
+
+    const identity = await ensureWebPurchaseIdentity()
+    const offerings = await webInstance.getOfferings()
+    const purchaseTarget = resolvePackage(offerings)
+    if (!purchaseTarget?.rcPackage) {
+      console.error('[RevenueCat] No package available')
+      return 'error'
+    }
+
+    const { customerInfo } = await webInstance.purchase({
+      rcPackage: purchaseTarget.rcPackage,
+      selectedLocale: 'es',
+      customerEmail: identity?.sessionEmail ?? undefined,
+    })
+
+    if (!purchaseTarget.expectedEntitlementId) return 'purchased'
+    return purchaseTarget.expectedEntitlementId in customerInfo.entitlements.active ? 'purchased' : 'cancelled'
+  }
+
   // ── Purchase the current offering's first package ──
   // Native: opens App Store / Play Store purchase sheet directly
   // Web: calls purchase() directly with locale support
-  async function purchaseCurrentOffering(): Promise<'purchased' | 'restored' | 'cancelled' | 'error'> {
+  async function purchaseCurrentOffering(): Promise<PurchaseOutcome> {
     if (!configured.value) return 'error'
 
     try {
@@ -211,37 +253,48 @@ export function useRevenueCat() {
         const hasPro = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined'
         return hasPro ? 'purchased' : 'cancelled'
       } else {
-        if (!webInstance) return 'error'
-        const client = useSupabaseClient()
-        const { data: { session } } = await client.auth.getSession()
-        const sessionUserId = session?.user?.id
-        const sessionEmail = normalizeEmail(session?.user?.email)
-
-        // Ensure web purchases are always made against the signed-in Supabase user,
-        // not an anonymous RevenueCat customer created earlier in the app lifecycle.
-        if (sessionUserId) {
-          await login(sessionUserId, sessionEmail)
-          if (sessionEmail) {
-            await client.from('profiles').update({ email: sessionEmail }).eq('id', sessionUserId)
-          }
-        }
-
-        const offerings = await webInstance.getOfferings()
-        const pkg = offerings.current?.availablePackages[0]
-        if (!pkg) {
-          console.error('[RevenueCat] No package available')
-          return 'error'
-        }
-        const { customerInfo } = await webInstance.purchase({
-          rcPackage: pkg,
-          selectedLocale: 'es',
-          customerEmail: sessionEmail ?? undefined,
+        return await purchaseWebPackage((offerings) => {
+          const pkg = offerings.current?.availablePackages[0] ?? null
+          return pkg ? { rcPackage: pkg, expectedEntitlementId: ENTITLEMENT_ID } : null
         })
-        const hasPro = ENTITLEMENT_ID in customerInfo.entitlements.active
-        return hasPro ? 'purchased' : 'cancelled'
       }
     } catch (e) {
       console.error('[RevenueCat] Purchase error:', e)
+      return 'error'
+    }
+  }
+
+  async function purchaseAddon(
+    offeringId: string,
+    packageId?: string | null,
+    entitlementId?: string | null,
+  ): Promise<PurchaseOutcome> {
+    if (!configured.value || isNative()) return 'error'
+
+    try {
+      return await purchaseWebPackage((offerings) => {
+        const offering = offerings.all[offeringId]
+        if (!offering) {
+          console.error(`[RevenueCat] Offering ${offeringId} not found`)
+          return null
+        }
+
+        const pkg = packageId
+          ? offering.packagesById[packageId] ?? null
+          : offering.availablePackages[0] ?? null
+
+        if (!pkg) {
+          console.error(`[RevenueCat] Package ${packageId ?? '(default)'} not found in offering ${offeringId}`)
+          return null
+        }
+
+        return {
+          rcPackage: pkg,
+          expectedEntitlementId: entitlementId ?? null,
+        }
+      })
+    } catch (e) {
+      console.error('[RevenueCat] Add-on purchase error:', e)
       return 'error'
     }
   }
@@ -308,6 +361,7 @@ export function useRevenueCat() {
     isProEntitled,
     getCustomerInfo,
     purchaseCurrentOffering,
+    purchaseAddon,
     getOfferings,
     restorePurchases,
     presentCustomerCenter,

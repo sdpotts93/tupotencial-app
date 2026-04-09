@@ -134,6 +134,10 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
   }
 
   const access = computeAccess(event)
+  const entitlementIds = Array.isArray(event.entitlement_ids)
+    ? Array.from(new Set(event.entitlement_ids.filter((value): value is string => !!value)))
+    : []
+  const activeAddonEntitlementIds = entitlementIds.filter(id => id !== CORE_ENTITLEMENT_ID)
 
   await db.upsert('subscriptions', {
     user_id: userId,
@@ -155,6 +159,13 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
       `user_id=eq.${userId}&entitlement_key=eq.${CORE_ENTITLEMENT_ID}&source=eq.subscription`,
     )
   }
+
+  await syncAddonEntitlements(
+    db,
+    userId,
+    activeAddonEntitlementIds,
+    access.areAddonEntitlementsActive,
+  )
 
   await db.upsert('revenuecat_webhook_events', {
     id: event.id,
@@ -214,7 +225,8 @@ function computeAccess(event: RevenueCatWebhookEvent) {
     ? event.expiration_at_ms <= Date.now()
     : false
 
-  const isActive = hasCore && !isExpired
+  const areAddonEntitlementsActive = isEventAccessActive(event.type ?? null, isExpired)
+  const isActive = hasCore && areAddonEntitlementsActive
   const status = isActive
     ? event.period_type === 'TRIAL'
       ? 'trialing'
@@ -223,8 +235,81 @@ function computeAccess(event: RevenueCatWebhookEvent) {
 
   return {
     isActive,
+    areAddonEntitlementsActive,
     status,
     currentPeriodEnd: expirationAt,
+  }
+}
+
+function isEventAccessActive(type: string | null, isExpired: boolean) {
+  if (isExpired) return false
+
+  switch (type) {
+    case 'EXPIRATION':
+    case 'REFUND':
+      return false
+    default:
+      return true
+  }
+}
+
+async function syncAddonEntitlements(
+  db: ReturnType<typeof supabase>,
+  userId: string,
+  entitlementIds: string[],
+  areEntitlementsActive: boolean,
+) {
+  const knownAddonEntitlements = await db.select(
+    'addon_entitlements',
+    'select=addon_id,entitlement_key',
+  ) as Array<{ addon_id: string; entitlement_key: string }>
+
+  if (!knownAddonEntitlements.length) return
+
+  const addons = await db.select(
+    'addons',
+    'select=id,price',
+  ) as Array<{ id: string; price: number | null }>
+  const addonPrices = new Map(addons.map(addon => [addon.id, addon.price ?? 0]))
+
+  const addonEntitlementsByKey = new Map<string, string[]>()
+  for (const row of knownAddonEntitlements) {
+    const rows = addonEntitlementsByKey.get(row.entitlement_key) ?? []
+    rows.push(row.addon_id)
+    addonEntitlementsByKey.set(row.entitlement_key, rows)
+  }
+
+  const addonIdsToActivate = new Set<string>()
+  for (const entitlementId of entitlementIds) {
+    for (const addonId of addonEntitlementsByKey.get(entitlementId) ?? []) {
+      addonIdsToActivate.add(addonId)
+    }
+  }
+
+  for (const row of knownAddonEntitlements) {
+    const shouldBeActive = areEntitlementsActive && addonIdsToActivate.has(row.addon_id)
+
+    if (shouldBeActive) {
+      await db.upsert('user_entitlements', {
+        user_id: userId,
+        entitlement_key: row.entitlement_key,
+        source: 'addon',
+        source_ref: row.addon_id,
+      }, 'user_id,entitlement_key')
+
+      await db.upsert('addon_purchases', {
+        user_id: userId,
+        addon_id: row.addon_id,
+        stripe_session_id: null,
+        amount: addonPrices.get(row.addon_id) ?? 0,
+      }, 'user_id,addon_id')
+      continue
+    }
+
+    await db.delete(
+      'user_entitlements',
+      `user_id=eq.${userId}&entitlement_key=eq.${encodeURIComponent(row.entitlement_key)}&source=eq.addon`,
+    )
   }
 }
 

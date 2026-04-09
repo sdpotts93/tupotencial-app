@@ -71,12 +71,20 @@
           <template v-else-if="isNative">
             <p class="addon__native-note">Las compras se realizan desde la versión web en tupotencial.com</p>
           </template>
-          <template v-else>
+          <template v-else-if="!addon.purchaseReady">
             <div class="addon__web-note">
               <UiButton variant="outline" block disabled>
-                Compra no disponible
+                Configuración pendiente
               </UiButton>
-              <p>Estamos migrando los complementos a RevenueCat. Por ahora este complemento no se puede comprar desde la web.</p>
+              <p>Este complemento todavía no tiene completa su configuración en RevenueCat.</p>
+            </div>
+          </template>
+          <template v-else>
+            <div class="addon__web-note">
+              <UiButton variant="primary-outline" block :loading="purchasing" @click="handlePurchase">
+                Comprar ahora
+              </UiButton>
+              <p>Tu acceso se activará en cuanto RevenueCat confirme la compra y el webhook sincronice tu entitlement.</p>
             </div>
           </template>
         </div>
@@ -91,31 +99,85 @@ definePageMeta({ layout: 'blank' })
 
 const route = useRoute()
 const client = useSupabaseClient()
-const { user } = useAuth()
+const toast = useToast()
+const { user, refreshProfile, hasEntitlement } = useAuth()
 const { isNative } = useNativePlatform()
+const { purchaseAddon } = useRevenueCat()
+const purchasing = ref(false)
 
 function formatPrice(cents: number) {
   return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
 }
 
 const { data: rawAddon, status: addonStatus, refresh: refreshAddon } = useAsyncData(`addon-${route.params.id}`, async () => {
-  const { data } = await client.from('addons').select('*').eq('id', route.params.id as string).single()
+  const { data } = await client
+    .from('addons')
+    .select('*, addon_entitlements(entitlement_key)')
+    .eq('id', route.params.id as string)
+    .single()
   return data
 }, { lazy: true })
 
-const { data: isOwned } = useAsyncData(`addon-owned-${route.params.id}`, async () => {
-  if (!user.value?.id) return null
-  const { data } = await client.from('addon_purchases').select('id').eq('addon_id', route.params.id as string).eq('user_id', user.value.id).maybeSingle()
-  return !!data
-}, { lazy: true, watch: [() => user.value?.id] })
+const entitlementKeys = computed(() => (
+  (rawAddon.value?.addon_entitlements ?? []).map((row: { entitlement_key: string }) => row.entitlement_key)
+))
 
 const addon = computed(() => ({
   title: rawAddon.value?.title ?? '',
   description: rawAddon.value?.description ?? '',
   priceLabel: formatPrice(rawAddon.value?.price ?? 0),
   img: rawAddon.value?.cover_url ?? undefined,
-  owned: isOwned.value ?? false,
+  owned: entitlementKeys.value.some(key => hasEntitlement(key)),
+  purchaseReady: !!rawAddon.value?.revenuecat_offering_id && entitlementKeys.value.length > 0,
 }))
+
+async function waitForAddonSync() {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    await refreshProfile()
+    await refreshAddon()
+
+    if (entitlementKeys.value.some(key => hasEntitlement(key))) {
+      return true
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 1500))
+  }
+
+  return false
+}
+
+async function handlePurchase() {
+  if (purchasing.value || !rawAddon.value?.revenuecat_offering_id) return
+
+  purchasing.value = true
+  try {
+    const outcome = await purchaseAddon(
+      rawAddon.value.revenuecat_offering_id,
+      rawAddon.value.revenuecat_package_id,
+      entitlementKeys.value[0] ?? null,
+    )
+
+    if (outcome === 'cancelled') {
+      toast.show('Compra cancelada', 'info')
+      return
+    }
+
+    if (outcome === 'error') {
+      toast.show('No pudimos iniciar la compra', 'error')
+      return
+    }
+
+    const synced = await waitForAddonSync()
+    if (!synced) {
+      toast.show('La compra se completó, pero la activación sigue pendiente', 'info')
+      return
+    }
+
+    toast.show('Complemento desbloqueado', 'success')
+  } finally {
+    purchasing.value = false
+  }
+}
 
 </script>
 

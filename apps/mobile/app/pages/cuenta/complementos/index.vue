@@ -84,12 +84,14 @@ function formatPrice(cents: number) {
 }
 
 const { data: addonsData, status: addonsStatus, refresh: refreshAddons } = useAsyncData('mobile-addons', async () => {
-  const { data: addonsList } = await client.from('addons').select('*').eq('status', 'active').order('created_at')
-  let purchasedIds = new Set<string>()
-  if (user.value?.id) {
-    const { data: purchases } = await client.from('addon_purchases').select('addon_id').eq('user_id', user.value.id)
-    purchasedIds = new Set((purchases ?? []).map(p => p.addon_id))
-  }
+  const { data: addonsList } = await client
+    .from('addons')
+    .select('*, addon_entitlements(entitlement_key)')
+    .eq('status', 'active')
+    .order('created_at')
+
+  const userEntitlements = new Set(user.value?.entitlements ?? [])
+
   return (addonsList ?? []).map(a => ({
     id: a.id,
     title: a.title,
@@ -97,9 +99,9 @@ const { data: addonsData, status: addonsStatus, refresh: refreshAddons } = useAs
     priceLabel: formatPrice(a.price),
     img: a.cover_url,
     bg: 'linear-gradient(135deg, var(--color-surface-alt) 0%, var(--color-surface) 100%)',
-    owned: purchasedIds.has(a.id),
+    owned: (a.addon_entitlements ?? []).some((row: { entitlement_key: string }) => userEntitlements.has(row.entitlement_key)),
   }))
-}, { watch: [() => user.value?.id], lazy: true })
+}, { watch: [() => user.value?.id, () => (user.value?.entitlements ?? []).join(',')], lazy: true })
 const addons = computed(() => addonsData.value ?? [])
 </script>
 

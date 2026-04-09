@@ -91,10 +91,26 @@
             />
 
             <UiInput
-              v-model="form.stripe_price_id"
-              label="Stripe Price ID"
-              placeholder="price_..."
-              hint="ID del precio en Stripe"
+              v-model="form.entitlement_key"
+              label="Entitlement"
+              placeholder="vip"
+              hint="Clave de acceso que se otorgará al comprar este add-on"
+              :error="errors.entitlement_key"
+            />
+
+            <UiInput
+              v-model="form.revenuecat_offering_id"
+              label="RevenueCat Offering ID"
+              placeholder="addon_vip"
+              hint="Offering que contiene el paquete de compra de este add-on"
+              :error="errors.revenuecat_offering_id"
+            />
+
+            <UiInput
+              v-model="form.revenuecat_package_id"
+              label="RevenueCat Package ID"
+              placeholder="default"
+              hint="Opcional. Déjalo vacío para usar el primer paquete disponible"
             />
 
             <UiSelect
@@ -122,7 +138,7 @@ const client = useSupabaseClient()
 const toast = useToast()
 const formError = ref('')
 const saving = ref(false)
-const errors = reactive({ title: '', price: '' })
+const errors = reactive({ title: '', price: '', entitlement_key: '', revenuecat_offering_id: '' })
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -161,7 +177,9 @@ const form = reactive({
   price: '',
   plan: 'todos',
   grants_core_months: '',
-  stripe_price_id: '',
+  entitlement_key: '',
+  revenuecat_offering_id: '',
+  revenuecat_package_id: '',
   status: 'active',
 })
 
@@ -179,10 +197,20 @@ async function handleSave() {
   formError.value = ''
   errors.title = ''
   errors.price = ''
+  errors.entitlement_key = ''
+  errors.revenuecat_offering_id = ''
 
   let hasError = false
   if (!form.title.trim()) { errors.title = 'El título es obligatorio'; hasError = true }
   if (!form.price || Number(form.price) <= 0) { errors.price = 'El precio es obligatorio'; hasError = true }
+  if (form.status === 'active' && !form.entitlement_key.trim()) {
+    errors.entitlement_key = 'El entitlement es obligatorio cuando el add-on está activo'
+    hasError = true
+  }
+  if (form.status === 'active' && !form.revenuecat_offering_id.trim()) {
+    errors.revenuecat_offering_id = 'El offering de RevenueCat es obligatorio cuando el add-on está activo'
+    hasError = true
+  }
   if (hasError) return
 
   saving.value = true
@@ -193,11 +221,23 @@ async function handleSave() {
       price: Math.round(Number(form.price) * 100),
       plan: form.plan,
       grants_core_months: form.grants_core_months ? Number(form.grants_core_months) : null,
-      stripe_price_id: form.stripe_price_id || null,
+      revenuecat_offering_id: form.revenuecat_offering_id || null,
+      revenuecat_package_id: form.revenuecat_package_id || null,
       status: form.status,
     }
 
-    await client.from('addons').insert(payload)
+    const { data: addon, error: insertError } = await client.from('addons').insert(payload).select('id').single()
+    if (insertError) throw insertError
+
+    const entitlementKey = form.entitlement_key.trim()
+    if (addon?.id && entitlementKey) {
+      const { error: entitlementError } = await client.from('addon_entitlements').insert({
+        addon_id: addon.id,
+        entitlement_key: entitlementKey,
+      })
+      if (entitlementError) throw entitlementError
+    }
+
     navigateTo('/admin/complementos')
   } catch {
     formError.value = 'Error al guardar. Intenta de nuevo.'

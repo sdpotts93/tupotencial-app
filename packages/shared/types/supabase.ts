@@ -105,6 +105,8 @@ export type Database = {
           id: string
           plan: string
           price: number
+          revenuecat_offering_id: string | null
+          revenuecat_package_id: string | null
           status: string
           stripe_price_id: string | null
           title: string
@@ -118,6 +120,8 @@ export type Database = {
           id?: string
           plan?: string
           price?: number
+          revenuecat_offering_id?: string | null
+          revenuecat_package_id?: string | null
           status?: string
           stripe_price_id?: string | null
           title: string
@@ -131,6 +135,8 @@ export type Database = {
           id?: string
           plan?: string
           price?: number
+          revenuecat_offering_id?: string | null
+          revenuecat_package_id?: string | null
           status?: string
           stripe_price_id?: string | null
           title?: string
@@ -1582,4 +1588,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

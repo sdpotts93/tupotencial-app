@@ -312,6 +312,8 @@ export interface Addon {
   plan: AddonPlan;
   grants_core_months: number | null;
   stripe_price_id: string | null;
+  revenuecat_offering_id: string | null;
+  revenuecat_package_id: string | null;
   status: AddonStatus;
   created_at: string;
   updated_at: string | null;
