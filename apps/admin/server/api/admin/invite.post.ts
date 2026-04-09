@@ -9,10 +9,10 @@ export default defineEventHandler(async (event) => {
   const serviceClient = serverSupabaseServiceRole(event)
 
   // 3. Verify requester is an admin (role = 'admin')
-  const { data: adminRow } = await serviceClient
+  const { data: adminRow, error: adminError } = await serviceClient
     .from('admin_users')
     .select('role')
-    .eq('user_id', user.id)
+    .eq('user_id', user.sub)
     .single()
 
   if (!adminRow || adminRow.role !== 'admin') {

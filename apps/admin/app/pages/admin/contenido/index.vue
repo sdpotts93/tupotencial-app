@@ -313,7 +313,7 @@ const featuredId = ref<string | null>(null)
 
 // Load featured content from app_settings
 const { data: featuredSetting } = useAsyncData('admin-featured-content', async () => {
-  const { data } = await client.from('app_settings').select('value').eq('key', 'biblioteca_featured').single()
+  const { data } = await client.from('app_settings').select('value').eq('key', 'biblioteca_featured').maybeSingle()
   return (data?.value as any)?.content_id ?? null
 })
 watchEffect(() => { featuredId.value = featuredSetting.value })

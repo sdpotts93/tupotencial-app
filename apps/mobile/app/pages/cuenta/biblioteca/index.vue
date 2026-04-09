@@ -390,7 +390,7 @@ const visibleCategories = computed(() => categories.value.filter(c => c.slug !==
 
 // Featured content from app_settings
 const { data: featuredContentId } = useAsyncData('biblioteca-featured', async () => {
-  const { data } = await client.from('app_settings').select('value').eq('key', 'biblioteca_featured').single()
+  const { data } = await client.from('app_settings').select('value').eq('key', 'biblioteca_featured').maybeSingle()
   return (data?.value as any)?.content_id ?? null
 }, { lazy: true })
 const featuredItem = computed(() => {

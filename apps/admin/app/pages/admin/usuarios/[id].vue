@@ -57,7 +57,7 @@
     </div>
 
     <!-- Error state -->
-    <template v-else-if="userStatus === 'error'">
+    <template v-else-if="userStatus === 'error' && userError">
       <div class="user-detail__error">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 20 20" class="user-detail__error-icon"><path fill="currentColor" d="m12.876 8.17l.952 1.089a5.5 5.5 0 0 0-.966.414l-.295-.337l-.585.936a5.5 5.5 0 0 0-1.76 2.676a.5.5 0 0 1-.684-.256L7.495 7.79L6.26 10.696A.5.5 0 0 1 5.8 11H2.5a.5.5 0 0 1 0-1h2.97l1.57-3.696a.5.5 0 0 1 .922.004l2.127 5.106l1.987-3.179a.5.5 0 0 1 .8-.064m3.848-3.858a4.42 4.42 0 0 1 .978 4.702A2 2 0 0 0 17.5 9h-.889a3.415 3.415 0 0 0-.598-3.984A3.306 3.306 0 0 0 11.3 5l-.951.963a.5.5 0 0 1-.711 0l-.96-.97a3.3 3.3 0 0 0-4.706-.016C2.899 6.061 2.713 7.711 3.42 9H2.5q-.09 0-.18.01a4.4 4.4 0 0 1 .941-4.736a4.3 4.3 0 0 1 6.127.016l.605.61l.596-.603l.109-.106a4.306 4.306 0 0 1 6.026.121M4.856 12l4.784 4.847a.5.5 0 0 0 .712-.703l-4.146-4.2Q6.011 12 5.8 12zM20 14.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0M15.5 12a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5m0 5.125a.625.625 0 1 0 0-1.25a.625.625 0 0 0 0 1.25"/></svg>
         <h2 class="user-detail__error-title">No pudimos cargar el usuario</h2>
@@ -111,18 +111,20 @@
           <div>
             <h3 class="user-detail__section-title">Suscripción</h3>
             <UiCard variant="outlined">
-              <div class="user-detail__list" v-if="subscription">
-                <div class="user-detail__row">
-                  <span class="user-detail__row-label">Estado</span>
-                  <UiTag :variant="subStatusVariant(subscription.status)">{{ subStatusLabel(subscription.status) }}</UiTag>
-                </div>
-                <div class="user-detail__row" v-if="subscription.current_period_end">
-                  <span class="user-detail__row-label">Periodo actual hasta</span>
-                  <span>{{ formatDate(subscription.current_period_end) }}</span>
-                </div>
-                <div class="user-detail__row" v-if="subscription.stripe_customer_id">
-                  <span class="user-detail__row-label">Stripe Customer</span>
-                  <span class="user-detail__mono">{{ subscription.stripe_customer_id }}</span>
+              <div v-if="subscription" class="user-detail__card-content">
+                <div class="user-detail__list">
+                  <div class="user-detail__row">
+                    <span class="user-detail__row-label">Estado</span>
+                    <UiTag :variant="subStatusVariant(subscription.status)">{{ subStatusLabel(subscription.status) }}</UiTag>
+                  </div>
+                  <div class="user-detail__row" v-if="subscription.current_period_end">
+                    <span class="user-detail__row-label">Periodo actual hasta</span>
+                    <span>{{ formatDate(subscription.current_period_end) }}</span>
+                  </div>
+                  <div class="user-detail__row" v-if="subscription.stripe_customer_id">
+                    <span class="user-detail__row-label">Stripe Customer</span>
+                    <span class="user-detail__mono">{{ subscription.stripe_customer_id }}</span>
+                  </div>
                 </div>
               </div>
               <p v-else class="user-detail__empty">Sin suscripción activa</p>
@@ -133,8 +135,10 @@
           <div>
             <h3 class="user-detail__section-title">Entitlements</h3>
             <UiCard variant="outlined">
-              <div class="user-detail__tags" v-if="entitlements.length">
-                <UiTag v-for="e in entitlements" :key="e.id" variant="info">{{ e.entitlement_key }}</UiTag>
+              <div v-if="entitlements.length" class="user-detail__card-content">
+                <div class="user-detail__tags">
+                  <UiTag v-for="e in entitlements" :key="e.id" variant="info">{{ e.entitlement_key }}</UiTag>
+                </div>
               </div>
               <p v-else class="user-detail__empty">Sin entitlements</p>
             </UiCard>
@@ -206,8 +210,8 @@ const client = useSupabaseClient()
 const userId = route.params.id as string
 
 // ── Profile ──
-const { data: profile, status: userStatus, refresh: refreshUser } = useAsyncData(`user-${userId}`, async () => {
-  const { data } = await client.from('profiles').select('*').eq('id', userId).single()
+const { data: profile, status: userStatus, error: userError, refresh: refreshUser } = useAsyncData(`user-${userId}`, async () => {
+  const { data } = await client.from('profiles').select('*').eq('id', userId).maybeSingle()
   return data
 }, { lazy: true })
 
@@ -410,6 +414,10 @@ function formatDate(iso: string) {
   gap: var(--space-3);
 }
 
+.user-detail__card-content {
+  min-height: 100%;
+}
+
 .user-detail__row {
   display: flex;
   align-items: center;
@@ -439,6 +447,7 @@ function formatDate(iso: string) {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  padding: var(--space-2) 0;
 }
 
 /* ─── Empty state ─── */

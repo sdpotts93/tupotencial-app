@@ -82,3 +82,4 @@ Append one line per completed task:
 2026-04-08 21:53 America/Mexico_City — Show profile emails in the first column on /admin/usuarios and /admin/roles and match admin search against email
 2026-04-08 22:00 America/Mexico_City — Load real auth emails for /admin/roles via a privileged admin endpoint and persist invite emails onto profiles
 2026-04-08 22:28 America/Mexico_City — Serialize RevenueCat identity and attribute sync to prevent duplicate onboarding requests
+2026-04-08 22:46 America/Mexico_City — Normalize spacing on /admin/usuarios/[id] subscription and entitlements cards and handle missing users without a false load error
