@@ -77,6 +77,7 @@ Append one line per completed task:
 2026-04-08 18:31 America/Mexico_City — Refresh subscription page state on return, add manage-subscription actions, and keep Core plan styling stable when current
 2026-04-08 20:14 America/Mexico_City — Fix RevenueCat subscription reads to re-identify the signed-in web user before loading entitlements or opening management
 2026-04-08 20:21 America/Mexico_City — Keep subscription page in loading state until the first effective plan resolution completes
+2026-04-09 15:11 America/Mexico_City — Add native boot gating and AppBootShell placeholder to the mobile app startup flow
 2026-04-08 21:34 America/Mexico_City — Exclude admin accounts from /admin/usuarios so admin staff only appears in /admin/roles
 2026-04-08 21:44 America/Mexico_City — Implement read-only admin access model across Supabase policies, route guards, and admin list actions
 2026-04-08 21:53 America/Mexico_City — Show profile emails in the first column on /admin/usuarios and /admin/roles and match admin search against email

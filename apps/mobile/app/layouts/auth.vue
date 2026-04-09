@@ -3,12 +3,7 @@
     <!-- Desktop branding panel (hidden on mobile) -->
     <div class="auth-layout__branding">
       <div class="auth-layout__branding-bg" />
-      <div class="auth-layout__branding-content">
-        <BlobLogo class="auth-layout__branding-logo" />
-        <p class="auth-layout__branding-tagline">
-          Un espacio seguro para tu crecimiento integral.
-        </p>
-      </div>
+      <AuthBrandingArtwork />
     </div>
 
     <!-- Content area -->
@@ -56,31 +51,6 @@
     position: absolute;
     inset: 0;
     background: var(--color-light);
-  }
-
-  .auth-layout__branding-content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-8);
-    padding: var(--space-10);
-  }
-
-  .auth-layout__branding-logo {
-    width: 250px;
-    height: 250px;
-    flex-shrink: 0;
-  }
-
-  .auth-layout__branding-tagline {
-    font-family: var(--font-title);
-    font-size: var(--title-md);
-    color: var(--color-text);
-    text-align: center;
-    line-height: var(--leading-snug);
-    max-width: 320px;
   }
 
   .auth-layout__content {
