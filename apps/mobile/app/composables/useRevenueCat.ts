@@ -12,9 +12,18 @@ const configured = ref(false)
 
 /** Web SDK instance (only populated on web). */
 let webInstance: PurchasesWeb | null = null
+let currentAppUserId: string | null = null
+let currentEmail: string | null = null
+let identitySyncQueue: Promise<void> = Promise.resolve()
+let inFlightIdentityKey: string | null = null
+let inFlightIdentityPromise: Promise<void> | null = null
 
 function isNative() {
   return Capacitor.isNativePlatform()
+}
+
+function normalizeEmail(email?: string | null) {
+  return email?.trim().toLowerCase() ?? null
 }
 
 export function useRevenueCat() {
@@ -26,23 +35,25 @@ export function useRevenueCat() {
     const sessionUserId = session?.user?.id
     if (!sessionUserId) return
 
-    const sessionEmail = session.user.email?.trim().toLowerCase() ?? null
+    const sessionEmail = normalizeEmail(session.user.email)
     await login(sessionUserId, sessionEmail)
   }
 
   async function syncAttributes(userId: string, email?: string | null) {
+    const normalizedEmail = normalizeEmail(email)
+
     if (isNative()) {
       const { Purchases } = await import('@revenuecat/purchases-capacitor')
       await Purchases.setAttributes({ supabase_user_id: userId })
-      if (email) {
-        await Purchases.setEmail({ email })
+      if (normalizedEmail) {
+        await Purchases.setEmail({ email: normalizedEmail })
       }
       return
     }
 
     if (!webInstance) return
     await webInstance.setAttributes({
-      $email: email ?? null,
+      $email: normalizedEmail,
       supabase_user_id: userId,
     })
   }
@@ -59,6 +70,7 @@ export function useRevenueCat() {
       const { Purchases } = await import('@revenuecat/purchases-js')
       const userId = appUserId ?? Purchases.generateRevenueCatAnonymousAppUserId()
       webInstance = Purchases.configure({ apiKey, appUserId: userId })
+      currentAppUserId = userId
     }
 
     configured.value = true
@@ -68,21 +80,55 @@ export function useRevenueCat() {
   async function login(userId: string, email?: string | null) {
     if (!configured.value) return
 
-    if (isNative()) {
-      const { Purchases } = await import('@revenuecat/purchases-capacitor')
-      await Purchases.logIn({ appUserID: userId })
-    } else {
-      if (!webInstance) {
+    const normalizedEmail = normalizeEmail(email)
+    const identityKey = `${userId}::${normalizedEmail ?? ''}`
+
+    if (currentAppUserId === userId && currentEmail === normalizedEmail) {
+      return
+    }
+
+    if (inFlightIdentityPromise && inFlightIdentityKey === identityKey) {
+      await inFlightIdentityPromise
+      return
+    }
+
+    const nextTask = identitySyncQueue.catch(() => {}).then(async () => {
+      if (currentAppUserId === userId && currentEmail === normalizedEmail) {
+        return
+      }
+
+      if (isNative()) {
+        const { Purchases } = await import('@revenuecat/purchases-capacitor')
+        if (currentAppUserId !== userId) {
+          await Purchases.logIn({ appUserID: userId })
+        }
+      } else if (!webInstance) {
         const { Purchases } = await import('@revenuecat/purchases-js')
         const config = useRuntimeConfig()
         const apiKey = config.public.revenueCatApiKey as string
         webInstance = Purchases.configure({ apiKey, appUserId: userId })
-      } else {
+      } else if (currentAppUserId !== userId) {
         await webInstance.changeUser(userId)
       }
-    }
 
-    await syncAttributes(userId, email)
+      if (currentAppUserId !== userId || currentEmail !== normalizedEmail) {
+        await syncAttributes(userId, normalizedEmail)
+      }
+
+      currentAppUserId = userId
+      currentEmail = normalizedEmail
+    })
+
+    identitySyncQueue = nextTask
+    inFlightIdentityKey = identityKey
+    const settledTask = nextTask.finally(() => {
+      if (inFlightIdentityPromise === settledTask) {
+        inFlightIdentityKey = null
+        inFlightIdentityPromise = null
+      }
+    })
+    inFlightIdentityPromise = settledTask
+    await settledTask
   }
 
   // ── Log out (call on sign-out) ──
@@ -92,12 +138,16 @@ export function useRevenueCat() {
     if (isNative()) {
       const { Purchases } = await import('@revenuecat/purchases-capacitor')
       await Purchases.logOut()
+      currentAppUserId = null
+      currentEmail = null
     } else {
       const { Purchases } = await import('@revenuecat/purchases-js')
       const config = useRuntimeConfig()
       const apiKey = config.public.revenueCatApiKey as string
       const anonId = Purchases.generateRevenueCatAnonymousAppUserId()
       webInstance = Purchases.configure({ apiKey, appUserId: anonId })
+      currentAppUserId = anonId
+      currentEmail = null
     }
   }
 
@@ -165,7 +215,7 @@ export function useRevenueCat() {
         const client = useSupabaseClient()
         const { data: { session } } = await client.auth.getSession()
         const sessionUserId = session?.user?.id
-        const sessionEmail = session?.user?.email?.trim().toLowerCase() ?? null
+        const sessionEmail = normalizeEmail(session?.user?.email)
 
         // Ensure web purchases are always made against the signed-in Supabase user,
         // not an anonymous RevenueCat customer created earlier in the app lifecycle.

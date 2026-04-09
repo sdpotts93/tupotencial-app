@@ -81,3 +81,4 @@ Append one line per completed task:
 2026-04-08 21:44 America/Mexico_City — Implement read-only admin access model across Supabase policies, route guards, and admin list actions
 2026-04-08 21:53 America/Mexico_City — Show profile emails in the first column on /admin/usuarios and /admin/roles and match admin search against email
 2026-04-08 22:00 America/Mexico_City — Load real auth emails for /admin/roles via a privileged admin endpoint and persist invite emails onto profiles
+2026-04-08 22:28 America/Mexico_City — Serialize RevenueCat identity and attribute sync to prevent duplicate onboarding requests
