@@ -65,7 +65,7 @@
             </UiButton>
           </template>
           <template v-else>
-            <UiButton v-if="isSubscriber" variant="outline" block @click="openCustomerCenter">Gestionar suscripción</UiButton>
+            <UiButton v-if="effectiveIsSubscriber" variant="outline" block @click="openCustomerCenter">Gestionar suscripción</UiButton>
             <UiButton v-else variant="outline" block disabled>Plan base</UiButton>
           </template>
 
@@ -86,7 +86,7 @@
           <br /><button class="pricing__restore" @click="handleRestore">Restaurar compras</button>
         </template>
       </p>
-      <div v-if="isSubscriber" class="pricing__manage">
+      <div v-if="effectiveIsSubscriber" class="pricing__manage">
         <UiButton variant="outline" size="sm" @click="openCustomerCenter">Gestionar suscripción</UiButton>
       </div>
 
@@ -100,7 +100,10 @@ definePageMeta({ layout: 'default' })
 const client = useSupabaseClient()
 const { isSubscriber, refreshProfile } = useAuth()
 const { isNative } = useNativePlatform()
-const { purchaseCurrentOffering, restorePurchases, presentCustomerCenter } = useRevenueCat()
+const { purchaseCurrentOffering, restorePurchases, presentCustomerCenter, getCustomerInfo, configured } = useRevenueCat()
+
+const rcSubscriber = ref(false)
+const effectiveIsSubscriber = computed(() => isSubscriber.value || rcSubscriber.value)
 
 // Fetch both plans + benefits for each
 const { data: plansData, status: subStatus, refresh: refreshSub } = useAsyncData('suscripcion-plans', async () => {
@@ -125,15 +128,44 @@ const { data: plansData, status: subStatus, refresh: refreshSub } = useAsyncData
 const plans = computed(() =>
   (plansData.value ?? []).map(p => ({
     ...p,
-    isCurrent: p.id === 'core' ? isSubscriber.value : !isSubscriber.value,
+    isCurrent: p.id === 'core' ? effectiveIsSubscriber.value : !effectiveIsSubscriber.value,
   })),
 )
 
 const paywallLoading = ref(false)
 
 async function refreshSubscriptionState() {
-  await refreshProfile()
-  await refreshSub()
+  const profilePromise = refreshProfile()
+  const plansPromise = refreshSub()
+  const rcActive = await readRevenueCatSubscriptionState()
+  const profileOk = await profilePromise
+  await plansPromise
+
+  rcSubscriber.value = rcActive
+  return profileOk || rcActive
+}
+
+async function readRevenueCatSubscriptionState() {
+  if (isNative.value) return false
+
+  // The page can mount before the RevenueCat plugin finishes configuring.
+  // Retry briefly so the first render reflects the current customer state.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    if (!configured.value) {
+      await new Promise(resolve => setTimeout(resolve, 250))
+      continue
+    }
+
+    const customerInfo = await getCustomerInfo().catch(() => null)
+    if (!customerInfo) {
+      await new Promise(resolve => setTimeout(resolve, 250))
+      continue
+    }
+
+    return typeof customerInfo.entitlements.active.core !== 'undefined'
+  }
+
+  return false
 }
 
 async function waitForSubscriptionSync() {
@@ -142,7 +174,7 @@ async function waitForSubscriptionSync() {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     await refreshSubscriptionState()
 
-    if (isSubscriber.value) {
+    if (effectiveIsSubscriber.value) {
       return true
     }
 

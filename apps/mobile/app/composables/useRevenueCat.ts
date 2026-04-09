@@ -18,6 +18,18 @@ function isNative() {
 }
 
 export function useRevenueCat() {
+  async function ensureWebSessionIdentity() {
+    if (isNative() || !configured.value) return
+
+    const client = useSupabaseClient()
+    const { data: { session } } = await client.auth.getSession()
+    const sessionUserId = session?.user?.id
+    if (!sessionUserId) return
+
+    const sessionEmail = session.user.email?.trim().toLowerCase() ?? null
+    await login(sessionUserId, sessionEmail)
+  }
+
   async function syncAttributes(userId: string, email?: string | null) {
     if (isNative()) {
       const { Purchases } = await import('@revenuecat/purchases-capacitor')
@@ -99,6 +111,7 @@ export function useRevenueCat() {
         const { customerInfo } = await Purchases.getCustomerInfo()
         return typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined'
       } else {
+        await ensureWebSessionIdentity()
         if (!webInstance) return false
         const customerInfo = await webInstance.getCustomerInfo()
         return ENTITLEMENT_ID in customerInfo.entitlements.active
@@ -119,6 +132,7 @@ export function useRevenueCat() {
         const { customerInfo } = await Purchases.getCustomerInfo()
         return customerInfo
       } else {
+        await ensureWebSessionIdentity()
         if (!webInstance) return null
         return await webInstance.getCustomerInfo()
       }
@@ -223,6 +237,7 @@ export function useRevenueCat() {
         const { RevenueCatUI } = await import('@revenuecat/purchases-capacitor-ui')
         await RevenueCatUI.presentCustomerCenter()
       } else {
+        await ensureWebSessionIdentity()
         if (!webInstance) return
         const customerInfo = await webInstance.getCustomerInfo()
         const managementUrl = customerInfo.managementURL
