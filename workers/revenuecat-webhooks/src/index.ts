@@ -30,6 +30,7 @@ interface RevenueCatWebhookEvent {
   period_type?: string | null
   environment?: string | null
   store?: string | null
+  subscriber_attributes?: Record<string, { value?: string | null; updated_at_ms?: number | null } | undefined> | null
   transferred_from?: string[] | null
   transferred_to?: string[] | null
 }
@@ -51,7 +52,7 @@ function supabase(env: Env) {
   return {
     async select(table: string, query: string) {
       const res = await fetch(`${base}/${table}?${query}`, { headers })
-      return res.json() as Promise<any[]>
+      return parseJsonResponse(res, `select ${table}`) as Promise<any[]>
     },
     async upsert(table: string, body: Record<string, any>, onConflict?: string) {
       const prefer = onConflict
@@ -63,13 +64,14 @@ function supabase(env: Env) {
         headers: { ...headers, Prefer: prefer },
         body: JSON.stringify(body),
       })
-      return res.json()
+      return parseJsonResponse(res, `upsert ${table}`)
     },
     async delete(table: string, query: string) {
-      await fetch(`${base}/${table}?${query}`, {
+      const res = await fetch(`${base}/${table}?${query}`, {
         method: 'DELETE',
         headers,
       })
+      await parseJsonResponse(res, `delete ${table}`)
     },
   }
 }
@@ -98,12 +100,14 @@ export default {
 
 async function handleWebhook(request: Request, env: Env): Promise<Response> {
   if (request.headers.get('authorization') !== env.REVENUECAT_WEBHOOK_AUTH) {
+    console.error('[RevenueCat webhook] Unauthorized request')
     return jsonResponse({ error: 'Unauthorized' }, 401)
   }
 
   const payload = await request.json().catch(() => null) as RevenueCatWebhookPayload | null
   const event = payload?.event
   if (!event?.id || !event.type) {
+    console.error('[RevenueCat webhook] Invalid payload')
     return jsonResponse({ error: 'Invalid payload' }, 400)
   }
 
@@ -117,8 +121,15 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
     return jsonResponse({ received: true, skipped: 'already processed' })
   }
 
-  const userId = resolveUserId(event)
+  const userId = await resolveUserId(event, db)
   if (!userId) {
+    console.warn('[RevenueCat webhook] Could not resolve Supabase user', {
+      eventId: event.id,
+      appUserId: event.app_user_id ?? null,
+      originalAppUserId: event.original_app_user_id ?? null,
+      aliases: event.aliases ?? [],
+      email: getSubscriberEmail(event),
+    })
     return jsonResponse({ received: true, skipped: 'no_supabase_user_id' })
   }
 
@@ -157,7 +168,7 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
   return jsonResponse({ received: true })
 }
 
-function resolveUserId(event: RevenueCatWebhookEvent): string | null {
+async function resolveUserId(event: RevenueCatWebhookEvent, db: ReturnType<typeof supabase>): Promise<string | null> {
   const candidates = [
     event.app_user_id,
     event.original_app_user_id,
@@ -172,7 +183,25 @@ function resolveUserId(event: RevenueCatWebhookEvent): string | null {
     }
   }
 
+  const email = getSubscriberEmail(event)
+  if (email) {
+    const profiles = await db.select(
+      'profiles',
+      `email=eq.${encodeURIComponent(email)}&select=id&limit=1`,
+    )
+    const profileId = profiles?.[0]?.id
+    if (typeof profileId === 'string' && UUID_RE.test(profileId)) {
+      console.warn('[RevenueCat webhook] Resolved user via email fallback', { email, profileId })
+      return profileId
+    }
+  }
+
   return null
+}
+
+function getSubscriberEmail(event: RevenueCatWebhookEvent): string | null {
+  const email = event.subscriber_attributes?.$email?.value?.trim().toLowerCase()
+  return email || null
 }
 
 function computeAccess(event: RevenueCatWebhookEvent) {
@@ -207,6 +236,30 @@ function jsonResponse(data: unknown, status = 200) {
       'Content-Type': 'application/json',
     },
   })
+}
+
+async function parseJsonResponse(res: Response, context: string) {
+  const text = await res.text()
+  const payload = text ? safeJsonParse(text) : null
+
+  if (!res.ok) {
+    console.error(`[RevenueCat webhook] Supabase ${context} failed`, {
+      status: res.status,
+      payload,
+      text,
+    })
+    throw new Error(`Supabase ${context} failed with status ${res.status}`)
+  }
+
+  return payload
+}
+
+function safeJsonParse(text: string) {
+  try {
+    return JSON.parse(text)
+  } catch {
+    return text
+  }
 }
 
 function corsHeaders() {

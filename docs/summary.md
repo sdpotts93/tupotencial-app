@@ -73,3 +73,4 @@ Append one line per completed task:
 2026-04-08 18:31 America/Mexico_City — Add mobile empty states for biblioteca, retos, comunidad, complementos, and hide empty recorded-events section
 2026-04-08 18:31 America/Mexico_City — Update mobile eventos empty states to use shared UiEmptyState styling
 2026-04-08 18:31 America/Mexico_City — Update mobile beneficios empty state to use shared UiEmptyState styling
+2026-04-08 18:31 America/Mexico_City — Fix RevenueCat web checkout identity handoff, sync profile emails, and add webhook email fallback/error logging

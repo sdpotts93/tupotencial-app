@@ -31,8 +31,9 @@ export function useAuth() {
     // instance, but useSupabaseClient() may still hold an expired JWT.
     await client.auth.getSession()
 
+    const normalizedEmail = supaUser.value?.email?.trim().toLowerCase() ?? null
     const [profileRes, subRes, entRes, adminRes] = await Promise.all([
-      client.from('profiles').select('display_name, avatar_url, community_segment').eq('id', uid).single(),
+      client.from('profiles').select('display_name, avatar_url, community_segment, email').eq('id', uid).single(),
       client.from('subscriptions').select('status').eq('user_id', uid).maybeSingle(),
       client.from('user_entitlements').select('entitlement_key').eq('user_id', uid),
       client.from('admin_users').select('role').eq('user_id', uid).maybeSingle(),
@@ -45,12 +46,16 @@ export function useAuth() {
     // access source of truth for the app.
     try {
       const { login: rcLogin } = useRevenueCat()
-      await rcLogin(uid, supaUser.value?.email ?? null)
+      await rcLogin(uid, normalizedEmail)
     } catch { /* RevenueCat not configured yet — non-critical */ }
+
+    if (normalizedEmail && profileRes.data?.email !== normalizedEmail) {
+      await client.from('profiles').update({ email: normalizedEmail }).eq('id', uid)
+    }
 
     user.value = {
       id: uid,
-      email: supaUser.value?.email ?? '',
+      email: normalizedEmail ?? '',
       display_name: profileRes.data?.display_name ?? '',
       avatar_url: profileRes.data?.avatar_url ?? null,
       community_segment: (profileRes.data?.community_segment as AuthUser['community_segment']) ?? null,
@@ -137,6 +142,7 @@ export function useAuth() {
       const { error: profileError } = await client.from('profiles').insert({
         id: data.user.id,
         display_name: '',
+        email: data.user.email?.trim().toLowerCase() ?? null,
       })
       if (profileError) console.error('Profile insert error:', profileError)
 

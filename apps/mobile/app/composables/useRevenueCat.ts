@@ -148,6 +148,20 @@ export function useRevenueCat() {
         return hasPro ? 'purchased' : 'cancelled'
       } else {
         if (!webInstance) return 'error'
+        const client = useSupabaseClient()
+        const { data: { session } } = await client.auth.getSession()
+        const sessionUserId = session?.user?.id
+        const sessionEmail = session?.user?.email?.trim().toLowerCase() ?? null
+
+        // Ensure web purchases are always made against the signed-in Supabase user,
+        // not an anonymous RevenueCat customer created earlier in the app lifecycle.
+        if (sessionUserId) {
+          await login(sessionUserId, sessionEmail)
+          if (sessionEmail) {
+            await client.from('profiles').update({ email: sessionEmail }).eq('id', sessionUserId)
+          }
+        }
+
         const offerings = await webInstance.getOfferings()
         const pkg = offerings.current?.availablePackages[0]
         if (!pkg) {
@@ -157,6 +171,7 @@ export function useRevenueCat() {
         const { customerInfo } = await webInstance.purchase({
           rcPackage: pkg,
           selectedLocale: 'es',
+          customerEmail: sessionEmail ?? undefined,
         })
         const hasPro = ENTITLEMENT_ID in customerInfo.entitlements.active
         return hasPro ? 'purchased' : 'cancelled'
