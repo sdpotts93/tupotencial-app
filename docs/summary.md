@@ -84,3 +84,4 @@ Append one line per completed task:
 2026-04-08 22:28 America/Mexico_City — Serialize RevenueCat identity and attribute sync to prevent duplicate onboarding requests
 2026-04-08 22:46 America/Mexico_City — Normalize spacing on /admin/usuarios/[id] subscription and entitlements cards and handle missing users without a false load error
 2026-04-09 00:18 America/Mexico_City — Migrate web add-ons to RevenueCat offerings, sync add-on entitlements in the webhook, and restore web add-on purchase flows
+2026-04-09 01:05 America/Mexico_City — Fix admin program cover uploads so create/edit persist portada images to Supabase Storage and save the public URL

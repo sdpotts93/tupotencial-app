@@ -357,6 +357,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+async function uploadCover(file: File, programId: string): Promise<string> {
+  const path = `${programId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
+
 async function handleSave() {
   formError.value = ''
   errors.title = ''
@@ -377,6 +385,12 @@ async function handleSave() {
   formError.value = ''
   saving.value = true
   try {
+    const targetId = crypto.randomUUID()
+    let coverUrl: string | null = null
+    if (uploadedFile.value) {
+      coverUrl = await uploadCover(uploadedFile.value, targetId)
+    }
+
     const programPayload = {
       title: form.title,
       description: form.description || null,
@@ -384,9 +398,10 @@ async function handleSave() {
       plan: form.plan,
       entitlement_key: form.entitlement_key || null,
       status: form.status,
+      cover_url: coverUrl,
     }
 
-    const { data: inserted } = await client.from('programs').insert(programPayload).select('id').single()
+    const { data: inserted } = await client.from('programs').insert({ ...programPayload, id: targetId }).select('id').single()
     if (!inserted) { saving.value = false; return }
 
     // Insert days + items

@@ -419,6 +419,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+async function uploadCover(file: File, programId: string): Promise<string> {
+  const path = `${programId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
+
 async function handleSave() {
   formError.value = ''
   errors.title = ''
@@ -439,57 +447,63 @@ async function handleSave() {
   formError.value = ''
   saving.value = true
   try {
+    const targetId = isNew ? crypto.randomUUID() : id
+    let coverUrl = form.existing_media || null
+    if (uploadedFile.value) {
+      coverUrl = await uploadCover(uploadedFile.value, targetId)
+    }
+
     const programPayload = {
-    title: form.title,
-    description: form.description || null,
-    type: form.program_type,
-    plan: form.plan,
-    entitlement_key: form.entitlement_key || null,
-    status: form.status,
-    cover_url: form.existing_media || null,
-  }
-
-  let programId = id
-
-  if (isNew) {
-    const { data: inserted } = await client.from('programs').insert(programPayload).select('id').single()
-    if (!inserted) return
-    programId = inserted.id
-  } else {
-    await client.from('programs').update(programPayload).eq('id', id)
-    // Delete existing days and items to replace them
-    const existingDayIds = (dbDays.value ?? []).map((d: any) => d.id)
-    if (existingDayIds.length) {
-      await client.from('program_day_items').delete().in('program_day_id', existingDayIds)
-      await client.from('program_days').delete().eq('program_id', id)
+      title: form.title,
+      description: form.description || null,
+      type: form.program_type,
+      plan: form.plan,
+      entitlement_key: form.entitlement_key || null,
+      status: form.status,
+      cover_url: coverUrl,
     }
-  }
 
-  // Insert days + items
-  for (let i = 0; i < programDays.value.length; i++) {
-    const day = programDays.value[i]!
-    const { data: insertedDay } = await client
-      .from('program_days')
-      .insert({
-        program_id: programId,
-        day_index: i + 1,
-        title: day.title || null,
-        description: day.description || null,
-      })
-      .select('id')
-      .single()
+    let programId = id
 
-    if (insertedDay && day.activities.length) {
-      const items = day.activities.map((a, pos) => ({
-        program_day_id: insertedDay.id,
-        type: uiTypeToDb[a.type] ?? a.type,
-        content_item_id: a.type === 'contenido' && a.content_id ? a.content_id : null,
-        form_id: a.type === 'formulario' && a.form_id ? a.form_id : null,
-        position: pos,
-      }))
-      await client.from('program_day_items').insert(items)
+    if (isNew) {
+      const { data: inserted } = await client.from('programs').insert({ ...programPayload, id: targetId }).select('id').single()
+      if (!inserted) return
+      programId = inserted.id
+    } else {
+      await client.from('programs').update(programPayload).eq('id', id)
+      // Delete existing days and items to replace them
+      const existingDayIds = (dbDays.value ?? []).map((d: any) => d.id)
+      if (existingDayIds.length) {
+        await client.from('program_day_items').delete().in('program_day_id', existingDayIds)
+        await client.from('program_days').delete().eq('program_id', id)
+      }
     }
-  }
+
+    // Insert days + items
+    for (let i = 0; i < programDays.value.length; i++) {
+      const day = programDays.value[i]!
+      const { data: insertedDay } = await client
+        .from('program_days')
+        .insert({
+          program_id: programId,
+          day_index: i + 1,
+          title: day.title || null,
+          description: day.description || null,
+        })
+        .select('id')
+        .single()
+
+      if (insertedDay && day.activities.length) {
+        const items = day.activities.map((a, pos) => ({
+          program_day_id: insertedDay.id,
+          type: uiTypeToDb[a.type] ?? a.type,
+          content_item_id: a.type === 'contenido' && a.content_id ? a.content_id : null,
+          form_id: a.type === 'formulario' && a.form_id ? a.form_id : null,
+          position: pos,
+        }))
+        await client.from('program_day_items').insert(items)
+      }
+    }
 
     navigateTo('/admin/programas')
   } catch {
