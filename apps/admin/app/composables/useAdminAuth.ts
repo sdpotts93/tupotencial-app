@@ -124,7 +124,11 @@ export function useAdminAuth() {
   // admin: full access
   // editor: CRUD content, programs, events, etc. — but NOT roles/admin management
   // read_only: view only, no create/edit/delete
-  const canEdit = computed(() => {
+  const canReadAdmin = computed(() => {
+    return Boolean(adminUser.value)
+  })
+
+  const canWriteAdmin = computed(() => {
     const role = adminUser.value?.role
     return role === 'admin' || role === 'editor'
   })
@@ -137,7 +141,9 @@ export function useAdminAuth() {
     adminUser: readonly(adminUser),
     isAuthenticated: readonly(isAuthenticated),
     isLoading: readonly(isLoading),
-    canEdit,
+    canReadAdmin,
+    canWriteAdmin,
+    canEdit: canWriteAdmin,
     canManageRoles,
     login,
     logout,

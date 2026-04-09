@@ -26,7 +26,7 @@
       <UiErrorState title="No pudimos cargar los usuarios" @retry="refresh()" />
     </template>
 
-    <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToUser" @load-more="loadMore">
+    <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToUser" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput
           v-model="searchInput"
@@ -129,8 +129,19 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
   async ({ from, to }) => {
     // profiles, subscriptions, and user_entitlements all FK to auth.users (not to each other),
     // so we query them separately and join in JS.
+    const { data: adminRows } = await client
+      .from('admin_users')
+      .select('user_id')
+
+    const adminIds = (adminRows ?? []).map(row => row.user_id)
+
     let profilesQuery = client.from('profiles').select('*')
-    if (search.value) profilesQuery = profilesQuery.ilike('display_name', `%${search.value}%`)
+    if (adminIds.length) {
+      profilesQuery = profilesQuery.not('id', 'in', `(${adminIds.join(',')})`)
+    }
+    if (search.value) {
+      profilesQuery = profilesQuery.or(`display_name.ilike.%${search.value}%,email.ilike.%${search.value}%`)
+    }
     if (filterSegment.value) profilesQuery = profilesQuery.eq('community_segment', filterSegment.value)
 
     // For plan/status filter, pre-filter by subscription status
@@ -165,7 +176,7 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
       return {
         ...p,
         full_name: p.display_name ?? 'Sin nombre',
-        email: '\u2014',
+        email: p.email ?? '\u2014',
         segment: p.community_segment ?? '',
         plan: subStatus === 'active' ? 'core' : 'free',
         subscription_status: subStatus,

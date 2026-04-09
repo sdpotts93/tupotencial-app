@@ -23,7 +23,7 @@
       <UiErrorState title="No pudimos cargar los formularios" @retry="refresh()" />
     </template>
 
-    <UiDataTable v-else :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @row-click="goToEdit" @load-more="loadMore">
+    <UiDataTable v-else :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput
           v-model="searchInput"
@@ -52,11 +52,11 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" :to="`/admin/formularios/${row.id}`">
+        <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/formularios/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
-        <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
+        <UiButton v-if="canEdit" variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
           <template #icon><Icon name="lucide:trash-2" size="16" /></template>
           Eliminar
         </UiButton>
@@ -122,6 +122,7 @@ function formatDate(iso: string) {
 const confirm = useConfirm()
 
 async function handleDelete(row: Record<string, any>) {
+  if (!canEdit.value) return
   if (await confirm({ message: `¿Seguro que deseas eliminar "${row.title}"?` })) {
     await client.from('forms').delete().eq('id', row.id)
     await refresh()
@@ -129,6 +130,7 @@ async function handleDelete(row: Record<string, any>) {
 }
 
 function goToEdit(row: Record<string, any>) {
+  if (!canEdit.value) return
   router.push(`/admin/formularios/${row.id}`)
 }
 </script>

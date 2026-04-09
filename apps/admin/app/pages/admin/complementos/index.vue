@@ -24,7 +24,7 @@
       <UiErrorState title="No pudimos cargar los add-ons" @retry="refresh()" />
     </template>
 
-    <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
+    <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput
           v-model="searchInput"
@@ -56,7 +56,7 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" :to="`/admin/complementos/${row.id}`">
+        <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/complementos/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
@@ -98,6 +98,7 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
 )
 
 function goToEdit(row: Record<string, any>) {
+  if (!canEdit.value) return
   router.push(`/admin/complementos/${row.id}`)
 }
 </script>

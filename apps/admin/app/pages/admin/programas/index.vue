@@ -25,7 +25,7 @@
       <UiErrorState title="No pudimos cargar los programas" @retry="refresh()" />
     </template>
 
-    <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
+    <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput
           v-model="searchInput"
@@ -73,15 +73,15 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" :to="`/admin/programas/${row.id}`">
+        <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/programas/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
-        <UiButton variant="soft" size="sm" @click.stop="handleDuplicate(row)">
+        <UiButton v-if="canEdit" variant="soft" size="sm" @click.stop="handleDuplicate(row)">
           <template #icon><Icon name="lucide:copy" size="16" /></template>
           Duplicar
         </UiButton>
-        <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
+        <UiButton v-if="canEdit" variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
           <template #icon><Icon name="lucide:trash-2" size="16" /></template>
           Eliminar
         </UiButton>
@@ -181,6 +181,7 @@ function statusLabel(status: string) {
 }
 
 async function handleDuplicate(row: Record<string, any>) {
+  if (!canEdit.value) return
   await client.from('programs').insert({
     title: `${row.title} (copia)`,
     type: row.type,
@@ -196,6 +197,7 @@ async function handleDuplicate(row: Record<string, any>) {
 const confirm = useConfirm()
 
 async function handleDelete(row: Record<string, any>) {
+  if (!canEdit.value) return
   if (await confirm({ message: `¿Seguro que deseas eliminar "${row.title}"?` })) {
     await client.from('programs').delete().eq('id', row.id)
     refresh()
@@ -203,6 +205,7 @@ async function handleDelete(row: Record<string, any>) {
 }
 
 function goToEdit(row: Record<string, any>) {
+  if (!canEdit.value) return
   router.push(`/admin/programas/${row.id}`)
 }
 </script>

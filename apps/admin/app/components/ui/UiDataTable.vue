@@ -26,9 +26,14 @@
         <tbody>
           <tr v-if="!rows.length && !loading">
             <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__empty">
-              <UiEmptyState :title="emptyTitle" :description="emptyDescription">
-                <template v-if="$slots.empty" #action>
-                  <slot name="empty" />
+              <UiEmptyState :title="emptyText" :description="emptyDescription">
+                <template #icon>
+                  <Icon name="lucide:search-x" size="32" />
+                </template>
+                <template #action>
+                  <slot name="empty">
+                    <UiButton variant="primary-outline" size="sm" @click="$emit('retry')">Reintentar</UiButton>
+                  </slot>
                 </template>
               </UiEmptyState>
             </td>
@@ -77,7 +82,7 @@ interface Props {
   loading?: boolean
   loadingMore?: boolean
   hasMore?: boolean
-  emptyTitle?: string
+  emptyText?: string
   emptyDescription?: string
   scrollable?: boolean
   fill?: boolean
@@ -87,8 +92,8 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   loadingMore: false,
   hasMore: false,
-  emptyTitle: 'Sin resultados',
-  emptyDescription: undefined,
+  emptyText: 'Sin resultados',
+  emptyDescription: 'Intenta ajustar los filtros o buscar con otros términos.',
   scrollable: false,
   fill: false,
 })
@@ -96,6 +101,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   'row-click': [row: Record<string, any>]
   'load-more': []
+  'retry': []
 }>()
 
 const sentinelRef = ref<HTMLElement | null>(null)
@@ -240,9 +246,7 @@ th.data-table__sticky-col {
 
 .data-table__empty {
   text-align: center;
-  padding: var(--space-10) var(--space-4);
-  color: var(--color-muted);
-  font-size: var(--text-sm);
+  padding: 0;
 }
 
 .data-table__empty--loading {

@@ -7,7 +7,7 @@
 
       <div class="sidebar-nav__scroll">
         <NuxtLink
-          v-for="item in navItems"
+          v-for="item in visibleNavItems"
           :key="item.to"
           :to="item.to"
           :class="['sidebar-nav__item', { 'sidebar-nav__item--active': isActive(item.to) }]"
@@ -17,7 +17,7 @@
           <span class="sidebar-nav__label">{{ item.label }}</span>
         </NuxtLink>
 
-        <template v-for="section in sections" :key="section.title">
+        <template v-for="section in visibleSections" :key="section.title">
           <div class="sidebar-nav__section">
             <span class="sidebar-nav__section-title">{{ section.title }}</span>
             <NuxtLink
@@ -82,7 +82,7 @@
 
 <script setup lang="ts">
 const route = useRoute()
-const { adminUser, logout } = useAdminAuth()
+const { adminUser, logout, canEdit, canManageRoles } = useAdminAuth()
 const sidebarOpen = ref(false)
 
 const initials = computed(() => {
@@ -232,6 +232,30 @@ const sections: NavSection[] = [
     ],
   },
 ]
+
+const visibleNavItems = computed(() => {
+  return navItems.filter((item) => {
+    if (item.to === '/admin/hoy') return canEdit.value
+    return true
+  })
+})
+
+const visibleSections = computed(() => {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => {
+        if (['/admin/categorias', '/admin/objetivos', '/admin/imagenes'].includes(item.to)) {
+          return canEdit.value
+        }
+        if (item.to === '/admin/roles') {
+          return canManageRoles.value
+        }
+        return true
+      }),
+    }))
+    .filter(section => section.items.length > 0)
+})
 
 function isActive(to: string): boolean {
   if (to === '/admin') {

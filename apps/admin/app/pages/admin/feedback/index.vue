@@ -19,7 +19,7 @@
       <UiErrorState title="No pudimos cargar las respuestas" @retry="refresh()" />
     </template>
 
-    <UiDataTable v-else :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @load-more="loadMore">
+    <UiDataTable v-else :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput v-model="searchInput" placeholder="Buscar por formulario..." style="min-width: 200px;">
           <template #suffix><Icon name="lucide:search" size="18" /></template>

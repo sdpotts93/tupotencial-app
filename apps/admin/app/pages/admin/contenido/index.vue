@@ -30,7 +30,7 @@
       <UiErrorState title="No pudimos cargar el contenido" @retry="refresh()" />
     </template>
 
-    <UiDataTable v-else :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @row-click="goToEdit" @load-more="loadMore">
+    <UiDataTable v-else :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput
           v-model="searchInput"
@@ -105,7 +105,7 @@
 
       <template #cell-title="{ row, value }">
         <div class="title-cell">
-          <button class="featured-star" :class="{ 'featured-star--active': row.id === featuredId, 'featured-star--disabled': row.status !== 'published' }" :disabled="row.status !== 'published'" @click.stop="toggleFeatured(row.id)">
+          <button class="featured-star" :class="{ 'featured-star--active': row.id === featuredId, 'featured-star--disabled': row.status !== 'published' || !canEdit }" :disabled="row.status !== 'published' || !canEdit" @click.stop="toggleFeatured(row.id)">
             <svg v-if="row.id === featuredId" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             <Icon v-else name="lucide:star" size="16" />
           </button>
@@ -114,11 +114,11 @@
       </template>
 
       <template #actions="{ row }">
-        <UiButton variant="soft" size="sm" :to="`/admin/contenido/${row.id}`">
+        <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/contenido/${row.id}`">
           <template #icon><Icon name="lucide:pencil" size="16" /></template>
           Editar
         </UiButton>
-        <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
+        <UiButton v-if="canEdit" variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
           <template #icon><Icon name="lucide:trash-2" size="16" /></template>
           Eliminar
         </UiButton>
@@ -321,6 +321,7 @@ function formatDate(iso: string) {
 const confirm = useConfirm()
 
 async function handleDelete(row: Record<string, any>) {
+  if (!canEdit.value) return
   if (await confirm({ message: `¿Seguro que deseas eliminar "${row.title}"?` })) {
     await client.from('content_items').delete().eq('id', row.id)
     refresh()
@@ -337,6 +338,7 @@ const { data: featuredSetting } = useAsyncData('admin-featured-content', async (
 watchEffect(() => { featuredId.value = featuredSetting.value })
 
 async function toggleFeatured(id: string) {
+  if (!canEdit.value) return
   const newId = featuredId.value === id ? null : id
   featuredId.value = newId
   await client.from('app_settings').upsert({
@@ -347,6 +349,7 @@ async function toggleFeatured(id: string) {
 }
 
 function goToEdit(row: Record<string, any>) {
+  if (!canEdit.value) return
   router.push(`/admin/contenido/${row.id}`)
 }
 

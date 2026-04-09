@@ -52,7 +52,7 @@
               'ben-row--dragging': dragIndex === index,
               'ben-row--over': dragOverIndex === index && dragIndex !== index,
             }"
-            :draggable="!searchInput"
+            :draggable="!searchInput && canEdit"
             @dragstart="onDragStart(index, $event)"
             @dragover.prevent="onDragOver(index)"
             @dragend="onDragEnd"
@@ -75,18 +75,23 @@
               </UiTag>
             </span>
             <span class="ben-row__actions" @click.stop>
-              <UiButton variant="soft" size="sm" :to="`/admin/beneficios/${row.id}`">
+              <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/beneficios/${row.id}`">
                 <template #icon><Icon name="lucide:pencil" size="16" /></template>
                 Editar
               </UiButton>
-              <UiButton variant="danger-ghost" size="sm" @click="handleDelete(row)">
+              <UiButton v-if="canEdit" variant="danger-ghost" size="sm" @click="handleDelete(row)">
                 <template #icon><Icon name="lucide:trash-2" size="16" /></template>
                 Eliminar
               </UiButton>
             </span>
           </div>
 
-          <div v-if="!filteredRows.length" class="ben-empty">Sin resultados</div>
+          <div v-if="!filteredRows.length" class="ben-empty">
+            <UiEmptyState title="Sin resultados" description="No se encontraron beneficios. Intenta con otra búsqueda.">
+              <template #icon><Icon name="lucide:search-x" size="32" /></template>
+              <template #action><UiButton variant="primary-outline" size="sm" @click="refresh()">Reintentar</UiButton></template>
+            </UiEmptyState>
+          </div>
         </div>
       </div>
     </template>
@@ -122,6 +127,7 @@ const dragIndex = ref<number | null>(null)
 const dragOverIndex = ref<number | null>(null)
 
 function onDragStart(index: number, e: DragEvent) {
+  if (!canEdit.value) return
   dragIndex.value = index
   if (e.dataTransfer) {
     e.dataTransfer.effectAllowed = 'move'
@@ -133,6 +139,11 @@ function onDragOver(index: number) {
 }
 
 async function onDragEnd() {
+  if (!canEdit.value) {
+    dragIndex.value = null
+    dragOverIndex.value = null
+    return
+  }
   if (dragIndex.value !== null && dragOverIndex.value !== null && dragIndex.value !== dragOverIndex.value) {
     const items = [...(benefits.value ?? [])]
     const sorted = items.sort((a, b) => a.sort_order - b.sort_order)
@@ -178,6 +189,7 @@ function statusLabel(status: string) {
 const confirm = useConfirm()
 
 async function handleDelete(row: Record<string, any>) {
+  if (!canEdit.value) return
   if (await confirm({ message: `¿Seguro que deseas eliminar "${row.title}"?` })) {
     await client.from('benefits').delete().eq('id', row.id)
     refresh()
@@ -185,6 +197,7 @@ async function handleDelete(row: Record<string, any>) {
 }
 
 function goToEdit(row: Record<string, any>) {
+  if (!canEdit.value) return
   router.push(`/admin/beneficios/${row.id}`)
 }
 </script>
@@ -304,10 +317,6 @@ function goToEdit(row: Record<string, any>) {
 /* ─── Empty ─── */
 .ben-empty {
   grid-column: 1 / -1;
-  text-align: center;
-  padding: var(--space-10) var(--space-4);
-  color: var(--color-muted);
-  font-size: var(--text-sm);
 }
 
 </style>

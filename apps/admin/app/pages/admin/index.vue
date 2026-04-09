@@ -69,7 +69,7 @@
 
       <!-- Recent Activity -->
       <h2 class="dashboard__section-title">Actividad reciente</h2>
-      <UiDataTable :columns="activityColumns" :rows="activityRows">
+      <UiDataTable :columns="activityColumns" :rows="activityRows" @retry="refreshDash()">
         <template #cell-type="{ value }">
           <UiTag :variant="typeVariant(value)">{{ value }}</UiTag>
         </template>

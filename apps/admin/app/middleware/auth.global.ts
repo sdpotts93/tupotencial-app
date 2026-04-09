@@ -29,16 +29,24 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // ── Role-based route guards ──
-  const { canEdit, canManageRoles } = useAdminAuth()
+  const { canWriteAdmin, canManageRoles } = useAdminAuth()
 
   // /admin/roles — admin only
   if (to.path.startsWith('/admin/roles') && !canManageRoles.value) {
     return navigateTo('/admin')
   }
 
-  // /new and /[id] edit routes — editor or admin only
-  const isWriteRoute = to.path.match(/\/admin\/[^/]+\/(new|[0-9a-f-]{36})/)
-  if (isWriteRoute && !canEdit.value) {
-    return navigateTo(to.path.replace(/\/(new|[0-9a-f-]{36})$/, ''))
+  // These sections are operational editors/configuration screens, not read-only views.
+  const writeOnlyPrefixes = ['/admin/hoy', '/admin/categorias', '/admin/objetivos', '/admin/imagenes']
+  if (writeOnlyPrefixes.some(prefix => to.path === prefix || to.path.startsWith(prefix + '/')) && !canWriteAdmin.value) {
+    return navigateTo('/admin')
+  }
+
+  // Deep admin routes are edit/detail screens by default. Keep only customer detail readable for read_only.
+  const isDeepAdminRoute = /^\/admin\/[^/]+\/[^/]+$/.test(to.path)
+  const isReadonlyAllowedDetail = /^\/admin\/usuarios\/[0-9a-f-]{36}$/.test(to.path)
+  if (isDeepAdminRoute && !isReadonlyAllowedDetail && !canWriteAdmin.value) {
+    const parentPath = to.path.split('/').slice(0, -1).join('/') || '/admin'
+    return navigateTo(parentPath)
   }
 })

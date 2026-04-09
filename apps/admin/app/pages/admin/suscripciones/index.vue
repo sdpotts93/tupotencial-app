@@ -20,7 +20,7 @@
     </template>
 
     <template v-else>
-      <UiDataTable fill :columns="columns" :rows="rows ?? []" @row-click="goToEdit">
+      <UiDataTable fill :columns="columns" :rows="rows ?? []" @row-click="goToEdit" @retry="refreshPlans()">
         <template #cell-price="{ row }">
           {{ row.price > 0 ? `$${(row.price / 100).toLocaleString('es-MX')} MXN/${row.interval === 'year' ? 'año' : 'mes'}` : 'Gratis' }}
         </template>
@@ -30,7 +30,7 @@
         </template>
 
         <template #actions="{ row }">
-          <UiButton variant="soft" size="sm" :to="`/admin/suscripciones/${row.id}`">
+          <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/suscripciones/${row.id}`">
             <template #icon><Icon name="lucide:pencil" size="16" /></template>
             Editar
           </UiButton>
@@ -45,6 +45,7 @@ definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
 const router = useRouter()
+const { canEdit } = useAdminAuth()
 
 const columns = [
   { key: 'title', label: 'Plan', width: '25%' },
@@ -70,6 +71,7 @@ const { data: rows, status: plansStatus, refresh: refreshPlans } = useAsyncData(
 }, { lazy: true })
 
 function goToEdit(row: Record<string, any>) {
+  if (!canEdit.value) return
   router.push(`/admin/suscripciones/${row.id}`)
 }
 </script>

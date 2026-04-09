@@ -52,6 +52,7 @@ export default defineEventHandler(async (event) => {
   await serviceClient.from('profiles').upsert({
     id: newUserId,
     display_name: body.full_name.trim(),
+    email: body.email.trim().toLowerCase(),
     community_segment: 'conjunta',
   })
 

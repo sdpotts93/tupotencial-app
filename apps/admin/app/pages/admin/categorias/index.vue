@@ -85,7 +85,12 @@
             </span>
           </div>
 
-          <div v-if="!filteredRows.length" class="cat-empty">Sin resultados</div>
+          <div v-if="!filteredRows.length" class="cat-empty">
+            <UiEmptyState title="Sin resultados" description="No se encontraron categorías. Intenta con otra búsqueda.">
+              <template #icon><Icon name="lucide:search-x" size="32" /></template>
+              <template #action><UiButton variant="primary-outline" size="sm" @click="refresh()">Reintentar</UiButton></template>
+            </UiEmptyState>
+          </div>
         </div>
       </div>
     </template>
@@ -386,10 +391,6 @@ async function handleDelete(row: Record<string, any>) {
 /* ─── Empty ─── */
 .cat-empty {
   grid-column: 1 / -1;
-  text-align: center;
-  padding: var(--space-10) var(--space-4);
-  color: var(--color-muted);
-  font-size: var(--text-sm);
 }
 
 

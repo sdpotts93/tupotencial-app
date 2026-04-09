@@ -100,23 +100,33 @@ const formError = ref('')
 const errors = reactive({ content_id: '', form_id: '' })
 
 // ── Fetch existing daily plan for this date ──
-const { data: existingPlan } = await useAsyncData(`daily-plan-${dateParam.value}`, async () => {
+const { data: existingPlan } = useAsyncData(`daily-plan-${dateParam.value}`, async () => {
   const { data } = await client.from('daily_plans').select('*').eq('date', dateParam.value).maybeSingle()
   return data
-})
-
-const existingPayload = existingPlan.value?.primary_action_payload as Record<string, any> | null
+}, { lazy: true })
 
 const form = reactive({
-  phrase_text: existingPayload?.quote_text ?? '',
-  phrase_author: (existingPayload?.quote_author ?? '') as string,
-  action_type: existingPlan.value?.primary_action_type ?? 'ai_prompt' as string,
-  content_id: existingPayload?.content_id ?? '',
-  form_id: existingPayload?.form_id ?? '',
-  badge_title: existingPlan.value?.badge_title ?? '',
-  badge_subtitle: existingPlan.value?.badge_subtitle ?? '',
-
+  phrase_text: '',
+  phrase_author: '' as string,
+  action_type: 'ai_prompt' as string,
+  content_id: '',
+  form_id: '',
+  badge_title: '',
+  badge_subtitle: '',
 })
+
+// Seed form once data arrives
+watch(existingPlan, (plan) => {
+  if (!plan) return
+  const payload = plan.primary_action_payload as Record<string, any> | null
+  form.phrase_text = payload?.quote_text ?? ''
+  form.phrase_author = payload?.quote_author ?? ''
+  form.action_type = plan.primary_action_type ?? 'ai_prompt'
+  form.content_id = payload?.content_id ?? ''
+  form.form_id = payload?.form_id ?? ''
+  form.badge_title = plan.badge_title ?? ''
+  form.badge_subtitle = plan.badge_subtitle ?? ''
+}, { immediate: true })
 
 const authorOptions = [
   { value: 'gabriel', label: 'Gabriel' },
@@ -130,15 +140,15 @@ const actionTypeOptions = [
 ]
 
 // ── Fetch content items and forms for dropdowns ──
-const { data: contentItemsList } = await useAsyncData('daily-plan-content-items', async () => {
+const { data: contentItemsList } = useAsyncData('daily-plan-content-items', async () => {
   const { data } = await client.from('content_items').select('id, title').eq('status', 'published').order('title')
   return data ?? []
-})
+}, { lazy: true })
 
-const { data: formsList } = await useAsyncData('daily-plan-forms', async () => {
+const { data: formsList } = useAsyncData('daily-plan-forms', async () => {
   const { data } = await client.from('forms').select('id, title').eq('status', 'active').order('title')
   return data ?? []
-})
+}, { lazy: true })
 
 const contentOptions = computed(() =>
   (contentItemsList.value ?? []).map(c => ({ value: c.id, label: c.title })),

@@ -32,7 +32,7 @@
         <UiErrorState title="No pudimos cargar los eventos" @retry="refresh()" />
       </template>
 
-      <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="handleRowClick" @load-more="loadMore">
+      <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="handleRowClick" @load-more="loadMore" @retry="refresh()">
         <template #toolbar>
           <UiInput
             v-model="searchInput"
@@ -199,6 +199,7 @@ function formatDateTime(iso: string) {
 }
 
 function handleRowClick(row: Record<string, any>) {
+  if (!canEdit.value) return
   if (activeTab.value === 'past') return
   router.push(`/admin/eventos/${row.id}`)
 }

@@ -32,7 +32,7 @@
         <UiErrorState title="No pudimos cargar las publicaciones" @retry="refresh()" />
       </template>
 
-      <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore">
+      <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
         <template #toolbar>
           <UiInput
             v-model="searchInput"
@@ -72,11 +72,11 @@
 
         <template #actions="{ row }">
           <div class="row-actions">
-            <UiButton variant="soft" size="sm" :to="`/admin/comunidad/${row.id}`">
+            <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/comunidad/${row.id}`">
               <template #icon><Icon name="lucide:pencil" size="16" /></template>
               Editar
             </UiButton>
-            <UiButton variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
+            <UiButton v-if="canEdit" variant="danger-ghost" size="sm" @click.stop="handleDelete(row)">
               <template #icon><Icon name="lucide:trash-2" size="16" /></template>
               Eliminar
             </UiButton>
@@ -153,6 +153,7 @@ function formatDate(iso: string) {
 }
 
 function goToEdit(row: Record<string, any>) {
+  if (!canEdit.value) return
   router.push(`/admin/comunidad/${row.id}`)
 }
 
@@ -163,6 +164,7 @@ function authorAvatar(name: string) {
 const confirm = useConfirm()
 
 async function handleDelete(row: Record<string, any>) {
+  if (!canEdit.value) return
   if (await confirm({ message: `¿Seguro que deseas eliminar esta publicación de ${row.author}?` })) {
     await client.from('posts').delete().eq('id', row.id)
     await refresh()
