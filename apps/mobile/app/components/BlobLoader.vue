@@ -68,7 +68,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => cancelAnimationFrame(raf))
 </script>
-
 <style scoped>
 .blob-loader {
   position: relative;
