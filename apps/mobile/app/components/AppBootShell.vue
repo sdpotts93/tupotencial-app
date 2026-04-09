@@ -29,6 +29,7 @@
           width="2040"
           height="3357"
           preserveAspectRatio="xMidYMid slice"
+          :opacity="viewportMeasured ? 1 : 0"
           :clip-path="`url(#${clipId})`"
         />
       </svg>
@@ -44,8 +45,8 @@ const MASK_SOURCE_HEIGHT = 921
 const STAGE_ASPECT = STAGE_WIDTH / STAGE_HEIGHT
 
 const MASK_CENTER_X_RATIO = 0.5
-const MASK_CENTER_Y_RATIO = 0.36
-const MASK_VIEWPORT_MAX_RATIO = 0.7
+const MASK_CENTER_Y_OFFSET_RATIO = -0.2
+const MASK_VIEWPORT_MAX_RATIO = 0.54
 
 const SX = 1 / MASK_SOURCE_WIDTH
 const SY = 1 / MASK_SOURCE_HEIGHT
@@ -94,8 +95,9 @@ const initialD = scalePathD(RAW_D, SX, SY)
 const clipId = `boot-blob-clip-${useId()}`
 const pathRef = ref<SVGPathElement | null>(null)
 
-const viewportWidth = ref(STAGE_WIDTH * 0.4)
-const viewportHeight = ref(STAGE_HEIGHT * 0.4)
+const viewportMeasured = ref(false)
+const viewportWidth = ref(import.meta.client ? window.innerWidth : 390)
+const viewportHeight = ref(import.meta.client ? window.innerHeight : 844)
 
 function updateViewportSize() {
   viewportWidth.value = window.innerWidth
@@ -104,6 +106,9 @@ function updateViewportSize() {
 
 onMounted(() => {
   updateViewportSize()
+  requestAnimationFrame(() => {
+    viewportMeasured.value = true
+  })
   window.addEventListener('resize', updateViewportSize, { passive: true })
   onBeforeUnmount(() => {
     window.removeEventListener('resize', updateViewportSize)
@@ -117,7 +122,8 @@ const blobTransform = computed(() => {
   const maskWidth = desiredMaskViewportSize / stageScale
   const maskHeight = maskWidth * (MASK_SOURCE_HEIGHT / MASK_SOURCE_WIDTH)
   const maskLeft = STAGE_WIDTH * MASK_CENTER_X_RATIO - (maskWidth / 2)
-  const maskTop = STAGE_HEIGHT * MASK_CENTER_Y_RATIO - (maskHeight / 2)
+  const maskCenterY = (STAGE_HEIGHT / 2) + (STAGE_HEIGHT * MASK_CENTER_Y_OFFSET_RATIO)
+  const maskTop = maskCenterY - (maskHeight / 2)
 
   return `translate(${maskLeft} ${maskTop}) scale(${maskWidth} ${maskHeight})`
 })
