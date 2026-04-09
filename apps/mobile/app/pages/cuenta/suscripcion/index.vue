@@ -10,7 +10,7 @@
         <h1 class="pricing__header-title">Suscripción</h1>
       </header>
 
-      <template v-if="subStatus === 'pending'">
+      <template v-if="subStatus === 'pending' || !subscriptionReady">
         <div class="pricing__plans">
           <div v-for="i in 2" :key="i" style="flex: 1; padding: var(--space-6); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
             <UiSkeleton variant="text" width="40%" height="20px" style="margin-bottom: var(--space-3);" />
@@ -103,6 +103,7 @@ const { isNative } = useNativePlatform()
 const { purchaseCurrentOffering, restorePurchases, presentCustomerCenter, getCustomerInfo, configured } = useRevenueCat()
 
 const rcSubscriber = ref(false)
+const subscriptionReady = ref(false)
 const effectiveIsSubscriber = computed(() => isSubscriber.value || rcSubscriber.value)
 
 // Fetch both plans + benefits for each
@@ -141,8 +142,11 @@ async function refreshSubscriptionState() {
   const profileOk = await profilePromise
   await plansPromise
 
-  rcSubscriber.value = rcActive
-  return profileOk || rcActive
+  if (rcActive !== null) {
+    rcSubscriber.value = rcActive
+  }
+
+  return profileOk || rcActive === true
 }
 
 async function readRevenueCatSubscriptionState() {
@@ -165,7 +169,7 @@ async function readRevenueCatSubscriptionState() {
     return typeof customerInfo.entitlements.active.core !== 'undefined'
   }
 
-  return false
+  return null
 }
 
 async function waitForSubscriptionSync() {
@@ -207,7 +211,10 @@ async function handleRestore() {
 }
 
 onMounted(() => {
-  void refreshSubscriptionState()
+  void (async () => {
+    await refreshSubscriptionState()
+    subscriptionReady.value = true
+  })()
 })
 
 onActivated(() => {
