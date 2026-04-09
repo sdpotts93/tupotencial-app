@@ -25,8 +25,11 @@ export function useCharacterAvatars() {
     }
   }, { default: () => defaults })
 
-  const avatarUrl = (character: string) => {
-    const key = character.toLowerCase() as keyof CharacterAvatars
+  const avatarUrl = (character?: string | null) => {
+    const normalized = character?.trim().toLowerCase()
+    if (!normalized) return defaults.gabriel
+
+    const key = normalized as keyof CharacterAvatars
     return data.value[key] ?? defaults.gabriel
   }
 

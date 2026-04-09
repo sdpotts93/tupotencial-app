@@ -3,19 +3,25 @@
 // Per AGENTS.md section 9.6
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const { isLoggedIn, isOnboarded, isSubscriber, hasEntitlement } = useAuth()
+  const { isLoggedIn, isOnboarded, isSubscriber, hasEntitlement, refreshProfile } = useAuth()
   const supaUser = useSupabaseUser()
   const client = useSupabaseClient()
 
   const path = to.path
 
-  // Use both app state and verified supabase session to determine auth.
-  const hasSession = !!supaUser.value
-  const isAuthed = isLoggedIn.value || hasSession
-
   // ---- Public routes (no auth required) ----
   const publicRoutes = ['/iniciar-sesion', '/registro', '/precios', '/restablecer-contrasena', '/nueva-contrasena', '/terminos', '/privacidad']
   if (publicRoutes.some(r => path === r || path.startsWith(r + '/'))) return
+
+  // If Supabase already has a session but app state hasn't hydrated yet,
+  // load the profile before deciding whether onboarding is required.
+  if (supaUser.value && !isLoggedIn.value) {
+    await refreshProfile()
+  }
+
+  // Use both app state and verified supabase session to determine auth.
+  const hasSession = !!supaUser.value
+  const isAuthed = isLoggedIn.value || hasSession
 
   // ---- Root redirect ----
   if (path === '/') {

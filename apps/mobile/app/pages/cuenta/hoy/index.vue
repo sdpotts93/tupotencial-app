@@ -95,6 +95,20 @@
     </div>
 
     <div class="screen__content">
+      <UiEmptyState
+        v-if="isHoyEmpty"
+        title="Tu día estará aquí pronto"
+        description="Todavía no hay una acción ni contenido programado para hoy. Revisa más tarde o vuelve a intentarlo."
+      >
+        <template #icon>
+          <Icon name="lucide:sun-medium" size="32" />
+        </template>
+        <template #action>
+          <UiButton variant="primary-outline" size="sm" @click="refreshHoyPage()">Reintentar</UiButton>
+        </template>
+      </UiEmptyState>
+
+      <template v-else>
 
       <!-- Daily retos task list / Celebration state -->
       <section :class="['hoy__retos', { 'hoy__retos--complete': allRetosComplete }]">
@@ -244,6 +258,7 @@
         </div>
       </section>
 
+      </template>
     </div>
     </template>
 
@@ -545,6 +560,11 @@ const { data: hoyPage, status: hoyStatus, refresh: refreshHoyPage } = useAsyncDa
 const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
 const featuredImgUrl = computed(() => (hoyDefaults.value.featured_img_url as string) || '/images/rojo-carlotta.jpg')
 const dailyPlanData = computed(() => hoyPage.value?.daily_plan)
+const isHoyEmpty = computed(() =>
+  !dailyPlanData.value
+  && (hoyPage.value?.content?.length ?? 0) === 0
+  && activePrograms.value.length === 0
+)
 // Resolve action type: daily plan overrides defaults; normalize default values to plan values
 const normalizeActionType = (t: string | undefined) => {
   if (!t) return undefined
@@ -586,9 +606,12 @@ const dailyPlan = computed(() => ({
 // ─── Mensaje del día (derived from daily plan payload or fallback to defaults) ───
 const mensajeDelDia = computed(() => {
   const payload = dailyPlanData.value?.primary_action_payload as Record<string, any> | null
+  const fallbackAuthor = user.value?.community_segment === 'carlotta' ? 'carlotta' : 'gabriel'
+  const rawAuthor = payload?.quote_author || hoyDefaults.value.phrase_author || fallbackAuthor
+  const author = typeof rawAuthor === 'string' ? rawAuthor.toLowerCase() : fallbackAuthor
   return {
-    text: payload?.quote_text || hoyDefaults.value.phrase_text,
-    author: (payload?.quote_author || hoyDefaults.value.phrase_author) as 'gabriel' | 'carlotta',
+    text: payload?.quote_text || hoyDefaults.value.phrase_text || 'Tu guía diaria aparecerá aquí cuando esté configurada.',
+    author: author === 'carlotta' ? 'carlotta' : 'gabriel',
   }
 })
 

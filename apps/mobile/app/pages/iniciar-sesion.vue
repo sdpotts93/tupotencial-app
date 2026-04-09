@@ -168,7 +168,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' })
 
-const { login, register, user } = useAuth()
+const { login, register, refreshProfile, user } = useAuth()
 const toast = useToast()
 
 
@@ -229,10 +229,14 @@ async function handleLogin() {
   loginLoading.value = true
   try {
     await login(loginEmail.value, loginPassword.value)
-    // Wait for the auth state to propagate to cookies before navigating.
-    // The supabase.client.js page:start hook calls getClaims() on navigation —
-    // if cookies aren't written yet, it nulls out supaUser and triggers logout.
-    await new Promise(r => setTimeout(r, 300))
+    // Load the profile before routing so existing members don't get sent back
+    // through onboarding when auth cookies/session state are still settling.
+    await new Promise(r => setTimeout(r, 150))
+    let profileLoaded = await refreshProfile()
+    if (!profileLoaded) {
+      await new Promise(r => setTimeout(r, 300))
+      profileLoaded = await refreshProfile()
+    }
     if (!user.value?.community_segment) {
       navigateTo('/cuenta/bienvenida/segmento')
     } else {

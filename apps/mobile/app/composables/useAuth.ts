@@ -1,6 +1,6 @@
 // Auth composable — powered by @nuxtjs/supabase
 // Integrates with RevenueCat for subscription entitlements (native IAP + web)
-import { useState, navigateTo, watch, computed } from '#imports'
+import { useState, navigateTo, watch, computed, clearNuxtData } from '#imports'
 
 export interface AuthUser {
   id: string
@@ -171,6 +171,11 @@ export function useAuth() {
 
     await client.auth.signOut()
     user.value = null
+    clearNuxtData('hoy-page')
+    clearNuxtData('hoy-checkin')
+    clearNuxtData('hoy-accion')
+    clearNuxtData('hoy-programs')
+    clearNuxtData('current-plan')
     navigateTo('/iniciar-sesion')
   }
 
