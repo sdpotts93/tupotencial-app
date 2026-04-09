@@ -223,7 +223,10 @@
 <script setup lang="ts">
 import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 
-definePageMeta({ layout: 'blank' })
+definePageMeta({
+  layout: 'default',
+  hideBottomNav: true,
+})
 
 type ProgramType = 'reto' | 'bootcamp' | 'programa'
 type ActivityType = 'media' | 'ai' | 'form'

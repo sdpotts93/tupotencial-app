@@ -146,7 +146,10 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({
+  layout: 'default',
+  hideBottomNav: true,
+})
 
 const client = useSupabaseClient()
 const { user } = useAuth()

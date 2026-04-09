@@ -132,7 +132,10 @@
 <script setup lang="ts">
 import Player from '@vimeo/player'
 
-definePageMeta({ layout: 'blank' })
+definePageMeta({
+  layout: 'default',
+  hideBottomNav: true,
+})
 
 const route = useRoute()
 const contentId = route.params.id as string

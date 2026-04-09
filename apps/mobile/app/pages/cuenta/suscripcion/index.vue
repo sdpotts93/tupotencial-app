@@ -63,7 +63,9 @@
 
           <!-- CTA -->
           <template v-if="plan.isCurrent">
-            <UiButton variant="outline" block disabled>Plan actual</UiButton>
+            <UiButton variant="outline" block disabled>
+              {{ plan.id === 'core' && !hasRecurringSubscription ? 'Acceso incluido' : 'Plan actual' }}
+            </UiButton>
           </template>
           <template v-else-if="plan.id === 'core'">
             <UiButton block class="pricing__cta-core" :loading="paywallLoading" @click="openPaywall">
@@ -71,7 +73,7 @@
             </UiButton>
           </template>
           <template v-else>
-            <UiButton v-if="effectiveIsSubscriber" variant="outline" block @click="openCustomerCenter">Gestionar suscripción</UiButton>
+            <UiButton v-if="hasRecurringSubscription" variant="outline" block @click="openCustomerCenter">Gestionar suscripción</UiButton>
             <UiButton v-else variant="outline" block disabled>Plan base</UiButton>
           </template>
 
@@ -92,8 +94,11 @@
           <br /><button class="pricing__restore" @click="handleRestore">Restaurar compras</button>
         </template>
       </p>
-      <div v-if="effectiveIsSubscriber" class="pricing__manage">
+      <div v-if="hasRecurringSubscription" class="pricing__manage">
         <UiButton variant="outline" size="sm" @click="openCustomerCenter">Gestionar suscripción</UiButton>
+      </div>
+      <div v-else-if="grantBasedCoreAccess" class="pricing__grant-note">
+        <p>Tu acceso Core está incluido por un complemento. No hay una suscripción recurrente para gestionar.</p>
       </div>
 
     </div>
@@ -180,6 +185,9 @@ const plans = computed(() =>
     isCurrent: p.id === 'core' ? effectiveIsSubscriber.value : !effectiveIsSubscriber.value,
   })),
 )
+
+const hasRecurringSubscription = computed(() => !!accessData.value?.subscription)
+const grantBasedCoreAccess = computed(() => !!accessData.value?.coreGrant && !hasRecurringSubscription.value)
 
 const corePlanInterval = computed(() => (
   plansData.value?.find(plan => plan.id === 'core')?.interval ?? 'month'
@@ -542,6 +550,21 @@ if (import.meta.client) {
   display: flex;
   justify-content: center;
   margin-top: var(--space-4);
+}
+
+.pricing__grant-note {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.pricing__grant-note p {
+  max-width: 42ch;
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
 }
 
 @media (min-width: 768px) {

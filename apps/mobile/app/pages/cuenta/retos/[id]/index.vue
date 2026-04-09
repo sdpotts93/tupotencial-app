@@ -142,7 +142,10 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({
+  layout: 'default',
+  hideBottomNav: true,
+})
 
 const route = useRoute()
 const client = useSupabaseClient()

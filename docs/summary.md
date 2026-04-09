@@ -95,4 +95,12 @@ Append one line per completed task:
 2026-04-09 03:16 America/Mexico_City — Show Core renewal or expiration dates on /cuenta/suscripcion for recurring subscriptions and granted-month access
 2026-04-09 03:27 America/Mexico_City — Refresh auth-backed plan state on /cuenta/beneficios and /cuenta/mas so Core labels update after subscription sync
 2026-04-09 03:41 America/Mexico_City — Prevent RevenueCat invoice events from canceling Core in Supabase and reconcile app-wide subscriber state with RevenueCat on the client
+2026-04-09 03:53 America/Mexico_City — Stack Core months across addon grants, hide subscription management for grant-only access, and surface included Core months on addon detail pages
 2026-04-09 12:30 America/Mexico_City — Fix onboarding avatar fallback rendering and prevent already-onboarded users from re-entering segment selection during profile hydration
+2026-04-09 14:54 America/Mexico_City — Keep the default account layout on complemento detail pages while hiding the mobile bottom nav
+2026-04-09 14:56 America/Mexico_City — Keep the default account layout on beneficio detail pages while hiding the mobile bottom nav
+2026-04-09 14:56 America/Mexico_City — Keep the default account layout on evento detail pages while hiding the mobile bottom nav
+2026-04-09 14:57 America/Mexico_City — Keep the default account layout on the progress page while hiding the mobile bottom nav
+2026-04-09 14:57 America/Mexico_City — Keep the default account layout on content detail and playback pages while hiding the mobile bottom nav
+2026-04-09 14:58 America/Mexico_City — Keep the default account layout on reto detail and day pages while hiding the mobile bottom nav
+2026-04-09 14:58 America/Mexico_City — Make the retos index explicitly use the default account layout

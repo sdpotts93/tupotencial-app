@@ -91,6 +91,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'default' })
+
 const PAGE_SIZE = 20
 
 const router = useRouter()

@@ -91,7 +91,10 @@
 <script setup lang="ts">
 import DOMPurify from 'dompurify'
 
-definePageMeta({ layout: 'blank' })
+definePageMeta({
+  layout: 'default',
+  hideBottomNav: true,
+})
 
 function sanitizeHtml(html: string): string {
   return DOMPurify.sanitize(html)

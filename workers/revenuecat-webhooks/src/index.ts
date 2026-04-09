@@ -321,6 +321,16 @@ async function syncAddonEntitlements(
     existingCoreGrants.map(grant => [grant.source_ref, grant]),
   )
 
+  const activeSubscriptions = await db.select(
+    'subscriptions',
+    `user_id=eq.${userId}&status=in.(active,trialing)&select=current_period_end&order=current_period_end.desc&limit=1`,
+  ) as Array<{ current_period_end: string | null }>
+
+  let latestCoreAccessEnd = getLatestCoreAccessEnd(
+    activeSubscriptions[0]?.current_period_end ?? null,
+    existingCoreGrants.map(grant => grant.ends_at),
+  )
+
   const addonEntitlementsByKey = new Map<string, string[]>()
   for (const row of knownAddonEntitlements) {
     const rows = addonEntitlementsByKey.get(row.entitlement_key) ?? []
@@ -336,6 +346,8 @@ async function syncAddonEntitlements(
   }
 
   const relevantEntitlementIdSet = new Set(relevantEntitlementIds)
+  const processedPurchaseAddonIds = new Set<string>()
+  const processedGrantAddonIds = new Set<string>()
   for (const row of knownAddonEntitlements) {
     if (!relevantEntitlementIdSet.has(row.entitlement_key)) continue
 
@@ -350,17 +362,24 @@ async function syncAddonEntitlements(
         source_ref: row.addon_id,
       }, 'user_id,entitlement_key')
 
-      await db.upsert('addon_purchases', {
-        user_id: userId,
-        addon_id: row.addon_id,
-        stripe_session_id: null,
-        amount: addonMeta?.price ?? 0,
-      }, 'user_id,addon_id')
+      if (!processedPurchaseAddonIds.has(row.addon_id)) {
+        await db.upsert('addon_purchases', {
+          user_id: userId,
+          addon_id: row.addon_id,
+          stripe_session_id: null,
+          amount: addonMeta?.price ?? 0,
+        }, 'user_id,addon_id')
+        processedPurchaseAddonIds.add(row.addon_id)
+      }
 
-      if ((addonMeta?.grantsCoreMonths ?? 0) > 0) {
+      if ((addonMeta?.grantsCoreMonths ?? 0) > 0 && !processedGrantAddonIds.has(row.addon_id)) {
         const existingGrant = addonCoreGrantsByAddonId.get(row.addon_id)
-        const startsAt = existingGrant?.starts_at ?? new Date().toISOString()
-        const endsAt = existingGrant?.ends_at ?? addMonthsIso(startsAt, addonMeta!.grantsCoreMonths)
+        const startsAt = maxIsoTimestamp(
+          new Date().toISOString(),
+          latestCoreAccessEnd,
+          existingGrant?.ends_at ?? null,
+        )
+        const endsAt = addMonthsIso(startsAt, addonMeta!.grantsCoreMonths)
 
         await db.upsert('subscription_access_grants', {
           user_id: userId,
@@ -369,6 +388,14 @@ async function syncAddonEntitlements(
           starts_at: startsAt,
           ends_at: endsAt,
         }, 'user_id,source,source_ref')
+
+        addonCoreGrantsByAddonId.set(row.addon_id, {
+          source_ref: row.addon_id,
+          starts_at: startsAt,
+          ends_at: endsAt,
+        })
+        latestCoreAccessEnd = maxIsoTimestamp(latestCoreAccessEnd, endsAt)
+        processedGrantAddonIds.add(row.addon_id)
       }
 
       continue
@@ -390,6 +417,26 @@ function addMonthsIso(startsAt: string, months: number) {
   const value = new Date(startsAt)
   value.setUTCMonth(value.getUTCMonth() + months)
   return value.toISOString()
+}
+
+function getLatestCoreAccessEnd(subscriptionEnd: string | null, grantEndsAt: string[]) {
+  return grantEndsAt.reduce<string | null>(
+    (latest, candidate) => maxIsoTimestamp(latest, candidate),
+    subscriptionEnd,
+  )
+}
+
+function maxIsoTimestamp(...values: Array<string | null | undefined>) {
+  let latest: string | null = null
+
+  for (const value of values) {
+    if (!value) continue
+    if (!latest || new Date(value).getTime() > new Date(latest).getTime()) {
+      latest = value
+    }
+  }
+
+  return latest ?? new Date().toISOString()
 }
 
 function jsonResponse(data: unknown, status = 200) {

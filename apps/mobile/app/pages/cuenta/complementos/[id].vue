@@ -61,6 +61,12 @@
           <span class="addon__price-note">Pago único</span>
         </div>
 
+        <div v-if="coreBonusMonths > 0" class="addon__core-bonus">
+          <p class="addon__core-bonus-label">Incluye Core</p>
+          <p class="addon__core-bonus-title">{{ coreBonusLabel }}</p>
+          <p class="addon__core-bonus-copy">Los meses incluidos se acumulan al final de tu acceso Core vigente.</p>
+        </div>
+
         <div class="addon__actions">
           <template v-if="addon.owned">
             <div class="addon__owned">
@@ -95,7 +101,10 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'blank' })
+definePageMeta({
+  layout: 'default',
+  hideBottomNav: true,
+})
 
 const route = useRoute()
 const client = useSupabaseClient()
@@ -130,6 +139,12 @@ const addon = computed(() => ({
   owned: entitlementKeys.value.some(key => hasEntitlement(key)),
   purchaseReady: !!rawAddon.value?.revenuecat_offering_id && entitlementKeys.value.length > 0,
 }))
+
+const coreBonusMonths = computed(() => rawAddon.value?.grants_core_months ?? 0)
+const coreBonusLabel = computed(() => {
+  const months = coreBonusMonths.value
+  return months === 1 ? '1 mes de Core incluido' : `${months} meses de Core incluidos`
+})
 
 async function waitForAddonSync() {
   for (let attempt = 0; attempt < 10; attempt += 1) {
@@ -281,6 +296,37 @@ async function handlePurchase() {
 .addon__price-note {
   font-size: var(--text-sm);
   color: var(--color-muted);
+}
+
+.addon__core-bonus {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in srgb, var(--color-gold) 28%, var(--color-border) 72%);
+  background: color-mix(in srgb, var(--color-gold-bg) 68%, white 32%);
+}
+
+.addon__core-bonus-label {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.addon__core-bonus-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: var(--title-sm);
+  color: var(--color-text);
+}
+
+.addon__core-bonus-copy {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
 }
 
 .addon__web-note {
