@@ -562,6 +562,12 @@ if (import.meta.client) {
 
   .pricing__header-title { display: none; }
   .pricing__back { display: none; }
+
+  .pricing__status-card {
+    background: var(--color-desktop-card);
+    border: 1px solid var(--color-desktop-border);
+    border-radius: var(--radius-lg);
+  }
 }
 
 /* ─── Error state ─── */
