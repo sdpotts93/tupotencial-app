@@ -265,15 +265,6 @@ const segmentOptions = [
   { value: 'core', label: 'Core' },
 ]
 
-const entitlementOptions = [
-  { value: '', label: 'Sin restricción (abierto)' },
-  { value: 'vip', label: 'VIP' },
-  { value: 'mentoria_grupal', label: 'Mentoría grupal' },
-  { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
-  { value: 'coaching_1on1', label: 'Coaching 1:1' },
-  { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
-]
-
 // ── Fetch categories & objectives for dropdowns ──
 const { data: categories } = await useAsyncData('content-categories', async () => {
   const { data } = await client.from('content_categories').select('id, title').order('sort_order')
@@ -284,6 +275,8 @@ const { data: objectives } = await useAsyncData('content-objectives', async () =
   const { data } = await client.from('content_objectives').select('id, title').order('position')
   return data ?? []
 })
+
+const { entitlementOptions } = await useAdminEntitlements()
 
 const categoryOptions = computed(() =>
   (categories.value ?? []).map(c => ({ value: c.id, label: c.title })),

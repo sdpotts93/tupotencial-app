@@ -158,13 +158,7 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
   [activeTab, search],
 )
 
-const entitlementLabels: Record<string, string> = {
-  vip: 'VIP',
-  mentoria_grupal: 'Mentoría grupal',
-  bootcamp_liderazgo: 'Bootcamp: Liderazgo',
-  coaching_1on1: 'Coaching 1:1',
-  retiro_marzo_2026: 'Retiro marzo 2026',
-}
+const { entitlementLabels } = await useAdminEntitlements()
 
 function statusVariant(status: string) {
   const map: Record<string, string> = { published: 'success', draft: 'warning', cancelled: 'danger' }

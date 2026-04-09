@@ -102,13 +102,7 @@ const planFilterOptions = [
   { value: 'core', label: 'Core' },
 ]
 
-const entitlementLabels: Record<string, string> = {
-  vip: 'VIP',
-  mentoria_grupal: 'Mentoría grupal',
-  bootcamp_liderazgo: 'Bootcamp: Liderazgo',
-  coaching_1on1: 'Coaching 1:1',
-  retiro_marzo_2026: 'Retiro marzo 2026',
-}
+const { entitlementLabels } = await useAdminEntitlements()
 
 const columns = [
   { key: 'title', label: 'Título', width: '25%' },

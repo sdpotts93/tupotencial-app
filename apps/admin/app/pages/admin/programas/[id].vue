@@ -243,6 +243,8 @@ const { data: formsList } = await useAsyncData('program-forms', async () => {
   return data ?? []
 })
 
+const { entitlementOptions, entitlementLabels } = await useAdminEntitlements()
+
 // ── Map DB item type to UI type ──
 const dbTypeToUi: Record<string, string> = { content: 'contenido', form: 'formulario', ai_prompt: 'talk_to_ai' }
 const uiTypeToDb: Record<string, string> = { contenido: 'content', formulario: 'form', talk_to_ai: 'ai_prompt' }
@@ -268,15 +270,6 @@ const typeOptions = [
 const planOptions = [
   { value: 'free', label: 'Gratuito' },
   { value: 'core', label: 'Core' },
-]
-
-const entitlementOptions = [
-  { value: '', label: 'Sin restricción (abierto)' },
-  { value: 'vip', label: 'VIP' },
-  { value: 'mentoria_grupal', label: 'Mentoría grupal' },
-  { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
-  { value: 'coaching_1on1', label: 'Coaching 1:1' },
-  { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
 ]
 
 const statusOptions = [
@@ -308,19 +301,11 @@ const contentEntitlementMap = computed(() => {
   return map
 })
 
-const entitlementLabels: Record<string, string> = {
-  vip: 'VIP',
-  mentoria_grupal: 'Mentoría grupal',
-  bootcamp_liderazgo: 'Bootcamp: Liderazgo',
-  coaching_1on1: 'Coaching 1:1',
-  retiro_marzo_2026: 'Retiro marzo 2026',
-}
-
 function contentConflictLabel(contentId: string): string | null {
   if (form.entitlement_key) return null
   const key = contentEntitlementMap.value[contentId]
   if (!key) return null
-  return entitlementLabels[key] ?? key
+  return entitlementLabels.value[key] ?? key
 }
 
 // ── Day + Activity management ──

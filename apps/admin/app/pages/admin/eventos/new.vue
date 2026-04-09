@@ -210,6 +210,8 @@ const form = reactive({
   status: 'draft',
 })
 
+const { entitlementOptions } = await useAdminEntitlements()
+
 const durationOptions = [
   { value: '15', label: '15 min' },
   { value: '30', label: '30 min' },
@@ -228,15 +230,6 @@ const durationOptions = [
 const planOptions = [
   { value: 'free', label: 'Gratuito' },
   { value: 'core', label: 'Core' },
-]
-
-const entitlementOptions = [
-  { value: '', label: 'Sin restricción (abierto)' },
-  { value: 'vip', label: 'VIP' },
-  { value: 'mentoria_grupal', label: 'Mentoría grupal' },
-  { value: 'bootcamp_liderazgo', label: 'Bootcamp: Liderazgo' },
-  { value: 'coaching_1on1', label: 'Coaching 1:1' },
-  { value: 'retiro_marzo_2026', label: 'Retiro marzo 2026' },
 ]
 
 const statusOptions = [
