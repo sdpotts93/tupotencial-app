@@ -1,4 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const isLocalDev = process.env.NODE_ENV !== 'production'
+const defaultAdminAppUrl = isLocalDev ? 'http://localhost:3001' : 'https://admin.tupotencial.app'
+const defaultAdminAllowedOrigins = [
+  defaultAdminAppUrl,
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+]
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
 
@@ -64,6 +72,12 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     vimeoToken: '',
+    adminAppUrl: process.env.NUXT_ADMIN_APP_URL || defaultAdminAppUrl,
+    adminAllowedOrigins: process.env.NUXT_ADMIN_ALLOWED_ORIGINS
+      ?.split(',')
+      .map(origin => origin.trim())
+      .filter(Boolean)
+      || defaultAdminAllowedOrigins,
     public: {},
   },
 

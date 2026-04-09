@@ -243,15 +243,15 @@ async function saveEdit() {
   editSaving.value = true
   formError.value = ''
   try {
-    await client
-      .from('admin_users')
-      .update({ role: editForm.role })
-      .eq('id', editingId.value)
+    await $fetch(`/api/admin/admin-users/${editingId.value}`, {
+      method: 'PATCH',
+      body: { role: editForm.role },
+    })
     toast.show('Cambios guardados', 'success')
     showEditModal.value = false
     await refresh()
-  } catch {
-    formError.value = 'Error al guardar. Intenta de nuevo.'
+  } catch (err: any) {
+    formError.value = err?.data?.message || 'Error al guardar. Intenta de nuevo.'
     toast.show('Error al guardar', 'error')
   } finally {
     editSaving.value = false
@@ -263,9 +263,13 @@ const confirm = useConfirm()
 async function deleteAdmin(row: Record<string, any>) {
   if (await confirm({ message: `¿Seguro que deseas eliminar a ${row.full_name}?` })) {
     try {
-      await client.from('admin_users').delete().eq('id', row.id)
+      await $fetch(`/api/admin/admin-users/${row.id}`, {
+        method: 'DELETE',
+      })
+      toast.show('Administrador eliminado', 'success')
       await refresh()
-    } catch {
+    } catch (err: any) {
+      formError.value = err?.data?.message || ''
       toast.show('Error al eliminar', 'error')
     }
   }

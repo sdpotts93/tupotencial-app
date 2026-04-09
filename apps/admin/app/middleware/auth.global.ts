@@ -3,7 +3,7 @@
 // server (via useSsrCookies) and client (via onAuthStateChange).
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const publicRoutes = ['/iniciar-sesion', '/confirm', '/restablecer-contrasena', '/nueva-contrasena']
+  const publicRoutes = ['/iniciar-sesion', '/confirmacion', '/restablecer-contrasena', '/nueva-contrasena']
   if (publicRoutes.some(r => to.path === r || to.path.startsWith(r + '/'))) return
 
   const user = useSupabaseUser()

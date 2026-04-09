@@ -1,6 +1,15 @@
+import { getHeader } from 'h3'
 import { serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
+  const config = useRuntimeConfig(event)
+  const origin = getHeader(event, 'origin')
+  const allowedOrigins = new Set((config.adminAllowedOrigins as string[]) ?? [])
+
+  if (!origin || !allowedOrigins.has(origin)) {
+    throw createError({ statusCode: 403, message: 'Origen inválido' })
+  }
+
   // 1. Auth — only logged-in admins can invite
   const user = await serverSupabaseUser(event)
   if (!user) throw createError({ statusCode: 401, message: 'No autenticado' })
@@ -34,7 +43,7 @@ export default defineEventHandler(async (event) => {
     body.email.trim(),
     {
       data: { display_name: body.full_name.trim() },
-      redirectTo: `${event.node.req.headers.origin ?? 'https://admin.tupotencial.com'}/confirm`,
+      redirectTo: `${config.adminAppUrl}/confirmacion`,
     },
   )
 

@@ -60,6 +60,7 @@ export default defineEventHandler(async (event) => {
 
   const profileMap = new Map<string, ProfileRow>((profiles ?? []).map(row => [row.id, row as ProfileRow]))
   const authEmailMap = new Map<string, string>()
+  const authLastSignInMap = new Map<string, string | null>()
 
   let page = 1
   const perPage = 200
@@ -75,6 +76,7 @@ export default defineEventHandler(async (event) => {
     for (const user of users) {
       if (userIdSet.has(user.id)) {
         authEmailMap.set(user.id, user.email ?? '')
+        authLastSignInMap.set(user.id, user.last_sign_in_at ?? null)
       }
     }
 
@@ -92,7 +94,7 @@ export default defineEventHandler(async (event) => {
         avatar_url: profile?.avatar_url ?? null,
         email,
         status: 'active',
-        last_login: null as string | null,
+        last_login: authLastSignInMap.get(row.user_id) ?? null,
       }
     })
     .filter((row) => {
