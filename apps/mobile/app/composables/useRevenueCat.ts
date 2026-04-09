@@ -27,6 +27,21 @@ function normalizeEmail(email?: string | null) {
   return email?.trim().toLowerCase() ?? null
 }
 
+function isUserCancelledPurchase(error: unknown) {
+  if (!error || typeof error !== 'object') return false
+
+  const candidate = error as {
+    userCancelled?: boolean | null
+    errorCode?: number | string
+    readableErrorCode?: string | null
+  }
+
+  return candidate.userCancelled === true
+    || candidate.errorCode === 1
+    || candidate.errorCode === '1'
+    || candidate.readableErrorCode === 'PURCHASE_CANCELLED_ERROR'
+}
+
 export function useRevenueCat() {
   async function ensureWebSessionIdentity() {
     if (isNative() || !configured.value) return
@@ -224,14 +239,16 @@ export function useRevenueCat() {
       return 'error'
     }
 
-    const { customerInfo } = await webInstance.purchase({
+    await webInstance.purchase({
       rcPackage: purchaseTarget.rcPackage,
       selectedLocale: 'es',
       customerEmail: identity?.sessionEmail ?? undefined,
     })
 
-    if (!purchaseTarget.expectedEntitlementId) return 'purchased'
-    return purchaseTarget.expectedEntitlementId in customerInfo.entitlements.active ? 'purchased' : 'cancelled'
+    // A resolved web purchase means checkout completed successfully.
+    // Access can still appear a few seconds later once RevenueCat/Supabase
+    // finish syncing entitlements, especially for one-time add-ons.
+    return 'purchased'
   }
 
   // ── Purchase the current offering's first package ──
@@ -260,6 +277,7 @@ export function useRevenueCat() {
       }
     } catch (e) {
       console.error('[RevenueCat] Purchase error:', e)
+      if (isUserCancelledPurchase(e)) return 'cancelled'
       return 'error'
     }
   }
@@ -295,6 +313,7 @@ export function useRevenueCat() {
       })
     } catch (e) {
       console.error('[RevenueCat] Add-on purchase error:', e)
+      if (isUserCancelledPurchase(e)) return 'cancelled'
       return 'error'
     }
   }
