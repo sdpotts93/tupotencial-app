@@ -88,3 +88,4 @@ Append one line per completed task:
 2026-04-09 01:10 America/Mexico_City — Fix admin community post media uploads so create/edit persist selected files to storage and save the public URL
 2026-04-09 01:20 America/Mexico_City — Add Cloudflare runtime fallbacks for Vimeo admin imports and clarify missing token error messaging
 2026-04-09 01:29 America/Mexico_City — Audit remaining admin file-upload forms and fix benefit, add-on, and event cover uploads in create/edit flows
+2026-04-09 01:38 America/Mexico_City — Standardize admin cover-image previews across benefits, programs, add-ons, and events create/edit screens

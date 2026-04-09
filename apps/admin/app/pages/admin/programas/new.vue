@@ -53,14 +53,15 @@
                     </div>
                     <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
                     <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
-                  </template>
-                  <template v-else>
-                    <div class="upload__preview">
-                      <p class="upload__filename">{{ uploadedFile.name }}</p>
-                      <p class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
-                      <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
-                    </div>
-                  </template>
+                </template>
+                <template v-else>
+                  <div class="upload__preview">
+                    <img :src="coverPreview" alt="" class="upload__img-preview" />
+                    <p class="upload__filename">{{ uploadedFile.name }}</p>
+                    <p class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
+                    <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
+                  </div>
+                </template>
                 </div>
               </div>
 
@@ -197,6 +198,7 @@ const tabs = [
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
+const coverPreview = ref('')
 const isDragging = ref(false)
 
 // ── Fetch content items and forms for dropdowns ──
@@ -335,19 +337,27 @@ function triggerFileInput() {
 function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement
   if (target.files?.[0]) {
-    uploadedFile.value = target.files[0]
+    setCoverFile(target.files[0])
   }
 }
 
 function handleDrop(e: DragEvent) {
   isDragging.value = false
   if (e.dataTransfer?.files?.[0]) {
-    uploadedFile.value = e.dataTransfer.files[0]
+    setCoverFile(e.dataTransfer.files[0])
   }
 }
 
+function setCoverFile(file: File) {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
+  uploadedFile.value = file
+  coverPreview.value = URL.createObjectURL(file)
+}
+
 function removeFile() {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
   uploadedFile.value = null
+  coverPreview.value = ''
   if (fileInput.value) fileInput.value.value = ''
 }
 
@@ -533,6 +543,16 @@ async function handleSave() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-1);
+}
+
+.upload__img-preview {
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-2);
 }
 
 .upload__filename {
