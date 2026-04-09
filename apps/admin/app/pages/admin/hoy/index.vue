@@ -546,7 +546,7 @@ async function handleSaveConfig() {
 }
 
 // ── Load saved config from app_settings ──
-const { data: savedConfig } = useAsyncData('hoy-config', async () => {
+const { data: savedConfig, refresh: refreshSavedConfig } = useAsyncData('hoy-config', async () => {
   const { data } = await client
     .from('app_settings')
     .select('key, value')
@@ -556,7 +556,41 @@ const { data: savedConfig } = useAsyncData('hoy-config', async () => {
     map[row.key] = row.value
   }
   return map
-}, { lazy: true })
+}, { lazy: true, server: false, default: () => ({}) })
+
+function formatDuration(seconds: number | null) {
+  if (!seconds) return ''
+  return `${Math.round(seconds / 60)} min`
+}
+
+const { data: adminHoyOptions, refresh: refreshAdminHoyOptions } = useAsyncData('admin-hoy-options', async () => {
+  const [{ data: contentItems }, { data: forms }] = await Promise.all([
+    client
+      .from('content_items')
+      .select('id, title, type, duration_seconds, published_at')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false }),
+    client
+      .from('forms')
+      .select('id, title')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false }),
+  ])
+
+  return {
+    contentItems: (contentItems ?? []).map(item => ({
+      id: item.id,
+      type: item.type,
+      title: item.title,
+      duration: formatDuration(item.duration_seconds),
+    })),
+    forms: forms ?? [],
+  }
+}, {
+  lazy: true,
+  server: false,
+  default: () => ({ contentItems: [], forms: [] }),
+})
 
 // ── Defaults config (loaded from DB, seed guarantees values exist) ──
 const defaults = reactive({
@@ -568,7 +602,6 @@ const defaults = reactive({
   badge_title: '',
   badge_subtitle: '',
   featured_img_url: '',
-  ...savedConfig.value?.hoy_defaults,
 })
 
 const defaultAuthorOptions = [
@@ -582,26 +615,16 @@ const defaultActionTypeOptions = [
   { value: 'formulario', label: 'Formulario' },
 ]
 
-const defaultContentOptions = [
-  { value: 'cnt-001', label: '5 pasos para el bienestar emocional' },
-  { value: 'cnt-002', label: 'Meditación guiada para la mañana' },
-  { value: 'cnt-003', label: 'Nutrición consciente: guía básica' },
-  { value: 'cnt-004', label: 'Rutina de yoga para principiantes' },
-  { value: 'cnt-005', label: 'Higiene del sueño: consejos prácticos' },
-  { value: 'cnt-006', label: 'Cómo manejar el estrés laboral' },
-  { value: 'cnt-007', label: 'Ejercicios de respiración 4-7-8' },
-  { value: 'cnt-008', label: 'Alimentación para la energía diaria' },
-]
+const defaultContentOptions = computed(() =>
+  adminHoyOptions.value.contentItems.map(item => ({ value: item.id, label: item.title })),
+)
 
-const defaultFormOptions = [
-  { value: 'frm-001', label: 'Evaluación inicial de bienestar' },
-  { value: 'frm-002', label: 'Check-in semanal' },
-  { value: 'frm-003', label: 'Encuesta de satisfacción del programa' },
-  { value: 'frm-004', label: 'Registro de hábitos diarios' },
-  { value: 'frm-005', label: 'Evaluación de progreso mensual' },
-]
+const defaultFormOptions = computed(() =>
+  adminHoyOptions.value.forms.map(form => ({ value: form.id, label: form.title })),
+)
 
-watch(() => defaults.action_type, () => {
+watch(() => defaults.action_type, (nextType, oldType) => {
+  if (!oldType || nextType === oldType) return
   defaults.content_id = ''
   defaults.form_id = ''
 })
@@ -661,9 +684,7 @@ function onClickOutside(e: MouseEvent) {
 onMounted(() => document.addEventListener('click', onClickOutside))
 onUnmounted(() => document.removeEventListener('click', onClickOutside))
 
-const recentContentMode = ref<'automatic' | 'manual'>(
-  savedConfig.value?.hoy_recent_content?.mode ?? 'automatic' as const,
-)
+const recentContentMode = ref<'automatic' | 'manual'>('automatic')
 
 const recentContentModeOptions = [
   { value: 'automatic', label: 'Automático (contenido más reciente)' },
@@ -672,21 +693,9 @@ const recentContentModeOptions = [
 
 const contentSearch = ref('')
 
-const allContentItems = ref([
-  { id: 'cnt-001', type: 'video', title: '5 pasos para el bienestar emocional', duration: '15 min' },
-  { id: 'cnt-002', type: 'audio', title: 'Meditación guiada para la mañana', duration: '10 min' },
-  { id: 'cnt-003', type: 'video', title: 'Nutrición consciente: guía básica', duration: '20 min' },
-  { id: 'cnt-004', type: 'video', title: 'Rutina de yoga para principiantes', duration: '25 min' },
-  { id: 'cnt-005', type: 'audio', title: 'Higiene del sueño: consejos prácticos', duration: '12 min' },
-  { id: 'cnt-006', type: 'video', title: 'Cómo manejar el estrés laboral', duration: '18 min' },
-  { id: 'cnt-007', type: 'audio', title: 'Ejercicios de respiración 4-7-8', duration: '8 min' },
-  { id: 'cnt-008', type: 'video', title: 'Alimentación para la energía diaria', duration: '14 min' },
-])
+const allContentItems = computed(() => adminHoyOptions.value.contentItems)
 
-const savedSelectedIds = new Set(savedConfig.value?.hoy_recent_content?.selected_ids ?? [])
-const selectedContent = ref(
-  allContentItems.value.filter(c => savedSelectedIds.has(c.id)),
-)
+const selectedContent = ref<typeof allContentItems.value>([])
 
 watch(contentSearch, () => { contentDropdownOpen.value = true })
 
@@ -727,15 +736,56 @@ const allAppSections: AppSection[] = [
   { id: 'retos', title: 'Programas', meta: 'Programas y retos activos', icon: 'lucide:flag', route: '/cuenta/retos' },
 ]
 
-const savedExploreSections = (savedConfig.value?.hoy_explore_sections?.sections ?? []) as { id: string; featured: boolean }[]
-const exploreSections = ref<(AppSection & { featured: boolean })[]>(
-  savedExploreSections
-    .map(s => {
-      const source = allAppSections.find(a => a.id === s.id)
-      return source ? { ...source, featured: s.featured } : null
+const exploreSections = ref<(AppSection & { featured: boolean })[]>([])
+
+const hasHydratedHoyConfig = ref(false)
+const hasHydratedSelectedContent = ref(false)
+
+function mapExploreSections(sections: { id: string; featured: boolean }[] = []) {
+  return sections
+    .map(section => {
+      const source = allAppSections.find(appSection => appSection.id === section.id)
+      return source ? { ...source, featured: section.featured } : null
     })
-    .filter((s): s is AppSection & { featured: boolean } => s !== null),
-)
+    .filter((section): section is AppSection & { featured: boolean } => section !== null)
+}
+
+watch(() => savedConfig.value?.hoy_defaults, (hoyDefaults) => {
+  if (hasHydratedHoyConfig.value || !hoyDefaults) return
+
+  defaults.phrase_text = hoyDefaults.phrase_text ?? ''
+  defaults.phrase_author = hoyDefaults.phrase_author ?? ''
+  defaults.action_type = hoyDefaults.action_type ?? ''
+  defaults.content_id = hoyDefaults.content_id ?? ''
+  defaults.form_id = hoyDefaults.form_id ?? ''
+  defaults.badge_title = hoyDefaults.badge_title ?? ''
+  defaults.badge_subtitle = hoyDefaults.badge_subtitle ?? ''
+  defaults.featured_img_url = hoyDefaults.featured_img_url ?? ''
+
+  recentContentMode.value = savedConfig.value?.hoy_recent_content?.mode ?? 'automatic'
+  exploreSections.value = mapExploreSections(savedConfig.value?.hoy_explore_sections?.sections ?? [])
+  hasHydratedHoyConfig.value = true
+}, { immediate: true })
+
+watch([savedConfig, allContentItems], ([config, contentItems]) => {
+  if (hasHydratedSelectedContent.value || !config) return
+
+  const selectedIds = new Set(config.hoy_recent_content?.selected_ids ?? [])
+  if (selectedIds.size > 0 && contentItems.length === 0) return
+
+  selectedContent.value = contentItems.filter(item => selectedIds.has(item.id))
+  hasHydratedSelectedContent.value = true
+}, { immediate: true })
+
+onMounted(() => {
+  if (!savedConfig.value || Object.keys(savedConfig.value).length === 0) {
+    refreshSavedConfig()
+  }
+
+  if (adminHoyOptions.value.contentItems.length === 0 && adminHoyOptions.value.forms.length === 0) {
+    refreshAdminHoyOptions()
+  }
+})
 
 const sectionToAdd = ref('')
 
