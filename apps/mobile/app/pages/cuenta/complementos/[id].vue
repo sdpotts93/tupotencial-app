@@ -52,43 +52,30 @@
           </svg>
         </button>
 
-        <h1 class="title title--lg addon__title">{{ addon.title }}</h1>
+        <!-- Status card -->
+        <div class="addon__status-card">
+          <p class="addon__status-label">{{ addon.owned ? 'Estado' : 'Precio' }}</p>
+          <p class="addon__status-value">{{ addon.owned ? 'Desbloqueado' : addon.priceLabel }}</p>
+          <p class="addon__status-copy">
+            <template v-if="addon.owned">Ya tienes acceso a este contenido.</template>
+            <template v-else>Pago único</template>
+          </p>
+        </div>
 
+        <h1 class="title title--lg addon__title">{{ addon.title }}</h1>
         <p class="addon__desc">{{ addon.description }}</p>
 
-        <div class="addon__price">
-          <span class="addon__price-value">{{ addon.priceLabel }}</span>
-          <span class="addon__price-note">Pago único</span>
-        </div>
-
-        <div class="addon__actions">
-          <template v-if="addon.owned">
-            <div class="addon__owned">
-              <UiTag variant="success">Desbloqueado</UiTag>
-              <p>Ya tienes acceso a este contenido.</p>
-            </div>
-          </template>
-          <template v-else-if="isNative">
-            <p class="addon__native-note">Las compras se realizan desde la versión web en tupotencial.com</p>
+        <div v-if="!addon.owned" class="addon__actions">
+          <template v-if="isNative">
+            <p class="addon__note">Las compras se realizan desde la versión web en tupotencial.com</p>
           </template>
           <template v-else-if="!addon.purchaseReady">
-            <div class="addon__web-note">
-              <UiButton variant="outline" block disabled>
-                Configuración pendiente
-              </UiButton>
-              <p>Este complemento todavía no tiene completa su configuración en RevenueCat.</p>
-            </div>
+            <UiButton variant="outline" block disabled>Configuración pendiente</UiButton>
           </template>
           <template v-else>
-            <div class="addon__web-note">
-              <UiButton variant="primary-outline" block :loading="purchasing" @click="handlePurchase">
-                Comprar ahora
-              </UiButton>
-              <p>Tu acceso se activará en cuanto RevenueCat confirme la compra y el webhook sincronice tu entitlement.</p>
-            </div>
+            <UiButton variant="primary-outline" block :loading="purchasing" @click="handlePurchase">Comprar ahora</UiButton>
           </template>
         </div>
-
       </div>
     </div>
   </div>
@@ -256,6 +243,38 @@ async function handlePurchase() {
   margin-bottom: var(--space-2);
 }
 
+/* ─── Status card ─── */
+.addon__status-card {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 82%, white 18%);
+  margin-bottom: var(--space-5);
+}
+
+.addon__status-label {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.addon__status-value {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: var(--title-md);
+  color: var(--color-text);
+}
+
+.addon__status-copy {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
 /* ─── Description ─── */
 .addon__desc {
   font-size: var(--text-base);
@@ -264,82 +283,16 @@ async function handlePurchase() {
   margin-bottom: var(--space-5);
 }
 
-/* ─── Price ─── */
-.addon__price {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  margin-bottom: var(--space-5);
-}
-
-.addon__price-value {
-  font-family: var(--font-title);
-  font-size: var(--title-md);
-  color: var(--color-text);
-}
-
-.addon__price-note {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-}
-
-.addon__web-note {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.addon__web-note p {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  line-height: var(--leading-relaxed);
-}
-
 /* ─── Actions ─── */
 .addon__actions {
   margin-bottom: var(--space-5);
 }
 
-/* ─── Owned state ─── */
-.addon__owned {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  background: rgba(var(--color-mood-good-rgb), 0.1);
-  border-radius: var(--radius-lg);
-}
-
-.addon__owned p {
+.addon__note {
+  margin: 0;
   font-size: var(--text-sm);
   color: var(--color-muted);
-}
-
-/* ─── Meta ─── */
-.addon__meta {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-8);
-}
-
-.addon__tag {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-eyebrow);
-  font-size: var(--eyebrow-sm);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border-radius: var(--radius-full);
-  padding: var(--space-1) var(--space-3);
-  white-space: nowrap;
-}
-
-.addon__tag--unlocked {
-  background: var(--color-complete-bg);
-  color: var(--color-complete);
+  line-height: var(--leading-relaxed);
 }
 
 /* ─── Tablet ─── */
@@ -407,7 +360,7 @@ async function handlePurchase() {
     font-size: var(--text-lg);
   }
 
-  .addon__price-value {
+  .addon__status-value {
     font-size: var(--title-lg);
   }
 
