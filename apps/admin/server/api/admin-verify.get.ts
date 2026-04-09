@@ -1,18 +1,17 @@
 // Verifies the current user is an admin and returns their profile data.
 // Used by useAdminAuth().restore() during SSR, where the plugin-scoped
 // Supabase client doesn't have the request's auth context.
-import { serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
-  const client = await serverSupabaseClient(event)
-
-  const { data: claimsData, error: claimsError } = await client.auth.getClaims()
-  const claims = claimsData?.claims as any
-  const uid = claims?.sub
-  const email = claims?.email ?? ''
-  if (claimsError || !uid) {
+  const user = await serverSupabaseUser(event)
+  const uid = user?.sub
+  const email = user?.email ?? ''
+  if (!uid) {
     throw createError({ statusCode: 401, statusMessage: 'Not authenticated' })
   }
+
+  const client = await serverSupabaseClient(event)
 
   const { data: adminRow } = await client
     .from('admin_users')

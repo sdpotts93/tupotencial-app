@@ -1,4 +1,4 @@
-import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
 
 interface AdminUserRow {
   id: string
@@ -15,10 +15,9 @@ interface ProfileRow {
 }
 
 export default defineEventHandler(async (event) => {
-  const client = await serverSupabaseClient(event)
-  const { data: claimsData, error: claimsError } = await client.auth.getClaims()
-  const uid = (claimsData?.claims as any)?.sub
-  if (claimsError || !uid) throw createError({ statusCode: 401, message: 'No autenticado' })
+  const user = await serverSupabaseUser(event)
+  const uid = user?.sub
+  if (!uid) throw createError({ statusCode: 401, message: 'No autenticado' })
 
   const serviceClient = serverSupabaseServiceRole(event)
   const { data: adminRow } = await serviceClient

@@ -281,12 +281,14 @@ const { data: _reactionCount } = useAsyncData(`user-reactions-${userId}`, async 
 const reactionCount = computed(() => _reactionCount.value ?? 0)
 
 // ── Helpers ──
-function segmentLabel(s: string) {
+function segmentLabel(s: string | null) {
+  if (!s) return 'Sin segmento'
   const map: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'Carlotta', conjunta: 'Conjunta' }
   return map[s] ?? s
 }
 
-function segmentVariant(s: string) {
+function segmentVariant(s: string | null) {
+  if (!s) return 'default' as any
   const map: Record<string, string> = { gabriel: 'info', carlotta: 'accent', conjunta: 'primary' }
   return (map[s] ?? 'default') as any
 }

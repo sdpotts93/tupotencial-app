@@ -1,4 +1,4 @@
-import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
 
 interface VimeoVideo {
   uri: string
@@ -20,11 +20,9 @@ interface VimeoResponse {
 }
 
 export default defineEventHandler(async (event) => {
-  // Auth check — use serverSupabaseClient to pick up sb-admin cookie
-  const client = await serverSupabaseClient(event)
-  const { data: claimsData, error: claimsError } = await client.auth.getClaims()
-  const uid = (claimsData?.claims as any)?.sub
-  if (claimsError || !uid) throw createError({ statusCode: 401, message: 'No autenticado' })
+  const user = await serverSupabaseUser(event)
+  const uid = user?.sub
+  if (!uid) throw createError({ statusCode: 401, message: 'No autenticado' })
 
   const serviceClient = serverSupabaseServiceRole(event)
   const { data: adminRow } = await serviceClient

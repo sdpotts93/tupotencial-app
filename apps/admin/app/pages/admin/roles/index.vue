@@ -134,6 +134,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
+const requestFetch = useRequestFetch()
 const toast = useToast()
 const { canManageRoles } = useAdminAuth()
 
@@ -161,7 +162,7 @@ const inviteForm = reactive({
 const { rows: adminUsers, hasMore, loading, loadingMore, loadMore, refresh, status } = await useInfiniteTable(
   'admin-roles',
   async ({ from, to }) => {
-    return await $fetch('/api/admin/admin-users', {
+    return await requestFetch('/api/admin/admin-users', {
       query: {
         from,
         to,
