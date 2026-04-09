@@ -493,7 +493,7 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     '2026-02-17T14:00:00.000Z',
     NULL
   ),
-  -- ci-011: Recorded event — Meditación guiada (video, core)
+  -- ci-011: Recorded event — Meditación guiada (video, VIP add-on gated)
   (
     'c2000000-0000-4000-8000-000000000011',
     'video',
@@ -503,7 +503,7 @@ Cada vez que te sientes en tu espacio, haz tres respiraciones profundas antes de
     NULL,
     NULL, NULL, NULL,
     3600,
-    NULL, 'core', NULL,
+    'vip', 'core', NULL,
     'published', now() - interval '14 days', NULL, NULL,
     NULL,
     'a0000000-0000-4000-8000-000000000001', NULL,
@@ -1464,14 +1464,18 @@ VALUES
 
 -- ── 24. Addons ───────────────────────────────────────────────────────────────
 
-INSERT INTO public.addons (id, title, description, cover_url, price, plan, grants_core_months, stripe_price_id, status, created_at)
+INSERT INTO public.addons (
+  id, title, description, cover_url, price, plan, grants_core_months,
+  stripe_price_id, revenuecat_offering_id, revenuecat_package_id,
+  status, created_at
+)
 VALUES
   (
     'f6000000-0000-4000-8000-000000000001',
     'Mentoría grupal mensual',
     'Sesión grupal de mentoría de 90 minutos una vez al mes con Carlotta o Gabriel. Máximo 15 participantes por sesión.',
     NULL,
-    149900, 'core', NULL, NULL, 'active',
+    149900, 'core', NULL, NULL, NULL, NULL, 'active',
     '2026-01-01T10:00:00.000Z'
   ),
   (
@@ -1479,7 +1483,7 @@ VALUES
     'Módulo VIP: Liderazgo avanzado',
     '12 lecciones exclusivas de liderazgo avanzado + material descargable y ejercicios prácticos.',
     NULL,
-    79900, 'core', NULL, NULL, 'active',
+    79900, 'core', NULL, NULL, 'addon_vip', NULL, 'active',
     '2026-01-01T10:05:00.000Z'
   ),
   (
@@ -1487,7 +1491,7 @@ VALUES
     'Bootcamp: Liderazgo Interior',
     'Acceso completo al bootcamp intensivo de 14 días. Incluye sesiones en vivo, materiales exclusivos y certificado.',
     NULL,
-    299900, 'todos', 3, NULL, 'active',
+    299900, 'todos', 3, NULL, NULL, NULL, 'active',
     '2026-02-01T08:00:00.000Z'
   ),
   (
@@ -1495,7 +1499,7 @@ VALUES
     'Sesión 1:1 con coach certificado',
     'Una sesión individual de 60 minutos con un coach certificado de Tu Potencial. Personalizada a tus necesidades.',
     NULL,
-    249900, 'todos', 1, NULL, 'active',
+    249900, 'todos', 1, NULL, NULL, NULL, 'active',
     '2026-02-10T09:00:00.000Z'
   ),
   (
@@ -1503,7 +1507,7 @@ VALUES
     'Retiro presencial: Reconexión (marzo 2026)',
     'Retiro de fin de semana en Valle de Bravo. Incluye hospedaje, alimentación, sesiones de meditación y yoga.',
     NULL,
-    899900, 'todos', 3, NULL, 'inactive',
+    899900, 'todos', 3, NULL, NULL, NULL, 'inactive',
     '2026-02-15T12:00:00.000Z'
   );
 
