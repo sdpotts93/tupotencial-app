@@ -221,6 +221,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+async function uploadCover(file: File, addonId: string): Promise<string> {
+  const path = `addons/${addonId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
+
 // ── Form state ──
 const form = reactive({
   title: addon.value?.title ?? '',
@@ -267,10 +275,15 @@ async function handleSave() {
 
   saving.value = true
   try {
+    let coverUrl = form.cover_url || null
+    if (coverFile.value) {
+      coverUrl = await uploadCover(coverFile.value, id)
+    }
+
     const payload = {
       title: form.title,
       description: form.description || null,
-      cover_url: form.cover_url || null,
+      cover_url: coverUrl,
       price: Math.round(Number(form.price) * 100),
       plan: form.plan,
       grants_core_months: form.grants_core_months ? Number(form.grants_core_months) : null,

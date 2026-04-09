@@ -132,6 +132,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+async function uploadCover(file: File, benefitId: string): Promise<string> {
+  const path = `benefits/${benefitId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
+
 // ── Fetch existing benefit ──
 const { data: benefit } = await useAsyncData(`benefit-${id}`, async () => {
   if (isNew) return null
@@ -173,10 +181,15 @@ async function handleSave() {
 
   saving.value = true
   try {
+    let coverUrl = form.cover_url || null
+    if (coverFile.value) {
+      coverUrl = await uploadCover(coverFile.value, id)
+    }
+
     const payload = {
       title: form.title,
       description: form.description || null,
-      cover_url: form.cover_url || null,
+      cover_url: coverUrl,
       url: form.url,
       utm_template: form.utm_template || null,
       code: form.code || null,

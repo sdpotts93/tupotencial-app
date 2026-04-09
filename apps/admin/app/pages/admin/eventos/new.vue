@@ -180,6 +180,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+async function uploadCover(file: File, eventId: string): Promise<string> {
+  const path = `events/${eventId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
+
 // ── Form state ──
 const form = reactive({
   title: '',
@@ -242,11 +250,18 @@ async function handleSave() {
 
   saving.value = true
   try {
+    const targetId = crypto.randomUUID()
     const startAt = form.starts_at!.toISOString()
+    let coverUrl: string | null = null
+    if (coverFile.value) {
+      coverUrl = await uploadCover(coverFile.value, targetId)
+    }
 
     await client.from('events').insert({
+      id: targetId,
       title: form.title,
       description: form.description,
+      cover_url: coverUrl,
       start_at: startAt,
       duration: form.duration || null,
       vimeo_live_event_id: form.vimeo_live_event_id || null,

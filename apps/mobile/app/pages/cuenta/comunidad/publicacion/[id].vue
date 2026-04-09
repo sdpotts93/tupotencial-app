@@ -11,7 +11,7 @@
       </header>
 
       <!-- Skeleton -->
-      <template v-if="postStatus === 'pending'">
+      <template v-if="postStatus === 'pending' && !postData">
         <div class="post-detail">
           <div class="post-detail__header">
             <UiSkeleton variant="circle" width="40px" height="40px" />
@@ -39,7 +39,7 @@
       </template>
 
       <!-- Error state -->
-      <template v-else-if="postStatus === 'error'">
+      <template v-else-if="postStatus === 'error' && !postData">
         <div class="post__error">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 20 20" class="post__error-icon"><path fill="currentColor" d="m12.876 8.17l.952 1.089a5.5 5.5 0 0 0-.966.414l-.295-.337l-.585.936a5.5 5.5 0 0 0-1.76 2.676a.5.5 0 0 1-.684-.256L7.495 7.79L6.26 10.696A.5.5 0 0 1 5.8 11H2.5a.5.5 0 0 1 0-1h2.97l1.57-3.696a.5.5 0 0 1 .922.004l2.127 5.106l1.987-3.179a.5.5 0 0 1 .8-.064m3.848-3.858a4.42 4.42 0 0 1 .978 4.702A2 2 0 0 0 17.5 9h-.889a3.415 3.415 0 0 0-.598-3.984A3.306 3.306 0 0 0 11.3 5l-.951.963a.5.5 0 0 1-.711 0l-.96-.97a3.3 3.3 0 0 0-4.706-.016C2.899 6.061 2.713 7.711 3.42 9H2.5q-.09 0-.18.01a4.4 4.4 0 0 1 .941-4.736a4.3 4.3 0 0 1 6.127.016l.605.61l.596-.603l.109-.106a4.306 4.306 0 0 1 6.026.121M4.856 12l4.784 4.847a.5.5 0 0 0 .712-.703l-4.146-4.2Q6.011 12 5.8 12zM20 14.5a4.5 4.5 0 1 1-9 0a4.5 4.5 0 0 1 9 0M15.5 12a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5m0 5.125a.625.625 0 1 0 0-1.25a.625.625 0 0 0 0 1.25"/></svg>
           <h2 class="post__error-title">No pudimos cargar la publicacion</h2>
@@ -67,7 +67,7 @@
           <img v-else :src="post.media_url" alt="" class="post-detail__media" />
         </template>
         <div class="post-detail__stats">
-          <button class="post-detail__like" @click="toggleLike">
+          <button class="post-detail__like" :disabled="togglingLike" @click="toggleLike">
             <svg class="icon-t" width="16" height="16" viewBox="0 0 24 24" :fill="post.liked ? 'var(--color-danger)' : 'none'" :stroke="post.liked ? 'var(--color-danger)' : 'currentColor'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
             {{ post.reactions }}
           </button>
@@ -266,14 +266,40 @@ onMounted(() => {
 onBeforeUnmount(() => commentObserver?.disconnect())
 
 // Toggle like
+const togglingLike = ref(false)
+
 async function toggleLike() {
-  if (!user.value?.id) return
-  if (post.value.liked) {
-    await client.from('post_reactions').delete().eq('post_id', postId).eq('user_id', user.value.id)
-  } else {
-    await client.from('post_reactions').insert({ post_id: postId, reaction: 'like' })
+  if (!user.value?.id || togglingLike.value || !postData.value) return
+
+  const previousLiked = postData.value.liked
+  const previousReactions = postData.value.reactions
+
+  postData.value = {
+    ...postData.value,
+    liked: !previousLiked,
+    reactions: Math.max(0, previousReactions + (previousLiked ? -1 : 1)),
   }
-  await refreshPost()
+
+  togglingLike.value = true
+
+  try {
+    if (previousLiked) {
+      const { error } = await client.from('post_reactions').delete().eq('post_id', postId).eq('user_id', user.value.id)
+      if (error) throw error
+    } else {
+      const { error } = await client.from('post_reactions').insert({ post_id: postId, reaction: 'like' })
+      if (error) throw error
+    }
+  } catch {
+    postData.value = {
+      ...postData.value,
+      liked: previousLiked,
+      reactions: previousReactions,
+    }
+    toast.show('Error al actualizar reacción', 'error')
+  } finally {
+    togglingLike.value = false
+  }
 }
 
 // Submit comment
@@ -284,6 +310,7 @@ async function submitComment() {
   if (!newComment.value.trim() || !user.value?.id || submitting.value) return
   submitting.value = true
   try {
+    const currentCommentCount = commentCountData.value ?? allComments.value.length
     const { data: inserted } = await client.from('post_comments').insert({
       post_id: postId,
       body: newComment.value.trim(),
@@ -291,6 +318,7 @@ async function submitComment() {
     newComment.value = ''
     if (inserted) {
       extraComments.value.push(mapComment(inserted))
+      commentCountData.value = currentCommentCount + 1
     }
   } catch {
     toast.show('Error al publicar comentario', 'error')

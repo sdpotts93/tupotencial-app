@@ -86,3 +86,5 @@ Append one line per completed task:
 2026-04-09 00:18 America/Mexico_City — Migrate web add-ons to RevenueCat offerings, sync add-on entitlements in the webhook, and restore web add-on purchase flows
 2026-04-09 01:05 America/Mexico_City — Fix admin program cover uploads so create/edit persist portada images to Supabase Storage and save the public URL
 2026-04-09 01:10 America/Mexico_City — Fix admin community post media uploads so create/edit persist selected files to storage and save the public URL
+2026-04-09 01:20 America/Mexico_City — Add Cloudflare runtime fallbacks for Vimeo admin imports and clarify missing token error messaging
+2026-04-09 01:29 America/Mexico_City — Audit remaining admin file-upload forms and fix benefit, add-on, and event cover uploads in create/edit flows

@@ -8,7 +8,7 @@
       <p class="community__subtitle">El espacio donde compartir avances, sostener el proceso y crecer con otros que viven con intención.</p>
 
       <!-- Loading skeleton -->
-      <div v-if="comunidadStatus === 'pending'">
+      <div v-if="comunidadStatus === 'pending' && !postsData">
         <!-- Pills skeleton -->
         <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-5);">
           <UiSkeleton v-for="i in 3" :key="i" variant="rect" width="70px" height="32px" radius="var(--radius-full)" />
@@ -239,7 +239,7 @@ const segmentAuthor: Record<string, string> = { gabriel: 'Gabriel', carlotta: 'C
 function buildPostQuery() {
   let query = client
     .from('posts')
-    .select('*, post_reactions(user_id, reaction), post_comments(count)')
+    .select('*, post_reactions(user_id, reaction)')
     .eq('status', 'published')
 
   const segment = filterSegmentMap[activeFilter.value]
@@ -248,22 +248,43 @@ function buildPostQuery() {
   return query.order('created_at', { ascending: false })
 }
 
-function mapPost(p: any) {
+async function fetchPublishedCommentCounts(postIds: string[]) {
+  if (!postIds.length) return {} as Record<string, number>
+
+  const { data } = await client
+    .from('post_comments')
+    .select('post_id')
+    .in('post_id', postIds)
+    .eq('status', 'published')
+
+  return (data ?? []).reduce((counts, comment: any) => {
+    counts[comment.post_id] = (counts[comment.post_id] ?? 0) + 1
+    return counts
+  }, {} as Record<string, number>)
+}
+
+function mapPost(p: any, commentCounts: Record<string, number>) {
   return {
     ...p,
     author: segmentAuthor[p.community_segment ?? ''] ?? 'Gabriel',
     avatar: avatarUrl(p.community_segment ?? 'gabriel'),
     reactions: ((p.post_reactions as any) ?? []).length,
     liked: ((p.post_reactions as any) ?? []).some((r: any) => r.user_id === user.value?.id),
-    comments: (p.post_comments as any)?.[0]?.count ?? 0,
+    comments: commentCounts[p.id] ?? 0,
     timeAgo: formatTimeAgo(p.created_at),
   }
 }
 
+async function fetchPostPage(from: number, to: number) {
+  const { data } = await buildPostQuery().range(from, to)
+  const rows = data ?? []
+  const commentCounts = await fetchPublishedCommentCounts(rows.map((post: any) => post.id))
+  const items = rows.map((post: any) => mapPost(post, commentCounts))
+  return { items, hasMore: rows.length >= PAGE_SIZE }
+}
+
 const { data: postsData, refresh: refreshComunidad, status: comunidadStatus } = useAsyncData('mobile-posts', async () => {
-  const { data } = await buildPostQuery().range(0, PAGE_SIZE - 1)
-  const items = (data ?? []).map(mapPost)
-  return { items, hasMore: items.length >= PAGE_SIZE }
+  return fetchPostPage(0, PAGE_SIZE - 1)
 }, { lazy: true, watch: [activeFilter] })
 
 // ── Infinite scroll state ──
@@ -285,11 +306,10 @@ async function loadMore() {
   if (loadingMore.value || !hasMore.value) return
   loadingMore.value = true
 
-  const { data } = await buildPostQuery().range(offset.value, offset.value + PAGE_SIZE - 1)
-  const batch = (data ?? []).map(mapPost)
-  extraPosts.value.push(...batch)
-  offset.value += batch.length
-  hasMore.value = batch.length >= PAGE_SIZE
+  const page = await fetchPostPage(offset.value, offset.value + PAGE_SIZE - 1)
+  extraPosts.value.push(...page.items)
+  offset.value += page.items.length
+  hasMore.value = page.hasMore
   loadingMore.value = false
 }
 
@@ -317,12 +337,25 @@ function isVideo(url: string) {
 async function toggleReaction(id: string) {
   const post = allPosts.value.find((p: any) => p.id === id)
   if (!post || !user.value?.id) return
-  if (post.liked) {
-    await client.from('post_reactions').delete().eq('post_id', id).eq('user_id', user.value.id)
-  } else {
-    await client.from('post_reactions').insert({ post_id: id, reaction: 'like' })
+
+  const previousLiked = post.liked
+  const previousReactions = post.reactions
+  post.liked = !previousLiked
+  post.reactions = Math.max(0, previousReactions + (previousLiked ? -1 : 1))
+
+  try {
+    if (previousLiked) {
+      const { error } = await client.from('post_reactions').delete().eq('post_id', id).eq('user_id', user.value.id)
+      if (error) throw error
+    } else {
+      const { error } = await client.from('post_reactions').insert({ post_id: id, reaction: 'like' })
+      if (error) throw error
+    }
+  } catch {
+    post.liked = previousLiked
+    post.reactions = previousReactions
+    await refreshComunidad()
   }
-  await refreshComunidad()
 }
 </script>
 

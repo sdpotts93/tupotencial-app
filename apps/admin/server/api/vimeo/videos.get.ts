@@ -1,4 +1,5 @@
 import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server'
+import { getVimeoToken } from '../../utils/getVimeoToken'
 
 interface VimeoVideo {
   uri: string
@@ -35,8 +36,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, message: 'Sin permisos' })
   }
 
-  const token = useRuntimeConfig().vimeoToken
-  if (!token) throw createError({ statusCode: 500, message: 'VIMEO_TOKEN no configurado' })
+  const token = getVimeoToken(event)
+  if (!token) throw createError({ statusCode: 500, message: 'NUXT_VIMEO_TOKEN no configurado en runtime de Cloudflare' })
 
   // Get existing vimeo_ids from DB first
   const { data: existing } = await serviceClient
