@@ -50,6 +50,11 @@ async function establishSessionFromLink() {
   const inviteType = typeof route.query.type === 'string' ? route.query.type : hash.get('type') ?? ''
   const accessToken = hash.get('access_token') ?? ''
   const refreshToken = hash.get('refresh_token') ?? ''
+  const hasAuthPayload = Boolean(code || (tokenHash && inviteType) || (accessToken && refreshToken))
+
+  if (!hasAuthPayload) {
+    throw new Error('El enlace no es válido o ya expiró.')
+  }
 
   if (code) {
     const { error: exchangeError } = await client.auth.exchangeCodeForSession(code)
@@ -131,6 +136,7 @@ onMounted(async () => {
   font-size: var(--title-xl);
   line-height: 0.95;
   margin-bottom: var(--space-3);
+  font-weight: 100;
 }
 
 .confirmacion__subtitle {
