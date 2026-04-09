@@ -4,29 +4,7 @@
       <h1 class="page-header__title">Usuarios</h1>
     </div>
 
-    <!-- Skeleton loader -->
-    <template v-if="status === 'pending'">
-      <UiTableSkeleton :toolbar-widths="['250px', '120px', '120px', '120px']" columns="1fr 80px 80px 80px 100px">
-        <div style="display: flex; align-items: center; gap: var(--space-3);">
-          <UiSkeleton variant="rect" width="36px" height="36px" radius="var(--radius-full)" />
-          <div style="display: flex; flex-direction: column; gap: var(--space-1);">
-            <UiSkeleton variant="text" width="120px" height="14px" />
-            <UiSkeleton variant="text" width="160px" height="12px" />
-          </div>
-        </div>
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="text" width="60px" height="14px" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="text" width="80px" height="14px" />
-      </UiTableSkeleton>
-    </template>
-
-    <!-- Error state -->
-    <template v-else-if="status === 'error'">
-      <UiErrorState title="No pudimos cargar los usuarios" @retry="refresh()" />
-    </template>
-
-    <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToUser" @load-more="loadMore" @retry="refresh()">
+    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading || status === 'pending'" :loading-more="loadingMore" :error="status === 'error'" error-title="No pudimos cargar los usuarios" @row-click="goToUser" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput
           v-model="searchInput"

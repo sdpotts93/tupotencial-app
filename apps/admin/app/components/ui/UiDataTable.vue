@@ -18,14 +18,27 @@
             <th v-if="$slots.actions" class="data-table__actions-header" />
           </tr>
           <tr v-if="loading" aria-hidden="true" class="data-table__bar-row">
-            <th :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__bar-cell">
+            <th :colspan="colSpan" class="data-table__bar-cell">
               <div class="data-table__bar" />
             </th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length && !loading">
-            <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__empty">
+          <!-- Error -->
+          <tr v-if="error && !rows.length">
+            <td :colspan="colSpan" class="data-table__state">
+              <UiErrorState :title="errorTitle" @retry="$emit('retry')" />
+            </td>
+          </tr>
+          <!-- Loading (no rows yet) -->
+          <tr v-else-if="loading && !rows.length">
+            <td :colspan="colSpan" class="data-table__state data-table__state--loading">
+              &nbsp;
+            </td>
+          </tr>
+          <!-- Empty (loaded, no rows) -->
+          <tr v-else-if="!rows.length && !loading">
+            <td :colspan="colSpan" class="data-table__state">
               <UiEmptyState :title="emptyText" :description="emptyDescription">
                 <template #icon>
                   <Icon name="lucide:search-x" size="32" />
@@ -38,11 +51,7 @@
               </UiEmptyState>
             </td>
           </tr>
-          <tr v-else-if="!rows.length && loading">
-            <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__empty data-table__empty--loading">
-              &nbsp;
-            </td>
-          </tr>
+          <!-- Rows -->
           <tr v-for="(row, i) in rows" :key="row.id || i" class="data-table__row" @click="$emit('row-click', row)">
             <td
               v-for="(col, ci) in columns"
@@ -58,7 +67,7 @@
             </td>
           </tr>
           <tr v-if="loadingMore">
-            <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__loading-more">
+            <td :colspan="colSpan" class="data-table__loading-more">
               Cargando más...
             </td>
           </tr>
@@ -82,6 +91,8 @@ interface Props {
   loading?: boolean
   loadingMore?: boolean
   hasMore?: boolean
+  error?: boolean
+  errorTitle?: string
   emptyText?: string
   emptyDescription?: string
   scrollable?: boolean
@@ -92,6 +103,8 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   loadingMore: false,
   hasMore: false,
+  error: false,
+  errorTitle: 'No pudimos cargar los datos',
   emptyText: 'Sin resultados',
   emptyDescription: 'Intenta ajustar los filtros o buscar con otros términos.',
   scrollable: false,
@@ -103,6 +116,8 @@ const emit = defineEmits<{
   'load-more': []
   'retry': []
 }>()
+
+const colSpan = computed(() => props.columns.length + (!!useSlots().actions ? 1 : 0))
 
 const sentinelRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
@@ -220,7 +235,6 @@ th.data-table__sticky-col {
 }
 @media (hover: hover) {
   .data-table__row:hover { background: var(--color-border-light); }
-  /* Sticky cell covers the tr background, so apply hover directly */
   .data-table__row:hover .data-table__sticky-col {
     background: var(--color-border-light);
   }
@@ -244,13 +258,13 @@ th.data-table__sticky-col {
   margin-left: var(--space-2);
 }
 
-.data-table__empty {
-  text-align: center;
+/* ─── State cells (empty / loading / error) ─── */
+.data-table__state {
   padding: 0;
 }
 
-.data-table__empty--loading {
-  padding: var(--space-10) var(--space-4);
+.data-table__state--loading {
+  height: 10dvh;
 }
 
 /* ─── Indeterminate progress bar ─── */

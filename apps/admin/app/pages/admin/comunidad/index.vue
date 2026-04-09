@@ -10,29 +10,7 @@
     <UiTabs v-model="activeTab" :tabs="tabs" />
 
     <div class="tab-content">
-      <!-- Skeleton loader -->
-      <template v-if="status === 'pending'">
-        <UiTableSkeleton :toolbar-widths="['200px']" columns="120px 1fr 1.5fr 50px 50px 80px 100px 100px">
-          <div style="display: flex; align-items: center; gap: var(--space-2);">
-            <UiSkeleton variant="rect" width="32px" height="32px" radius="var(--radius-full)" />
-            <UiSkeleton variant="text" width="80px" height="14px" />
-          </div>
-          <UiSkeleton variant="text" width="70%" height="14px" />
-          <UiSkeleton variant="text" width="90%" height="14px" />
-          <UiSkeleton variant="text" width="30px" height="14px" />
-          <UiSkeleton variant="text" width="30px" height="14px" />
-          <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-          <UiSkeleton variant="text" width="80px" height="14px" />
-          <UiSkeleton variant="rect" width="80px" height="30px" radius="var(--radius-md)" />
-        </UiTableSkeleton>
-      </template>
-
-      <!-- Error state -->
-      <template v-else-if="status === 'error'">
-        <UiErrorState title="No pudimos cargar las publicaciones" @retry="refresh()" />
-      </template>
-
-      <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
+      <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading || status === 'pending'" :loading-more="loadingMore" :error="status === 'error'" error-title="No pudimos cargar las publicaciones" @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
         <template #toolbar>
           <UiInput
             v-model="searchInput"

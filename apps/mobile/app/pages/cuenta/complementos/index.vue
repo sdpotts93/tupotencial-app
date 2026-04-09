@@ -56,8 +56,7 @@
             class="addons__card"
           >
             <div class="addons__card-hero">
-              <img v-if="addon.img" :src="addon.img" alt="" class="addons__card-img" />
-              <div v-else class="addons__card-gradient" :style="{ background: addon.bg }" />
+              <img :src="addon.img || ''" alt="" class="addons__card-img" />
               <span class="addons__card-price">{{ addon.priceLabel }}</span>
             </div>
             <div class="addons__card-info">

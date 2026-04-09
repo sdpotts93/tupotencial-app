@@ -7,94 +7,90 @@
       </div>
     </div>
 
-    <!-- Skeleton loader -->
-    <template v-if="benefitsStatus === 'pending'">
-      <UiTableSkeleton :toolbar-widths="['200px']" columns="40px minmax(200px, 1fr) 1fr 1fr auto">
-        <UiSkeleton variant="rect" width="16px" height="16px" radius="var(--radius-sm)" />
-        <UiSkeleton variant="text" width="70%" height="14px" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="rect" width="120px" height="30px" radius="var(--radius-md)" />
-      </UiTableSkeleton>
-    </template>
+    <div class="ben-container">
+      <div class="ben-toolbar">
+        <UiInput
+          v-model="searchInput"
+          placeholder="Buscar beneficio..."
+          style="min-width: 200px;"
+        >
+          <template #suffix><Icon name="lucide:search" size="18" /></template>
+        </UiInput>
+      </div>
 
-    <!-- Error state -->
-    <template v-else-if="benefitsStatus === 'error'">
-      <UiErrorState title="No pudimos cargar los beneficios" @retry="refresh()" />
-    </template>
-
-    <template v-else>
-      <div class="ben-container">
-        <div class="ben-toolbar">
-          <UiInput
-            v-model="searchInput"
-            placeholder="Buscar beneficio..."
-            style="min-width: 200px;"
-          >
-            <template #suffix><Icon name="lucide:search" size="18" /></template>
-          </UiInput>
+      <div class="ben-list">
+        <div class="ben-header">
+          <span class="ben-header__drag" />
+          <span>Beneficio</span>
+          <span>Plan</span>
+          <span>Estado</span>
+          <span class="ben-header__actions" />
         </div>
 
-        <div class="ben-list">
-          <div class="ben-header">
-            <span class="ben-header__drag" />
-            <span>Beneficio</span>
-            <span>Plan</span>
-            <span>Estado</span>
-            <span class="ben-header__actions" />
-          </div>
+        <!-- Loading bar -->
+        <div v-if="benefitsStatus === 'pending'" class="ben-bar"><div class="ben-bar__fill" /></div>
 
-          <div
-            v-for="(row, index) in filteredRows"
-            :key="row.id"
-            class="ben-row"
-            :class="{
-              'ben-row--dragging': dragIndex === index,
-              'ben-row--over': dragOverIndex === index && dragIndex !== index,
-            }"
-            :draggable="!searchInput && canEdit"
-            @dragstart="onDragStart(index, $event)"
-            @dragover.prevent="onDragOver(index)"
-            @dragend="onDragEnd"
-            @click="goToEdit(row)"
-          >
-            <span class="ben-row__drag" :class="{ 'ben-row__drag--disabled': !!searchInput }">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
-                <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
-                <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
-              </svg>
-            </span>
-            <span class="ben-row__title">{{ row.title }}</span>
-            <span class="ben-row__plan">
-              <UiTag :variant="row.plan === 'core' ? 'gold' : 'default'">{{ planLabel(row.plan) }}</UiTag>
-            </span>
-            <span class="ben-row__status">
-              <UiTag :variant="row.status === 'active' ? 'success' : 'warning'">
-                {{ statusLabel(row.status) }}
-              </UiTag>
-            </span>
-            <span class="ben-row__actions" @click.stop>
-              <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/beneficios/${row.id}`">
-                <template #icon><Icon name="lucide:pencil" size="16" /></template>
-                Editar
-              </UiButton>
-              <UiButton v-if="canEdit" variant="danger-ghost" size="sm" @click="handleDelete(row)">
-                <template #icon><Icon name="lucide:trash-2" size="16" /></template>
-                Eliminar
-              </UiButton>
-            </span>
-          </div>
+        <!-- Error -->
+        <div v-if="benefitsStatus === 'error'" class="ben-empty">
+          <UiErrorState title="No pudimos cargar los beneficios" @retry="refresh()" />
+        </div>
 
-          <div v-if="!filteredRows.length" class="ben-empty">
-            <UiEmptyState title="Sin resultados" description="No se encontraron beneficios. Intenta con otra búsqueda.">
-              <template #icon><Icon name="lucide:search-x" size="32" /></template>
-              <template #action><UiButton variant="primary-outline" size="sm" @click="refresh()">Reintentar</UiButton></template>
-            </UiEmptyState>
-          </div>
+        <!-- Loading (no rows yet) -->
+        <div v-else-if="benefitsStatus === 'pending' && !filteredRows.length" class="ben-empty ben-empty--loading" />
+
+        <!-- Empty -->
+        <div v-else-if="!filteredRows.length" class="ben-empty">
+          <UiEmptyState title="Sin resultados" description="No se encontraron beneficios. Intenta con otra búsqueda.">
+            <template #icon><Icon name="lucide:search-x" size="32" /></template>
+            <template #action><UiButton variant="primary-outline" size="sm" @click="refresh()">Reintentar</UiButton></template>
+          </UiEmptyState>
+        </div>
+
+        <!-- Rows -->
+        <div
+          v-for="(row, index) in filteredRows"
+          v-else
+          :key="row.id"
+          class="ben-row"
+          :class="{
+            'ben-row--dragging': dragIndex === index,
+            'ben-row--over': dragOverIndex === index && dragIndex !== index,
+          }"
+          :draggable="!searchInput && canEdit"
+          @dragstart="onDragStart(index, $event)"
+          @dragover.prevent="onDragOver(index)"
+          @dragend="onDragEnd"
+          @click="goToEdit(row)"
+        >
+          <span class="ben-row__drag" :class="{ 'ben-row__drag--disabled': !!searchInput }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/>
+              <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+              <circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>
+            </svg>
+          </span>
+          <span class="ben-row__title">{{ row.title }}</span>
+          <span class="ben-row__plan">
+            <UiTag :variant="row.plan === 'core' ? 'gold' : 'default'">{{ planLabel(row.plan) }}</UiTag>
+          </span>
+          <span class="ben-row__status">
+            <UiTag :variant="row.status === 'active' ? 'success' : 'warning'">
+              {{ statusLabel(row.status) }}
+            </UiTag>
+          </span>
+          <span class="ben-row__actions" @click.stop>
+            <UiButton v-if="canEdit" variant="soft" size="sm" :to="`/admin/beneficios/${row.id}`">
+              <template #icon><Icon name="lucide:pencil" size="16" /></template>
+              Editar
+            </UiButton>
+            <UiButton v-if="canEdit" variant="danger-ghost" size="sm" @click="handleDelete(row)">
+              <template #icon><Icon name="lucide:trash-2" size="16" /></template>
+              Eliminar
+            </UiButton>
+          </span>
         </div>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -317,6 +313,44 @@ function goToEdit(row: Record<string, any>) {
 /* ─── Empty ─── */
 .ben-empty {
   grid-column: 1 / -1;
+}
+
+.ben-empty--loading {
+  min-height: 10dvh;
+}
+
+/* ─── Loading bar ─── */
+.ben-bar {
+  grid-column: 1 / -1;
+  height: 0;
+  position: relative;
+  overflow: visible;
+}
+
+.ben-bar__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+}
+
+.ben-bar__fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  border-radius: 2px;
+  background: rgba(230, 120, 74, 0.7);
+  animation: dt-slide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes dt-slide {
+  0%   { left: -40%; }
+  100% { left: 100%; }
 }
 
 </style>

@@ -21,29 +21,7 @@
     <!-- Admin Users Table -->
     <h2 class="section-title">Administradores</h2>
 
-    <!-- Skeleton loader -->
-    <template v-if="status === 'pending'">
-      <UiTableSkeleton :toolbar-widths="['200px']" :row-count="4" columns="1fr 100px 80px 100px 100px">
-        <div style="display: flex; align-items: center; gap: var(--space-2);">
-          <UiSkeleton variant="rect" width="32px" height="32px" radius="var(--radius-full)" />
-          <div style="display: flex; flex-direction: column; gap: var(--space-1);">
-            <UiSkeleton variant="text" width="120px" height="14px" />
-            <UiSkeleton variant="text" width="150px" height="12px" />
-          </div>
-        </div>
-        <UiSkeleton variant="rect" width="80px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="text" width="80px" height="14px" />
-        <UiSkeleton variant="rect" width="80px" height="30px" radius="var(--radius-md)" />
-      </UiTableSkeleton>
-    </template>
-
-    <!-- Error state -->
-    <template v-else-if="status === 'error'">
-      <UiErrorState title="No pudimos cargar los administradores" @retry="refresh()" />
-    </template>
-
-    <UiDataTable v-else fill :columns="columns" :rows="filteredAdmins" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @load-more="loadMore" @retry="refresh()">
+    <UiDataTable fill :columns="columns" :rows="filteredAdmins" :has-more="hasMore" :loading="searchPending || loading || status === 'pending'" :loading-more="loadingMore" :error="status === 'error'" error-title="No pudimos cargar los administradores" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput
           v-model="searchInput"

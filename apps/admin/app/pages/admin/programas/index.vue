@@ -7,25 +7,7 @@
       </div>
     </div>
 
-    <!-- Skeleton loader -->
-    <template v-if="status === 'pending'">
-      <UiTableSkeleton :toolbar-widths="['200px', '120px', '120px', '120px']" columns="1fr 80px 80px 80px 80px 60px 100px">
-        <UiSkeleton variant="text" width="60%" height="14px" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="text" width="40px" height="14px" />
-        <UiSkeleton variant="rect" width="80px" height="30px" radius="var(--radius-md)" />
-      </UiTableSkeleton>
-    </template>
-
-    <!-- Error state -->
-    <template v-else-if="status === 'error'">
-      <UiErrorState title="No pudimos cargar los programas" @retry="refresh()" />
-    </template>
-
-    <UiDataTable v-else fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
+    <UiDataTable fill :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading || status === 'pending'" :loading-more="loadingMore" :error="status === 'error'" error-title="No pudimos cargar los programas" @row-click="goToEdit" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput
           v-model="searchInput"

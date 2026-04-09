@@ -4,6 +4,26 @@
       <h1 class="page-header__title">Plan del día: {{ formatDate(dateParam) }}</h1>
     </div>
 
+    <!-- Skeleton -->
+    <template v-if="planStatus === 'pending' || planStatus === 'idle'">
+      <div class="form-layout__main">
+        <UiCard v-for="i in 3" :key="i" variant="outlined">
+          <div class="form-section">
+            <UiSkeleton variant="text" width="120px" height="20px" />
+            <UiSkeleton variant="rect" width="100%" height="44px" radius="var(--radius-md)" />
+            <UiSkeleton variant="rect" width="100%" height="44px" radius="var(--radius-md)" />
+          </div>
+        </UiCard>
+      </div>
+    </template>
+
+    <!-- Error -->
+    <template v-else-if="planStatus === 'error'">
+      <UiErrorState title="No pudimos cargar el plan del día" @retry="refreshPlan()" />
+    </template>
+
+    <!-- Content -->
+    <template v-else>
     <div class="form-layout__main">
 
       <!-- 1. Frase del día -->
@@ -85,6 +105,7 @@
       <UiButton variant="soft" size="sm" to="/admin/hoy">Cancelar</UiButton>
       <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar</UiButton>
     </div>
+    </template>
   </div>
 </template>
 
@@ -100,7 +121,7 @@ const formError = ref('')
 const errors = reactive({ content_id: '', form_id: '' })
 
 // ── Fetch existing daily plan for this date ──
-const { data: existingPlan } = useAsyncData(`daily-plan-${dateParam.value}`, async () => {
+const { data: existingPlan, status: planStatus, refresh: refreshPlan } = useAsyncData(`daily-plan-${dateParam.value}`, async () => {
   const { data } = await client.from('daily_plans').select('*').eq('date', dateParam.value).maybeSingle()
   return data
 }, { lazy: true })

@@ -4,23 +4,7 @@
       <h1 class="page-header__title">Suscripciones</h1>
     </div>
 
-    <!-- Skeleton loader -->
-    <template v-if="plansStatus === 'pending'">
-      <UiTableSkeleton :toolbar-widths="[]" :row-count="4" columns="25% 1fr 1fr auto">
-        <UiSkeleton variant="text" width="80%" height="14px" />
-        <UiSkeleton variant="text" width="60%" height="14px" />
-        <UiSkeleton variant="text" width="50%" height="14px" />
-        <UiSkeleton variant="rect" width="80px" height="30px" radius="var(--radius-md)" />
-      </UiTableSkeleton>
-    </template>
-
-    <!-- Error state -->
-    <template v-else-if="plansStatus === 'error'">
-      <UiErrorState title="No pudimos cargar las suscripciones" @retry="refreshPlans()" />
-    </template>
-
-    <template v-else>
-      <UiDataTable fill :columns="columns" :rows="rows ?? []" @row-click="goToEdit" @retry="refreshPlans()">
+    <UiDataTable fill :columns="columns" :rows="rows ?? []" :loading="plansStatus === 'pending'" :error="plansStatus === 'error'" error-title="No pudimos cargar las suscripciones" @row-click="goToEdit" @retry="refreshPlans()">
         <template #cell-price="{ row }">
           {{ row.price > 0 ? `$${(row.price / 100).toLocaleString('es-MX')} MXN/${row.interval === 'year' ? 'año' : 'mes'}` : 'Gratis' }}
         </template>
@@ -35,8 +19,7 @@
             Editar
           </UiButton>
         </template>
-      </UiDataTable>
-    </template>
+    </UiDataTable>
   </div>
 </template>
 

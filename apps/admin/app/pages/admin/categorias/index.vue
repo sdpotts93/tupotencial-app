@@ -7,45 +7,43 @@
       </div>
     </div>
 
-    <!-- Skeleton loader -->
-    <template v-if="catsStatus === 'pending'">
-      <UiTableSkeleton :toolbar-widths="['200px']" columns="40px 1fr 1fr 1fr 1fr auto">
-        <UiSkeleton variant="rect" width="16px" height="16px" radius="var(--radius-sm)" />
-        <UiSkeleton variant="text" width="70%" height="14px" />
-        <UiSkeleton variant="text" width="50%" height="14px" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="text" width="60%" height="14px" />
-        <UiSkeleton variant="rect" width="120px" height="30px" radius="var(--radius-md)" />
-      </UiTableSkeleton>
-    </template>
+    <div class="cat-container">
+      <div class="cat-toolbar">
+        <UiInput
+          v-model="searchInput"
+          placeholder="Buscar por nombre..."
+          style="min-width: 200px;"
+        >
+          <template #suffix><Icon name="lucide:search" size="18" /></template>
+        </UiInput>
+      </div>
 
-    <!-- Error state -->
-    <template v-else-if="catsStatus === 'error'">
-      <UiErrorState title="No pudimos cargar las categorías" @retry="refresh()" />
-    </template>
-
-    <template v-else>
-      <div class="cat-container">
-        <div class="cat-toolbar">
-          <UiInput
-            v-model="searchInput"
-            placeholder="Buscar por nombre..."
-            style="min-width: 200px;"
-          >
-            <template #suffix><Icon name="lucide:search" size="18" /></template>
-          </UiInput>
+      <div class="cat-list">
+        <div class="cat-header">
+          <span class="cat-header__drag" />
+          <span class="cat-header__name">Nombre</span>
+          <span class="cat-header__slug">Slug</span>
+          <span class="cat-header__status">Estado</span>
+          <span class="cat-header__count">Contenidos</span>
+          <span class="cat-header__actions" />
         </div>
 
-        <div class="cat-list">
-          <div class="cat-header">
-            <span class="cat-header__drag" />
-            <span class="cat-header__name">Nombre</span>
-            <span class="cat-header__slug">Slug</span>
-            <span class="cat-header__status">Estado</span>
-            <span class="cat-header__count">Contenidos</span>
-            <span class="cat-header__actions" />
-          </div>
+        <div v-if="catsStatus === 'pending'" class="cat-bar"><div class="cat-bar__fill" /></div>
 
+        <div v-if="catsStatus === 'error'" class="cat-empty">
+          <UiErrorState title="No pudimos cargar las categorías" @retry="refresh()" />
+        </div>
+
+        <div v-else-if="catsStatus === 'pending' && !filteredRows.length" class="cat-empty cat-empty--loading" />
+
+        <div v-else-if="!filteredRows.length" class="cat-empty">
+          <UiEmptyState title="Sin resultados" description="No se encontraron categorías. Intenta con otra búsqueda.">
+            <template #icon><Icon name="lucide:search-x" size="32" /></template>
+            <template #action><UiButton variant="primary-outline" size="sm" @click="refresh()">Reintentar</UiButton></template>
+          </UiEmptyState>
+        </div>
+
+        <template v-else>
           <div
             v-for="(cat, index) in filteredRows"
             :key="cat.id"
@@ -84,16 +82,9 @@
               </UiButton>
             </span>
           </div>
-
-          <div v-if="!filteredRows.length" class="cat-empty">
-            <UiEmptyState title="Sin resultados" description="No se encontraron categorías. Intenta con otra búsqueda.">
-              <template #icon><Icon name="lucide:search-x" size="32" /></template>
-              <template #action><UiButton variant="primary-outline" size="sm" @click="refresh()">Reintentar</UiButton></template>
-            </UiEmptyState>
-          </div>
-        </div>
+        </template>
       </div>
-    </template>
+    </div>
 
     <!-- Create/Edit Modal -->
     <UiModal v-model="showCreateModal" :title="editingCategory ? 'Editar categoría' : 'Nueva categoría'">
@@ -391,6 +382,43 @@ async function handleDelete(row: Record<string, any>) {
 /* ─── Empty ─── */
 .cat-empty {
   grid-column: 1 / -1;
+}
+
+.cat-empty--loading {
+  min-height: 10dvh;
+}
+
+.cat-bar {
+  grid-column: 1 / -1;
+  height: 0;
+  position: relative;
+  overflow: visible;
+}
+
+.cat-bar__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+}
+
+.cat-bar__fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  border-radius: 2px;
+  background: rgba(230, 120, 74, 0.7);
+  animation: dt-slide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes dt-slide {
+  0%   { left: -40%; }
+  100% { left: 100%; }
 }
 
 

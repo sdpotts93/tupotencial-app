@@ -4,22 +4,7 @@
       <h1 class="page-header__title">Feedback</h1>
     </div>
 
-    <!-- Skeleton loader -->
-    <template v-if="status === 'pending'">
-      <UiTableSkeleton :toolbar-widths="['200px', '120px']" columns="1fr 80px 80px 100px">
-        <UiSkeleton variant="text" width="50%" height="14px" />
-        <UiSkeleton variant="text" width="80px" height="14px" />
-        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-        <UiSkeleton variant="text" width="80px" height="14px" />
-      </UiTableSkeleton>
-    </template>
-
-    <!-- Error state -->
-    <template v-else-if="status === 'error'">
-      <UiErrorState title="No pudimos cargar las respuestas" @retry="refresh()" />
-    </template>
-
-    <UiDataTable v-else :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @load-more="loadMore" @retry="refresh()">
+    <UiDataTable :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading || status === 'pending'" :loading-more="loadingMore" :error="status === 'error'" error-title="No pudimos cargar las respuestas" fill @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput v-model="searchInput" placeholder="Buscar por formulario..." style="min-width: 200px;">
           <template #suffix><Icon name="lucide:search" size="18" /></template>
