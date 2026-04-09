@@ -91,3 +91,5 @@ Append one line per completed task:
 2026-04-09 01:38 America/Mexico_City — Standardize admin cover-image previews across benefits, programs, add-ons, and events create/edit screens
 2026-04-09 02:04 America/Mexico_City — Replace hardcoded admin entitlement dropdowns and labels with live addon entitlement data from Supabase
 2026-04-09 02:25 America/Mexico_City — Fix RevenueCat web add-on purchases so successful checkouts no longer show a false "Compra cancelada" toast
+2026-04-09 03:03 America/Mexico_City — Prevent RevenueCat subscription sync from revoking addon entitlements and add time-bound Core access grants for addons
+2026-04-09 03:16 America/Mexico_City — Show Core renewal or expiration dates on /cuenta/suscripcion for recurring subscriptions and granted-month access

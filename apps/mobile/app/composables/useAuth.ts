@@ -32,15 +32,19 @@ export function useAuth() {
     await client.auth.getSession()
 
     const normalizedEmail = supaUser.value?.email?.trim().toLowerCase() ?? null
-    const [profileRes, subRes, entRes, adminRes] = await Promise.all([
+    const [profileRes, subRes, entRes, adminRes, effectiveSubscriberRes] = await Promise.all([
       client.from('profiles').select('display_name, avatar_url, community_segment, email').eq('id', uid).single(),
       client.from('subscriptions').select('status').eq('user_id', uid).maybeSingle(),
       client.from('user_entitlements').select('entitlement_key').eq('user_id', uid),
       client.from('admin_users').select('role').eq('user_id', uid).maybeSingle(),
+      client.rpc('user_is_subscriber'),
     ])
     if (profileRes.error || !profileRes.data) return false
-    const isSubscriber = subRes.data?.status === 'active' || subRes.data?.status === 'trialing'
-    const entitlements = (entRes.data ?? []).map(e => e.entitlement_key)
+    const hasActiveSubscription = subRes.data?.status === 'active' || subRes.data?.status === 'trialing'
+    const isSubscriber = effectiveSubscriberRes.error
+      ? hasActiveSubscription
+      : effectiveSubscriberRes.data === true
+    const entitlements = Array.from(new Set((entRes.data ?? []).map(e => e.entitlement_key)))
 
     // Identify the signed-in user with RevenueCat, but keep Supabase as the
     // access source of truth for the app.

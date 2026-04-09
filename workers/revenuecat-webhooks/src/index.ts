@@ -266,11 +266,29 @@ async function syncAddonEntitlements(
 
   if (!knownAddonEntitlements.length) return
 
+  const addonEntitlementKeys = new Set(knownAddonEntitlements.map(row => row.entitlement_key))
+  const relevantEntitlementIds = Array.from(new Set(entitlementIds.filter(id => addonEntitlementKeys.has(id))))
+
+  // RevenueCat webhook events are incremental, not guaranteed full snapshots.
+  // Only mutate addon access when the event explicitly references addon keys.
+  if (!relevantEntitlementIds.length) return
+
   const addons = await db.select(
     'addons',
-    'select=id,price',
-  ) as Array<{ id: string; price: number | null }>
-  const addonPrices = new Map(addons.map(addon => [addon.id, addon.price ?? 0]))
+    'select=id,price,grants_core_months',
+  ) as Array<{ id: string; price: number | null; grants_core_months: number | null }>
+  const addonMetaById = new Map(addons.map(addon => [addon.id, {
+    price: addon.price ?? 0,
+    grantsCoreMonths: addon.grants_core_months ?? 0,
+  }]))
+
+  const existingCoreGrants = await db.select(
+    'subscription_access_grants',
+    `user_id=eq.${userId}&source=eq.addon&select=source_ref,starts_at,ends_at`,
+  ) as Array<{ source_ref: string; starts_at: string; ends_at: string }>
+  const addonCoreGrantsByAddonId = new Map(
+    existingCoreGrants.map(grant => [grant.source_ref, grant]),
+  )
 
   const addonEntitlementsByKey = new Map<string, string[]>()
   for (const row of knownAddonEntitlements) {
@@ -280,14 +298,18 @@ async function syncAddonEntitlements(
   }
 
   const addonIdsToActivate = new Set<string>()
-  for (const entitlementId of entitlementIds) {
+  for (const entitlementId of relevantEntitlementIds) {
     for (const addonId of addonEntitlementsByKey.get(entitlementId) ?? []) {
       addonIdsToActivate.add(addonId)
     }
   }
 
+  const relevantEntitlementIdSet = new Set(relevantEntitlementIds)
   for (const row of knownAddonEntitlements) {
+    if (!relevantEntitlementIdSet.has(row.entitlement_key)) continue
+
     const shouldBeActive = areEntitlementsActive && addonIdsToActivate.has(row.addon_id)
+    const addonMeta = addonMetaById.get(row.addon_id)
 
     if (shouldBeActive) {
       await db.upsert('user_entitlements', {
@@ -301,8 +323,23 @@ async function syncAddonEntitlements(
         user_id: userId,
         addon_id: row.addon_id,
         stripe_session_id: null,
-        amount: addonPrices.get(row.addon_id) ?? 0,
+        amount: addonMeta?.price ?? 0,
       }, 'user_id,addon_id')
+
+      if ((addonMeta?.grantsCoreMonths ?? 0) > 0) {
+        const existingGrant = addonCoreGrantsByAddonId.get(row.addon_id)
+        const startsAt = existingGrant?.starts_at ?? new Date().toISOString()
+        const endsAt = existingGrant?.ends_at ?? addMonthsIso(startsAt, addonMeta!.grantsCoreMonths)
+
+        await db.upsert('subscription_access_grants', {
+          user_id: userId,
+          source: 'addon',
+          source_ref: row.addon_id,
+          starts_at: startsAt,
+          ends_at: endsAt,
+        }, 'user_id,source,source_ref')
+      }
+
       continue
     }
 
@@ -310,7 +347,18 @@ async function syncAddonEntitlements(
       'user_entitlements',
       `user_id=eq.${userId}&entitlement_key=eq.${encodeURIComponent(row.entitlement_key)}&source=eq.addon`,
     )
+
+    await db.delete(
+      'subscription_access_grants',
+      `user_id=eq.${userId}&source=eq.addon&source_ref=eq.${encodeURIComponent(row.addon_id)}`,
+    )
   }
+}
+
+function addMonthsIso(startsAt: string, months: number) {
+  const value = new Date(startsAt)
+  value.setUTCMonth(value.getUTCMonth() + months)
+  return value.toISOString()
 }
 
 function jsonResponse(data: unknown, status = 200) {

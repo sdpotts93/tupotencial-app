@@ -80,6 +80,12 @@
 
       </template>
 
+      <div v-if="accessTimeline" class="pricing__status-card">
+        <p class="pricing__status-label">{{ accessTimeline.label }}</p>
+        <p class="pricing__status-date">{{ accessTimeline.date }}</p>
+        <p class="pricing__status-copy">{{ accessTimeline.copy }}</p>
+      </div>
+
       <p class="pricing__note">
         Pago seguro. Cancela en cualquier momento.
         <template v-if="isNative">
@@ -98,13 +104,19 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
-const { isSubscriber, refreshProfile } = useAuth()
+const { user, isSubscriber, refreshProfile } = useAuth()
 const { isNative } = useNativePlatform()
 const { purchaseCurrentOffering, restorePurchases, presentCustomerCenter, getCustomerInfo, configured } = useRevenueCat()
 
 const rcSubscriber = ref(false)
 const subscriptionReady = ref(false)
 const effectiveIsSubscriber = computed(() => isSubscriber.value || rcSubscriber.value)
+
+interface SubscriptionAccessGrant {
+  source: 'addon' | 'admin'
+  source_ref: string
+  ends_at: string
+}
 
 // Fetch both plans + benefits for each
 const { data: plansData, status: subStatus, refresh: refreshSub } = useAsyncData('suscripcion-plans', async () => {
@@ -126,6 +138,42 @@ const { data: plansData, status: subStatus, refresh: refreshSub } = useAsyncData
   }))
 }, { lazy: true })
 
+const { data: accessData, refresh: refreshAccess } = useAsyncData('suscripcion-access', async () => {
+  const uid = user.value?.id
+  if (!uid) {
+    return {
+      subscription: null as { status: string; current_period_end: string | null } | null,
+      coreGrant: null as SubscriptionAccessGrant | null,
+    }
+  }
+
+  const nowIso = new Date().toISOString()
+  const [subRes, grantRes] = await Promise.all([
+    client
+      .from('subscriptions')
+      .select('status, current_period_end')
+      .eq('user_id', uid)
+      .in('status', ['active', 'trialing'])
+      .maybeSingle(),
+    (client as any)
+      .from('subscription_access_grants')
+      .select('source, source_ref, ends_at')
+      .eq('user_id', uid)
+      .gt('ends_at', nowIso)
+      .order('ends_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  return {
+    subscription: subRes.data ?? null,
+    coreGrant: grantRes?.data ?? null,
+  }
+}, {
+  lazy: true,
+  watch: [() => user.value?.id],
+})
+
 const plans = computed(() =>
   (plansData.value ?? []).map(p => ({
     ...p,
@@ -133,14 +181,46 @@ const plans = computed(() =>
   })),
 )
 
+const corePlanInterval = computed(() => (
+  plansData.value?.find(plan => plan.id === 'core')?.interval ?? 'month'
+))
+
+const accessTimeline = computed(() => {
+  const subscription = accessData.value?.subscription
+  if (subscription?.current_period_end) {
+    return {
+      label: corePlanInterval.value === 'month' ? 'Próxima renovación' : 'Vigencia actual',
+      date: formatAccessDate(subscription.current_period_end),
+      copy: corePlanInterval.value === 'month'
+        ? 'Tu membresía Core seguirá activa y se renovará automáticamente en esa fecha.'
+        : 'Tu membresía Core sigue activa hasta esa fecha según tu periodo actual.',
+    }
+  }
+
+  const grant = accessData.value?.coreGrant
+  if (grant?.ends_at) {
+    return {
+      label: 'Acceso Core vigente hasta',
+      date: formatAccessDate(grant.ends_at),
+      copy: grant.source === 'addon'
+        ? 'Este acceso fue otorgado por un complemento con meses incluidos de Core.'
+        : 'Este acceso fue otorgado manualmente y expirará en esa fecha.',
+    }
+  }
+
+  return null
+})
+
 const paywallLoading = ref(false)
 
 async function refreshSubscriptionState() {
   const profilePromise = refreshProfile()
   const plansPromise = refreshSub()
+  const accessPromise = refreshAccess()
   const rcActive = await readRevenueCatSubscriptionState()
   const profileOk = await profilePromise
   await plansPromise
+  await accessPromise
 
   if (rcActive !== null) {
     rcSubscriber.value = rcActive
@@ -208,6 +288,14 @@ async function openCustomerCenter() {
 async function handleRestore() {
   const info = await restorePurchases()
   if (info) await waitForSubscriptionSync()
+}
+
+function formatAccessDate(value: string) {
+  return new Intl.DateTimeFormat('es-MX', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(value))
 }
 
 onMounted(() => {
@@ -407,6 +495,38 @@ if (import.meta.client) {
   text-decoration: underline;
   cursor: pointer;
   padding: 0;
+}
+
+.pricing__status-card {
+  max-width: 800px;
+  margin: 0 0 var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 82%, white 18%);
+}
+
+.pricing__status-label {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-eyebrow);
+  font-size: var(--eyebrow-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.pricing__status-date {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: var(--title-md);
+  color: var(--color-text);
+}
+
+.pricing__status-copy {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
 }
 
 .pricing__note {
