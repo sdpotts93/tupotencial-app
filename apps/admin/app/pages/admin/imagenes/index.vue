@@ -144,7 +144,7 @@ const { data: avatarsData, refresh, status } = useAsyncData('admin-character-ava
     carlotta_avatar_url: val?.carlotta_avatar_url ?? '',
     gabriel_avatar_url: val?.gabriel_avatar_url ?? '',
   }
-}, { lazy: true, default: () => ({ carlotta_avatar_url: '', gabriel_avatar_url: '' }) })
+}, { lazy: true, server: false, default: () => ({ carlotta_avatar_url: '', gabriel_avatar_url: '' }) })
 
 const avatars = computed(() => avatarsData.value)
 

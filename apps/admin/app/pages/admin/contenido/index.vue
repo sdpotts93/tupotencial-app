@@ -315,7 +315,7 @@ const featuredId = ref<string | null>(null)
 const { data: featuredSetting } = useAsyncData('admin-featured-content', async () => {
   const { data } = await client.from('app_settings').select('value').eq('key', 'biblioteca_featured').maybeSingle()
   return (data?.value as any)?.content_id ?? null
-})
+}, { server: false })
 watchEffect(() => { featuredId.value = featuredSetting.value })
 
 async function toggleFeatured(id: string) {

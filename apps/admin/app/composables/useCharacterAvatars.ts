@@ -4,8 +4,8 @@ interface CharacterAvatars {
 }
 
 const defaults: CharacterAvatars = {
-  carlotta: '/images/carlotta.png',
-  gabriel: '/images/gabriel.png',
+  carlotta: '',
+  gabriel: '',
 }
 
 export function useCharacterAvatars() {
@@ -20,14 +20,17 @@ export function useCharacterAvatars() {
     if (!data?.value) return defaults
     const val = data.value as unknown as { carlotta_avatar_url: string; gabriel_avatar_url: string }
     return {
-      carlotta: val.carlotta_avatar_url || defaults.carlotta,
-      gabriel: val.gabriel_avatar_url || defaults.gabriel,
+      carlotta: val.carlotta_avatar_url || '',
+      gabriel: val.gabriel_avatar_url || '',
     }
-  }, { default: () => defaults })
+  }, { server: false, default: () => defaults })
 
-  const avatarUrl = (character: string) => {
-    const key = character.toLowerCase() as keyof CharacterAvatars
-    return data.value[key] ?? defaults.gabriel
+  const avatarUrl = (character?: string | null) => {
+    const normalized = character?.trim().toLowerCase()
+    if (!normalized) return ''
+
+    const key = normalized as keyof CharacterAvatars
+    return data.value[key] ?? ''
   }
 
   return { characterAvatars: data, avatarUrl }

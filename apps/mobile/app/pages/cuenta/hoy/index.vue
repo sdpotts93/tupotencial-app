@@ -149,7 +149,10 @@
       <div class="hoy__duo-row">
         <section class="hoy__featured">
           <button class="hoy__featured-card" :disabled="!!todayAccion" @click="handleRetoTap('accion')">
-            <img :src="featuredImgUrl" alt="" class="hoy__featured-img" />
+            <img v-if="featuredImgUrl" :src="featuredImgUrl" alt="" class="hoy__featured-img" />
+            <div v-else class="hoy__featured-placeholder">
+              <Icon name="lucide:image-off" size="28" />
+            </div>
             <div class="hoy__featured-info">
               <div v-if="!todayAccion" class="hoy__featured-eyebrow-row">
                 <span class="hoy__featured-eyebrow">{{ dailyPlan.eyebrow }}</span>
@@ -558,7 +561,10 @@ const { data: hoyPage, status: hoyStatus, refresh: refreshHoyPage } = useAsyncDa
 }, { lazy: true })
 
 const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
-const featuredImgUrl = computed(() => (hoyDefaults.value.featured_img_url as string) || '/images/rojo-carlotta.jpg')
+const featuredImgUrl = computed(() => {
+  const url = hoyDefaults.value.featured_img_url as string | undefined
+  return typeof url === 'string' && url.trim() ? url : ''
+})
 const dailyPlanData = computed(() => hoyPage.value?.daily_plan)
 const isHoyEmpty = computed(() =>
   !dailyPlanData.value
@@ -1408,6 +1414,18 @@ function closeAccionSheet() {
   border-radius: var(--radius-2xl);
 }
 
+.hoy__featured-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-2xl);
+  background:
+    linear-gradient(135deg, rgba(var(--tint-rgb), 0.08), rgba(var(--tint-rgb), 0.02)),
+    var(--color-surface-elevated, var(--color-surface));
+  color: var(--color-muted);
+}
+
 .hoy__featured-info {
   padding: var(--space-4) var(--space-1) 0;
 }
@@ -2235,6 +2253,17 @@ function closeAccionSheet() {
     border-radius: var(--radius-lg);
     margin: var(--space-4);
     flex-shrink: 0;
+  }
+
+  .hoy__featured-placeholder {
+    max-width: 250px;
+    width: 50%;
+    height: auto;
+    aspect-ratio: auto;
+    margin: var(--space-4);
+    flex-shrink: 0;
+    align-self: stretch;
+    border-radius: var(--radius-lg);
   }
 
   .hoy__featured-info {
