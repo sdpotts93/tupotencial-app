@@ -74,3 +74,4 @@ Append one line per completed task:
 2026-04-08 18:31 America/Mexico_City — Update mobile eventos empty states to use shared UiEmptyState styling
 2026-04-08 18:31 America/Mexico_City — Update mobile beneficios empty state to use shared UiEmptyState styling
 2026-04-08 18:31 America/Mexico_City — Fix RevenueCat web checkout identity handoff, sync profile emails, and add webhook email fallback/error logging
+2026-04-08 18:31 America/Mexico_City — Refresh subscription page state on return, add manage-subscription actions, and keep Core plan styling stable when current

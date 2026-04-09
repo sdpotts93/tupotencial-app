@@ -16,10 +16,7 @@
 
     <!-- Error -->
     <template v-else-if="status === 'error'">
-      <div class="img-error">
-        <p>No pudimos cargar la configuración.</p>
-        <UiButton variant="primary-outline" size="sm" @click="refresh()">Reintentar</UiButton>
-      </div>
+      <UiErrorState title="No pudimos cargar la configuración" @retry="refresh()" />
     </template>
 
     <template v-else>
@@ -365,14 +362,6 @@ async function handleSave() {
   padding: var(--space-1) var(--space-2);
 }
 
-.img-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-10);
-  color: var(--color-muted);
-}
 
 @media (max-width: 640px) {
   .img-grid {

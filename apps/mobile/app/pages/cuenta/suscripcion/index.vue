@@ -44,8 +44,8 @@
         >
           <div class="pricing__plan-header">
             <h3 class="pricing__plan-name">{{ plan.title }}</h3>
-            <span v-if="plan.isCurrent" class="pricing__tag-current">TU PLAN</span>
-            <span v-else-if="plan.id === 'core'" class="pricing__tag-core">MÁS POPULAR</span>
+            <span v-if="plan.id === 'core'" class="pricing__tag-core">{{ plan.isCurrent ? 'CORE' : 'MÁS POPULAR' }}</span>
+            <span v-else-if="plan.isCurrent" class="pricing__tag-current">TU PLAN</span>
           </div>
 
           <p class="pricing__plan-price">
@@ -65,7 +65,8 @@
             </UiButton>
           </template>
           <template v-else>
-            <UiButton variant="outline" block disabled>Plan base</UiButton>
+            <UiButton v-if="isSubscriber" variant="outline" block @click="openCustomerCenter">Gestionar suscripción</UiButton>
+            <UiButton v-else variant="outline" block disabled>Plan base</UiButton>
           </template>
 
           <div class="pricing__divider" />
@@ -85,6 +86,9 @@
           <br /><button class="pricing__restore" @click="handleRestore">Restaurar compras</button>
         </template>
       </p>
+      <div v-if="isSubscriber" class="pricing__manage">
+        <UiButton variant="outline" size="sm" @click="openCustomerCenter">Gestionar suscripción</UiButton>
+      </div>
 
     </div>
   </div>
@@ -96,6 +100,7 @@ definePageMeta({ layout: 'default' })
 const client = useSupabaseClient()
 const { isSubscriber, refreshProfile } = useAuth()
 const { isNative } = useNativePlatform()
+const { purchaseCurrentOffering, restorePurchases, presentCustomerCenter } = useRevenueCat()
 
 // Fetch both plans + benefits for each
 const { data: plansData, status: subStatus, refresh: refreshSub } = useAsyncData('suscripcion-plans', async () => {
@@ -124,16 +129,18 @@ const plans = computed(() =>
   })),
 )
 
-// ── RevenueCat purchase (native + web) ──
-const { purchaseCurrentOffering, restorePurchases } = useRevenueCat()
 const paywallLoading = ref(false)
+
+async function refreshSubscriptionState() {
+  await refreshProfile()
+  await refreshSub()
+}
 
 async function waitForSubscriptionSync() {
   const maxAttempts = 10
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    await refreshProfile()
-    await refreshSub()
+    await refreshSubscriptionState()
 
     if (isSubscriber.value) {
       return true
@@ -151,15 +158,38 @@ async function openPaywall() {
     const result = await purchaseCurrentOffering()
     if (result === 'purchased' || result === 'restored') {
       await waitForSubscriptionSync()
+      await refreshSubscriptionState()
     }
   } finally {
     paywallLoading.value = false
   }
 }
 
+async function openCustomerCenter() {
+  await presentCustomerCenter()
+}
+
 async function handleRestore() {
   const info = await restorePurchases()
   if (info) await waitForSubscriptionSync()
+}
+
+onMounted(() => {
+  void refreshSubscriptionState()
+})
+
+onActivated(() => {
+  void refreshSubscriptionState()
+})
+
+if (import.meta.client) {
+  const onVisChange = () => {
+    if (document.visibilityState === 'visible') {
+      void refreshSubscriptionState()
+    }
+  }
+  onMounted(() => document.addEventListener('visibilitychange', onVisChange))
+  onUnmounted(() => document.removeEventListener('visibilitychange', onVisChange))
 }
 </script>
 
@@ -346,6 +376,12 @@ async function handleRestore() {
   color: var(--color-muted);
   line-height: var(--leading-relaxed);
   margin-top: var(--space-6);
+}
+
+.pricing__manage {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
 }
 
 @media (min-width: 768px) {

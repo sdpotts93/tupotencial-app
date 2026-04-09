@@ -6,29 +6,17 @@
 
     <!-- Skeleton loader -->
     <template v-if="status === 'pending'">
-      <div class="table-skeleton">
-        <div class="table-skeleton__toolbar">
-          <UiSkeleton variant="rect" width="200px" height="36px" radius="var(--radius-md)" />
-          <UiSkeleton variant="rect" width="120px" height="36px" radius="var(--radius-md)" />
-        </div>
-        <div class="table-skeleton__rows">
-          <div v-for="i in 6" :key="i" class="table-skeleton__row">
-            <UiSkeleton variant="text" width="50%" height="14px" />
-            <UiSkeleton variant="text" width="80px" height="14px" />
-            <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
-            <UiSkeleton variant="text" width="80px" height="14px" />
-          </div>
-        </div>
-      </div>
+      <UiTableSkeleton :toolbar-widths="['200px', '120px']" columns="1fr 80px 80px 100px">
+        <UiSkeleton variant="text" width="50%" height="14px" />
+        <UiSkeleton variant="text" width="80px" height="14px" />
+        <UiSkeleton variant="rect" width="60px" height="22px" radius="var(--radius-full)" />
+        <UiSkeleton variant="text" width="80px" height="14px" />
+      </UiTableSkeleton>
     </template>
 
     <!-- Error state -->
     <template v-else-if="status === 'error'">
-      <div class="table-error">
-        <h2 class="table-error__title">No pudimos cargar las respuestas</h2>
-        <p class="table-error__desc">Hubo un problema al conectar. Revisa tu conexión e intenta de nuevo.</p>
-        <UiButton variant="primary-outline" size="sm" @click="refresh()">Reintentar</UiButton>
-      </div>
+      <UiErrorState title="No pudimos cargar las respuestas" @retry="refresh()" />
     </template>
 
     <UiDataTable v-else :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading" :loading-more="loadingMore" fill @load-more="loadMore">
@@ -179,51 +167,4 @@ function formatDate(iso: string) {
   white-space: nowrap;
 }
 
-.table-skeleton {
-  background: var(--color-desktop-card, var(--color-white));
-  border: 1px solid var(--color-desktop-border, var(--color-border-light));
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.table-skeleton__toolbar {
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border-light);
-  display: flex;
-  gap: var(--space-3);
-}
-
-.table-skeleton__row {
-  display: grid;
-  grid-template-columns: 1fr 80px 80px 100px;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-light);
-  align-items: center;
-}
-
-.table-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: var(--space-10) var(--space-6);
-  min-height: 40dvh;
-  gap: var(--space-3);
-}
-
-.table-error__title {
-  font-family: var(--font-title);
-  font-size: var(--title-md);
-  color: var(--color-text);
-  line-height: var(--leading-snug);
-}
-
-.table-error__desc {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  max-width: 28ch;
-  line-height: var(--leading-normal);
-}
 </style>

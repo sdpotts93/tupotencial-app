@@ -26,7 +26,11 @@
         <tbody>
           <tr v-if="!rows.length && !loading">
             <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="data-table__empty">
-              {{ emptyText }}
+              <UiEmptyState :title="emptyTitle" :description="emptyDescription">
+                <template v-if="$slots.empty" #action>
+                  <slot name="empty" />
+                </template>
+              </UiEmptyState>
             </td>
           </tr>
           <tr v-else-if="!rows.length && loading">
@@ -73,7 +77,8 @@ interface Props {
   loading?: boolean
   loadingMore?: boolean
   hasMore?: boolean
-  emptyText?: string
+  emptyTitle?: string
+  emptyDescription?: string
   scrollable?: boolean
   fill?: boolean
 }
@@ -82,7 +87,8 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   loadingMore: false,
   hasMore: false,
-  emptyText: 'Sin resultados',
+  emptyTitle: 'Sin resultados',
+  emptyDescription: undefined,
   scrollable: false,
   fill: false,
 })
