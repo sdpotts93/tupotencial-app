@@ -54,14 +54,14 @@
           </svg>
         </button>
 
-        <p class="eyebrow" :style="{ color: benefit.color }">BENEFICIO EXCLUSIVO</p>
+        <p class="eyebrow">BENEFICIO EXCLUSIVO</p>
         <h1 class="title title--lg benefit__title">{{ benefit.title }}</h1>
 
         <p class="benefit__desc">{{ benefit.description }}</p>
 
         <div v-if="benefit.code" class="benefit__code">
           <p class="benefit__code-label">TU CÓDIGO</p>
-          <p class="benefit__code-value" :style="{ color: benefit.color }">{{ benefit.code }}</p>
+          <p class="benefit__code-value">{{ benefit.code }}</p>
         </div>
 
         <div class="benefit__actions">
