@@ -90,3 +90,4 @@ Append one line per completed task:
 2026-04-09 01:29 America/Mexico_City — Audit remaining admin file-upload forms and fix benefit, add-on, and event cover uploads in create/edit flows
 2026-04-09 01:38 America/Mexico_City — Standardize admin cover-image previews across benefits, programs, add-ons, and events create/edit screens
 2026-04-09 02:04 America/Mexico_City — Replace hardcoded admin entitlement dropdowns and labels with live addon entitlement data from Supabase
+2026-04-09 02:25 America/Mexico_City — Fix RevenueCat web add-on purchases so successful checkouts no longer show a false "Compra cancelada" toast
