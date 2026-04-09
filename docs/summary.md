@@ -93,3 +93,4 @@ Append one line per completed task:
 2026-04-09 02:25 America/Mexico_City — Fix RevenueCat web add-on purchases so successful checkouts no longer show a false "Compra cancelada" toast
 2026-04-09 03:03 America/Mexico_City — Prevent RevenueCat subscription sync from revoking addon entitlements and add time-bound Core access grants for addons
 2026-04-09 03:16 America/Mexico_City — Show Core renewal or expiration dates on /cuenta/suscripcion for recurring subscriptions and granted-month access
+2026-04-09 03:27 America/Mexico_City — Refresh auth-backed plan state on /cuenta/beneficios and /cuenta/mas so Core labels update after subscription sync

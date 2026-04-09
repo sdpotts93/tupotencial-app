@@ -79,7 +79,7 @@
 definePageMeta({ layout: 'default' })
 
 const client = useSupabaseClient()
-const { isSubscriber } = useAuth()
+const { isSubscriber, refreshProfile } = useAuth()
 
 const { data: currentPlan, status: beneficiosStatus, refresh: refreshBeneficios } = useAsyncData('beneficios-plan', async () => {
   const planId = isSubscriber.value ? 'core' : 'free'
@@ -106,6 +106,24 @@ const { data: benefits } = useAsyncData('mobile-benefits', async () => {
     bgColor: BENEFIT_COLORS[b.position % BENEFIT_COLORS.length]!.bgColor,
   }))
 }, { watch: [isSubscriber], lazy: true })
+
+onMounted(() => {
+  void refreshProfile()
+})
+
+onActivated(() => {
+  void refreshProfile()
+})
+
+if (import.meta.client) {
+  const onVisChange = () => {
+    if (document.visibilityState === 'visible') {
+      void refreshProfile()
+    }
+  }
+  onMounted(() => document.addEventListener('visibilitychange', onVisChange))
+  onUnmounted(() => document.removeEventListener('visibilitychange', onVisChange))
+}
 </script>
 
 <style scoped>
