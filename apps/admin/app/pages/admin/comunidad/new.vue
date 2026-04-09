@@ -162,6 +162,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+async function uploadMedia(file: File, postId: string): Promise<string> {
+  const path = `community/${postId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
+
 async function handleSave() {
   formError.value = ''
   errors.body = ''
@@ -170,16 +178,23 @@ async function handleSave() {
 
   saving.value = true
   try {
+    const targetId = crypto.randomUUID()
+    let mediaUrl: string | null = null
+    if (uploadedFile.value) {
+      mediaUrl = await uploadMedia(uploadedFile.value, targetId)
+    }
+
     const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
     const payload = {
       title: form.title || null,
       body: form.body,
+      media_url: mediaUrl,
       status: form.status,
       community_segment: communitySegment,
       is_official: true,
     }
 
-    await client.from('posts').insert(payload)
+    await client.from('posts').insert({ ...payload, id: targetId })
     navigateTo('/admin/comunidad')
   } catch {
     formError.value = 'Error al guardar. Intenta de nuevo.'

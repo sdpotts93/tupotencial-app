@@ -281,6 +281,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+async function uploadMedia(file: File, postId: string): Promise<string> {
+  const path = `community/${postId}/${Date.now()}-${file.name}`
+  const { error } = await client.storage.from('content-covers').upload(path, file, { upsert: true })
+  if (error) throw error
+  const { data: urlData } = client.storage.from('content-covers').getPublicUrl(path)
+  return urlData.publicUrl
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
@@ -300,18 +308,24 @@ async function handleSave() {
 
   saving.value = true
   try {
+    const targetId = isNew ? crypto.randomUUID() : id
+    let mediaUrl = form.media_url || null
+    if (uploadedFile.value) {
+      mediaUrl = await uploadMedia(uploadedFile.value, targetId)
+    }
+
     const communitySegment = form.author === 'Carlotta' ? 'carlotta' : 'gabriel'
     const payload = {
       title: form.title || null,
       body: form.body,
-      media_url: form.media_url || null,
+      media_url: mediaUrl,
       status: form.status,
       community_segment: communitySegment,
       is_official: true,
     }
 
     if (isNew) {
-      await client.from('posts').insert(payload)
+      await client.from('posts').insert({ ...payload, id: targetId })
     } else {
       await client.from('posts').update(payload).eq('id', id)
     }
