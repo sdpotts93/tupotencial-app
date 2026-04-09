@@ -35,7 +35,20 @@
       <template v-else>
         <p class="addons__intro">Lleva tu experiencia al siguiente nivel con contenido y experiencias exclusivas.</p>
 
-        <div class="addons__list">
+        <UiEmptyState
+          v-if="!addons.length"
+          title="Aún no hay complementos disponibles"
+          description="Los complementos y experiencias VIP aparecerán aquí cuando estén publicados."
+        >
+          <template #icon>
+            <Icon name="lucide:sparkles" size="32" />
+          </template>
+          <template #action>
+            <UiButton variant="primary-outline" size="sm" @click="refreshAddons()">Reintentar</UiButton>
+          </template>
+        </UiEmptyState>
+
+        <div v-else class="addons__list">
           <NuxtLink
             v-for="addon in addons"
             :key="addon.id"
@@ -71,7 +84,7 @@ function formatPrice(cents: number) {
   return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
 }
 
-const { data: addons, status: addonsStatus, refresh: refreshAddons } = useAsyncData('mobile-addons', async () => {
+const { data: addonsData, status: addonsStatus, refresh: refreshAddons } = useAsyncData('mobile-addons', async () => {
   const { data: addonsList } = await client.from('addons').select('*').eq('status', 'active').order('created_at')
   let purchasedIds = new Set<string>()
   if (user.value?.id) {
@@ -88,6 +101,7 @@ const { data: addons, status: addonsStatus, refresh: refreshAddons } = useAsyncD
     owned: purchasedIds.has(a.id),
   }))
 }, { watch: [() => user.value?.id], lazy: true })
+const addons = computed(() => addonsData.value ?? [])
 </script>
 
 <style scoped>

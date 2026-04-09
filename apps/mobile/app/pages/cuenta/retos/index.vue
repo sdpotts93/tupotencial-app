@@ -31,6 +31,19 @@
         </div>
       </div>
 
+      <UiEmptyState
+        v-else-if="!allPrograms.length"
+        :title="retosEmptyTitle"
+        :description="retosEmptyDescription"
+      >
+        <template #icon>
+          <Icon name="lucide:flag" size="32" />
+        </template>
+        <template #action>
+          <UiButton variant="primary-outline" size="sm" @click="refreshRetos()">Reintentar</UiButton>
+        </template>
+      </UiEmptyState>
+
       <!-- Programs list -->
       <div v-else class="retos__list">
         <div
@@ -170,6 +183,17 @@ watch(programs, (val) => {
 })
 
 const allPrograms = computed(() => [...(programs.value?.items ?? []), ...extraItems.value])
+const activeTabLabel = computed(() => tabs.find(tab => tab.value === activeTab.value)?.label ?? 'contenidos')
+const retosEmptyTitle = computed(() =>
+  activeTab.value === 'all'
+    ? 'Aún no hay programas disponibles'
+    : `Aún no hay ${activeTabLabel.value.toLowerCase()} disponibles`
+)
+const retosEmptyDescription = computed(() =>
+  activeTab.value === 'all'
+    ? 'Publicaremos programas, retos y bootcamps aquí cuando estén listos.'
+    : `Esta sección se llenará cuando publiquemos ${activeTabLabel.value.toLowerCase()} nuevos.`
+)
 
 async function loadMore() {
   if (loadingMore.value || !hasMore.value) return

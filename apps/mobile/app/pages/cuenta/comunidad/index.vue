@@ -59,8 +59,21 @@
             </button>
           </div>
 
+          <UiEmptyState
+            v-if="!allPosts.length"
+            title="Todavía no hay publicaciones"
+            description="La comunidad aparecerá aquí cuando haya mensajes publicados."
+          >
+            <template #icon>
+              <Icon name="lucide:messages-square" size="32" />
+            </template>
+            <template #action>
+              <UiButton variant="primary-outline" size="sm" @click="refreshComunidad()">Reintentar</UiButton>
+            </template>
+          </UiEmptyState>
+
           <!-- Community feed -->
-          <div class="community__feed">
+          <div v-else class="community__feed">
             <article v-for="post in allPosts" :key="post.id" class="post" @click="navigateTo(`/cuenta/comunidad/publicacion/${post.id}`)">
               <div class="post__header">
                 <img :src="post.avatar" alt="" class="post__avatar" />
@@ -92,7 +105,7 @@
           </div>
 
           <!-- Infinite scroll sentinel -->
-          <div v-if="hasMore" ref="sentinelRef" class="community__sentinel">
+          <div v-if="allPosts.length && hasMore" ref="sentinelRef" class="community__sentinel">
             <div v-for="i in 2" :key="i" style="padding-bottom: var(--space-5); border-bottom: 1px solid rgba(var(--tint-rgb), 0.06);">
               <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
                 <UiSkeleton variant="circle" width="36px" height="36px" />
@@ -129,7 +142,7 @@
 
           <div class="sidebar__section">
             <h3 class="sidebar__title">Recientes</h3>
-            <div class="sidebar__recent">
+            <div v-if="recentPosts.length" class="sidebar__recent">
               <NuxtLink
                 v-for="post in recentPosts"
                 :key="post.id"
@@ -142,6 +155,9 @@
                   <span class="recent-post__meta">{{ post.comments }} comentarios · {{ post.timeAgo }}</span>
                 </div>
               </NuxtLink>
+            </div>
+            <div v-else class="community__sidebar-empty">
+              Aún no hay actividad reciente.
             </div>
           </div>
         </aside>
@@ -641,6 +657,13 @@ async function toggleReaction(id: string) {
   .sidebar__recent {
     display: flex;
     flex-direction: column;
+  }
+
+  .community__sidebar-empty {
+    padding: 0 var(--space-4) var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    line-height: var(--leading-normal);
   }
 
   .recent-post {

@@ -120,103 +120,133 @@
         <template v-else>
           <!-- ═══════════ TAB: Categorías ═══════════ -->
         <template v-if="activeTab === 'categorias'">
-          <!-- Featured / hero -->
-          <section v-if="featuredItem" class="library__featured">
-            <h2 class="library__section-title">Destacado</h2>
-            <div :class="['library__featured-card', { 'library__featured-card--locked': isContentLocked(featuredItem) }]" @click="handleContentClick(featuredItem)">
-              <div class="library__featured-img-wrap">
-                <img :src="featuredItem.thumbnail" alt="" class="library__featured-img" />
-                <EntitlementLockBadge :locked="isContentLocked(featuredItem)" />
-              </div>
-              <div class="library__featured-info">
-                <div class="library__featured-eyebrow-row">
-                  <span class="library__featured-eyebrow">{{ featuredItem.typeLabel }} {{ featuredItem.duration ? `\u2022 ${featuredItem.duration}` : '' }}</span>
-                  <Icon name="lucide:arrow-up-right" size="16" class="library__featured-arrow" />
-                </div>
-                <h3 class="library__featured-name">{{ featuredItem.title }}</h3>
-              </div>
-            </div>
-          </section>
+          <UiEmptyState
+            v-if="isCategoriesEmpty"
+            title="La biblioteca estará aquí pronto"
+            description="Todavía no hay contenido publicado para mostrar en esta sección."
+          >
+            <template #icon>
+              <Icon name="lucide:library" size="32" />
+            </template>
+            <template #action>
+              <UiButton variant="primary-outline" size="sm" @click="refreshBiblio()">Reintentar</UiButton>
+            </template>
+          </UiEmptyState>
 
-          <!-- Categories -->
-          <section v-for="cat in categories.filter(c => c.slug !== 'eventos-grabados')" :key="cat.slug" class="library__section">
-            <div class="section__header">
-              <h2 class="library__section-title">{{ cat.title }}</h2>
-              <NuxtLink :to="`/cuenta/biblioteca/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
-            </div>
-            <div class="library__scroll">
-              <div
-                v-for="item in cat.items"
-                :key="item.id"
-                :class="['library__scroll-card', { 'library__scroll-card--locked': isContentLocked(item) }]"
-                @click="handleContentClick(item)"
-              >
-                <div class="library__scroll-img-wrap">
-                  <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
-                  <EntitlementLockBadge :locked="isContentLocked(item)" />
+          <template v-else>
+            <!-- Featured / hero -->
+            <section v-if="featuredItem" class="library__featured">
+              <h2 class="library__section-title">Destacado</h2>
+              <div :class="['library__featured-card', { 'library__featured-card--locked': isContentLocked(featuredItem) }]" @click="handleContentClick(featuredItem)">
+                <div class="library__featured-img-wrap">
+                  <img :src="featuredItem.thumbnail" alt="" class="library__featured-img" />
+                  <EntitlementLockBadge :locked="isContentLocked(featuredItem)" />
                 </div>
-                <div class="library__scroll-info">
-                  <span class="library__scroll-title">{{ item.title }}</span>
-                  <div class="library__scroll-meta-row">
-                    <span v-if="item.duration" class="library__scroll-duration">
-                      <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
-                    </span>
-                    <span v-if="item.typeLabel" class="library__type-tag">{{ item.typeLabel }}</span>
+                <div class="library__featured-info">
+                  <div class="library__featured-eyebrow-row">
+                    <span class="library__featured-eyebrow">{{ featuredItem.typeLabel }} {{ featuredItem.duration ? `\u2022 ${featuredItem.duration}` : '' }}</span>
+                    <Icon name="lucide:arrow-up-right" size="16" class="library__featured-arrow" />
+                  </div>
+                  <h3 class="library__featured-name">{{ featuredItem.title }}</h3>
+                </div>
+              </div>
+            </section>
+
+            <!-- Categories -->
+            <section v-for="cat in visibleCategories" :key="cat.slug" class="library__section">
+              <div class="section__header">
+                <h2 class="library__section-title">{{ cat.title }}</h2>
+                <NuxtLink :to="`/cuenta/biblioteca/c/${cat.slug}`" class="library__see-all">Ver todo</NuxtLink>
+              </div>
+              <div class="library__scroll">
+                <div
+                  v-for="item in cat.items"
+                  :key="item.id"
+                  :class="['library__scroll-card', { 'library__scroll-card--locked': isContentLocked(item) }]"
+                  @click="handleContentClick(item)"
+                >
+                  <div class="library__scroll-img-wrap">
+                    <img :src="item.thumbnail" :alt="item.title" loading="lazy" class="library__scroll-img" />
+                    <EntitlementLockBadge :locked="isContentLocked(item)" />
+                  </div>
+                  <div class="library__scroll-info">
+                    <span class="library__scroll-title">{{ item.title }}</span>
+                    <div class="library__scroll-meta-row">
+                      <span v-if="item.duration" class="library__scroll-duration">
+                        <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ item.duration }}
+                      </span>
+                      <span v-if="item.typeLabel" class="library__type-tag">{{ item.typeLabel }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <!-- Eventos Grabados -->
-          <section class="library__section">
-            <div class="section__header">
-              <h2 class="library__section-title">Eventos Grabados</h2>
-              <NuxtLink to="/cuenta/eventos" class="library__see-all">Ver todo</NuxtLink>
-            </div>
-            <div class="library__scroll">
-              <div
-                v-for="ev in recordedEvents"
-                :key="ev.id"
-                :class="['library__scroll-card', { 'library__scroll-card--locked': isContentLocked(ev) }]"
-                @click="handleEventClick(ev)"
-              >
-                <div class="library__scroll-img-wrap">
-                  <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
-                  <EntitlementLockBadge :locked="isContentLocked(ev)" />
-                </div>
-                <div class="library__scroll-info">
-                  <span class="library__scroll-title">{{ ev.title }}</span>
-                  <span class="library__scroll-duration">
-                    <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.duration }}
-                  </span>
+            <!-- Eventos Grabados -->
+            <section v-if="recordedEvents.length" class="library__section">
+              <div class="section__header">
+                <h2 class="library__section-title">Eventos Grabados</h2>
+                <NuxtLink to="/cuenta/eventos" class="library__see-all">Ver todo</NuxtLink>
+              </div>
+              <div class="library__scroll">
+                <div
+                  v-for="ev in recordedEvents"
+                  :key="ev.id"
+                  :class="['library__scroll-card', { 'library__scroll-card--locked': isContentLocked(ev) }]"
+                  @click="handleEventClick(ev)"
+                >
+                  <div class="library__scroll-img-wrap">
+                    <img :src="ev.img" :alt="ev.title" loading="lazy" class="library__scroll-img" />
+                    <EntitlementLockBadge :locked="isContentLocked(ev)" />
+                  </div>
+                  <div class="library__scroll-info">
+                    <span class="library__scroll-title">{{ ev.title }}</span>
+                    <span class="library__scroll-duration">
+                      <Icon class="clock-icon" name="lucide:clock" size="12" /> {{ ev.duration }}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </template>
         </template>
 
         <!-- ═══════════ TAB: Objetivos ═══════════ -->
         <template v-if="activeTab === 'objetivos'">
-          <p class="library__tab-intro">Encuentra contenido según lo que quieres trabajar.</p>
+          <UiEmptyState
+            v-if="!objectives.length"
+            title="Aún no hay objetivos disponibles"
+            description="Esta vista se llenará cuando publiquemos objetivos y contenido relacionado."
+          >
+            <template #icon>
+              <Icon name="lucide:target" size="32" />
+            </template>
+            <template #action>
+              <UiButton variant="primary-outline" size="sm" @click="refreshObjectives()">Reintentar</UiButton>
+            </template>
+          </UiEmptyState>
 
-          <div class="library__objectives-grid">
-            <NuxtLink
-              v-for="obj in objectives"
-              :key="obj.slug"
-              :to="`/cuenta/biblioteca/o/${obj.slug}`"
-              class="library__objective-card"
-            >
-              <div class="library__objective-icon-wrap">
-                <Icon :name="obj.icon" size="22" class="library__objective-icon" />
-              </div>
-              <div class="library__objective-body">
-                <h3 class="library__objective-name">{{ obj.title }}</h3>
-                <p class="library__objective-desc">{{ obj.description }}</p>
-              </div>
-              <span class="library__objective-count">{{ obj.count }} {{ obj.count === 1 ? 'contenido' : 'contenidos' }}</span>
-            </NuxtLink>
-          </div>
+          <template v-else>
+            <p class="library__tab-intro">Encuentra contenido según lo que quieres trabajar.</p>
+
+            <div class="library__objectives-grid">
+              <NuxtLink
+                v-for="obj in objectives"
+                :key="obj.slug"
+                :to="`/cuenta/biblioteca/o/${obj.slug}`"
+                class="library__objective-card"
+              >
+                <div class="library__objective-icon-wrap">
+                  <Icon :name="obj.icon" size="22" class="library__objective-icon" />
+                </div>
+                <div class="library__objective-body">
+                  <h3 class="library__objective-name">{{ obj.title }}</h3>
+                  <p class="library__objective-desc">{{ obj.description }}</p>
+                </div>
+                <span class="library__objective-count">{{ obj.count }} {{ obj.count === 1 ? 'contenido' : 'contenidos' }}</span>
+              </NuxtLink>
+            </div>
+          </template>
         </template>
         </template>
       </template>
@@ -356,6 +386,7 @@ const { data: categoriesData, status: biblioStatus, refresh: refreshBiblio } = u
   return Array.from(catMap.values())
 }, { lazy: true })
 const categories = computed(() => categoriesData.value ?? [])
+const visibleCategories = computed(() => categories.value.filter(c => c.slug !== 'eventos-grabados'))
 
 // Featured content from app_settings
 const { data: featuredContentId } = useAsyncData('biblioteca-featured', async () => {
@@ -365,13 +396,13 @@ const { data: featuredContentId } = useAsyncData('biblioteca-featured', async ()
 const featuredItem = computed(() => {
   const fid = featuredContentId.value
   if (fid) {
-    for (const cat of categories.value) {
+    for (const cat of visibleCategories.value) {
       const found = cat.items.find((i: any) => i.id === fid)
       if (found) return found
     }
   }
   // Fallback to first item if featured not found
-  const firstCat = categories.value[0]
+  const firstCat = visibleCategories.value[0]
   return firstCat?.items?.[0] ?? null
 })
 
@@ -387,6 +418,12 @@ const recordedEvents = computed(() => {
     plan: item.plan ?? undefined,
   }))
 })
+
+const isCategoriesEmpty = computed(() =>
+  !featuredItem.value
+  && visibleCategories.value.length === 0
+  && recordedEvents.value.length === 0
+)
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) return true
@@ -437,7 +474,7 @@ function handleEventClick(ev: { id: string; entitlement_key: string | null; plan
 }
 
 // ─── Tab: Objetivos ───
-const { data: objectives } = useAsyncData('mobile-library-objectives', async () => {
+const { data: objectivesData, refresh: refreshObjectives } = useAsyncData('mobile-library-objectives', async () => {
   const { data: objs } = await client
     .from('content_objectives')
     .select('id, title, slug, content_item_objectives(count)')
@@ -451,6 +488,7 @@ const { data: objectives } = useAsyncData('mobile-library-objectives', async () 
     count: o.content_item_objectives?.[0]?.count ?? 0,
   }))
 }, { lazy: true })
+const objectives = computed(() => objectivesData.value ?? [])
 </script>
 
 <style scoped>

@@ -98,10 +98,15 @@
               </div>
             </div>
           </div>
-          <div v-else class="events__empty">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="events__empty-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <p class="events__empty-text">No hay eventos programados</p>
-          </div>
+          <UiEmptyState
+            v-else
+            title="No hay eventos programados"
+            description="Los próximos eventos y lives aparecerán aquí cuando estén publicados."
+          >
+            <template #icon>
+              <Icon name="lucide:calendar" size="32" />
+            </template>
+          </UiEmptyState>
         </section>
 
         <!-- Past -->
@@ -138,10 +143,15 @@
               </div>
             </div>
           </div>
-          <div v-if="!allPastEvents.length && !pastHasMore" class="events__empty">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="events__empty-icon"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
-            <p class="events__empty-text">Aún no hay eventos pasados</p>
-          </div>
+          <UiEmptyState
+            v-if="!allPastEvents.length && !pastHasMore"
+            title="Aún no hay eventos pasados"
+            description="Las grabaciones de eventos aparecerán aquí cuando exista contenido publicado."
+          >
+            <template #icon>
+              <Icon name="lucide:history" size="32" />
+            </template>
+          </UiEmptyState>
         </section>
 
         <EntitlementPurchaseModal v-model="showPurchaseModal" :addon="selectedAddon" />
@@ -543,27 +553,6 @@ function handleRecordedClick(item: { id: string; entitlement_key: string | null;
 
 .events__past-chevron {
   flex-shrink: 0;
-  color: var(--color-muted);
-}
-
-/* ─── Empty state ─── */
-.events__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: var(--space-8) var(--space-4);
-  gap: var(--space-3);
-}
-
-.events__empty-icon {
-  color: var(--color-muted);
-  opacity: 0.5;
-}
-
-.events__empty-text {
-  font-size: var(--text-sm);
   color: var(--color-muted);
 }
 

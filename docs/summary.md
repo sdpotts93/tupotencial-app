@@ -70,3 +70,6 @@ Append one line per completed task:
 2026-03-21 00:15 America/Mexico_City — Stripe customer portal: /create-portal-session worker endpoint + "Gestionar suscripción" link on /cuenta/mas
 2026-04-08 22:20 America/Mexico_City — Replace Stripe subscription worker with RevenueCat webhook sync, add webhook event migration, and switch web subscription purchase flow to RevenueCat
 2026-04-08 18:31 America/Mexico_City — Fix mobile auth/onboarding race after logout, harden Hoy empty-state handling, and guard character avatar fallback
+2026-04-08 18:31 America/Mexico_City — Add mobile empty states for biblioteca, retos, comunidad, complementos, and hide empty recorded-events section
+2026-04-08 18:31 America/Mexico_City — Update mobile eventos empty states to use shared UiEmptyState styling
+2026-04-08 18:31 America/Mexico_City — Update mobile beneficios empty state to use shared UiEmptyState styling
