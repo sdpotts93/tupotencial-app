@@ -19,11 +19,26 @@ export interface AuthUser {
 // register a new watcher, causing racing fetchProfile calls.
 const watcherRegistered = ref(false)
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 export function useAuth() {
   const client = useSupabaseClient()
   const supaUser = useSupabaseUser()
   const user = useState<AuthUser | null>('auth-user', () => null)
   const loading = useState('auth-loading', () => false)
+
+  async function waitForProfileLoad(uid?: string, timeoutMs = 2000): Promise<boolean> {
+    const start = Date.now()
+
+    while (loading.value && Date.now() - start < timeoutMs) {
+      await sleep(50)
+    }
+
+    if (!uid) return !!user.value
+    return user.value?.id === uid
+  }
 
   async function fetchProfile(uid: string): Promise<boolean> {
     // Ensure the client has a fresh access token before querying.
@@ -41,7 +56,7 @@ export function useAuth() {
     ])
     if (profileRes.error || !profileRes.data) return false
     const hasActiveSubscription = subRes.data?.status === 'active' || subRes.data?.status === 'trialing'
-    const isSubscriber = effectiveSubscriberRes.error
+    let isSubscriber = effectiveSubscriberRes.error
       ? hasActiveSubscription
       : effectiveSubscriberRes.data === true
     const entitlements = Array.from(new Set((entRes.data ?? []).map(e => e.entitlement_key)))
@@ -52,6 +67,18 @@ export function useAuth() {
       const { login: rcLogin } = useRevenueCat()
       await rcLogin(uid, normalizedEmail)
     } catch { /* RevenueCat not configured yet — non-critical */ }
+
+    if (import.meta.client && !isSubscriber) {
+      try {
+        const { configured, getCustomerInfo } = useRevenueCat()
+        if (configured.value) {
+          const customerInfo = await getCustomerInfo()
+          if (customerInfo?.entitlements?.active?.core) {
+            isSubscriber = true
+          }
+        }
+      } catch { /* RevenueCat sync can lag or be unavailable — non-critical */ }
+    }
 
     if (normalizedEmail && profileRes.data?.email !== normalizedEmail) {
       await client.from('profiles').update({ email: normalizedEmail }).eq('id', uid)
@@ -64,7 +91,9 @@ export function useAuth() {
       avatar_url: profileRes.data?.avatar_url ?? null,
       community_segment: (profileRes.data?.community_segment as AuthUser['community_segment']) ?? null,
       is_subscriber: isSubscriber,
-      subscription_status: subRes.data?.status ?? null,
+      subscription_status: isSubscriber
+        ? (subRes.data?.status ?? 'active')
+        : (subRes.data?.status ?? null),
       entitlements,
       is_admin: !!adminRes.data,
     }
@@ -78,7 +107,10 @@ export function useAuth() {
       return false
     }
 
-    if (loading.value) return !!user.value
+    if (loading.value) {
+      const hydrated = await waitForProfileLoad(uid)
+      if (hydrated) return true
+    }
 
     loading.value = true
     try {
@@ -107,7 +139,10 @@ export function useAuth() {
       const uid = u.id ?? (u as any).sub as string | undefined
       if (!uid) return // guard against incomplete user object
       if (user.value?.id === uid) return // already loaded
-      if (loading.value) return // fetch already in-flight — skip duplicate
+      if (loading.value) {
+        const hydrated = await waitForProfileLoad(uid)
+        if (hydrated) return
+      }
       loading.value = true
       try {
         const ok = await fetchProfile(uid)

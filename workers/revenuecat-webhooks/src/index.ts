@@ -25,10 +25,13 @@ interface RevenueCatWebhookEvent {
   app_user_id?: string
   original_app_user_id?: string | null
   aliases?: string[] | null
+  entitlement_id?: string | null
   entitlement_ids?: string[] | null
   expiration_at_ms?: number | null
   period_type?: string | null
   environment?: string | null
+  product_id?: string | null
+  presented_offering_id?: string | null
   store?: string | null
   subscriber_attributes?: Record<string, { value?: string | null; updated_at_ms?: number | null } | undefined> | null
   transferred_from?: string[] | null
@@ -139,25 +142,27 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
     : []
   const activeAddonEntitlementIds = entitlementIds.filter(id => id !== CORE_ENTITLEMENT_ID)
 
-  await db.upsert('subscriptions', {
-    user_id: userId,
-    status: access.status,
-    current_period_end: access.currentPeriodEnd,
-    updated_at: new Date().toISOString(),
-  }, 'user_id')
-
-  if (access.isActive) {
-    await db.upsert('user_entitlements', {
+  if (shouldSyncCoreSubscription(event, entitlementIds)) {
+    await db.upsert('subscriptions', {
       user_id: userId,
-      entitlement_key: CORE_ENTITLEMENT_ID,
-      source: 'subscription',
-      source_ref: `revenuecat:${event.id}`,
-    }, 'user_id,entitlement_key')
-  } else {
-    await db.delete(
-      'user_entitlements',
-      `user_id=eq.${userId}&entitlement_key=eq.${CORE_ENTITLEMENT_ID}&source=eq.subscription`,
-    )
+      status: access.status,
+      current_period_end: access.currentPeriodEnd,
+      updated_at: new Date().toISOString(),
+    }, 'user_id')
+
+    if (access.isActive) {
+      await db.upsert('user_entitlements', {
+        user_id: userId,
+        entitlement_key: CORE_ENTITLEMENT_ID,
+        source: 'subscription',
+        source_ref: `revenuecat:${event.id}`,
+      }, 'user_id,entitlement_key')
+    } else {
+      await db.delete(
+        'user_entitlements',
+        `user_id=eq.${userId}&entitlement_key=eq.${CORE_ENTITLEMENT_ID}&source=eq.subscription`,
+      )
+    }
   }
 
   await syncAddonEntitlements(
@@ -251,6 +256,32 @@ function isEventAccessActive(type: string | null, isExpired: boolean) {
     default:
       return true
   }
+}
+
+function shouldSyncCoreSubscription(event: RevenueCatWebhookEvent, entitlementIds: string[]) {
+  if (!eventTargetsCoreSubscription(event, entitlementIds)) return false
+
+  if (Array.isArray(event.entitlement_ids)) return true
+
+  switch (event.type) {
+    case 'EXPIRATION':
+    case 'REFUND':
+      return true
+    default:
+      return false
+  }
+}
+
+function eventTargetsCoreSubscription(event: RevenueCatWebhookEvent, entitlementIds: string[]) {
+  if (entitlementIds.includes(CORE_ENTITLEMENT_ID)) return true
+
+  const candidates = [
+    event.entitlement_id,
+    event.product_id,
+    event.presented_offering_id,
+  ]
+
+  return candidates.some(value => value?.toLowerCase().includes(CORE_ENTITLEMENT_ID))
 }
 
 async function syncAddonEntitlements(

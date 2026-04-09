@@ -23,7 +23,13 @@
           @click="toggleOption(opt.value)"
         >
           <span class="onboarding-opt__icon">
-            <img v-if="(opt as any).avatar" :src="(opt as any).avatar" :alt="opt.label" class="onboarding-opt__avatar" />
+            <img
+              v-if="optionAvatar(opt)"
+              :src="optionAvatar(opt)!"
+              :alt="opt.label"
+              class="onboarding-opt__avatar"
+              @error="handleAvatarError(opt.value)"
+            />
             <Icon v-else :name="opt.icon" size="20" />
           </span>
           <span class="onboarding-opt__label">{{ opt.label }}</span>
@@ -55,13 +61,22 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' })
 
-const { setSegment, user } = useAuth()
+type OnboardingOption = {
+  value: string
+  icon: string
+  label: string
+  avatar?: string
+}
+
+const { setSegment, user, refreshProfile, isOnboarded } = useAuth()
+const supaUser = useSupabaseUser()
 const supabase = useSupabaseClient()
 const { avatarUrl } = useCharacterAvatars()
 
 const step = ref(0)
+const failedAvatarOptions = ref<Record<string, boolean>>({})
 
-const steps = [
+const steps = computed(() => [
   {
     question: '¿Qué te motiva a estar aquí?',
     key: 'motivation',
@@ -105,14 +120,21 @@ const steps = [
       { value: '20', icon: 'lucide:star', label: '20+ minutos' },
     ],
   },
-]
+])
 
 const answers = ref<Record<string, string | string[]>>({})
 
-const currentStep = computed(() => steps[step.value]!)
+const currentStep = computed(() => steps.value[step.value]!)
 
 // Profile-setup is step 1 of 5, these are steps 2–5
 const progressWidth = computed(() => `${((step.value + 2) / 5) * 100}%`)
+
+function optionAvatar(opt: OnboardingOption) {
+  const avatar = opt.avatar?.trim()
+  if (!avatar) return ''
+  if (failedAvatarOptions.value[opt.value]) return ''
+  return avatar
+}
 
 function isSelected(value: string) {
   const answer = answers.value[currentStep.value.key]
@@ -140,6 +162,13 @@ const hasAnswer = computed(() => {
   return !!answer
 })
 
+function handleAvatarError(value: string) {
+  failedAvatarOptions.value = {
+    ...failedAvatarOptions.value,
+    [value]: true,
+  }
+}
+
 function handleBack() {
   if (step.value > 0) {
     step.value--
@@ -151,7 +180,7 @@ function handleBack() {
 async function handleContinue() {
   if (!hasAnswer.value) return
 
-  if (step.value < steps.length - 1) {
+  if (step.value < steps.value.length - 1) {
     step.value++
   } else {
     // Final step — save segment + onboarding preferences
@@ -172,6 +201,28 @@ async function handleContinue() {
     navigateTo('/cuenta/hoy')
   }
 }
+
+async function redirectIfAlreadyOnboarded() {
+  if (isOnboarded.value) {
+    await navigateTo('/cuenta/hoy')
+    return
+  }
+
+  if (!user.value && supaUser.value) {
+    const loaded = await refreshProfile()
+    if (loaded && isOnboarded.value) {
+      await navigateTo('/cuenta/hoy')
+    }
+  }
+}
+
+watch(() => user.value?.community_segment, (segment) => {
+  if (segment) navigateTo('/cuenta/hoy')
+})
+
+onMounted(() => {
+  redirectIfAlreadyOnboarded()
+})
 </script>
 
 <style scoped>

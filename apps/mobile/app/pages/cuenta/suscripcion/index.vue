@@ -10,6 +10,12 @@
         <h1 class="pricing__header-title">Suscripción</h1>
       </header>
 
+      <div v-if="accessTimeline" class="pricing__status-card">
+        <p class="pricing__status-label">{{ accessTimeline.label }}</p>
+        <p class="pricing__status-date">{{ accessTimeline.date }}</p>
+        <p class="pricing__status-copy">{{ accessTimeline.copy }}</p>
+      </div>
+
       <template v-if="subStatus === 'pending' || !subscriptionReady">
         <div class="pricing__plans">
           <div v-for="i in 2" :key="i" style="flex: 1; padding: var(--space-6); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
@@ -79,12 +85,6 @@
       </div>
 
       </template>
-
-      <div v-if="accessTimeline" class="pricing__status-card">
-        <p class="pricing__status-label">{{ accessTimeline.label }}</p>
-        <p class="pricing__status-date">{{ accessTimeline.date }}</p>
-        <p class="pricing__status-copy">{{ accessTimeline.copy }}</p>
-      </div>
 
       <p class="pricing__note">
         Pago seguro. Cancela en cualquier momento.
@@ -499,17 +499,17 @@ if (import.meta.client) {
 
 .pricing__status-card {
   max-width: 800px;
-  margin: 0 0 var(--space-5);
+  margin: 0 auto var(--space-5);
   padding: var(--space-5);
   border-radius: var(--radius-xl);
-  border: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-surface) 82%, white 18%);
+  background: rgba(var(--tint-rgb), 0.04);
 }
 
 .pricing__status-label {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-1);
   font-family: var(--font-eyebrow);
   font-size: var(--eyebrow-sm);
+  font-weight: var(--weight-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-muted);
@@ -520,13 +520,14 @@ if (import.meta.client) {
   font-family: var(--font-title);
   font-size: var(--title-md);
   color: var(--color-text);
+  line-height: var(--leading-snug);
 }
 
 .pricing__status-copy {
   margin: var(--space-2) 0 0;
   font-size: var(--text-sm);
   line-height: var(--leading-relaxed);
-  color: var(--color-text-secondary);
+  color: var(--color-muted);
 }
 
 .pricing__note {
