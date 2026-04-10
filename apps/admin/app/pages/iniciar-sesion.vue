@@ -1,25 +1,16 @@
 <template>
   <div class="login">
     <!-- Screen 1: Full-screen hero (mobile only) -->
-    <div class="login__hero">
-      <div class="login__hero-content">
-        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="login__wordmark" />
-        <BlobLogo class="login__logo" />
-        <p class="login__tagline">
-          Panel de administración
-        </p>
-      </div>
-
-      <!-- Bottom CTA area -->
-      <div class="login__cta-area">
+    <AuthMobileHero class="login__hero" tagline="Panel de administración">
+      <template #cta>
         <UiButton variant="primary" block @click="sheetOpen = true">
           Iniciar sesión
         </UiButton>
         <p class="login__legal">
           Acceso exclusivo para administradores de Tu Potencial.
         </p>
-      </div>
-    </div>
+      </template>
+    </AuthMobileHero>
 
     <!-- Login sheet overlay -->
     <div
@@ -129,62 +120,10 @@ async function handleLogin() {
 
 <style scoped>
 .login {
-  min-height: 100dvh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   position: relative;
-}
-
-/* ─── Hero (Screen 1 — mobile only) ─── */
-.login__hero {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  min-height: 100dvh;
-}
-
-.login__hero-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-  padding: var(--space-10) var(--space-6);
-}
-
-.login__logo {
-  margin-bottom: var(--space-8);
-  width: 200px;
-  height: 200px;
-  flex-shrink: 0;
-}
-
-.login__wordmark {
-  height: 18px;
-  width: auto;
-  display: block;
-  margin-bottom: var(--space-8);
-}
-
-.login__tagline {
-  font-family: var(--font-title);
-  font-size: var(--title-md);
-  color: var(--color-text);
-  text-align: center;
-  line-height: var(--leading-snug);
-}
-
-/* ─── CTA area at bottom of hero ─── */
-.login__cta-area {
-  position: relative;
-  z-index: 1;
-  padding: 0 var(--space-6) var(--space-8);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
 }
 
 .login__legal {

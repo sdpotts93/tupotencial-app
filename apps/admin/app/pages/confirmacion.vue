@@ -1,5 +1,6 @@
 <template>
   <div class="confirmacion">
+    <AuthMobileHero class="confirmacion__hero" tagline="Panel de administración" />
     <div class="confirmacion__card">
       <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="confirmacion__wordmark" />
       <BlobLoader v-if="status === 'loading'" class="confirmacion__loader" />
@@ -93,15 +94,18 @@ onMounted(async () => {
 
 <style scoped>
 .confirmacion {
-  min-height: 100%;
+  min-height: 100svh;
   display: flex;
   flex: 1;
   align-items: center;
   justify-content: center;
   padding: var(--space-6);
+  position: relative;
 }
 
 .confirmacion__card {
+  position: relative;
+  z-index: 1;
   background: var(--color-accent);
   color: var(--color-text);
   border-radius: var(--radius-2xl);
@@ -147,6 +151,10 @@ onMounted(async () => {
 @media (min-width: 1024px) {
   .confirmacion {
     padding: 0;
+  }
+
+  .confirmacion__hero {
+    display: none;
   }
 }
 </style>

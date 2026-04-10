@@ -1,5 +1,6 @@
 <template>
   <div class="reset">
+    <AuthMobileHero class="reset__hero" tagline="Panel de administración" />
     <div class="reset__overlay reset__overlay--active">
       <div class="reset__sheet">
         <div class="reset__sheet-header">
@@ -95,7 +96,7 @@ async function handleSubmit() {
 
 <style scoped>
 .reset {
-  min-height: 100dvh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -203,6 +204,10 @@ async function handleSubmit() {
     background: transparent;
     min-height: auto;
     flex: 1;
+  }
+
+  .reset__hero {
+    display: none;
   }
 
   .reset__overlay {
