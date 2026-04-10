@@ -1,8 +1,15 @@
 <template>
   <div class="login">
     <!-- Screen 1: Full-screen hero (mobile only) -->
-    <div class="login__hero">
+    <div class="login__hero" :style="heroLayoutReady ? heroLayoutVars : undefined">
       <AuthHeroArtwork />
+      <div class="login__hero-content" :class="{ 'login__hero-content--ready': heroLayoutReady }">
+        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="login__wordmark" />
+        <div class="login__logo-slot" aria-hidden="true" />
+        <p class="login__tagline">
+          Un espacio seguro para <br> tu crecimiento integral.
+        </p>
+      </div>
 
       <!-- Bottom CTA area -->
       <div class="login__cta-area">
@@ -160,6 +167,13 @@
 </template>
 
 <script setup lang="ts">
+import {
+  DEFAULT_MASK_CENTER_X_RATIO,
+  DEFAULT_MASK_CENTER_Y_OFFSET_RATIO,
+  DEFAULT_MASK_VIEWPORT_MAX_RATIO,
+  computeBlobStageMetrics,
+} from '~/composables/useBlobStageMetrics'
+
 definePageMeta({ layout: 'auth' })
 
 const { login, register, refreshProfile, user } = useAuth()
@@ -180,6 +194,12 @@ const regPassword = ref('')
 const regConfirm = ref('')
 const regLoading = ref(false)
 const regErrors = reactive<{ email?: string; password?: string; confirm?: string }>({})
+const heroWidth = ref(import.meta.client ? Math.round(window.visualViewport?.width ?? window.innerWidth) : 390)
+const heroHeight = ref(import.meta.client ? Math.round(window.visualViewport?.height ?? window.innerHeight) : 844)
+const VIEWPORT_HEIGHT_WOBBLE_PX = 120
+let heroMeasurementRaf = 0
+let heroMeasurementTimeout: ReturnType<typeof setTimeout> | null = null
+const heroLayoutReady = ref(false)
 
 // Debounced live validation for register form
 let regValidateTimer: ReturnType<typeof setTimeout> | null = null
@@ -204,6 +224,68 @@ function scheduleRegValidation() {
     }
   }, 1000)
 }
+
+function updateHeroSize() {
+  const nextWidth = Math.round(window.visualViewport?.width ?? window.innerWidth)
+  const nextHeight = Math.round(window.visualViewport?.height ?? window.innerHeight)
+  const widthChanged = nextWidth !== heroWidth.value
+  const heightDelta = Math.abs(nextHeight - heroHeight.value)
+
+  heroWidth.value = nextWidth
+  if (widthChanged || heightDelta > VIEWPORT_HEIGHT_WOBBLE_PX) {
+    heroHeight.value = nextHeight
+  }
+}
+
+function scheduleHeroMeasurement() {
+  cancelAnimationFrame(heroMeasurementRaf)
+  heroMeasurementRaf = requestAnimationFrame(() => {
+    heroMeasurementRaf = requestAnimationFrame(() => {
+      updateHeroSize()
+      heroLayoutReady.value = true
+    })
+  })
+}
+
+onMounted(() => {
+  scheduleHeroMeasurement()
+  heroMeasurementTimeout = setTimeout(() => {
+    updateHeroSize()
+    heroLayoutReady.value = true
+  }, 150)
+  window.addEventListener('resize', scheduleHeroMeasurement, { passive: true })
+  window.visualViewport?.addEventListener('resize', scheduleHeroMeasurement, { passive: true })
+  window.visualViewport?.addEventListener('scroll', scheduleHeroMeasurement, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  cancelAnimationFrame(heroMeasurementRaf)
+  if (heroMeasurementTimeout) clearTimeout(heroMeasurementTimeout)
+  window.removeEventListener('resize', scheduleHeroMeasurement)
+  window.visualViewport?.removeEventListener('resize', scheduleHeroMeasurement)
+  window.visualViewport?.removeEventListener('scroll', scheduleHeroMeasurement)
+})
+
+const heroLayoutVars = computed(() => {
+  const metrics = computeBlobStageMetrics(heroWidth.value, heroHeight.value, {
+    maskCenterXRatio: DEFAULT_MASK_CENTER_X_RATIO,
+    maskCenterYOffsetRatio: DEFAULT_MASK_CENTER_Y_OFFSET_RATIO,
+    maskViewportMaxRatio: DEFAULT_MASK_VIEWPORT_MAX_RATIO,
+  })
+
+  const wordmarkHeight = 18
+  const blobGap = 32
+  const wordmarkGap = 40
+
+  return {
+    '--login-blob-left': `${metrics.maskCenterXPx}px`,
+    '--login-blob-top': `${metrics.maskTopPx}px`,
+    '--login-blob-width': `${metrics.maskWidthPx}px`,
+    '--login-blob-height': `${metrics.maskHeightPx}px`,
+    '--login-wordmark-top': `${metrics.maskTopPx - wordmarkHeight - wordmarkGap}px`,
+    '--login-tagline-top': `${metrics.maskBottomPx + blobGap}px`,
+  }
+})
 
 async function handleLogin() {
   loginErrors.value = {}
@@ -271,7 +353,7 @@ async function handleRegister() {
 
 <style scoped>
 .login {
-  min-height: 100dvh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -280,15 +362,62 @@ async function handleRegister() {
 /* ─── Hero (Screen 1 — mobile only) ─── */
 .login__hero {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   position: relative;
-  min-height: 100dvh;
+  min-height: 100svh;
+}
+
+.login__hero-content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.login__hero-content--ready {
+  opacity: 1;
+}
+
+.login__wordmark {
+  position: absolute;
+  top: var(--login-wordmark-top);
+  left: var(--login-blob-left);
+  transform: translateX(-50%);
+  height: 18px;
+  width: auto;
+  display: block;
+}
+
+.login__logo-slot {
+  position: absolute;
+  top: var(--login-blob-top);
+  left: var(--login-blob-left);
+  width: var(--login-blob-width);
+  height: var(--login-blob-height);
+  transform: translateX(-50%);
+}
+
+.login__tagline {
+  position: absolute;
+  top: var(--login-tagline-top);
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - (var(--space-6) * 2));
+  transform: translateX(-50%);
+  font-family: var(--font-title);
+  font-size: var(--title-md);
+  color: var(--color-text);
+  text-align: center;
+  line-height: var(--leading-snug);
 }
 
 /* ─── CTA area at bottom of hero ─── */
 .login__cta-area {
-  position: relative;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 1;
   padding: 0 var(--space-6) var(--space-8);
   display: flex;

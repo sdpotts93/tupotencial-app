@@ -1,51 +1,38 @@
 <template>
-  <div class="auth-branding-artwork" :class="{ 'auth-branding-artwork--ghost-text': ghostText }">
-    <div class="auth-branding-artwork__media">
-      <slot>
-        <BlobLogo />
-      </slot>
+  <div class="auth-branding-artwork">
+    <AnimatedBlobStage class="auth-branding-artwork__stage" />
+    <div class="auth-branding-artwork__content">
+      <div class="auth-branding-artwork__logo-slot" aria-hidden="true" />
+      <p class="auth-branding-artwork__tagline">Un espacio seguro para tu crecimiento integral.</p>
     </div>
-    <p class="auth-branding-artwork__tagline">
-      Un espacio seguro para tu crecimiento integral.
-    </p>
   </div>
 </template>
-
-<script setup lang="ts">
-withDefaults(defineProps<{
-  ghostText?: boolean
-}>(), {
-  ghostText: false,
-})
-</script>
 
 <style scoped>
 .auth-branding-artwork {
   position: relative;
   z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-branding-artwork__stage {
+  z-index: 0;
+}
+
+.auth-branding-artwork__content {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-8);
+  justify-content: center;
   padding: var(--space-10);
-  --auth-branding-media-width: 250px;
-  --auth-branding-media-height: 250px;
-}
-
-.auth-branding-artwork__media {
-  width: var(--auth-branding-media-width);
-  height: var(--auth-branding-media-height);
-  flex-shrink: 0;
-}
-
-.auth-branding-artwork__media :deep(*) {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.auth-branding-artwork__media :deep(img) {
-  object-fit: cover;
+  gap: var(--space-8);
 }
 
 .auth-branding-artwork__tagline {
@@ -57,7 +44,9 @@ withDefaults(defineProps<{
   max-width: 320px;
 }
 
-.auth-branding-artwork--ghost-text .auth-branding-artwork__tagline {
-  opacity: 0;
+.auth-branding-artwork__logo-slot {
+  width: 250px;
+  height: 250px;
+  flex-shrink: 0;
 }
 </style>
