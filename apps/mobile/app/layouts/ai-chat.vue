@@ -56,7 +56,9 @@
       </div>
     </header>
 
-    <slot />
+    <main class="ai-layout__body">
+      <slot />
+    </main>
     <UiToast />
   </div>
 </template>
@@ -138,7 +140,15 @@ const sessions = computed(() =>
 <style scoped>
 /* Mobile: completely blank — no sidebar, no top bar */
 .ai-layout {
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
+}
+
+.ai-layout__body {
+  position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
 .ai-sidebar {

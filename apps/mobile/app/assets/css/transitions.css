@@ -13,6 +13,42 @@
   opacity: 0;
 }
 
+/* ---- Account stack transition (detail drill-down) ---- */
+.account-stack-enter-active,
+.account-stack-leave-active {
+  will-change: transform, opacity;
+  transition:
+    transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.account-stack-enter-active {
+  z-index: 1;
+}
+
+.account-stack-leave-active {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.account-stack-enter-from {
+  opacity: 0.96;
+  transform: translate3d(48px, 0, 0);
+}
+
+.account-stack-enter-to,
+.account-stack-leave-from {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.account-stack-leave-to {
+  opacity: 0.88;
+  transform: translate3d(-12px, 0, 0);
+}
+
 /* ---- Slide up (for drawers / modals) ---- */
 .slide-up-enter-active,
 .slide-up-leave-active {
@@ -58,6 +94,8 @@
 
 /* ---- Respect reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
+  .account-stack-enter-active,
+  .account-stack-leave-active,
   .layout-enter-active,
   .layout-leave-active,
   .slide-up-enter-active,
@@ -69,10 +107,18 @@
     transition: none;
   }
 
+  .account-stack-enter-from,
+  .account-stack-leave-to,
   .slide-up-enter-from,
   .slide-up-leave-to,
   .scale-fade-enter-from,
   .scale-fade-leave-to {
     transform: none;
+  }
+
+  .account-stack-leave-active {
+    position: static !important;
+    inset: auto;
+    width: auto;
   }
 }

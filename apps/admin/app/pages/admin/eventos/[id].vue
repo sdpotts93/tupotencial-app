@@ -231,7 +231,7 @@ async function uploadCover(file: File, eventId: string): Promise<string> {
 // ── Fetch existing event ──
 const { data: event, status: dataStatus } = useAsyncData(`event-${id}`, async () => {
   if (isNew) return null
-  const { data } = await client.from('events').select('*').eq('id', id).single()
+  const { data } = await (client.rpc as any)('get_admin_event', { p_id: id })
   return data
 }, { lazy: true })
 

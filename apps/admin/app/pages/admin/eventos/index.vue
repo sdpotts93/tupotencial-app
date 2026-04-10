@@ -135,7 +135,7 @@ const { canEdit } = useAdminAuth()
 const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await useInfiniteTable(
   'admin-events',
   async ({ from, to }) => {
-    let query = client.from('events').select('*, event_registrations(count)')
+    let query = client.from('events').select('id, title, description, start_at, end_at, plan, entitlement_key, status, cover_url, created_at, event_registrations(count)')
 
     const now = new Date().toISOString()
     if (activeTab.value === 'upcoming') {

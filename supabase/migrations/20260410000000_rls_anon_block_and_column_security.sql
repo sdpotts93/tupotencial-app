@@ -202,7 +202,7 @@ ALTER POLICY "program_day_items_select" ON public.program_day_items
   );
 
 -- =========================================================================
--- LAYER 2: Column-level security on content_items
+-- LAYER 2: Column-level security on content_items & events
 -- =========================================================================
 -- Revoke table-level SELECT so column-level grants take effect.
 -- Sensitive columns (vimeo_id, body, media_url, external_url) become
@@ -222,8 +222,18 @@ GRANT SELECT (
 
 -- No SELECT grant to anon (RLS blocks them anyway, but defense-in-depth)
 
+-- events: same treatment — vimeo_url, vimeo_id, vimeo_live_event_id are sensitive
+REVOKE SELECT ON public.events FROM anon;
+REVOKE SELECT ON public.events FROM authenticated;
+
+GRANT SELECT (
+  id, title, description, start_at, end_at, community_segment,
+  plan, duration, cover_url, entitlement_key,
+  status, created_at, updated_at
+) ON public.events TO authenticated;
+
 -- =========================================================================
--- Admin function: full content item access for admin/editor
+-- Admin functions: full row access for admin/editor
 -- =========================================================================
 CREATE OR REPLACE FUNCTION public.get_admin_content_item(p_id uuid)
 RETURNS json
@@ -244,5 +254,25 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_admin_content_item(uuid) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.get_admin_event(p_id uuid)
+RETURNS json
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT public.has_admin_access() THEN
+    RETURN NULL;
+  END IF;
+
+  RETURN (
+    SELECT row_to_json(e)
+    FROM public.events e
+    WHERE e.id = p_id
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_admin_event(uuid) TO authenticated;
 
 COMMIT;

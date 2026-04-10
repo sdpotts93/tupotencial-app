@@ -106,3 +106,4 @@ Append one line per completed task:
 2026-04-09 14:58 America/Mexico_City — Keep the default account layout on reto detail and day pages while hiding the mobile bottom nav
 2026-04-09 14:58 America/Mexico_City — Make the retos index explicitly use the default account layout
 2026-04-09 21:55 America/Mexico_City — Restyle the admin /confirmacion page to match the /nueva-contrasena mobile auth sheet pattern
+2026-04-09 22:11 America/Mexico_City — Preserve current account tab transitions while adding right-to-left stack transitions for in-section mobile account navigation and layout changes

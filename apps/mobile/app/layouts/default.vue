@@ -19,7 +19,9 @@
       </div>
     </header>
 
-    <slot />
+    <main class="app-layout__body">
+      <slot />
+    </main>
     <UiToast />
   </div>
 </template>
@@ -130,9 +132,17 @@ const desktopBottomItems = [
 
 <style scoped>
 .app-layout {
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   background: var(--color-white);
+}
+
+.app-layout__body {
+  position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
 /* Hide bottom nav on mobile for detail pages */

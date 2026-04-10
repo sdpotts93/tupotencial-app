@@ -18,7 +18,9 @@
       </div>
     </header>
 
-    <slot />
+    <main class="blank-layout__body">
+      <slot />
+    </main>
     <UiToast />
   </div>
 </template>
@@ -124,7 +126,15 @@ const desktopBottomItems = [
 <style scoped>
 /* Mobile: completely blank — no nav, no top bar */
 .blank-layout {
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
+}
+
+.blank-layout__body {
+  position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
 /* Mobile: hide nav and top bar entirely */
