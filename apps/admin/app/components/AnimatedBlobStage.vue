@@ -1,5 +1,5 @@
 <template>
-  <div class="animated-blob-stage" aria-hidden="true">
+  <div ref="stageRef" class="animated-blob-stage" aria-hidden="true">
     <svg
       class="animated-blob-stage__svg"
       viewBox="0 0 2040 3357"
@@ -75,6 +75,7 @@ const props = withDefaults(defineProps<{
   maskCenterYOffsetRatio?: number
   maskViewportMaxRatio?: number
   stagePreserveAspectRatio?: string
+  stageAlignY?: 'center' | 'top' | 'bottom'
 }>(), {
   baseOpacity: 0.075,
   imageSrc: '/complete-layout-mobile.webp',
@@ -82,11 +83,12 @@ const props = withDefaults(defineProps<{
   maskCenterYOffsetRatio: DEFAULT_MASK_CENTER_Y_OFFSET_RATIO,
   maskViewportMaxRatio: DEFAULT_MASK_VIEWPORT_MAX_RATIO,
   stagePreserveAspectRatio: 'xMidYMid slice',
+  stageAlignY: 'center',
 })
 
 const SX = 1 / MASK_SOURCE_WIDTH
 const SY = 1 / MASK_SOURCE_HEIGHT
-const SHRINK = 0.85
+const SHRINK = 1
 
 function scalePathD(d: string, sx: number, sy: number) {
   const re = /([MmCcSsQqTtAaLlHhVvZz])|(-?\d*\.?\d+(?:e[+-]?\d+)?)/gi
@@ -129,52 +131,40 @@ function scalePathD(d: string, sx: number, sy: number) {
 const initialD = scalePathD(BLOB_RAW_D, SX, SY)
 const clipId = `animated-blob-clip-${useId()}`
 const pathRef = ref<SVGPathElement | null>(null)
+const stageRef = ref<HTMLElement | null>(null)
 const measured = ref(false)
 const imageReady = ref(false)
 const entranceProgress = ref(0)
 const containerWidth = ref(import.meta.client ? Math.round(window.visualViewport?.width ?? window.innerWidth) : 390)
 const containerHeight = ref(import.meta.client ? Math.round(window.visualViewport?.height ?? window.innerHeight) : 844)
-const VIEWPORT_HEIGHT_WOBBLE_PX = 120
 const ENTRANCE_DURATION_MS = 900
 const ENTRANCE_START_WIDTH_ART = Math.max(STAGE_WIDTH, STAGE_HEIGHT * (MASK_SOURCE_WIDTH / MASK_SOURCE_HEIGHT)) * 2.2
 const MASK_VISIBLE_PROGRESS = 0.18
 const ENTRANCE_ALMOST_COMPLETE_PROGRESS = 0.72
-let viewportMeasurementRaf = 0
-let viewportMeasurementTimeout: ReturnType<typeof setTimeout> | null = null
 let entranceRaf = 0
 let hasEmittedMaskVisible = false
 let hasEmittedEntranceAlmostComplete = false
 let hasEmittedEntranceComplete = false
+let stageObserver: ResizeObserver | null = null
 const stageReady = computed(() => measured.value && imageReady.value)
 
 function updateContainerSize() {
-  const nextWidth = Math.round(window.visualViewport?.width ?? window.innerWidth)
-  const nextHeight = Math.round(window.visualViewport?.height ?? window.innerHeight)
-  const widthChanged = nextWidth !== containerWidth.value
-  const heightDelta = Math.abs(nextHeight - containerHeight.value)
+  const el = stageRef.value
+  if (!el) return
+
+  const nextWidth = Math.round(el.clientWidth)
+  const nextHeight = Math.round(el.clientHeight)
+  if (!nextWidth || !nextHeight) return
 
   containerWidth.value = nextWidth
-  if (widthChanged || heightDelta > VIEWPORT_HEIGHT_WOBBLE_PX) {
-    containerHeight.value = nextHeight
-  }
-}
-
-function scheduleContainerMeasurement() {
-  cancelAnimationFrame(viewportMeasurementRaf)
-  viewportMeasurementRaf = requestAnimationFrame(() => {
-    viewportMeasurementRaf = requestAnimationFrame(() => {
-      updateContainerSize()
-      measured.value = true
-    })
-  })
+  containerHeight.value = nextHeight
+  measured.value = true
 }
 
 onMounted(() => {
-  scheduleContainerMeasurement()
-  viewportMeasurementTimeout = setTimeout(() => {
-    updateContainerSize()
-    measured.value = true
-  }, 150)
+  updateContainerSize()
+  stageObserver = new ResizeObserver(updateContainerSize)
+  if (stageRef.value) stageObserver.observe(stageRef.value)
 
   const image = new Image()
   image.src = props.imageSrc
@@ -194,18 +184,12 @@ onMounted(() => {
     image.addEventListener('error', markImageReady, { once: true })
   }
 
-  window.addEventListener('resize', scheduleContainerMeasurement, { passive: true })
-  window.visualViewport?.addEventListener('resize', scheduleContainerMeasurement, { passive: true })
-  window.visualViewport?.addEventListener('scroll', scheduleContainerMeasurement, { passive: true })
 })
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(viewportMeasurementRaf)
   cancelAnimationFrame(entranceRaf)
-  if (viewportMeasurementTimeout) clearTimeout(viewportMeasurementTimeout)
-  window.removeEventListener('resize', scheduleContainerMeasurement)
-  window.visualViewport?.removeEventListener('resize', scheduleContainerMeasurement)
-  window.visualViewport?.removeEventListener('scroll', scheduleContainerMeasurement)
+  stageObserver?.disconnect()
+  stageObserver = null
 })
 
 const blobMetrics = computed(() => {
@@ -213,6 +197,7 @@ const blobMetrics = computed(() => {
     maskCenterXRatio: props.maskCenterXRatio,
     maskCenterYOffsetRatio: props.maskCenterYOffsetRatio,
     maskViewportMaxRatio: props.maskViewportMaxRatio,
+    stageAlignY: props.stageAlignY,
   })
 })
 

@@ -15,11 +15,13 @@ export function computeBlobStageMetrics(
     maskCenterXRatio?: number
     maskCenterYOffsetRatio?: number
     maskViewportMaxRatio?: number
+    stageAlignY?: 'center' | 'top' | 'bottom'
   },
 ) {
   const maskCenterXRatio = options?.maskCenterXRatio ?? DEFAULT_MASK_CENTER_X_RATIO
   const maskCenterYOffsetRatio = options?.maskCenterYOffsetRatio ?? DEFAULT_MASK_CENTER_Y_OFFSET_RATIO
   const maskViewportMaxRatio = options?.maskViewportMaxRatio ?? DEFAULT_MASK_VIEWPORT_MAX_RATIO
+  const stageAlignY = options?.stageAlignY ?? 'center'
 
   const stageRenderWidth = Math.max(containerWidth, containerHeight * STAGE_ASPECT)
   const stageRenderHeight = Math.max(containerHeight, containerWidth / STAGE_ASPECT)
@@ -34,7 +36,11 @@ export function computeBlobStageMetrics(
   const maskTopArt = maskCenterYArt - (maskHeightArt / 2)
 
   const stageOffsetX = (containerWidth - stageRenderWidth) / 2
-  const stageOffsetY = (containerHeight - stageRenderHeight) / 2
+  const stageOffsetY = stageAlignY === 'top'
+    ? 0
+    : stageAlignY === 'bottom'
+      ? (containerHeight - stageRenderHeight)
+      : (containerHeight - stageRenderHeight) / 2
   const maskLeftPx = stageOffsetX + (maskLeftArt * stageScale)
   const maskTopPx = stageOffsetY + (maskTopArt * stageScale)
   const maskWidthPx = maskWidthArt * stageScale

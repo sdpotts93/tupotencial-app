@@ -110,8 +110,7 @@ onMounted(async () => {
   color: var(--color-text);
   border-radius: var(--radius-2xl);
   padding: var(--space-8);
-  width: 100%;
-  max-width: 440px;
+  width: min(440px, 80%);
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -290,8 +290,7 @@ async function handleRegister() {
   }
 
   .register__sheet {
-    max-width: 440px;
-    width: 100%;
+    width: min(440px, 80%);
     border-radius: var(--radius-2xl);
     max-height: 90dvh;
   }
@@ -324,8 +323,7 @@ async function handleRegister() {
 
   .register__sheet {
     transform: none !important;
-    max-width: 440px;
-    width: 100%;
+    width: min(440px, 80%);
     border-radius: var(--radius-2xl);
     box-shadow: none;
     padding: var(--space-8);
