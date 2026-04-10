@@ -15,7 +15,7 @@
 
 /* ---- Account stack transition (detail drill-down) ---- */
 .account-stack-enter-active {
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
   grid-area: 1 / 1;
   transform-origin: center;
   will-change: transform;
@@ -24,7 +24,7 @@
 .account-stack-leave-active,
 .account-stack-back-enter-active,
 .account-stack-back-leave-active {
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
   grid-area: 1 / 1;
   transform-origin: center;
   pointer-events: none;
