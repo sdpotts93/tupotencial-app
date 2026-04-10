@@ -4,97 +4,131 @@
       <h1 class="page-header__title">Editar formulario</h1>
     </div>
 
-    <div class="form-layout">
-      <div class="form-layout__main">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiInput
-              v-model="form.title"
-              label="Título del formulario"
-              required
-              :error="errors.title"
-            />
-
-            <UiTextarea
-              v-model="form.description"
-              label="Descripción"
-              :rows="3"
-            />
-          </div>
-        </UiCard>
-
-        <!-- Fields -->
-        <div class="fields-header">
-          <h2 class="fields-header__title">Campos del formulario</h2>
-        </div>
-
-        <div v-if="fields.length === 0" class="fields-empty">
-          <p>No hay campos configurados. Agrega el primer campo del formulario.</p>
-        </div>
-
-        <div class="fields-list">
-          <UiCard v-for="(field, index) in fields" :key="index" variant="outlined">
+    <!-- Skeleton -->
+    <template v-if="!isNew && dataStatus === 'pending'">
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
             <div class="form-section">
-              <div class="field-card__header">
-                <span class="field-card__number eyebrow">Campo {{ index + 1 }}</span>
-                <UiButton variant="danger-ghost" size="sm" @click="removeField(index)">Quitar</UiButton>
-              </div>
-
-              <UiInput
-                v-model="field.question"
-                label="Pregunta"
-                placeholder="Escribe la pregunta..."
-              />
-
-              <UiSelect
-                v-model="field.type"
-                label="Tipo de respuesta"
-                :options="fieldTypeOptions"
-              />
-
-              <UiInput
-                v-if="field.type === 'select'"
-                v-model="field.optionsText"
-                label="Opciones (separadas por coma)"
-                placeholder="Ej: Malo, Regular, Bueno, Excelente"
-              />
-
-              <label class="field-toggle">
-                <input v-model="field.required" type="checkbox" class="field-toggle__input" />
-                <span class="field-toggle__label">Campo obligatorio</span>
-              </label>
+              <UiSkeleton variant="text" width="120px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="80px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+          <UiSkeleton variant="text" width="160px" height="16px" style="margin-top: var(--space-6);" />
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="60px" height="10px" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
             </div>
           </UiCard>
         </div>
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="40px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+        </div>
+      </div>
+    </template>
 
-        <UiButton variant="primary-outline" size="sm" @click="addField" style="align-self: flex-start; margin-top: var(--space-3);">+ Agregar campo</UiButton>
+    <template v-else>
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiInput
+                v-model="form.title"
+                label="Título del formulario"
+                required
+                :error="errors.title"
+              />
+
+              <UiTextarea
+                v-model="form.description"
+                label="Descripción"
+                :rows="3"
+              />
+            </div>
+          </UiCard>
+
+          <!-- Fields -->
+          <div class="fields-header">
+            <h2 class="fields-header__title">Campos del formulario</h2>
+          </div>
+
+          <div v-if="fields.length === 0" class="fields-empty">
+            <p>No hay campos configurados. Agrega el primer campo del formulario.</p>
+          </div>
+
+          <div class="fields-list">
+            <UiCard v-for="(field, index) in fields" :key="index" variant="outlined">
+              <div class="form-section">
+                <div class="field-card__header">
+                  <span class="field-card__number eyebrow">Campo {{ index + 1 }}</span>
+                  <UiButton variant="danger-ghost" size="sm" @click="removeField(index)">Quitar</UiButton>
+                </div>
+
+                <UiInput
+                  v-model="field.question"
+                  label="Pregunta"
+                  placeholder="Escribe la pregunta..."
+                />
+
+                <UiSelect
+                  v-model="field.type"
+                  label="Tipo de respuesta"
+                  :options="fieldTypeOptions"
+                />
+
+                <UiInput
+                  v-if="field.type === 'select'"
+                  v-model="field.optionsText"
+                  label="Opciones (separadas por coma)"
+                  placeholder="Ej: Malo, Regular, Bueno, Excelente"
+                />
+
+                <label class="field-toggle">
+                  <input v-model="field.required" type="checkbox" class="field-toggle__input" />
+                  <span class="field-toggle__label">Campo obligatorio</span>
+                </label>
+              </div>
+            </UiCard>
+          </div>
+
+          <UiButton variant="primary-outline" size="sm" @click="addField" style="align-self: flex-start; margin-top: var(--space-3);">+ Agregar campo</UiButton>
+        </div>
+
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSelect
+                v-model="form.status"
+                label="Estado"
+                :options="statusOptions"
+              />
+            </div>
+          </UiCard>
+          <!-- <UiCard variant="filled">
+            <div class="form-section">
+              <p class="meta-label">Respuestas: 247</p>
+              <p class="meta-label">Última respuesta: 7 mar 2026</p>
+            </div>
+          </UiCard> -->
+        </div>
       </div>
 
-      <div class="form-layout__sidebar">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiSelect
-              v-model="form.status"
-              label="Estado"
-              :options="statusOptions"
-            />
-          </div>
-        </UiCard>
-        <!-- <UiCard variant="filled">
-          <div class="form-section">
-            <p class="meta-label">Respuestas: 247</p>
-            <p class="meta-label">Última respuesta: 7 mar 2026</p>
-          </div>
-        </UiCard> -->
+      <div class="page-actions">
+        <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/formularios">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+        <p v-if="formError" class="form-error">{{ formError }}</p>
       </div>
-    </div>
-
-    <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
-      <UiButton variant="soft" size="sm" to="/admin/formularios">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
-      <p v-if="formError" class="form-error">{{ formError }}</p>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -112,11 +146,11 @@ const formError = ref('')
 const errors = reactive({ title: '' })
 
 // ── Fetch existing form ──
-const { data: formRecord } = await useAsyncData(`form-${id}`, async () => {
+const { data: formRecord, status: dataStatus } = useAsyncData(`form-${id}`, async () => {
   if (isNew) return null
   const { data } = await client.from('forms').select('*').eq('id', id).single()
   return data
-})
+}, { lazy: true })
 
 // Convert DB fields (jsonb array) to local FormField[]
 function dbFieldsToLocal(dbFields: unknown): FormField[] {
@@ -142,9 +176,9 @@ function localFieldsToDb(localFields: FormField[]) {
 
 // ── Form state ──
 const form = reactive({
-  title: formRecord.value?.title ?? '',
-  description: formRecord.value?.description ?? '',
-  status: formRecord.value?.status ?? 'active',
+  title: '',
+  description: '',
+  status: 'active',
 })
 
 // ── Options ──
@@ -168,9 +202,16 @@ interface FormField {
   required: boolean
 }
 
-const fields = ref<FormField[]>(
-  formRecord.value ? dbFieldsToLocal(formRecord.value.fields) : [],
-)
+const fields = ref<FormField[]>([])
+
+watch(formRecord, (val) => {
+  if (val) {
+    form.title = val.title ?? ''
+    form.description = val.description ?? ''
+    form.status = val.status ?? 'active'
+    fields.value = dbFieldsToLocal(val.fields)
+  }
+}, { immediate: true })
 
 function addField() {
   fields.value.push({

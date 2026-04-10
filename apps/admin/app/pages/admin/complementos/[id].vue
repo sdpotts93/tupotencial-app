@@ -4,136 +4,172 @@
       <h1 class="page-header__title">Editar add-on</h1>
     </div>
 
-    <div class="form-layout">
-      <div class="form-layout__main">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiInput v-model="form.title" label="Título del add-on" required :error="errors.title" />
+    <!-- Skeleton -->
+    <template v-if="!isNew && dataStatus === 'pending'">
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="100px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="120px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+        </div>
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="80px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="40px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+        </div>
+      </div>
+    </template>
 
-            <UiTextarea v-model="form.description" label="Descripción" :rows="4" />
+    <template v-else>
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiInput v-model="form.title" label="Título del add-on" required :error="errors.title" />
 
-            <!-- Image upload -->
-            <div class="upload">
-              <label class="upload__label">Imagen de portada</label>
-              <div
-                class="upload__dropzone"
-                :class="{ 'upload__dropzone--active': isDragging }"
-                @dragover.prevent="isDragging = true"
-                @dragleave="isDragging = false"
-                @drop.prevent="handleDrop"
-                @click="triggerFileInput"
-              >
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept="image/*"
-                  class="upload__input"
-                  @change="handleFileChange"
-                />
-                <template v-if="!coverFile && !form.cover_url">
-                  <div class="upload__icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                  </div>
-                  <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
-                  <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
-                </template>
-                <template v-else-if="coverFile">
-                  <div class="upload__preview">
-                    <img :src="coverPreview" alt="" class="upload__img-preview" />
-                    <p class="upload__filename">{{ coverFile.name }}</p>
-                    <p class="upload__filesize">{{ formatFileSize(coverFile.size) }}</p>
-                    <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
-                  </div>
-                </template>
-                <template v-else>
-                  <div class="upload__preview">
-                    <img :src="form.cover_url" alt="" class="upload__img-preview" />
-                    <p class="upload__filename">{{ form.cover_url }}</p>
-                    <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
-                  </div>
-                </template>
+              <UiTextarea v-model="form.description" label="Descripción" :rows="4" />
+
+              <!-- Image upload -->
+              <div class="upload">
+                <label class="upload__label">Imagen de portada</label>
+                <div
+                  class="upload__dropzone"
+                  :class="{ 'upload__dropzone--active': isDragging }"
+                  @dragover.prevent="isDragging = true"
+                  @dragleave="isDragging = false"
+                  @drop.prevent="handleDrop"
+                  @click="triggerFileInput"
+                >
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    accept="image/*"
+                    class="upload__input"
+                    @change="handleFileChange"
+                  />
+                  <template v-if="!coverFile && !form.cover_url">
+                    <div class="upload__icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
+                    <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
+                  </template>
+                  <template v-else-if="coverFile">
+                    <div class="upload__preview">
+                      <img :src="coverPreview" alt="" class="upload__img-preview" />
+                      <p class="upload__filename">{{ coverFile.name }}</p>
+                      <p class="upload__filesize">{{ formatFileSize(coverFile.size) }}</p>
+                      <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="upload__preview">
+                      <img :src="form.cover_url" alt="" class="upload__img-preview" />
+                      <p class="upload__filename">{{ form.cover_url }}</p>
+                      <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
+                    </div>
+                  </template>
+                </div>
               </div>
             </div>
-          </div>
-        </UiCard>
+          </UiCard>
+        </div>
+
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiInput
+                v-model="form.price"
+                label="Precio (MXN)"
+                type="number"
+                placeholder="2499"
+                hint="Precio en pesos mexicanos"
+                required
+                :error="errors.price"
+              />
+
+              <UiSelect
+                v-model="form.plan"
+                label="Disponible para"
+                :options="planOptions"
+              />
+
+              <UiInput
+                v-model="form.grants_core_months"
+                label="Meses de Core incluidos"
+                type="number"
+                placeholder="0"
+                hint="Dejar vacío si no aplica"
+              />
+
+              <UiInput
+                v-model="form.entitlement_key"
+                label="Entitlement"
+                placeholder="vip"
+                hint="Clave de acceso que se otorgará al comprar este add-on"
+                :error="errors.entitlement_key"
+              />
+
+              <UiInput
+                v-model="form.revenuecat_offering_id"
+                label="RevenueCat Offering ID"
+                placeholder="addon_vip"
+                hint="Offering que contiene el paquete de compra de este add-on"
+                :error="errors.revenuecat_offering_id"
+              />
+
+              <UiInput
+                v-model="form.revenuecat_package_id"
+                label="RevenueCat Package ID"
+                placeholder="default"
+                hint="Opcional. Déjalo vacío para usar el primer paquete disponible"
+              />
+
+              <UiSelect
+                v-model="form.status"
+                label="Estado"
+                :options="statusOptions"
+              />
+            </div>
+          </UiCard>
+
+          <!-- <UiCard variant="filled">
+            <div class="form-section">
+              <p class="meta-label">ID: {{ route.params.id }}</p>
+              <p class="meta-label">Compras: {{ purchases }}</p>
+              <p class="meta-label">Ingresos: ${{ (revenue / 100).toLocaleString('es-MX') }} MXN</p>
+            </div>
+          </UiCard> -->
+        </div>
       </div>
 
-      <div class="form-layout__sidebar">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiInput
-              v-model="form.price"
-              label="Precio (MXN)"
-              type="number"
-              placeholder="2499"
-              hint="Precio en pesos mexicanos"
-              required
-              :error="errors.price"
-            />
-
-            <UiSelect
-              v-model="form.plan"
-              label="Disponible para"
-              :options="planOptions"
-            />
-
-            <UiInput
-              v-model="form.grants_core_months"
-              label="Meses de Core incluidos"
-              type="number"
-              placeholder="0"
-              hint="Dejar vacío si no aplica"
-            />
-
-            <UiInput
-              v-model="form.entitlement_key"
-              label="Entitlement"
-              placeholder="vip"
-              hint="Clave de acceso que se otorgará al comprar este add-on"
-              :error="errors.entitlement_key"
-            />
-
-            <UiInput
-              v-model="form.revenuecat_offering_id"
-              label="RevenueCat Offering ID"
-              placeholder="addon_vip"
-              hint="Offering que contiene el paquete de compra de este add-on"
-              :error="errors.revenuecat_offering_id"
-            />
-
-            <UiInput
-              v-model="form.revenuecat_package_id"
-              label="RevenueCat Package ID"
-              placeholder="default"
-              hint="Opcional. Déjalo vacío para usar el primer paquete disponible"
-            />
-
-            <UiSelect
-              v-model="form.status"
-              label="Estado"
-              :options="statusOptions"
-            />
-          </div>
-        </UiCard>
-
-        <!-- <UiCard variant="filled">
-          <div class="form-section">
-            <p class="meta-label">ID: {{ route.params.id }}</p>
-            <p class="meta-label">Compras: {{ purchases }}</p>
-            <p class="meta-label">Ingresos: ${{ (revenue / 100).toLocaleString('es-MX') }} MXN</p>
-          </div>
-        </UiCard> -->
+      <div class="page-actions">
+        <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/complementos">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+        <p v-if="formError" class="form-error">{{ formError }}</p>
       </div>
-    </div>
-
-    <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
-      <UiButton variant="soft" size="sm" to="/admin/complementos">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
-      <p v-if="formError" class="form-error">{{ formError }}</p>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -146,13 +182,13 @@ const id = route.params.id as string
 const isNew = id === 'new'
 
 // ── Fetch existing addon + purchase stats ──
-const { data: addon } = await useAsyncData(`addon-${id}`, async () => {
+const { data: addon, status: dataStatus } = useAsyncData(`addon-${id}`, async () => {
   if (isNew) return null
   const { data } = await client.from('addons').select('*').eq('id', id).single()
   return data
-})
+}, { lazy: true })
 
-const { data: addonEntitlement } = await useAsyncData(`addon-entitlement-${id}`, async () => {
+const { data: addonEntitlement } = useAsyncData(`addon-entitlement-${id}`, async () => {
   if (isNew) return null
   const { data } = await client
     .from('addon_entitlements')
@@ -161,9 +197,9 @@ const { data: addonEntitlement } = await useAsyncData(`addon-entitlement-${id}`,
     .limit(1)
     .maybeSingle()
   return data
-})
+}, { lazy: true })
 
-const { data: stats } = await useAsyncData(`addon-stats-${id}`, async () => {
+const { data: stats } = useAsyncData(`addon-stats-${id}`, async () => {
   if (isNew) return { purchases: 0, revenue: 0 }
   const { data } = await client.from('addon_purchases').select('amount').eq('addon_id', id)
   const rows = data ?? []
@@ -171,7 +207,7 @@ const { data: stats } = await useAsyncData(`addon-stats-${id}`, async () => {
     purchases: rows.length,
     revenue: rows.reduce((sum, p) => sum + (p.amount ?? 0), 0),
   }
-})
+}, { lazy: true })
 
 const purchases = computed(() => stats.value?.purchases ?? 0)
 const revenue = computed(() => stats.value?.revenue ?? 0)
@@ -231,17 +267,34 @@ async function uploadCover(file: File, addonId: string): Promise<string> {
 
 // ── Form state ──
 const form = reactive({
-  title: addon.value?.title ?? '',
-  description: addon.value?.description ?? '',
-  cover_url: addon.value?.cover_url ?? '',
-  price: addon.value ? String(addon.value.price / 100) : '',
-  plan: addon.value?.plan ?? 'todos',
-  grants_core_months: addon.value?.grants_core_months ? String(addon.value.grants_core_months) : '',
-  entitlement_key: addonEntitlement.value?.entitlement_key ?? '',
-  revenuecat_offering_id: addon.value?.revenuecat_offering_id ?? '',
-  revenuecat_package_id: addon.value?.revenuecat_package_id ?? '',
-  status: addon.value?.status ?? 'active',
+  title: '',
+  description: '',
+  cover_url: '',
+  price: '',
+  plan: 'todos',
+  grants_core_months: '',
+  entitlement_key: '',
+  revenuecat_offering_id: '',
+  revenuecat_package_id: '',
+  status: 'active',
 })
+
+watch([addon, addonEntitlement], ([a, ent]) => {
+  if (a) {
+    form.title = a.title ?? ''
+    form.description = a.description ?? ''
+    form.cover_url = a.cover_url ?? ''
+    form.price = String(a.price / 100)
+    form.plan = a.plan ?? 'todos'
+    form.grants_core_months = a.grants_core_months ? String(a.grants_core_months) : ''
+    form.revenuecat_offering_id = a.revenuecat_offering_id ?? ''
+    form.revenuecat_package_id = a.revenuecat_package_id ?? ''
+    form.status = a.status ?? 'active'
+  }
+  if (ent) {
+    form.entitlement_key = ent.entitlement_key ?? ''
+  }
+}, { immediate: true })
 
 const planOptions = [
   { value: 'todos', label: 'Todos' },

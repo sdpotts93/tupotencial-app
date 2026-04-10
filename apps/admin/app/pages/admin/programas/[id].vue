@@ -4,188 +4,221 @@
       <h1 class="page-header__title">Editar programa</h1>
     </div>
 
-    <UiTabs v-model="activeTab" :tabs="tabs" />
-
-    <!-- Tab 1: Información -->
-    <div v-if="activeTab === 'info'" class="tab-content">
+    <!-- Skeleton -->
+    <template v-if="!isNew && dataStatus === 'pending'">
+      <UiSkeleton variant="rect" width="240px" height="36px" radius="var(--radius-lg)" style="margin-bottom: var(--space-6);" />
       <div class="form-layout">
         <div class="form-layout__main">
           <UiCard variant="outlined">
             <div class="form-section">
-              <UiInput
-                v-model="form.title"
-                label="Título del programa"
-                required
-                :error="errors.title"
-              />
-
-              <UiTextarea
-                v-model="form.description"
-                label="Descripción"
-                :rows="4"
-              />
-
-              <!-- Image upload -->
-              <div class="upload">
-                <label class="upload__label">Imagen de portada</label>
-                <div
-                  class="upload__dropzone"
-                  :class="{ 'upload__dropzone--active': isDragging }"
-                  @dragover.prevent="isDragging = true"
-                  @dragleave="isDragging = false"
-                  @drop.prevent="handleDrop"
-                  @click="triggerFileInput"
-                >
-                  <input
-                    ref="fileInput"
-                    type="file"
-                    accept="image/*"
-                    class="upload__input"
-                    @change="handleFileChange"
-                  />
-                  <template v-if="!uploadedFile && !form.existing_media">
-                    <div class="upload__icon">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-                      </svg>
-                    </div>
-                    <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
-                    <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
-                  </template>
-                  <template v-else-if="uploadedFile">
-                    <div class="upload__preview">
-                      <img :src="coverPreview" alt="" class="upload__img-preview" />
-                      <p class="upload__filename">{{ uploadedFile.name }}</p>
-                      <p class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
-                      <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div class="upload__preview">
-                      <img :src="form.existing_media" alt="" class="upload__img-preview" />
-                      <p class="upload__filename">{{ form.existing_media }}</p>
-                      <button class="upload__remove" @click.stop="removeExistingMedia">Eliminar</button>
-                    </div>
-                  </template>
-                </div>
-              </div>
-
-              <UiSelect
-                v-model="form.program_type"
-                label="Tipo de programa"
-                :options="typeOptions"
-              />
+              <UiSkeleton variant="text" width="120px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="100px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="120px" radius="var(--radius-lg)" />
             </div>
           </UiCard>
         </div>
-
         <div class="form-layout__sidebar">
           <UiCard variant="outlined">
             <div class="form-section">
-              <UiSelect
-                v-model="form.plan"
-                label="Plan"
-                :options="planOptions"
-              />
-              <UiSelect
-                v-model="form.entitlement_key"
-                label="Complemento requerido"
-                :options="entitlementOptions"
-                placeholder="Sin restricción"
-              />
-              <UiSelect
-                v-model="form.status"
-                label="Estado"
-                :options="statusOptions"
-              />
+              <UiSkeleton variant="text" width="30px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="40px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
             </div>
           </UiCard>
-          <!-- <UiCard variant="filled">
-            <div class="form-section">
-              <p class="meta-label">Inscritos: 3,420</p>
-              <p class="meta-label">Completados: 1,847</p>
-              <p class="meta-label">Tasa de finalización: 54%</p>
-            </div>
-          </UiCard> -->
         </div>
       </div>
-    </div>
+    </template>
 
-    <!-- Tab 2: Días del programa -->
-    <div v-if="activeTab === 'days'" class="tab-content">
-      <div class="days-header">
-        <h2 class="days-header__title">Días del programa</h2>
+    <template v-else>
+      <UiTabs v-model="activeTab" :tabs="tabs" />
+
+      <!-- Tab 1: Información -->
+      <div v-if="activeTab === 'info'" class="tab-content">
+        <div class="form-layout">
+          <div class="form-layout__main">
+            <UiCard variant="outlined">
+              <div class="form-section">
+                <UiInput
+                  v-model="form.title"
+                  label="Título del programa"
+                  required
+                  :error="errors.title"
+                />
+
+                <UiTextarea
+                  v-model="form.description"
+                  label="Descripción"
+                  :rows="4"
+                />
+
+                <!-- Image upload -->
+                <div class="upload">
+                  <label class="upload__label">Imagen de portada</label>
+                  <div
+                    class="upload__dropzone"
+                    :class="{ 'upload__dropzone--active': isDragging }"
+                    @dragover.prevent="isDragging = true"
+                    @dragleave="isDragging = false"
+                    @drop.prevent="handleDrop"
+                    @click="triggerFileInput"
+                  >
+                    <input
+                      ref="fileInput"
+                      type="file"
+                      accept="image/*"
+                      class="upload__input"
+                      @change="handleFileChange"
+                    />
+                    <template v-if="!uploadedFile && !form.existing_media">
+                      <div class="upload__icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                      </div>
+                      <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
+                      <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
+                    </template>
+                    <template v-else-if="uploadedFile">
+                      <div class="upload__preview">
+                        <img :src="coverPreview" alt="" class="upload__img-preview" />
+                        <p class="upload__filename">{{ uploadedFile.name }}</p>
+                        <p class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
+                        <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div class="upload__preview">
+                        <img :src="form.existing_media" alt="" class="upload__img-preview" />
+                        <p class="upload__filename">{{ form.existing_media }}</p>
+                        <button class="upload__remove" @click.stop="removeExistingMedia">Eliminar</button>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+
+                <UiSelect
+                  v-model="form.program_type"
+                  label="Tipo de programa"
+                  :options="typeOptions"
+                />
+              </div>
+            </UiCard>
+          </div>
+
+          <div class="form-layout__sidebar">
+            <UiCard variant="outlined">
+              <div class="form-section">
+                <UiSelect
+                  v-model="form.plan"
+                  label="Plan"
+                  :options="planOptions"
+                />
+                <UiSelect
+                  v-model="form.entitlement_key"
+                  label="Complemento requerido"
+                  :options="entitlementOptions"
+                  placeholder="Sin restricción"
+                />
+                <UiSelect
+                  v-model="form.status"
+                  label="Estado"
+                  :options="statusOptions"
+                />
+              </div>
+            </UiCard>
+            <!-- <UiCard variant="filled">
+              <div class="form-section">
+                <p class="meta-label">Inscritos: 3,420</p>
+                <p class="meta-label">Completados: 1,847</p>
+                <p class="meta-label">Tasa de finalización: 54%</p>
+              </div>
+            </UiCard> -->
+          </div>
+        </div>
       </div>
 
-      <div v-if="programDays.length === 0" class="days-empty">
-        <p>No hay días configurados. Agrega el primer día del programa.</p>
-      </div>
+      <!-- Tab 2: Días del programa -->
+      <div v-if="activeTab === 'days'" class="tab-content">
+        <div class="days-header">
+          <h2 class="days-header__title">Días del programa</h2>
+        </div>
 
-      <div class="days-list">
-        <UiCard v-for="(day, dayIndex) in programDays" :key="dayIndex" variant="outlined">
-          <div class="form-section">
-            <div class="day-card__header">
-              <span class="day-card__number eyebrow">Día {{ dayIndex + 1 }}</span>
-              <UiButton variant="danger-ghost" size="sm" @click="removeDay(dayIndex)">Quitar</UiButton>
-            </div>
+        <div v-if="programDays.length === 0" class="days-empty">
+          <p>No hay días configurados. Agrega el primer día del programa.</p>
+        </div>
 
-            <div class="day-card__fields">
-              <UiInput v-model="day.title" label="Título del día" placeholder="Ej: Introducción a la meditación" />
-              <UiTextarea v-model="day.description" label="Descripción" placeholder="Describe las actividades del día..." :rows="2" />
-            </div>
-
-            <!-- Activities -->
-            <div class="activities">
-              <h4 class="activities__title eyebrow">Actividades</h4>
-
-              <div v-for="(activity, actIndex) in day.activities" :key="actIndex" class="activity-item">
-                <div class="activity-item__header">
-                  <span class="activity-item__label">Actividad {{ actIndex + 1 }}</span>
-                  <UiButton variant="danger-ghost" size="sm" @click="removeActivity(dayIndex, actIndex)">Quitar actividad</UiButton>
-                </div>
-                <div class="activity-item__fields">
-                  <UiSelect
-                    v-model="activity.type"
-                    label="Tipo"
-                    :options="activityTypeOptions"
-                  />
-                  <UiSelect
-                    v-if="activity.type === 'contenido'"
-                    v-model="activity.content_id"
-                    label="Contenido"
-                    :options="contentOptions"
-                    placeholder="Selecciona contenido"
-                  />
-                  <p v-if="activity.type === 'contenido' && contentConflictLabel(activity.content_id)" class="activity-item__warning">
-                    Este contenido requiere el complemento "{{ contentConflictLabel(activity.content_id) }}" pero el programa no tiene restricción.
-                  </p>
-                  <UiSelect
-                    v-if="activity.type === 'formulario'"
-                    v-model="activity.form_id"
-                    label="Formulario"
-                    :options="formOptions"
-                    placeholder="Selecciona formulario"
-                  />
-                </div>
+        <div class="days-list">
+          <UiCard v-for="(day, dayIndex) in programDays" :key="dayIndex" variant="outlined">
+            <div class="form-section">
+              <div class="day-card__header">
+                <span class="day-card__number eyebrow">Día {{ dayIndex + 1 }}</span>
+                <UiButton variant="danger-ghost" size="sm" @click="removeDay(dayIndex)">Quitar</UiButton>
               </div>
 
-              <UiButton variant="outline" size="sm" @click="addActivity(dayIndex)">+ Agregar actividad</UiButton>
+              <div class="day-card__fields">
+                <UiInput v-model="day.title" label="Título del día" placeholder="Ej: Introducción a la meditación" />
+                <UiTextarea v-model="day.description" label="Descripción" placeholder="Describe las actividades del día..." :rows="2" />
+              </div>
+
+              <!-- Activities -->
+              <div class="activities">
+                <h4 class="activities__title eyebrow">Actividades</h4>
+
+                <div v-for="(activity, actIndex) in day.activities" :key="actIndex" class="activity-item">
+                  <div class="activity-item__header">
+                    <span class="activity-item__label">Actividad {{ actIndex + 1 }}</span>
+                    <UiButton variant="danger-ghost" size="sm" @click="removeActivity(dayIndex, actIndex)">Quitar actividad</UiButton>
+                  </div>
+                  <div class="activity-item__fields">
+                    <UiSelect
+                      v-model="activity.type"
+                      label="Tipo"
+                      :options="activityTypeOptions"
+                    />
+                    <UiSelect
+                      v-if="activity.type === 'contenido'"
+                      v-model="activity.content_id"
+                      label="Contenido"
+                      :options="contentOptions"
+                      placeholder="Selecciona contenido"
+                    />
+                    <p v-if="activity.type === 'contenido' && contentConflictLabel(activity.content_id)" class="activity-item__warning">
+                      Este contenido requiere el complemento "{{ contentConflictLabel(activity.content_id) }}" pero el programa no tiene restricción.
+                    </p>
+                    <UiSelect
+                      v-if="activity.type === 'formulario'"
+                      v-model="activity.form_id"
+                      label="Formulario"
+                      :options="formOptions"
+                      placeholder="Selecciona formulario"
+                    />
+                  </div>
+                </div>
+
+                <UiButton variant="outline" size="sm" @click="addActivity(dayIndex)">+ Agregar actividad</UiButton>
+              </div>
             </div>
-          </div>
-        </UiCard>
+          </UiCard>
+        </div>
+
+        <UiButton variant="primary-outline" size="sm" @click="addDay" style="align-self: flex-start; margin-top: var(--space-3);">+ Agregar día</UiButton>
       </div>
 
-      <UiButton variant="primary-outline" size="sm" @click="addDay" style="align-self: flex-start; margin-top: var(--space-3);">+ Agregar día</UiButton>
-    </div>
-
-    <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
-      <UiButton variant="soft" size="sm" to="/admin/programas">Cancelar</UiButton>
-      <UiButton v-if="activeTab === 'info'" variant="soft" size="sm" @click="activeTab = 'days'">Siguiente</UiButton>
-      <UiButton v-if="activeTab === 'days'" variant="soft" size="sm" @click="activeTab = 'info'">Atrás</UiButton>
-      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
-      <p v-if="formError" class="form-error">{{ formError }}</p>
-    </div>
+      <div class="page-actions">
+        <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/programas">Cancelar</UiButton>
+        <UiButton v-if="activeTab === 'info'" variant="soft" size="sm" @click="activeTab = 'days'">Siguiente</UiButton>
+        <UiButton v-if="activeTab === 'days'" variant="soft" size="sm" @click="activeTab = 'info'">Atrás</UiButton>
+        <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+        <p v-if="formError" class="form-error">{{ formError }}</p>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -215,14 +248,14 @@ const coverPreview = ref('')
 const isDragging = ref(false)
 
 // ── Fetch existing program ──
-const { data: program } = await useAsyncData(`program-${id}`, async () => {
+const { data: program, status: dataStatus } = useAsyncData(`program-${id}`, async () => {
   if (isNew) return null
   const { data } = await client.from('programs').select('*').eq('id', id).single()
   return data
-})
+}, { lazy: true })
 
 // ── Fetch program days with items ──
-const { data: dbDays } = await useAsyncData(`program-days-${id}`, async () => {
+const { data: dbDays } = useAsyncData(`program-days-${id}`, async () => {
   if (isNew) return []
   const { data } = await client
     .from('program_days')
@@ -230,20 +263,20 @@ const { data: dbDays } = await useAsyncData(`program-days-${id}`, async () => {
     .eq('program_id', id)
     .order('day_index')
   return data ?? []
-})
+}, { lazy: true })
 
 // ── Fetch content items and forms for dropdowns ──
-const { data: contentItemsList } = await useAsyncData('program-content-items', async () => {
+const { data: contentItemsList } = useAsyncData('program-content-items', async () => {
   const { data } = await client.from('content_items').select('id, title, entitlement_key').eq('status', 'published').order('title')
   return data ?? []
-})
+}, { lazy: true })
 
-const { data: formsList } = await useAsyncData('program-forms', async () => {
+const { data: formsList } = useAsyncData('program-forms', async () => {
   const { data } = await client.from('forms').select('id, title').eq('status', 'active').order('title')
   return data ?? []
-})
+}, { lazy: true })
 
-const { entitlementOptions, entitlementLabels } = await useAdminEntitlements()
+const { entitlementOptions, entitlementLabels } = useAdminEntitlements()
 
 // ── Map DB item type to UI type ──
 const dbTypeToUi: Record<string, string> = { content: 'contenido', form: 'formulario', ai_prompt: 'talk_to_ai' }
@@ -251,14 +284,26 @@ const uiTypeToDb: Record<string, string> = { contenido: 'content', formulario: '
 
 // ── Form state ──
 const form = reactive({
-  title: program.value?.title ?? '',
-  description: program.value?.description ?? '',
-  program_type: program.value?.type ?? 'program',
-  plan: program.value?.plan ?? 'free',
-  entitlement_key: program.value?.entitlement_key ?? '',
-  status: program.value?.status ?? 'draft',
-  existing_media: program.value?.cover_url ?? '',
+  title: '',
+  description: '',
+  program_type: 'program',
+  plan: 'free',
+  entitlement_key: '',
+  status: 'draft',
+  existing_media: '',
 })
+
+watch(program, (val) => {
+  if (val) {
+    form.title = val.title ?? ''
+    form.description = val.description ?? ''
+    form.program_type = val.type ?? 'program'
+    form.plan = val.plan ?? 'free'
+    form.entitlement_key = val.entitlement_key ?? ''
+    form.status = val.status ?? 'draft'
+    form.existing_media = val.cover_url ?? ''
+  }
+}, { immediate: true })
 
 // ── Options ──
 const typeOptions = [
@@ -339,7 +384,13 @@ function buildLocalDays(): ProgramDay[] {
   })
 }
 
-const programDays = ref<ProgramDay[]>(isNew ? [] : buildLocalDays())
+const programDays = ref<ProgramDay[]>([])
+
+watch(dbDays, () => {
+  if (!isNew && dbDays.value?.length) {
+    programDays.value = buildLocalDays()
+  }
+}, { immediate: true })
 
 function addDay() {
   programDays.value.push({

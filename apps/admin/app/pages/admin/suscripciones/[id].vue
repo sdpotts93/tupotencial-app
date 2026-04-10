@@ -4,73 +4,115 @@
       <h1 class="page-header__title">Editar plan — {{ plan?.title }}</h1>
     </div>
 
-    <div class="form-layout">
-      <div class="form-layout__main">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiInput v-model="form.title" label="Nombre del plan" />
-
-            <UiTextarea v-model="form.description" label="Descripción" :rows="3" />
-          </div>
-        </UiCard>
-
-        <!-- Benefits from benefits table -->
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <div class="benefits-header">
-              <div>
-                <label class="benefits__label">Beneficios del plan</label>
-                <p class="benefits__hint">Alianzas y descuentos asociados a este plan. Edítalos en Beneficios.</p>
-              </div>
-              <UiButton variant="soft" size="sm" to="/admin/beneficios">Ir a Beneficios</UiButton>
+    <!-- Skeleton -->
+    <template v-if="dataStatus === 'pending'">
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="80px" radius="var(--radius-lg)" />
             </div>
-
-            <div v-if="planBenefits?.length" class="benefits-list">
-              <div v-for="b in planBenefits" :key="b.id" class="benefits-list__item">
-                <span class="benefits-list__title">{{ b.title }}</span>
-                <UiTag :variant="b.status === 'active' ? 'success' : 'warning'" size="sm">
-                  {{ b.status === 'active' ? 'Activo' : 'Inactivo' }}
-                </UiTag>
-              </div>
+          </UiCard>
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="text" width="200px" height="10px" style="margin-bottom: var(--space-3);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-md)" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-md)" />
             </div>
-            <p v-else class="benefits__empty">No hay beneficios asociados a este plan.</p>
-          </div>
-        </UiCard>
+          </UiCard>
+        </div>
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="50px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+          <UiCard variant="filled">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="120px" height="10px" />
+              <UiSkeleton variant="text" width="180px" height="10px" />
+            </div>
+          </UiCard>
+        </div>
+      </div>
+    </template>
+
+    <template v-else>
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiInput v-model="form.title" label="Nombre del plan" />
+
+              <UiTextarea v-model="form.description" label="Descripción" :rows="3" />
+            </div>
+          </UiCard>
+
+          <!-- Benefits from benefits table -->
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <div class="benefits-header">
+                <div>
+                  <label class="benefits__label">Beneficios del plan</label>
+                  <p class="benefits__hint">Alianzas y descuentos asociados a este plan. Edítalos en Beneficios.</p>
+                </div>
+                <UiButton variant="soft" size="sm" to="/admin/beneficios">Ir a Beneficios</UiButton>
+              </div>
+
+              <div v-if="planBenefits?.length" class="benefits-list">
+                <div v-for="b in planBenefits" :key="b.id" class="benefits-list__item">
+                  <span class="benefits-list__title">{{ b.title }}</span>
+                  <UiTag :variant="b.status === 'active' ? 'success' : 'warning'" size="sm">
+                    {{ b.status === 'active' ? 'Activo' : 'Inactivo' }}
+                  </UiTag>
+                </div>
+              </div>
+              <p v-else class="benefits__empty">No hay beneficios asociados a este plan.</p>
+            </div>
+          </UiCard>
+        </div>
+
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiInput
+                v-model="form.price"
+                label="Precio (MXN)"
+                type="number"
+                placeholder="399"
+                hint="Precio en pesos mexicanos"
+              />
+
+              <UiSelect
+                v-model="form.interval"
+                label="Intervalo"
+                :options="intervalOptions"
+              />
+            </div>
+          </UiCard>
+
+          <UiCard variant="filled">
+            <div class="form-section">
+              <p class="meta-label">ID: {{ route.params.id }}</p>
+              <p class="meta-hint">Los planes no se pueden crear ni eliminar.</p>
+            </div>
+          </UiCard>
+        </div>
       </div>
 
-      <div class="form-layout__sidebar">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiInput
-              v-model="form.price"
-              label="Precio (MXN)"
-              type="number"
-              placeholder="399"
-              hint="Precio en pesos mexicanos"
-            />
-
-            <UiSelect
-              v-model="form.interval"
-              label="Intervalo"
-              :options="intervalOptions"
-            />
-          </div>
-        </UiCard>
-
-        <UiCard variant="filled">
-          <div class="form-section">
-            <p class="meta-label">ID: {{ route.params.id }}</p>
-            <p class="meta-hint">Los planes no se pueden crear ni eliminar.</p>
-          </div>
-        </UiCard>
+      <div class="page-actions">
+        <UiButton variant="soft" size="sm" to="/admin/suscripciones">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+        <p v-if="formError" class="form-error">{{ formError }}</p>
       </div>
-    </div>
-
-    <div class="page-actions">
-      <UiButton variant="soft" size="sm" to="/admin/suscripciones">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
-      <p v-if="formError" class="form-error">{{ formError }}</p>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -83,31 +125,40 @@ const planId = route.params.id as string
 const toast = useToast()
 
 // ── Fetch plan ──
-const { data: plan } = await useAsyncData(`sub-plan-${planId}`, async () => {
+const { data: plan, status: dataStatus } = useAsyncData(`sub-plan-${planId}`, async () => {
   const { data } = await client.from('subscription_plans').select('*').eq('id', planId).single()
   return data
-})
+}, { lazy: true })
 
 // ── Fetch benefits for this plan ──
-const { data: planBenefits } = await useAsyncData(`sub-plan-benefits-${planId}`, async () => {
+const { data: planBenefits } = useAsyncData(`sub-plan-benefits-${planId}`, async () => {
   const { data } = await client
     .from('benefits')
     .select('id, title, status')
     .eq('plan', planId)
     .order('position')
   return data ?? []
-})
+}, { lazy: true })
 
 const formError = ref('')
 const saving = ref(false)
 
 // ── Form state ──
 const form = reactive({
-  title: plan.value?.title ?? '',
-  description: plan.value?.description ?? '',
-  price: plan.value ? String(plan.value.price / 100) : '0',
-  interval: plan.value?.interval ?? 'month',
+  title: '',
+  description: '',
+  price: '0',
+  interval: 'month',
 })
+
+watch(plan, (val) => {
+  if (val) {
+    form.title = val.title ?? ''
+    form.description = val.description ?? ''
+    form.price = String(val.price / 100)
+    form.interval = val.interval ?? 'month'
+  }
+}, { immediate: true })
 
 const intervalOptions = [
   { value: 'month', label: 'Mensual' },

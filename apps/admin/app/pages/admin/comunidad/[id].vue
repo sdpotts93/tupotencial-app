@@ -89,10 +89,18 @@
                     <p class="upload__text">Arrastra tu archivo aquí o <span class="upload__link">selecciona</span></p>
                     <p class="upload__hint">JPG, PNG, WebP, MP4, MOV — max 50 MB</p>
                   </template>
+                  <template v-else-if="uploadedFile">
+                    <div class="upload__preview">
+                      <img v-if="mediaPreview" :src="mediaPreview" alt="" class="upload__img-preview" />
+                      <p class="upload__filename">{{ uploadedFile.name }}</p>
+                      <p class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
+                      <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
+                    </div>
+                  </template>
                   <template v-else>
                     <div class="upload__preview">
-                      <p class="upload__filename">{{ uploadedFile?.name ?? form.media_url }}</p>
-                      <p v-if="uploadedFile" class="upload__filesize">{{ formatFileSize(uploadedFile.size) }}</p>
+                      <img v-if="isExistingImage" :src="form.media_url" alt="" class="upload__img-preview" />
+                      <p class="upload__filename">{{ form.media_url }}</p>
                       <button class="upload__remove" @click.stop="removeFile">Eliminar</button>
                     </div>
                   </template>
@@ -247,30 +255,36 @@ watch(rawComments, (val) => { comments.value = val ?? [] }, { immediate: true })
 // ── Media upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadedFile = ref<File | null>(null)
+const mediaPreview = ref('')
 const isDragging = ref(false)
+
+const isExistingImage = computed(() => /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(form.media_url))
 
 function triggerFileInput() {
   fileInput.value?.click()
 }
 
+function setUploadedFile(file: File) {
+  if (mediaPreview.value) URL.revokeObjectURL(mediaPreview.value)
+  uploadedFile.value = file
+  mediaPreview.value = file.type.startsWith('image/') ? URL.createObjectURL(file) : ''
+  form.media_url = ''
+}
+
 function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement
-  if (target.files?.[0]) {
-    uploadedFile.value = target.files[0]
-    form.media_url = ''
-  }
+  if (target.files?.[0]) setUploadedFile(target.files[0])
 }
 
 function handleDrop(e: DragEvent) {
   isDragging.value = false
-  if (e.dataTransfer?.files?.[0]) {
-    uploadedFile.value = e.dataTransfer.files[0]
-    form.media_url = ''
-  }
+  if (e.dataTransfer?.files?.[0]) setUploadedFile(e.dataTransfer.files[0])
 }
 
 function removeFile() {
+  if (mediaPreview.value) URL.revokeObjectURL(mediaPreview.value)
   uploadedFile.value = null
+  mediaPreview.value = ''
   form.media_url = ''
   if (fileInput.value) fileInput.value.value = ''
 }
@@ -488,6 +502,14 @@ async function handleDelete() {
 .upload__filesize {
   font-size: var(--text-xs);
   color: var(--color-muted);
+}
+
+.upload__img-preview {
+  max-width: 100%;
+  max-height: 160px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  margin-bottom: var(--space-2);
 }
 
 .upload__remove {

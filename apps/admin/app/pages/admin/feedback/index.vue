@@ -4,7 +4,7 @@
       <h1 class="page-header__title">Feedback</h1>
     </div>
 
-    <UiDataTable :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading || status === 'pending'" :loading-more="loadingMore" :error="status === 'error'" error-title="No pudimos cargar las respuestas" fill @load-more="loadMore" @retry="refresh()">
+    <UiDataTable :columns="columns" :rows="rows" :has-more="hasMore" :loading="searchPending || loading || status === 'pending'" :loading-more="loadingMore" :error="status === 'error'" error-title="No pudimos cargar las respuestas" fill @row-click="goToDetail" @load-more="loadMore" @retry="refresh()">
       <template #toolbar>
         <UiInput v-model="searchInput" placeholder="Buscar por formulario..." style="min-width: 200px;">
           <template #suffix><Icon name="lucide:search" size="18" /></template>
@@ -104,6 +104,10 @@ function avatarInitials(name: string) {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function goToDetail(row: any) {
+  navigateTo(`/admin/feedback/${row.id}`)
 }
 </script>
 

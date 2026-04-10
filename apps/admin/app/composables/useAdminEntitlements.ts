@@ -27,10 +27,10 @@ function addonScore(addon: AdminAddonRelation | null): number {
   return score
 }
 
-export async function useAdminEntitlements() {
+export function useAdminEntitlements() {
   const client = useSupabaseClient()
 
-  const { data, refresh, status, error } = await useAsyncData('admin-entitlements', async () => {
+  const { data, refresh, status, error } = useAsyncData('admin-entitlements', async () => {
     const { data, error } = await client
       .from('addon_entitlements')
       .select('entitlement_key, addons(title, status)')

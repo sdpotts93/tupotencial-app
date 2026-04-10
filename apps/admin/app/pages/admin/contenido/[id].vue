@@ -4,7 +4,48 @@
       <h1 class="page-header__title">Editar contenido</h1>
     </div>
 
-    <div class="form-layout">
+    <!-- Skeleton -->
+    <template v-if="!isNew && dataStatus === 'pending'">
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="50px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="80px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="80px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="120px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="200px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="120px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+        </div>
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="90px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="60px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="30px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="40px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+        </div>
+      </div>
+    </template>
+
+    <template v-else>
+      <div class="form-layout">
       <div class="form-layout__main">
         <UiCard variant="outlined">
           <div class="form-section">
@@ -265,12 +306,13 @@
       </div>
     </div>
 
-    <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
-      <UiButton variant="soft" size="sm" to="/admin/contenido">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
-      <p v-if="formError" class="form-error">{{ formError }}</p>
-    </div>
+      <div class="page-actions">
+        <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/contenido">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+        <p v-if="formError" class="form-error">{{ formError }}</p>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -301,56 +343,74 @@ const formError = ref('')
 const errors = reactive({ title: '', introduction: '', body: '', vimeo_url: '', audio_file: '', scheduled_at: '' })
 
 // ── Fetch existing content item + junction category ──
-const { data: contentItem } = await useAsyncData(`content-${id}`, async () => {
+const { data: contentItem, status: dataStatus } = useAsyncData(`content-${id}`, async () => {
   if (isNew) return null
   const { data } = await client.from('content_items').select('*').eq('id', id).single()
   return data
-})
+}, { lazy: true })
 
-const { data: itemCategories } = await useAsyncData(`content-categories-${id}`, async () => {
+const { data: itemCategories } = useAsyncData(`content-categories-${id}`, async () => {
   if (isNew) return []
   const { data } = await client.from('content_item_categories').select('category_id').eq('content_item_id', id)
   return (data ?? []).map(d => d.category_id)
-})
+}, { lazy: true })
 
-const { data: itemObjectives } = await useAsyncData(`content-objectives-${id}`, async () => {
+const { data: itemObjectives } = useAsyncData(`content-objectives-${id}`, async () => {
   if (isNew) return []
   const { data } = await client.from('content_item_objectives').select('objective_id').eq('content_item_id', id)
   return (data ?? []).map(d => d.objective_id)
-})
+}, { lazy: true })
 
 // ── Fetch categories & objectives for dropdowns ──
-const { data: categories } = await useAsyncData('content-categories', async () => {
+const { data: categories } = useAsyncData('content-categories', async () => {
   const { data } = await client.from('content_categories').select('id, title').order('sort_order')
   return data ?? []
-})
+}, { lazy: true })
 
-const { data: objectives } = await useAsyncData('content-objectives', async () => {
+const { data: objectives } = useAsyncData('content-objectives', async () => {
   const { data } = await client.from('content_objectives').select('id, title').order('position')
   return data ?? []
-})
+}, { lazy: true })
 
-const { entitlementOptions } = await useAdminEntitlements()
+const { entitlementOptions } = useAdminEntitlements()
 
 const form = reactive({
-  title: contentItem.value?.title ?? '',
-  introduction: contentItem.value?.subtitle ?? '',
-  body: contentItem.value?.type === 'article'
-    ? (contentItem.value?.body ?? '')
-    : (contentItem.value?.description ?? ''),
-  content_type: contentItem.value?.type ?? 'video',
-  category_ids: itemCategories.value ?? [] as string[],
-  objective_ids: itemObjectives.value ?? [] as string[],
-  duration: contentItem.value?.duration_seconds ? `${contentItem.value.duration_seconds}` : '',
-  segment: contentItem.value?.plan ?? 'free',
-  entitlement_key: contentItem.value?.entitlement_key ?? '',
-  status: contentItem.value?.status ?? 'draft',
-  scheduled_at: contentItem.value?.available_from ? new Date(contentItem.value.available_from) : null as Date | null,
-  unpublished_at: contentItem.value?.available_to ? new Date(contentItem.value.available_to) : null as Date | null,
-  vimeo_url: contentItem.value?.vimeo_id ?? '',
-  existing_media: contentItem.value?.type !== 'video' ? (contentItem.value?.media_url ?? '') : '',
-  thumbnail_url: contentItem.value?.thumbnail_url ?? '',
+  title: '',
+  introduction: '',
+  body: '',
+  content_type: 'video',
+  category_ids: [] as string[],
+  objective_ids: [] as string[],
+  duration: '',
+  segment: 'free',
+  entitlement_key: '',
+  status: 'draft',
+  scheduled_at: null as Date | null,
+  unpublished_at: null as Date | null,
+  vimeo_url: '',
+  existing_media: '',
+  thumbnail_url: '',
 })
+
+watch([contentItem, itemCategories, itemObjectives], ([item, cats, objs]) => {
+  if (item) {
+    form.title = item.title ?? ''
+    form.introduction = item.subtitle ?? ''
+    form.body = item.type === 'article' ? (item.body ?? '') : (item.description ?? '')
+    form.content_type = item.type ?? 'video'
+    form.duration = item.duration_seconds ? `${item.duration_seconds}` : ''
+    form.segment = item.plan ?? 'free'
+    form.entitlement_key = item.entitlement_key ?? ''
+    form.status = item.status ?? 'draft'
+    form.scheduled_at = item.available_from ? new Date(item.available_from) : null
+    form.unpublished_at = item.available_to ? new Date(item.available_to) : null
+    form.vimeo_url = item.vimeo_id ?? ''
+    form.existing_media = item.type !== 'video' ? (item.media_url ?? '') : ''
+    form.thumbnail_url = item.thumbnail_url ?? ''
+  }
+  if (cats) form.category_ids = cats
+  if (objs) form.objective_ids = objs
+}, { immediate: true })
 
 const typeOptions = [
   { value: 'video', label: 'Video' },

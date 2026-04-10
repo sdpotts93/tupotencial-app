@@ -4,124 +4,166 @@
       <h1 class="page-header__title">Editar evento</h1>
     </div>
 
-    <div class="form-layout">
-      <div class="form-layout__main">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiInput v-model="form.title" label="Título del evento" required :error="errors.title" />
-            <UiTextarea v-model="form.description" label="Descripción" :rows="5" :error="errors.description" />
-            <!-- Image upload -->
-            <div class="upload">
-              <label class="upload__label">Imagen de portada</label>
-              <div
-                class="upload__dropzone"
-                :class="{ 'upload__dropzone--active': isDragging }"
-                @dragover.prevent="isDragging = true"
-                @dragleave="isDragging = false"
-                @drop.prevent="handleDrop"
-                @click="triggerFileInput"
-              >
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept="image/*"
-                  class="upload__input"
-                  @change="handleFileChange"
-                />
-                <template v-if="!coverFile && !form.cover_url">
-                  <div class="upload__icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                  </div>
-                  <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
-                  <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
-                </template>
-                <template v-else-if="coverFile">
-                  <div class="upload__preview">
-                    <img :src="coverPreviewUrl" alt="" class="upload__img-preview" />
-                    <p class="upload__filename">{{ coverFile.name }}</p>
-                    <p class="upload__filesize">{{ formatFileSize(coverFile.size) }}</p>
-                    <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
-                  </div>
-                </template>
-                <template v-else>
-                  <div class="upload__preview">
-                    <img :src="form.cover_url" alt="" class="upload__img-preview" />
-                    <p class="upload__filename">{{ form.cover_url }}</p>
-                    <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
-                  </div>
-                </template>
+    <!-- Skeleton -->
+    <template v-if="!isNew && dataStatus === 'pending'">
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="70px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="120px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="120px" radius="var(--radius-lg)" />
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-top: var(--space-4);">
+                <div>
+                  <UiSkeleton variant="text" width="80px" height="12px" style="margin-bottom: var(--space-1);" />
+                  <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+                </div>
+                <div>
+                  <UiSkeleton variant="text" width="60px" height="12px" style="margin-bottom: var(--space-1);" />
+                  <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+                </div>
               </div>
             </div>
+          </UiCard>
+        </div>
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSkeleton variant="text" width="30px" height="12px" style="margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="100px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+              <UiSkeleton variant="text" width="40px" height="12px" style="margin-top: var(--space-4); margin-bottom: var(--space-1);" />
+              <UiSkeleton variant="rect" width="100%" height="40px" radius="var(--radius-lg)" />
+            </div>
+          </UiCard>
+        </div>
+      </div>
+    </template>
 
-            <div class="form-row">
-              <UiDatePicker
-                v-model="form.starts_at"
-                label="Fecha y hora"
-                :enable-time="true"
-                placeholder="Selecciona fecha y hora"
-                required
-                :error="errors.starts_at"
-              />
-              <UiSelect
-                v-model="form.duration"
-                label="Duración"
-                :options="durationOptions"
-                placeholder="Selecciona duración"
-                required
-                :error="errors.duration"
+    <template v-else>
+      <div class="form-layout">
+        <div class="form-layout__main">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiInput v-model="form.title" label="Título del evento" required :error="errors.title" />
+              <UiTextarea v-model="form.description" label="Descripción" :rows="5" :error="errors.description" />
+              <!-- Image upload -->
+              <div class="upload">
+                <label class="upload__label">Imagen de portada</label>
+                <div
+                  class="upload__dropzone"
+                  :class="{ 'upload__dropzone--active': isDragging }"
+                  @dragover.prevent="isDragging = true"
+                  @dragleave="isDragging = false"
+                  @drop.prevent="handleDrop"
+                  @click="triggerFileInput"
+                >
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    accept="image/*"
+                    class="upload__input"
+                    @change="handleFileChange"
+                  />
+                  <template v-if="!coverFile && !form.cover_url">
+                    <div class="upload__icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <p class="upload__text">Arrastra tu imagen aquí o <span class="upload__link">selecciona</span></p>
+                    <p class="upload__hint">JPG, PNG, WebP — max 10 MB</p>
+                  </template>
+                  <template v-else-if="coverFile">
+                    <div class="upload__preview">
+                      <img :src="coverPreviewUrl" alt="" class="upload__img-preview" />
+                      <p class="upload__filename">{{ coverFile.name }}</p>
+                      <p class="upload__filesize">{{ formatFileSize(coverFile.size) }}</p>
+                      <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="upload__preview">
+                      <img :src="form.cover_url" alt="" class="upload__img-preview" />
+                      <p class="upload__filename">{{ form.cover_url }}</p>
+                      <button class="upload__remove" @click.stop="removeCover">Eliminar</button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <UiDatePicker
+                  v-model="form.starts_at"
+                  label="Fecha y hora"
+                  :enable-time="true"
+                  placeholder="Selecciona fecha y hora"
+                  required
+                  :error="errors.starts_at"
+                />
+                <UiSelect
+                  v-model="form.duration"
+                  label="Duración"
+                  :options="durationOptions"
+                  placeholder="Selecciona duración"
+                  required
+                  :error="errors.duration"
+                />
+              </div>
+
+              <div class="form-divider" />
+
+              <p class="eyebrow">Vimeo</p>
+
+              <UiInput
+                v-model="form.vimeo_live_event_id"
+                label="Vimeo Live Event ID"
+                placeholder="1234567"
+                hint="ID del evento en vivo. Ir a Vimeo > Crear > Evento en vivo. Copiar ID de la URL."
               />
             </div>
+          </UiCard>
+        </div>
 
-            <div class="form-divider" />
+        <div class="form-layout__sidebar">
+          <UiCard variant="outlined">
+            <div class="form-section">
+              <UiSelect v-model="form.plan" label="Plan" :options="planOptions" />
 
-            <p class="eyebrow">Vimeo</p>
+              <UiSelect
+                v-model="form.entitlement_key"
+                label="Complemento requerido"
+                :options="entitlementOptions"
+                placeholder="Sin restricción"
+              />
 
-            <UiInput
-              v-model="form.vimeo_live_event_id"
-              label="Vimeo Live Event ID"
-              placeholder="1234567"
-              hint="ID del evento en vivo. Ir a Vimeo > Crear > Evento en vivo. Copiar ID de la URL."
-            />
-          </div>
-        </UiCard>
+              <UiSelect v-model="form.status" label="Estado" :options="statusOptions" />
+            </div>
+          </UiCard>
+
+          <UiCard v-if="form.vimeo_live_event_id" variant="filled">
+            <div class="form-section">
+              <p class="eyebrow">Embed en vivo</p>
+              <p class="meta-text">
+                URL para embed durante la transmisión:
+              </p>
+              <code class="embed-url">https://vimeo.com/event/{{ form.vimeo_live_event_id }}/embed</code>
+            </div>
+          </UiCard>
+        </div>
       </div>
 
-      <div class="form-layout__sidebar">
-        <UiCard variant="outlined">
-          <div class="form-section">
-            <UiSelect v-model="form.plan" label="Plan" :options="planOptions" />
-
-            <UiSelect
-              v-model="form.entitlement_key"
-              label="Complemento requerido"
-              :options="entitlementOptions"
-              placeholder="Sin restricción"
-            />
-
-            <UiSelect v-model="form.status" label="Estado" :options="statusOptions" />
-          </div>
-        </UiCard>
-
-        <UiCard v-if="form.vimeo_live_event_id" variant="filled">
-          <div class="form-section">
-            <p class="eyebrow">Embed en vivo</p>
-            <p class="meta-text">
-              URL para embed durante la transmisión:
-            </p>
-            <code class="embed-url">https://vimeo.com/event/{{ form.vimeo_live_event_id }}/embed</code>
-          </div>
-        </UiCard>
+      <div class="page-actions">
+        <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
+        <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
+        <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
+        <p v-if="formError" class="form-error">{{ formError }}</p>
       </div>
-    </div>
-
-    <div class="page-actions">
-      <UiButton variant="danger-ghost" size="sm" :loading="deleting" @click="handleDelete">Eliminar</UiButton>
-      <UiButton variant="soft" size="sm" to="/admin/eventos">Cancelar</UiButton>
-      <UiButton variant="primary-outline" size="sm" :loading="saving" @click="handleSave">Guardar cambios</UiButton>
-      <p v-if="formError" class="form-error">{{ formError }}</p>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -187,26 +229,40 @@ async function uploadCover(file: File, eventId: string): Promise<string> {
 }
 
 // ── Fetch existing event ──
-const { data: event } = await useAsyncData(`event-${id}`, async () => {
+const { data: event, status: dataStatus } = useAsyncData(`event-${id}`, async () => {
   if (isNew) return null
   const { data } = await client.from('events').select('*').eq('id', id).single()
   return data
-})
+}, { lazy: true })
 
 // ── Form state ──
 const form = reactive({
-  title: event.value?.title ?? '',
-  description: event.value?.description ?? '',
-  cover_url: event.value?.cover_url ?? '',
-  starts_at: event.value?.start_at ? new Date(event.value.start_at) : null as Date | null,
-  duration: event.value?.duration ?? '',
-  vimeo_live_event_id: event.value?.vimeo_live_event_id ?? '',
-  plan: event.value?.plan ?? 'free',
-  entitlement_key: event.value?.entitlement_key ?? '',
-  status: event.value?.status ?? 'draft',
+  title: '',
+  description: '',
+  cover_url: '',
+  starts_at: null as Date | null,
+  duration: '',
+  vimeo_live_event_id: '',
+  plan: 'free',
+  entitlement_key: '',
+  status: 'draft',
 })
 
-const { entitlementOptions } = await useAdminEntitlements()
+watch(event, (val) => {
+  if (val) {
+    form.title = val.title ?? ''
+    form.description = val.description ?? ''
+    form.cover_url = val.cover_url ?? ''
+    form.starts_at = val.start_at ? new Date(val.start_at) : null
+    form.duration = val.duration ?? ''
+    form.vimeo_live_event_id = val.vimeo_live_event_id ?? ''
+    form.plan = val.plan ?? 'free'
+    form.entitlement_key = val.entitlement_key ?? ''
+    form.status = val.status ?? 'draft'
+  }
+}, { immediate: true })
+
+const { entitlementOptions } = useAdminEntitlements()
 
 const durationOptions = [
   { value: '15', label: '15 min' },
