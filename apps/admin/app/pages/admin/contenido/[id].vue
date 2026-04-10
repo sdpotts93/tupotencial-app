@@ -345,7 +345,7 @@ const errors = reactive({ title: '', introduction: '', body: '', vimeo_url: '', 
 // ── Fetch existing content item + junction category ──
 const { data: contentItem, status: dataStatus } = useAsyncData(`content-${id}`, async () => {
   if (isNew) return null
-  const { data } = await client.from('content_items').select('*').eq('id', id).single()
+  const { data } = await (client.rpc as any)('get_admin_content_item', { p_id: id })
   return data
 }, { lazy: true })
 

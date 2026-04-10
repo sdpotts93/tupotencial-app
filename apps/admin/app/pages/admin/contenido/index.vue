@@ -243,7 +243,7 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
     const objJoin = filterObjective.value
       ? 'content_item_objectives!inner(objective_id)'
       : 'content_item_objectives(objective_id)'
-    let query = client.from('content_items').select(`*, ${catJoin}, ${objJoin}`)
+    let query = client.from('content_items').select(`id, title, type, plan, status, entitlement_key, published_at, created_at, ${catJoin}, ${objJoin}`)
 
     if (search.value) query = query.ilike('title', `%${search.value}%`)
     if (filterStatus.value) query = query.eq('status', filterStatus.value)
