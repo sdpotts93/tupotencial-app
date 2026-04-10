@@ -140,13 +140,45 @@ const desktopBottomItems = [
 }
 
 .app-layout__body {
-  position: relative;
+  display: grid;
   flex: 1;
+  min-height: 0;
   min-width: 0;
+  overflow-x: clip;
+}
+
+.app-layout__body > :deep(*) {
+  grid-area: 1 / 1;
+  min-height: 0;
 }
 
 /* Hide bottom nav on mobile for detail pages */
 @media (max-width: 1023px) {
+  .app-layout {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .app-layout__body {
+    overflow: hidden;
+  }
+
+  .app-layout__body > :deep(*) {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .app-layout__body > :deep(*::-webkit-scrollbar) {
+    display: none;
+  }
+
+  .app-layout__body > :deep(.screen) {
+    min-height: 100%;
+  }
+
   .app-layout--hide-mobile-nav {
     padding-bottom: 0;
   }

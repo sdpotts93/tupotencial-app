@@ -129,24 +129,14 @@
 
 <script setup lang="ts">
 import { marked } from 'marked'
+import { sanitizeRichHtml } from '~/composables/useHtmlSanitizer'
 
 // Configure marked for inline rendering (no wrapping <p> tags)
 marked.setOptions({ breaks: true })
 
-// DOMPurify requires a DOM — lazy-load on client only
-let _DOMPurify: typeof import('dompurify').default | undefined
-async function getDOMPurify() {
-  if (!_DOMPurify) {
-    const m = await import('dompurify')
-    _DOMPurify = m.default
-  }
-  return _DOMPurify
-}
-if (import.meta.client) getDOMPurify()
-
 function renderMarkdown(text: string): string {
   const raw = marked.parse(text, { async: false }) as string
-  return _DOMPurify ? _DOMPurify.sanitize(raw) as string : raw
+  return sanitizeRichHtml(raw)
 }
 
 definePageMeta({ layout: 'ai-chat', pageTransition: false })
@@ -195,29 +185,36 @@ if (import.meta.client) {
 const messagesRef = ref<HTMLElement | null>(null)
 const userScrolledUp = ref(false)
 
+function resolveScrollParent(el: HTMLElement | null) {
+  if (!el || !import.meta.client) return null
+
+  const contentParent = el.closest('.screen__content') as HTMLElement | null
+  const screenParent = el.closest('.screen') as HTMLElement | null
+  const candidates = [contentParent, screenParent].filter(Boolean) as HTMLElement[]
+
+  return candidates.find((candidate) => {
+    const { overflowY } = window.getComputedStyle(candidate)
+    return overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay'
+  }) ?? candidates[0] ?? null
+}
+
 function scrollToBottom() {
   if (userScrolledUp.value) return
   nextTick(() => {
     const el = messagesRef.value
     if (!el) return
-    // Scroll the nearest scrollable parent (screen__content on desktop, window on mobile)
-    const scrollParent = el.closest('.screen__content') as HTMLElement | null
-    if (scrollParent && scrollParent.scrollHeight > scrollParent.clientHeight) {
+    const scrollParent = resolveScrollParent(el)
+    if (scrollParent) {
       scrollParent.scrollTop = scrollParent.scrollHeight
-    } else {
-      window.scrollTo({ top: document.body.scrollHeight })
     }
   })
 }
 
 function onMessagesScroll() {
   if (!generating.value) return
-  const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
-  if (scrollParent && scrollParent.scrollHeight > scrollParent.clientHeight) {
+  const scrollParent = resolveScrollParent(messagesRef.value)
+  if (scrollParent) {
     const distFromBottom = scrollParent.scrollHeight - scrollParent.scrollTop - scrollParent.clientHeight
-    userScrolledUp.value = distFromBottom > 100
-  } else {
-    const distFromBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight
     userScrolledUp.value = distFromBottom > 100
   }
 }
@@ -265,12 +262,9 @@ const olderSentinelRef = ref<HTMLElement | null>(null)
 let olderObserver: IntersectionObserver | null = null
 
 onMounted(() => {
-  // Listen for scroll to detect user scrolling up during streaming
-  const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
-  if (scrollParent && scrollParent.scrollHeight > scrollParent.clientHeight) {
+  const scrollParent = resolveScrollParent(messagesRef.value)
+  if (scrollParent) {
     scrollParent.addEventListener('scroll', onMessagesScroll, { passive: true })
-  } else {
-    window.addEventListener('scroll', onMessagesScroll, { passive: true })
   }
   scrollToBottom()
 
@@ -288,9 +282,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (typewriterTimer) clearTimeout(typewriterTimer)
   olderObserver?.disconnect()
-  const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
+  const scrollParent = resolveScrollParent(messagesRef.value)
   if (scrollParent) scrollParent.removeEventListener('scroll', onMessagesScroll)
-  window.removeEventListener('scroll', onMessagesScroll)
 })
 
 const quickPrompts = ['¿Qué hago hoy?', 'Ayúdame a reflexionar', 'Plan de 5 minutos']
@@ -355,9 +348,14 @@ async function loadOlderMessages() {
 
   if (batch.length) {
     // Preserve scroll position when prepending
-    const scrollParent = messagesRef.value?.closest('.screen__content') as HTMLElement | null
-    const prevHeight = scrollParent?.scrollHeight ?? document.documentElement.scrollHeight
-    const prevScroll = scrollParent ? scrollParent.scrollTop : window.scrollY
+    const scrollParent = resolveScrollParent(messagesRef.value)
+    if (!scrollParent) {
+      loadingOlder.value = false
+      return
+    }
+
+    const prevHeight = scrollParent.scrollHeight
+    const prevScroll = scrollParent.scrollTop
 
     const older: ChatMessage[] = batch
       .filter(m => m.role === 'user' || m.role === 'assistant')
@@ -366,13 +364,9 @@ async function loadOlderMessages() {
     messages.value.unshift(...older)
 
     nextTick(() => {
-      const newHeight = scrollParent?.scrollHeight ?? document.documentElement.scrollHeight
+      const newHeight = scrollParent.scrollHeight
       const diff = newHeight - prevHeight
-      if (scrollParent) {
-        scrollParent.scrollTop = prevScroll + diff
-      } else {
-        window.scrollTo(0, prevScroll + diff)
-      }
+      scrollParent.scrollTop = prevScroll + diff
     })
   }
 

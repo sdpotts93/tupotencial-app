@@ -1,5 +1,6 @@
 export default defineNuxtPlugin(() => {
   const router = useRouter()
+  let currentHistoryPosition = Number(window.history.state?.position ?? 0)
 
   const onboardingPaths = ['/configurar-perfil', '/cuenta/bienvenida/segmento']
   const accountTabPaths = new Set([
@@ -32,8 +33,8 @@ export default defineNuxtPlugin(() => {
     return { name: 'layout', mode: 'out-in' as const }
   }
 
-  function stackTransition() {
-    return { name: 'account-stack' }
+  function stackTransition(direction: 'back' | 'forward' = 'forward') {
+    return { name: direction === 'back' ? 'account-stack-back' : 'account-stack' }
   }
 
   router.beforeEach((to, from) => {
@@ -68,18 +69,24 @@ export default defineNuxtPlugin(() => {
     }
 
     const layoutChanged = resolveLayout(from.meta) !== resolveLayout(to.meta)
+    const nextHistoryPosition = Number(window.history.state?.position ?? currentHistoryPosition)
+    const stackDirection = nextHistoryPosition < currentHistoryPosition ? 'back' : 'forward'
 
     if (layoutChanged) {
       to.meta.pageTransition = false
       from.meta.pageTransition = false
-      to.meta.layoutTransition = stackTransition()
-      from.meta.layoutTransition = stackTransition()
+      to.meta.layoutTransition = stackTransition(stackDirection)
+      from.meta.layoutTransition = stackTransition(stackDirection)
       return
     }
 
-    to.meta.pageTransition = stackTransition()
-    from.meta.pageTransition = stackTransition()
+    to.meta.pageTransition = stackTransition(stackDirection)
+    from.meta.pageTransition = stackTransition(stackDirection)
     to.meta.layoutTransition = false
     from.meta.layoutTransition = false
+  })
+
+  router.afterEach(() => {
+    currentHistoryPosition = Number(window.history.state?.position ?? currentHistoryPosition)
   })
 })

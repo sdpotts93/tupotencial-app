@@ -81,7 +81,7 @@
         </div>
 
         <!-- Article body: rendered HTML from Tiptap WYSIWYG (sanitized) -->
-        <div v-if="content.type === 'article' && content.body" class="detail__body" v-html="sanitizeHtml(content.body)" />
+        <div v-if="content.type === 'article' && content.body" class="detail__body" v-html="sanitizeRichHtml(content.body)" />
       </div>
     </div>
     </template>
@@ -89,16 +89,12 @@
 </template>
 
 <script setup lang="ts">
-import DOMPurify from 'dompurify'
+import { sanitizeRichHtml } from '~/composables/useHtmlSanitizer'
 
 definePageMeta({
   layout: 'default',
   hideBottomNav: true,
 })
-
-function sanitizeHtml(html: string): string {
-  return DOMPurify.sanitize(html)
-}
 
 const route = useRoute()
 const id = route.params.id as string
@@ -134,6 +130,11 @@ const { data: contentData, status: contentStatus, refresh: refreshContent } = us
     accessGranted: data.access_granted as boolean,
   }
 }, { lazy: true })
+
+watch(contentStatus, (newVal, oldVal) => {
+  console.log(newVal, oldVal, "contenido INDEX");
+})
+
 
 const content = computed(() => contentData.value ?? {
   title: '',

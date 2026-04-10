@@ -348,6 +348,8 @@ function retrySearch() {
   if (query.value && query.value.length >= 2) performSearch(query.value)
 }
 
+
+
 watch(query, (q) => {
   if (searchTimer) clearTimeout(searchTimer)
   if (!q || q.length < 2) {
@@ -384,6 +386,11 @@ const { data: categoriesData, status: biblioStatus, refresh: refreshBiblio } = u
   }
   return Array.from(catMap.values())
 }, { lazy: true })
+
+watch(biblioStatus, (newVal, oldVal) => {
+  console.log(newVal, oldVal, "BIBLIOTEAC INDEX");
+})
+
 const categories = computed(() => categoriesData.value ?? [])
 const visibleCategories = computed(() => categories.value.filter(c => c.slug !== 'eventos-grabados'))
 

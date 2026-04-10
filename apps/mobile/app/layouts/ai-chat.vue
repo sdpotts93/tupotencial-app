@@ -146,9 +146,16 @@ const sessions = computed(() =>
 }
 
 .ai-layout__body {
-  position: relative;
+  display: grid;
   flex: 1;
+  min-height: 0;
   min-width: 0;
+  overflow-x: clip;
+}
+
+.ai-layout__body > :deep(*) {
+  grid-area: 1 / 1;
+  min-height: 0;
 }
 
 .ai-sidebar {
@@ -157,6 +164,33 @@ const sessions = computed(() =>
 
 .ai-layout__topbar {
   display: none;
+}
+
+@media (max-width: 1023px) {
+  .ai-layout {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .ai-layout__body {
+    overflow: hidden;
+  }
+
+  .ai-layout__body > :deep(*) {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .ai-layout__body > :deep(*::-webkit-scrollbar) {
+    display: none;
+  }
+
+  .ai-layout__body > :deep(.screen) {
+    min-height: 100%;
+  }
 }
 
 /* ─── Desktop ─── */

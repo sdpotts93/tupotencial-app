@@ -132,9 +132,16 @@ const desktopBottomItems = [
 }
 
 .blank-layout__body {
-  position: relative;
+  display: grid;
   flex: 1;
+  min-height: 0;
   min-width: 0;
+  overflow-x: clip;
+}
+
+.blank-layout__body > :deep(*) {
+  grid-area: 1 / 1;
+  min-height: 0;
 }
 
 /* Mobile: hide nav and top bar entirely */
@@ -143,6 +150,31 @@ const desktopBottomItems = [
 }
 
 @media (max-width: 1023px) {
+  .blank-layout {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .blank-layout__body {
+    overflow: hidden;
+  }
+
+  .blank-layout__body > :deep(*) {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .blank-layout__body > :deep(*::-webkit-scrollbar) {
+    display: none;
+  }
+
+  .blank-layout__body > :deep(.screen) {
+    min-height: 100%;
+  }
+
   .blank-layout__nav {
     display: none !important;
   }

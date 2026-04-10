@@ -107,3 +107,17 @@ Append one line per completed task:
 2026-04-09 14:58 America/Mexico_City — Make the retos index explicitly use the default account layout
 2026-04-09 21:55 America/Mexico_City — Restyle the admin /confirmacion page to match the /nueva-contrasena mobile auth sheet pattern
 2026-04-09 22:11 America/Mexico_City — Preserve current account tab transitions while adding right-to-left stack transitions for in-section mobile account navigation and layout changes
+2026-04-09 22:16 America/Mexico_City — Refine in-section mobile account transitions to use a full-width incoming slide and slower 20% outgoing offset
+2026-04-09 22:20 America/Mexico_City — Let in-section mobile account transitions overlap by removing global out-in transition mode and keeping tab fades explicit in route logic
+2026-04-09 22:31 America/Mexico_City — Replace absolute-positioned account route overlap with stacked grid layout containers for in-section mobile transitions
+2026-04-09 22:36 America/Mexico_City — Set production route timing for in-section mobile account transitions with faster entry and slower outgoing offset
+2026-04-09 22:41 America/Mexico_City — Reset scroll immediately for stacked in-section mobile account transitions so entering pages no longer inherit outgoing scroll offset
+2026-04-09 22:48 America/Mexico_City — Compensate stacked mobile account transitions for scroll offset and restore delayed scroll application to avoid transition jumps
+2026-04-09 22:59 America/Mexico_City — Freeze the leaving mobile account page to its viewport rect during stacked transitions so new pages can start at top without jump
+2026-04-09 23:11 America/Mexico_City — Set mobile history scroll restoration to manual to test whether browser restoration is contributing to route transition scroll glitches
+2026-04-09 23:24 America/Mexico_City — Move mobile account route scrolling into per-page layout slots so overlapping transitions keep independent scroll positions and update AI chat to use the active route scroller
+2026-04-09 23:36 America/Mexico_City — Reverse stacked mobile account transition direction for browser back navigations using history position detection
+2026-04-09 23:43 America/Mexico_City — Refine stacked mobile account transition direction to prefer parent-child route hierarchy before falling back to history back detection
+2026-04-09 23:50 America/Mexico_City — Remove back-direction reversal from stacked mobile account transitions so returning routes still enter from the right
+2026-04-10 00:04 America/Mexico_City — Restore stacked mobile account back-direction reversal using browser history position so account detail back navigations no longer re-enter from the right
+2026-04-10 00:11 America/Mexico_City — Move stacked mobile account back-direction detection into route guards so history back transitions resolve before Nuxt picks the transition name
