@@ -121,3 +121,8 @@ Append one line per completed task:
 2026-04-09 23:50 America/Mexico_City — Remove back-direction reversal from stacked mobile account transitions so returning routes still enter from the right
 2026-04-10 00:04 America/Mexico_City — Restore stacked mobile account back-direction reversal using browser history position so account detail back navigations no longer re-enter from the right
 2026-04-10 00:11 America/Mexico_City — Move stacked mobile account back-direction detection into route guards so history back transitions resolve before Nuxt picks the transition name
+2026-04-09 23:57 America/Mexico_City — Stop mutating from.meta in mobile page transitions to prevent temporary remounts of source account pages on first drill-down navigation
+2026-04-10 00:24 America/Mexico_City — Drive mobile page transitions from shared state using real transition names so first tab-to-detail account navigations keep their stack animation without remounting the source page
+2026-04-10 00:36 America/Mexico_City — Revert mobile page transitions back to route-meta selection on the target route so first account drill-down navigations use the correct stack transition without mutating from.meta
+2026-04-10 00:49 America/Mexico_City — Render mobile page transitions through NuxtPage slot with shared transition state so first account drill-down navigations can animate immediately without mutating from.meta
+2026-04-10 01:03 America/Mexico_City — Use a single dynamic mobile page transition wrapper keyed by CSS state so first account detail navigations can animate without switching transition names or mutating from.meta

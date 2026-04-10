@@ -13,6 +13,69 @@
   opacity: 0;
 }
 
+/* ---- Stable account page transition shell ---- */
+.account-route-enter-active,
+.account-route-leave-active {
+  grid-area: 1 / 1;
+}
+
+html[data-account-page-transition='fade'] .account-route-enter-active,
+html[data-account-page-transition='fade'] .account-route-leave-active {
+  transition: opacity var(--transition-fast);
+}
+
+html[data-account-page-transition='fade'] .account-route-enter-from,
+html[data-account-page-transition='fade'] .account-route-leave-to {
+  opacity: 0;
+}
+
+html[data-account-page-transition='account-stack'] .account-route-enter-active {
+  transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
+  transform-origin: center;
+  will-change: transform;
+}
+
+html[data-account-page-transition='account-stack'] .account-route-leave-active,
+html[data-account-page-transition='account-stack-back'] .account-route-enter-active,
+html[data-account-page-transition='account-stack-back'] .account-route-leave-active {
+  transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
+  transform-origin: center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+html[data-account-page-transition='account-stack'] .account-route-enter-from {
+  transform: translate(100%, 0);
+}
+
+html[data-account-page-transition='account-stack'] .account-route-enter-to {
+  z-index: 2;
+}
+
+html[data-account-page-transition='account-stack-back'] .account-route-enter-to {
+  z-index: 1;
+}
+
+html[data-account-page-transition='account-stack'] .account-route-enter-to,
+html[data-account-page-transition='account-stack'] .account-route-leave-from,
+html[data-account-page-transition='account-stack-back'] .account-route-enter-to,
+html[data-account-page-transition='account-stack-back'] .account-route-leave-from {
+  transform: translate(0, 0);
+  will-change: transform;
+}
+
+html[data-account-page-transition='account-stack'] .account-route-leave-to {
+  transform: translate(-50%);
+}
+
+html[data-account-page-transition='account-stack-back'] .account-route-enter-from {
+  transform: translate(-100%, 0);
+}
+
+html[data-account-page-transition='account-stack-back'] .account-route-leave-to {
+  transform: translate(50%, 0);
+}
+
 /* ---- Account stack transition (detail drill-down) ---- */
 .account-stack-enter-active {
   transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
@@ -108,6 +171,8 @@
 
 /* ---- Respect reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
+  .account-route-enter-active,
+  .account-route-leave-active,
   .account-stack-enter-active,
   .account-stack-leave-active,
   .account-stack-back-enter-active,
@@ -123,6 +188,8 @@
     transition: none;
   }
 
+  .account-route-enter-from,
+  .account-route-leave-to,
   .account-stack-enter-from,
   .account-stack-leave-to,
   .account-stack-back-enter-from,

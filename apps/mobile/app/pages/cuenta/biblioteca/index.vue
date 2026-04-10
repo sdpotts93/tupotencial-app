@@ -387,10 +387,6 @@ const { data: categoriesData, status: biblioStatus, refresh: refreshBiblio } = u
   return Array.from(catMap.values())
 }, { lazy: true })
 
-watch(biblioStatus, (newVal, oldVal) => {
-  console.log(newVal, oldVal, "BIBLIOTEAC INDEX");
-})
-
 const categories = computed(() => categoriesData.value ?? [])
 const visibleCategories = computed(() => categories.value.filter(c => c.slug !== 'eventos-grabados'))
 
@@ -430,6 +426,19 @@ const isCategoriesEmpty = computed(() =>
   && visibleCategories.value.length === 0
   && recordedEvents.value.length === 0
 )
+const bibliotecaInstanceId = Math.random().toString(36).slice(2, 7)
+
+watch(biblioStatus, (newVal, oldVal) => {
+  console.log('[biblioteca][status]', bibliotecaInstanceId, newVal, oldVal)
+}, { immediate: true })
+
+onMounted(() => {
+  console.log('[biblioteca][mounted]', bibliotecaInstanceId, router.currentRoute.value.fullPath)
+})
+
+onUnmounted(() => {
+  console.log('[biblioteca][unmounted]', bibliotecaInstanceId, router.currentRoute.value.fullPath)
+})
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) return true
