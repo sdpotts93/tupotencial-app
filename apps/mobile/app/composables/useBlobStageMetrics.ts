@@ -41,6 +41,12 @@ export function computeBlobStageMetrics(
   const maskHeightPx = maskHeightArt * stageScale
 
   return {
+    maskLeftArt,
+    maskTopArt,
+    maskWidthArt,
+    maskHeightArt,
+    maskCenterXArt,
+    maskCenterYArt,
     maskLeftPx,
     maskTopPx,
     maskWidthPx,

@@ -1,18 +1,27 @@
 <template>
   <div class="login">
     <!-- Screen 1: Full-screen hero (mobile only) -->
-    <div class="login__hero" :style="heroLayoutReady ? heroLayoutVars : undefined">
-      <AuthHeroArtwork />
-      <div class="login__hero-content" :class="{ 'login__hero-content--ready': heroLayoutReady }">
-        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="login__wordmark" />
-        <div class="login__logo-slot" aria-hidden="true" />
-        <p class="login__tagline">
+    <div class="login__hero" :style="heroMetricsReady ? heroLayoutVars : undefined">
+      <AuthHeroArtwork @entrance-almost-complete="heroContentReady = true" />
+      <div class="login__hero-content">
+        <img
+          src="/logo-word/logo-word-black.png"
+          alt="Tu Potencial"
+          class="login__wordmark"
+          :class="{ 'login__wordmark--ready': heroMetricsReady }"
+        />
+        <div
+          class="login__logo-slot"
+          :class="{ 'login__logo-slot--ready': heroContentReady }"
+          aria-hidden="true"
+        />
+        <p class="login__tagline" :class="{ 'login__tagline--ready': heroContentReady }">
           Un espacio seguro para <br> tu crecimiento integral.
         </p>
       </div>
 
       <!-- Bottom CTA area -->
-      <div class="login__cta-area">
+      <div class="login__cta-area" :class="{ 'login__cta-area--ready': heroContentReady }">
         <UiButton variant="primary" block @click="activeSheet = 'login'">
           Iniciar con correo
         </UiButton>
@@ -199,7 +208,8 @@ const heroHeight = ref(import.meta.client ? Math.round(window.visualViewport?.he
 const VIEWPORT_HEIGHT_WOBBLE_PX = 120
 let heroMeasurementRaf = 0
 let heroMeasurementTimeout: ReturnType<typeof setTimeout> | null = null
-const heroLayoutReady = ref(false)
+const heroMetricsReady = ref(false)
+const heroContentReady = ref(false)
 
 // Debounced live validation for register form
 let regValidateTimer: ReturnType<typeof setTimeout> | null = null
@@ -242,7 +252,7 @@ function scheduleHeroMeasurement() {
   heroMeasurementRaf = requestAnimationFrame(() => {
     heroMeasurementRaf = requestAnimationFrame(() => {
       updateHeroSize()
-      heroLayoutReady.value = true
+      heroMetricsReady.value = true
     })
   })
 }
@@ -251,7 +261,7 @@ onMounted(() => {
   scheduleHeroMeasurement()
   heroMeasurementTimeout = setTimeout(() => {
     updateHeroSize()
-    heroLayoutReady.value = true
+    heroMetricsReady.value = true
   }, 150)
   window.addEventListener('resize', scheduleHeroMeasurement, { passive: true })
   window.visualViewport?.addEventListener('resize', scheduleHeroMeasurement, { passive: true })
@@ -371,12 +381,6 @@ async function handleRegister() {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.login__hero-content--ready {
-  opacity: 1;
 }
 
 .login__wordmark {
@@ -387,6 +391,12 @@ async function handleRegister() {
   height: 18px;
   width: auto;
   display: block;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.login__wordmark--ready {
+  opacity: 1;
 }
 
 .login__logo-slot {
@@ -396,6 +406,12 @@ async function handleRegister() {
   width: var(--login-blob-width);
   height: var(--login-blob-height);
   transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.login__logo-slot--ready {
+  opacity: 1;
 }
 
 .login__tagline {
@@ -410,6 +426,12 @@ async function handleRegister() {
   color: var(--color-text);
   text-align: center;
   line-height: var(--leading-snug);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.login__tagline--ready {
+  opacity: 1;
 }
 
 /* ─── CTA area at bottom of hero ─── */
@@ -423,6 +445,12 @@ async function handleRegister() {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.login__cta-area--ready {
+  opacity: 1;
 }
 
 

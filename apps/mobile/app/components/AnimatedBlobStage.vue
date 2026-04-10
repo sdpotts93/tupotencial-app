@@ -17,7 +17,6 @@
         </clipPath>
       </defs>
 
-      <image href="/complete-layout.jpg" x="0" y="0" width="2040" height="3357" preserveAspectRatio="none" :opacity="baseOpacity" />
       <image
         href="/complete-layout.jpg"
         x="0"
@@ -25,7 +24,25 @@
         width="2040"
         height="3357"
         preserveAspectRatio="none"
-        :opacity="measured ? 1 : 0"
+        :opacity="measured ? baseOpacity : 0"
+      />
+      <image
+        href="/complete-layout.jpg"
+        x="0"
+        y="0"
+        width="2040"
+        height="3357"
+        preserveAspectRatio="none"
+        :opacity="measured ? 1 - entranceProgress : 0"
+      />
+      <image
+        href="/complete-layout.jpg"
+        x="0"
+        y="0"
+        width="2040"
+        height="3357"
+        preserveAspectRatio="none"
+        :opacity="measured ? entranceProgress : 0"
         :clip-path="`url(#${clipId})`"
       />
     </svg>
@@ -40,8 +57,16 @@ import {
   DEFAULT_MASK_VIEWPORT_MAX_RATIO,
   MASK_SOURCE_HEIGHT,
   MASK_SOURCE_WIDTH,
+  STAGE_HEIGHT,
+  STAGE_WIDTH,
   computeBlobStageMetrics,
 } from '~/composables/useBlobStageMetrics'
+
+const emit = defineEmits<{
+  maskVisible: []
+  entranceAlmostComplete: []
+  entranceComplete: []
+}>()
 
 const props = withDefaults(defineProps<{
   baseOpacity?: number
@@ -101,11 +126,20 @@ const initialD = scalePathD(BLOB_RAW_D, SX, SY)
 const clipId = `animated-blob-clip-${useId()}`
 const pathRef = ref<SVGPathElement | null>(null)
 const measured = ref(false)
+const entranceProgress = ref(0)
 const containerWidth = ref(import.meta.client ? Math.round(window.visualViewport?.width ?? window.innerWidth) : 390)
 const containerHeight = ref(import.meta.client ? Math.round(window.visualViewport?.height ?? window.innerHeight) : 844)
 const VIEWPORT_HEIGHT_WOBBLE_PX = 120
+const ENTRANCE_DURATION_MS = 900
+const ENTRANCE_START_WIDTH_ART = Math.max(STAGE_WIDTH, STAGE_HEIGHT * (MASK_SOURCE_WIDTH / MASK_SOURCE_HEIGHT)) * 2.2
+const MASK_VISIBLE_PROGRESS = 0.18
+const ENTRANCE_ALMOST_COMPLETE_PROGRESS = 0.72
 let viewportMeasurementRaf = 0
 let viewportMeasurementTimeout: ReturnType<typeof setTimeout> | null = null
+let entranceRaf = 0
+let hasEmittedMaskVisible = false
+let hasEmittedEntranceAlmostComplete = false
+let hasEmittedEntranceComplete = false
 
 function updateContainerSize() {
   const nextWidth = Math.round(window.visualViewport?.width ?? window.innerWidth)
@@ -142,21 +176,76 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(viewportMeasurementRaf)
+  cancelAnimationFrame(entranceRaf)
   if (viewportMeasurementTimeout) clearTimeout(viewportMeasurementTimeout)
   window.removeEventListener('resize', scheduleContainerMeasurement)
   window.visualViewport?.removeEventListener('resize', scheduleContainerMeasurement)
   window.visualViewport?.removeEventListener('scroll', scheduleContainerMeasurement)
 })
 
-const blobTransform = computed(() => {
+const blobMetrics = computed(() => {
   return computeBlobStageMetrics(containerWidth.value, containerHeight.value, {
     maskCenterXRatio: props.maskCenterXRatio,
     maskCenterYOffsetRatio: props.maskCenterYOffsetRatio,
     maskViewportMaxRatio: props.maskViewportMaxRatio,
-  }).blobTransform
+  })
+})
+
+const blobTransform = computed(() => {
+  const target = blobMetrics.value
+  const easedProgress = 1 - ((1 - entranceProgress.value) ** 3)
+  const startWidthArt = ENTRANCE_START_WIDTH_ART
+  const startHeightArt = startWidthArt * (MASK_SOURCE_HEIGHT / MASK_SOURCE_WIDTH)
+  const startCenterXArt = STAGE_WIDTH / 2
+  const startCenterYArt = STAGE_HEIGHT / 2
+  const widthArt = startWidthArt + ((target.maskWidthArt - startWidthArt) * easedProgress)
+  const heightArt = startHeightArt + ((target.maskHeightArt - startHeightArt) * easedProgress)
+  const centerXArt = startCenterXArt + ((target.maskCenterXArt - startCenterXArt) * easedProgress)
+  const centerYArt = startCenterYArt + ((target.maskCenterYArt - startCenterYArt) * easedProgress)
+  const leftArt = centerXArt - (widthArt / 2)
+  const topArt = centerYArt - (heightArt / 2)
+
+  return `translate(${leftArt} ${topArt}) scale(${widthArt} ${heightArt})`
 })
 
 useOrgBlob(pathRef)
+
+watch(measured, (isMeasured) => {
+  if (!isMeasured) return
+
+  cancelAnimationFrame(entranceRaf)
+  entranceProgress.value = 0
+  hasEmittedMaskVisible = false
+  hasEmittedEntranceAlmostComplete = false
+  hasEmittedEntranceComplete = false
+
+  const start = performance.now()
+  const tick = (now: number) => {
+    const linearProgress = Math.min((now - start) / ENTRANCE_DURATION_MS, 1)
+    entranceProgress.value = linearProgress
+
+    if (!hasEmittedMaskVisible && linearProgress >= MASK_VISIBLE_PROGRESS) {
+      hasEmittedMaskVisible = true
+      emit('maskVisible')
+    }
+
+    if (!hasEmittedEntranceAlmostComplete && linearProgress >= ENTRANCE_ALMOST_COMPLETE_PROGRESS) {
+      hasEmittedEntranceAlmostComplete = true
+      emit('entranceAlmostComplete')
+    }
+
+    if (!hasEmittedEntranceComplete && linearProgress >= 1) {
+      hasEmittedEntranceComplete = true
+      emit('entranceComplete')
+    }
+
+    if (linearProgress < 1) {
+      entranceRaf = requestAnimationFrame(tick)
+    }
+  }
+
+  entranceRaf = requestAnimationFrame(tick)
+}, { once: true })
 </script>
 
 <style scoped>
