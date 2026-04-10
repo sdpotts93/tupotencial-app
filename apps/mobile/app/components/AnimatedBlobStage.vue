@@ -3,7 +3,7 @@
     <svg
       class="animated-blob-stage__svg"
       viewBox="0 0 2040 3357"
-      preserveAspectRatio="xMidYMid slice"
+      :preserveAspectRatio="props.stagePreserveAspectRatio"
     >
       <defs>
         <clipPath :id="clipId" clipPathUnits="userSpaceOnUse">
@@ -18,31 +18,31 @@
       </defs>
 
       <image
-        href="/complete-layout.jpg"
+        :href="props.imageSrc"
         x="0"
         y="0"
         width="2040"
         height="3357"
         preserveAspectRatio="none"
-        :opacity="measured ? baseOpacity : 0"
+        :opacity="stageReady ? baseOpacity : 0"
       />
       <image
-        href="/complete-layout.jpg"
+        :href="props.imageSrc"
         x="0"
         y="0"
         width="2040"
         height="3357"
         preserveAspectRatio="none"
-        :opacity="measured ? 1 - entranceProgress : 0"
+        :opacity="stageReady ? 1 - entranceProgress : 0"
       />
       <image
-        href="/complete-layout.jpg"
+        :href="props.imageSrc"
         x="0"
         y="0"
         width="2040"
         height="3357"
         preserveAspectRatio="none"
-        :opacity="measured ? entranceProgress : 0"
+        :opacity="stageReady ? entranceProgress : 0"
         :clip-path="`url(#${clipId})`"
       />
     </svg>
@@ -70,14 +70,18 @@ const emit = defineEmits<{
 
 const props = withDefaults(defineProps<{
   baseOpacity?: number
+  imageSrc?: string
   maskCenterXRatio?: number
   maskCenterYOffsetRatio?: number
   maskViewportMaxRatio?: number
+  stagePreserveAspectRatio?: string
 }>(), {
   baseOpacity: 0.075,
+  imageSrc: '/complete-layout-mobile.webp',
   maskCenterXRatio: DEFAULT_MASK_CENTER_X_RATIO,
   maskCenterYOffsetRatio: DEFAULT_MASK_CENTER_Y_OFFSET_RATIO,
   maskViewportMaxRatio: DEFAULT_MASK_VIEWPORT_MAX_RATIO,
+  stagePreserveAspectRatio: 'xMidYMid slice',
 })
 
 const SX = 1 / MASK_SOURCE_WIDTH
@@ -126,6 +130,7 @@ const initialD = scalePathD(BLOB_RAW_D, SX, SY)
 const clipId = `animated-blob-clip-${useId()}`
 const pathRef = ref<SVGPathElement | null>(null)
 const measured = ref(false)
+const imageReady = ref(false)
 const entranceProgress = ref(0)
 const containerWidth = ref(import.meta.client ? Math.round(window.visualViewport?.width ?? window.innerWidth) : 390)
 const containerHeight = ref(import.meta.client ? Math.round(window.visualViewport?.height ?? window.innerHeight) : 844)
@@ -140,6 +145,7 @@ let entranceRaf = 0
 let hasEmittedMaskVisible = false
 let hasEmittedEntranceAlmostComplete = false
 let hasEmittedEntranceComplete = false
+const stageReady = computed(() => measured.value && imageReady.value)
 
 function updateContainerSize() {
   const nextWidth = Math.round(window.visualViewport?.width ?? window.innerWidth)
@@ -169,6 +175,25 @@ onMounted(() => {
     updateContainerSize()
     measured.value = true
   }, 150)
+
+  const image = new Image()
+  image.src = props.imageSrc
+
+  const markImageReady = () => {
+    imageReady.value = true
+  }
+
+  if (image.complete) {
+    if (typeof image.decode === 'function') {
+      image.decode().then(markImageReady).catch(markImageReady)
+    } else {
+      markImageReady()
+    }
+  } else {
+    image.addEventListener('load', markImageReady, { once: true })
+    image.addEventListener('error', markImageReady, { once: true })
+  }
+
   window.addEventListener('resize', scheduleContainerMeasurement, { passive: true })
   window.visualViewport?.addEventListener('resize', scheduleContainerMeasurement, { passive: true })
   window.visualViewport?.addEventListener('scroll', scheduleContainerMeasurement, { passive: true })
@@ -211,7 +236,7 @@ const blobTransform = computed(() => {
 useOrgBlob(pathRef)
 
 watch(measured, (isMeasured) => {
-  if (!isMeasured) return
+  if (!isMeasured || !imageReady.value) return
 
   cancelAnimationFrame(entranceRaf)
   entranceProgress.value = 0
@@ -246,6 +271,54 @@ watch(measured, (isMeasured) => {
 
   entranceRaf = requestAnimationFrame(tick)
 }, { once: true })
+
+watch(imageReady, (isReady) => {
+  if (!isReady || !measured.value) return
+
+  cancelAnimationFrame(entranceRaf)
+  entranceProgress.value = 0
+  hasEmittedMaskVisible = false
+  hasEmittedEntranceAlmostComplete = false
+  hasEmittedEntranceComplete = false
+
+  const start = performance.now()
+  const tick = (now: number) => {
+    const linearProgress = Math.min((now - start) / ENTRANCE_DURATION_MS, 1)
+    entranceProgress.value = linearProgress
+
+    if (!hasEmittedMaskVisible && linearProgress >= MASK_VISIBLE_PROGRESS) {
+      hasEmittedMaskVisible = true
+      emit('maskVisible')
+    }
+
+    if (!hasEmittedEntranceAlmostComplete && linearProgress >= ENTRANCE_ALMOST_COMPLETE_PROGRESS) {
+      hasEmittedEntranceAlmostComplete = true
+      emit('entranceAlmostComplete')
+    }
+
+    if (!hasEmittedEntranceComplete && linearProgress >= 1) {
+      hasEmittedEntranceComplete = true
+      emit('entranceComplete')
+    }
+
+    if (linearProgress < 1) {
+      entranceRaf = requestAnimationFrame(tick)
+    }
+  }
+
+  entranceRaf = requestAnimationFrame(tick)
+}, { once: true })
+
+useHead({
+  link: [
+    {
+      rel: 'preload',
+      as: 'image',
+      href: props.imageSrc,
+      fetchpriority: 'high',
+    },
+  ],
+})
 </script>
 
 <style scoped>

@@ -478,6 +478,7 @@ async function handleRegister() {
   flex-direction: column;
   justify-content: flex-end;
   pointer-events: none;
+  align-items: center;
   transition: background var(--transition-base);
 }
 

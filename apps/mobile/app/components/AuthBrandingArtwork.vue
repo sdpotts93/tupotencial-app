@@ -1,12 +1,23 @@
 <template>
   <div class="auth-branding-artwork">
-    <AnimatedBlobStage class="auth-branding-artwork__stage" />
+    <AnimatedBlobStage
+      v-if="isDesktop"
+      class="auth-branding-artwork__stage"
+      image-src="/complete-layout-desktop.webp"
+      stage-preserve-aspect-ratio="xMidYMin slice"
+      :mask-center-y-offset-ratio="-0.25"
+      :mask-viewport-max-ratio="0.7"
+    />
     <div class="auth-branding-artwork__content">
       <div class="auth-branding-artwork__logo-slot" aria-hidden="true" />
       <p class="auth-branding-artwork__tagline">Un espacio seguro para tu crecimiento integral.</p>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+const { isDesktop } = useDesktopBreakpoint()
+</script>
 
 <style scoped>
 .auth-branding-artwork {
@@ -32,7 +43,6 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-10);
-  gap: var(--space-8);
 }
 
 .auth-branding-artwork__tagline {

@@ -1,7 +1,9 @@
 <template>
   <div class="auth-hero-artwork">
     <AnimatedBlobStage
+      v-if="!isDesktop"
       class="auth-hero-artwork__stage"
+      image-src="/complete-layout-mobile.webp"
       @mask-visible="$emit('maskVisible')"
       @entrance-almost-complete="$emit('entranceAlmostComplete')"
       @entrance-complete="$emit('entranceComplete')"
@@ -10,6 +12,8 @@
 </template>
 
 <script setup lang="ts">
+const { isDesktop } = useDesktopBreakpoint()
+
 defineEmits<{
   maskVisible: []
   entranceAlmostComplete: []
