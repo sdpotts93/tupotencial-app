@@ -161,34 +161,34 @@ export default defineNuxtPlugin(() => {
     const nextHistoryPosition = Number(window.history.state?.position ?? currentHistoryPosition)
     const stackDirection = nextHistoryPosition < currentHistoryPosition ? 'back' : 'forward'
 
-    if (fromAi && toAi && layoutChanged) {
-      setAccountPageTransition('none')
-      to.meta.pageTransition = false
-      from.meta.pageTransition = false
-      to.meta.layoutTransition = defaultLayoutTransition()
-      from.meta.layoutTransition = defaultLayoutTransition()
-      console.log('[page-transition][beforeEach]', {
-        from: fromPath,
-        to: toPath,
-        branch: 'ai-layout-change-fade',
-        layoutChanged,
-        stackDirection,
-        history: {
-          current: currentHistoryPosition,
-          next: nextHistoryPosition,
-        },
-        pageTransition: {
-          to: serializeTransition(to.meta.pageTransition),
-          from: serializeTransition(from.meta.pageTransition),
-        },
-        layoutTransition: {
-          to: serializeTransition(to.meta.layoutTransition),
-          from: serializeTransition(from.meta.layoutTransition),
-        },
-        accountPageTransition: root.dataset.accountPageTransition ?? null,
-      })
-      return
-    }
+    // if (fromAi && toAi && layoutChanged) {
+    //   setAccountPageTransition('none')
+    //   to.meta.pageTransition = false
+    //   from.meta.pageTransition = false
+    //   to.meta.layoutTransition = defaultLayoutTransition()
+    //   from.meta.layoutTransition = defaultLayoutTransition()
+    //   console.log('[page-transition][beforeEach]', {
+    //     from: fromPath,
+    //     to: toPath,
+    //     branch: 'ai-layout-change-fade',
+    //     layoutChanged,
+    //     stackDirection,
+    //     history: {
+    //       current: currentHistoryPosition,
+    //       next: nextHistoryPosition,
+    //     },
+    //     pageTransition: {
+    //       to: serializeTransition(to.meta.pageTransition),
+    //       from: serializeTransition(from.meta.pageTransition),
+    //     },
+    //     layoutTransition: {
+    //       to: serializeTransition(to.meta.layoutTransition),
+    //       from: serializeTransition(from.meta.layoutTransition),
+    //     },
+    //     accountPageTransition: root.dataset.accountPageTransition ?? null,
+    //   })
+    //   return
+    // }
 
     if (layoutChanged) {
       setAccountPageTransition('none')

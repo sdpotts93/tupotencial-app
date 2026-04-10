@@ -198,6 +198,7 @@ const sessions = computed(() =>
   .ai-layout {
     padding-left: var(--sidebar-width);
     background: var(--color-desktop-bg);
+    width: 100vw;
   }
 
   /* ─── Sidebar ─── */

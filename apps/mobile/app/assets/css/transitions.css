@@ -76,6 +76,56 @@ html[data-account-page-transition='account-stack-back'] .account-route-leave-to 
   transform: translate(50%, 0);
 }
 
+
+/* ---- Account stack transition (detail drill-down) ---- */
+.account-stack-enter-active {
+  transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
+}
+
+.account-stack-leave-active,
+.account-stack-back-enter-active,
+.account-stack-back-leave-active {
+  transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
+}
+
+.account-stack-enter-active,
+.account-stack-leave-active,
+.account-stack-back-enter-active,
+.account-stack-back-leave-active {
+  position: absolute;
+}
+
+.account-stack-enter-from {
+  transform: translate(100%, 0);
+}
+
+.account-stack-enter-to {
+  z-index: 2;
+}
+
+.account-stack-back-enter-to {
+  z-index: 1;
+}
+
+.account-stack-enter-to,
+.account-stack-leave-from,
+.account-stack-back-enter-to,
+.account-stack-back-leave-from {
+  transform: translate(0, 0);
+}
+
+.account-stack-leave-to {
+  transform: translate(-50%);
+}
+
+.account-stack-back-enter-from {
+  transform: translate(-100%, 0);
+}
+
+.account-stack-back-leave-to {
+  transform: translate(50%, 0);
+}
+
 @media (min-width: 1024px) {
 
   .account-route-enter-active,
@@ -97,7 +147,7 @@ html[data-account-page-transition='account-stack-back'] .account-route-leave-to 
   html[data-account-page-transition='account-stack'] .account-route-leave-active,
   html[data-account-page-transition='account-stack-back'] .account-route-enter-active,
   html[data-account-page-transition='account-stack-back'] .account-route-leave-active {
-    transition: opacity 0.4s ease, filter 0.4s ease;
+    transition: opacity 0.4s ease;
     transform: none;
   }
 
@@ -116,57 +166,46 @@ html[data-account-page-transition='account-stack-back'] .account-route-leave-to 
     opacity: 1;
     transform: none;
   }
+
+  .account-stack-enter-active {
+    transition: opacity 0.3s ease;
+  }
+
+  .account-stack-leave-active,
+  .account-stack-back-enter-active,
+  .account-stack-back-leave-active {
+    transition: opacity 0.3s ease;
+  }
+
+  .account-stack-enter-from {
+    transform: none;
+    opacity: 0;
+  }
+
+  .account-stack-leave-to {
+    transform: none;
+    opacity: 0;
+  }
+
+  .account-stack-enter-active,
+  .account-stack-leave-active,
+  .account-stack-back-enter-active,
+  .account-stack-back-leave-active {
+    position: relative;
+  }
+
+
+  .account-stack-back-enter-from {
+    transform: none;
+    opacity: 0;
+  }
+
+  .account-stack-back-leave-to {
+    transform: none;
+    opacity: 0;
+  }
 }
 
-/* ---- Account stack transition (detail drill-down) ---- */
-.account-stack-enter-active {
-  transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
-  grid-area: 1 / 1;
-  transform-origin: center;
-  will-change: transform;
-}
-
-.account-stack-leave-active,
-.account-stack-back-enter-active,
-.account-stack-back-leave-active {
-  transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
-  grid-area: 1 / 1;
-  transform-origin: center;
-  pointer-events: none;
-  will-change: transform;
-}
-
-.account-stack-enter-from {
-  transform: translate(100%, 0);
-}
-
-.account-stack-enter-to {
-    z-index: 2;
-}
-
-.account-stack-back-enter-to {
-  z-index: 1;
-}
-
-.account-stack-enter-to,
-.account-stack-leave-from,
-.account-stack-back-enter-to,
-.account-stack-back-leave-from {
-  transform: translate(0, 0);
-  will-change: transform;
-}
-
-.account-stack-leave-to {
-  transform: translate(-50%);
-}
-
-.account-stack-back-enter-from {
-  transform: translate(-100%, 0);
-}
-
-.account-stack-back-leave-to {
-  transform: translate(50%, 0);
-}
 
 /* ---- Slide up (for drawers / modals) ---- */
 .slide-up-enter-active,
