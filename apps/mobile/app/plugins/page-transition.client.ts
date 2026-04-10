@@ -21,10 +21,6 @@ export default defineNuxtPlugin(() => {
     return path === '/cuenta' || path.startsWith('/cuenta/')
   }
 
-  function isAiPath(path: string) {
-    return path === '/cuenta/ia' || path.startsWith('/cuenta/ia/')
-  }
-
   function resolveLayout(meta: Record<string, any>) {
     if (meta.layout === false) return false
     return typeof meta.layout === 'string' ? meta.layout : 'default'
@@ -44,17 +40,6 @@ export default defineNuxtPlugin(() => {
 
   function stackTransition(direction: 'back' | 'forward' = 'forward') {
     return { name: direction === 'back' ? 'account-stack-back' : 'account-stack' }
-  }
-
-  function serializeTransition(transition: unknown) {
-    if (transition === false) return false
-    if (!transition || typeof transition !== 'object') return transition ?? null
-
-    const value = transition as { name?: string; mode?: string }
-    return {
-      name: value.name ?? null,
-      mode: value.mode ?? null,
-    }
   }
 
   function setAccountPageTransition(kind: 'fade' | 'account-stack' | 'account-stack-back' | 'none') {
@@ -77,30 +62,11 @@ export default defineNuxtPlugin(() => {
       from.meta.pageTransition = { name: 'slide-left', mode: 'out-in' }
       to.meta.layoutTransition = defaultLayoutTransition()
       from.meta.layoutTransition = defaultLayoutTransition()
-      console.log('[page-transition][beforeEach]', {
-        from: fromPath,
-        to: toPath,
-        branch: 'onboarding',
-        history: {
-          current: currentHistoryPosition,
-          next: Number(window.history.state?.position ?? currentHistoryPosition),
-        },
-        pageTransition: {
-          to: serializeTransition(to.meta.pageTransition),
-          from: serializeTransition(from.meta.pageTransition),
-        },
-        layoutTransition: {
-          to: serializeTransition(to.meta.layoutTransition),
-          from: serializeTransition(from.meta.layoutTransition),
-        },
-      })
       return
     }
 
     const fromAccount = isAccountPath(fromPath)
     const toAccount = isAccountPath(toPath)
-    const fromAi = isAiPath(fromPath)
-    const toAi = isAiPath(toPath)
     const betweenMainTabs = accountTabPaths.has(fromPath) && accountTabPaths.has(toPath)
 
     if (fromAccount && toAccount && betweenMainTabs) {
@@ -109,24 +75,6 @@ export default defineNuxtPlugin(() => {
       from.meta.pageTransition = accountPageTransition()
       to.meta.layoutTransition = false
       from.meta.layoutTransition = false
-      console.log('[page-transition][beforeEach]', {
-        from: fromPath,
-        to: toPath,
-        branch: 'between-main-tabs-account-route',
-        history: {
-          current: currentHistoryPosition,
-          next: Number(window.history.state?.position ?? currentHistoryPosition),
-        },
-        pageTransition: {
-          to: serializeTransition(to.meta.pageTransition),
-          from: serializeTransition(from.meta.pageTransition),
-        },
-        layoutTransition: {
-          to: serializeTransition(to.meta.layoutTransition),
-          from: serializeTransition(from.meta.layoutTransition),
-        },
-        accountPageTransition: root.dataset.accountPageTransition ?? null,
-      })
       return
     }
 
@@ -136,24 +84,6 @@ export default defineNuxtPlugin(() => {
       from.meta.pageTransition = defaultPageTransition()
       to.meta.layoutTransition = defaultLayoutTransition()
       from.meta.layoutTransition = defaultLayoutTransition()
-      console.log('[page-transition][beforeEach]', {
-        from: fromPath,
-        to: toPath,
-        branch: betweenMainTabs ? 'between-main-tabs' : 'default',
-        history: {
-          current: currentHistoryPosition,
-          next: Number(window.history.state?.position ?? currentHistoryPosition),
-        },
-        pageTransition: {
-          to: serializeTransition(to.meta.pageTransition),
-          from: serializeTransition(from.meta.pageTransition),
-        },
-        layoutTransition: {
-          to: serializeTransition(to.meta.layoutTransition),
-          from: serializeTransition(from.meta.layoutTransition),
-        },
-        accountPageTransition: root.dataset.accountPageTransition ?? null,
-      })
       return
     }
 
@@ -161,61 +91,12 @@ export default defineNuxtPlugin(() => {
     const nextHistoryPosition = Number(window.history.state?.position ?? currentHistoryPosition)
     const stackDirection = nextHistoryPosition < currentHistoryPosition ? 'back' : 'forward'
 
-    // if (fromAi && toAi && layoutChanged) {
-    //   setAccountPageTransition('none')
-    //   to.meta.pageTransition = false
-    //   from.meta.pageTransition = false
-    //   to.meta.layoutTransition = defaultLayoutTransition()
-    //   from.meta.layoutTransition = defaultLayoutTransition()
-    //   console.log('[page-transition][beforeEach]', {
-    //     from: fromPath,
-    //     to: toPath,
-    //     branch: 'ai-layout-change-fade',
-    //     layoutChanged,
-    //     stackDirection,
-    //     history: {
-    //       current: currentHistoryPosition,
-    //       next: nextHistoryPosition,
-    //     },
-    //     pageTransition: {
-    //       to: serializeTransition(to.meta.pageTransition),
-    //       from: serializeTransition(from.meta.pageTransition),
-    //     },
-    //     layoutTransition: {
-    //       to: serializeTransition(to.meta.layoutTransition),
-    //       from: serializeTransition(from.meta.layoutTransition),
-    //     },
-    //     accountPageTransition: root.dataset.accountPageTransition ?? null,
-    //   })
-    //   return
-    // }
-
     if (layoutChanged) {
       setAccountPageTransition('none')
       to.meta.pageTransition = false
       from.meta.pageTransition = false
       to.meta.layoutTransition = stackTransition(stackDirection)
       from.meta.layoutTransition = stackTransition(stackDirection)
-      console.log('[page-transition][beforeEach]', {
-        from: fromPath,
-        to: toPath,
-        branch: 'layout-changed-account-stack',
-        layoutChanged,
-        stackDirection,
-        history: {
-          current: currentHistoryPosition,
-          next: nextHistoryPosition,
-        },
-        pageTransition: {
-          to: serializeTransition(to.meta.pageTransition),
-          from: serializeTransition(from.meta.pageTransition),
-        },
-        layoutTransition: {
-          to: serializeTransition(to.meta.layoutTransition),
-          from: serializeTransition(from.meta.layoutTransition),
-        },
-        accountPageTransition: root.dataset.accountPageTransition ?? null,
-      })
       return
     }
 
@@ -224,37 +105,9 @@ export default defineNuxtPlugin(() => {
     from.meta.pageTransition = accountPageTransition()
     to.meta.layoutTransition = false
     from.meta.layoutTransition = false
-    console.log('[page-transition][beforeEach]', {
-      from: fromPath,
-      to: toPath,
-      branch: 'account-stack-account-route',
-      layoutChanged,
-      stackDirection,
-      history: {
-        current: currentHistoryPosition,
-        next: nextHistoryPosition,
-      },
-      pageTransition: {
-        to: serializeTransition(to.meta.pageTransition),
-        from: serializeTransition(from.meta.pageTransition),
-      },
-      layoutTransition: {
-        to: serializeTransition(to.meta.layoutTransition),
-        from: serializeTransition(from.meta.layoutTransition),
-      },
-      accountPageTransition: root.dataset.accountPageTransition ?? null,
-    })
   })
 
-  router.afterEach((to, from) => {
+  router.afterEach(() => {
     currentHistoryPosition = Number(window.history.state?.position ?? currentHistoryPosition)
-    console.log('[page-transition][afterEach]', {
-      from: normalizePath(from.path),
-      to: normalizePath(to.path),
-      historyPosition: currentHistoryPosition,
-      pageTransition: serializeTransition(to.meta.pageTransition),
-      layoutTransition: serializeTransition(to.meta.layoutTransition),
-      accountPageTransition: root.dataset.accountPageTransition ?? null,
-    })
   })
 })

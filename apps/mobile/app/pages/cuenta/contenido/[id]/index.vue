@@ -99,7 +99,6 @@ definePageMeta({
 const route = useRoute()
 const id = route.params.id as string
 const client = useSupabaseClient()
-const contenidoInstanceId = Math.random().toString(36).slice(2, 7)
 
 function formatDuration(seconds: number | null) {
   if (!seconds) return null
@@ -131,18 +130,6 @@ const { data: contentData, status: contentStatus, refresh: refreshContent } = us
     accessGranted: data.access_granted as boolean,
   }
 }, { lazy: true })
-
-watch(contentStatus, (newVal, oldVal) => {
-  console.log('[contenido][status]', contenidoInstanceId, newVal, oldVal)
-}, { immediate: true })
-
-onMounted(() => {
-  console.log('[contenido][mounted]', contenidoInstanceId, route.fullPath)
-})
-
-onUnmounted(() => {
-  console.log('[contenido][unmounted]', contenidoInstanceId, route.fullPath)
-})
 
 
 const content = computed(() => contentData.value ?? {

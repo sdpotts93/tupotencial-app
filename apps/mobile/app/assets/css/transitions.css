@@ -2,10 +2,22 @@
    Tu Potencial — Page & layout transitions
    ============================================ */
 
+.layout-shell {
+  position: relative;
+  display: grid;
+  min-height: 100dvh;
+}
+
+.layout-shell > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
 /* ---- Layout transition ---- */
 .layout-enter-active,
 .layout-leave-active {
   transition: opacity var(--transition-slow);
+  grid-area: 1 / 1;
 }
 
 .layout-enter-from,
@@ -80,19 +92,19 @@ html[data-account-page-transition='account-stack-back'] .account-route-leave-to 
 /* ---- Account stack transition (detail drill-down) ---- */
 .account-stack-enter-active {
   transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
+  grid-area: 1 / 1;
+  transform-origin: center;
+  will-change: transform;
 }
 
 .account-stack-leave-active,
 .account-stack-back-enter-active,
 .account-stack-back-leave-active {
   transition: transform 0.3s cubic-bezier(.25, .74, .22, .99);
-}
-
-.account-stack-enter-active,
-.account-stack-leave-active,
-.account-stack-back-enter-active,
-.account-stack-back-leave-active {
-  position: absolute;
+  grid-area: 1 / 1;
+  transform-origin: center;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .account-stack-enter-from {
@@ -127,7 +139,6 @@ html[data-account-page-transition='account-stack-back'] .account-route-leave-to 
 }
 
 @media (min-width: 1024px) {
-
   .account-route-enter-active,
   .account-route-leave-active {
     grid-area: auto;
@@ -186,14 +197,6 @@ html[data-account-page-transition='account-stack-back'] .account-route-leave-to 
     transform: none;
     opacity: 0;
   }
-
-  .account-stack-enter-active,
-  .account-stack-leave-active,
-  .account-stack-back-enter-active,
-  .account-stack-back-leave-active {
-    position: relative;
-  }
-
 
   .account-stack-back-enter-from {
     transform: none;

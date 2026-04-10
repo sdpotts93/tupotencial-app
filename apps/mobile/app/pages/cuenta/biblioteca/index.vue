@@ -426,19 +426,6 @@ const isCategoriesEmpty = computed(() =>
   && visibleCategories.value.length === 0
   && recordedEvents.value.length === 0
 )
-const bibliotecaInstanceId = Math.random().toString(36).slice(2, 7)
-
-watch(biblioStatus, (newVal, oldVal) => {
-  console.log('[biblioteca][status]', bibliotecaInstanceId, newVal, oldVal)
-}, { immediate: true })
-
-onMounted(() => {
-  console.log('[biblioteca][mounted]', bibliotecaInstanceId, router.currentRoute.value.fullPath)
-})
-
-onUnmounted(() => {
-  console.log('[biblioteca][unmounted]', bibliotecaInstanceId, router.currentRoute.value.fullPath)
-})
 
 function isContentLocked(item: { entitlement_key: string | null; plan?: string }) {
   if (isLocked(item.entitlement_key)) return true
