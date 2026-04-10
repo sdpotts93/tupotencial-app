@@ -21,6 +21,10 @@ export default defineNuxtPlugin(() => {
     return path === '/cuenta' || path.startsWith('/cuenta/')
   }
 
+  function isAiPath(path: string) {
+    return path === '/cuenta/ia' || path.startsWith('/cuenta/ia/')
+  }
+
   function resolveLayout(meta: Record<string, any>) {
     if (meta.layout === false) return false
     return typeof meta.layout === 'string' ? meta.layout : 'default'
@@ -95,6 +99,8 @@ export default defineNuxtPlugin(() => {
 
     const fromAccount = isAccountPath(fromPath)
     const toAccount = isAccountPath(toPath)
+    const fromAi = isAiPath(fromPath)
+    const toAi = isAiPath(toPath)
     const betweenMainTabs = accountTabPaths.has(fromPath) && accountTabPaths.has(toPath)
 
     if (fromAccount && toAccount && betweenMainTabs) {
@@ -154,6 +160,35 @@ export default defineNuxtPlugin(() => {
     const layoutChanged = resolveLayout(from.meta) !== resolveLayout(to.meta)
     const nextHistoryPosition = Number(window.history.state?.position ?? currentHistoryPosition)
     const stackDirection = nextHistoryPosition < currentHistoryPosition ? 'back' : 'forward'
+
+    if (fromAi && toAi && layoutChanged) {
+      setAccountPageTransition('none')
+      to.meta.pageTransition = false
+      from.meta.pageTransition = false
+      to.meta.layoutTransition = defaultLayoutTransition()
+      from.meta.layoutTransition = defaultLayoutTransition()
+      console.log('[page-transition][beforeEach]', {
+        from: fromPath,
+        to: toPath,
+        branch: 'ai-layout-change-fade',
+        layoutChanged,
+        stackDirection,
+        history: {
+          current: currentHistoryPosition,
+          next: nextHistoryPosition,
+        },
+        pageTransition: {
+          to: serializeTransition(to.meta.pageTransition),
+          from: serializeTransition(from.meta.pageTransition),
+        },
+        layoutTransition: {
+          to: serializeTransition(to.meta.layoutTransition),
+          from: serializeTransition(from.meta.layoutTransition),
+        },
+        accountPageTransition: root.dataset.accountPageTransition ?? null,
+      })
+      return
+    }
 
     if (layoutChanged) {
       setAccountPageTransition('none')

@@ -21,7 +21,7 @@
 
 html[data-account-page-transition='fade'] .account-route-enter-active,
 html[data-account-page-transition='fade'] .account-route-leave-active {
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.3s ease;  
 }
 
 html[data-account-page-transition='fade'] .account-route-enter-from,
@@ -74,6 +74,48 @@ html[data-account-page-transition='account-stack-back'] .account-route-enter-fro
 
 html[data-account-page-transition='account-stack-back'] .account-route-leave-to {
   transform: translate(50%, 0);
+}
+
+@media (min-width: 1024px) {
+
+  .account-route-enter-active,
+  .account-route-leave-active {
+    grid-area: auto;
+  }
+
+  html[data-account-page-transition='fade'] .account-route-enter-active,
+  html[data-account-page-transition='fade'] .account-route-leave-active {
+    grid-area: auto;
+  }
+
+  html[data-account-page-transition='fade'] .account-route-enter-from,
+  html[data-account-page-transition='fade'] .account-route-leave-to {
+    grid-area: auto;
+  }
+
+  html[data-account-page-transition='account-stack'] .account-route-enter-active,
+  html[data-account-page-transition='account-stack'] .account-route-leave-active,
+  html[data-account-page-transition='account-stack-back'] .account-route-enter-active,
+  html[data-account-page-transition='account-stack-back'] .account-route-leave-active {
+    transition: opacity 0.4s ease, filter 0.4s ease;
+    transform: none;
+  }
+
+  html[data-account-page-transition='account-stack'] .account-route-enter-from,
+  html[data-account-page-transition='account-stack'] .account-route-leave-to,
+  html[data-account-page-transition='account-stack-back'] .account-route-enter-from,
+  html[data-account-page-transition='account-stack-back'] .account-route-leave-to {
+    opacity: 0;
+    transform: none;
+  }
+
+  html[data-account-page-transition='account-stack'] .account-route-enter-to,
+  html[data-account-page-transition='account-stack'] .account-route-leave-from,
+  html[data-account-page-transition='account-stack-back'] .account-route-enter-to,
+  html[data-account-page-transition='account-stack-back'] .account-route-leave-from {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ---- Account stack transition (detail drill-down) ---- */
