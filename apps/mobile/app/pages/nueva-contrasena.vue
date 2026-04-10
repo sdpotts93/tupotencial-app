@@ -1,5 +1,6 @@
 <template>
   <div class="newpw">
+    <AuthMobileHero class="newpw__hero" />
     <div
       class="newpw__overlay newpw__overlay--active"
     >
@@ -109,7 +110,7 @@ async function handleSubmit() {
 
 <style scoped>
 .newpw {
-  min-height: 100dvh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -203,6 +204,10 @@ async function handleSubmit() {
     background: transparent;
     min-height: auto;
     flex: 1;
+  }
+
+  .newpw__hero {
+    display: none;
   }
 
   .newpw__overlay {

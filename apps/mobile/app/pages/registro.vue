@@ -1,25 +1,16 @@
 <template>
   <div class="register">
     <!-- Screen 1: Full-screen hero (mobile only) -->
-    <div class="register__hero">
-      <div class="register__hero-content">
-        <img src="/logo-word/logo-word-black.png" alt="Tu Potencial" class="register__wordmark" />
-        <BlobLogo class="register__logo" />
-        <p class="register__tagline">
-          Un espacio seguro para <br> tu crecimiento integral.
-        </p>
-      </div>
-
-      <!-- Bottom CTA area -->
-      <div class="register__cta-area">
+    <AuthMobileHero class="register__hero">
+      <template #cta>
         <UiButton variant="primary" block @click="showSheet = true">
           Crear cuenta
         </UiButton>
         <UiButton variant="outline" block to="/iniciar-sesion">
           Ya tengo cuenta
         </UiButton>
-      </div>
-    </div>
+      </template>
+    </AuthMobileHero>
 
     <!-- Screen 2: Slide-up sheet (mobile) / Static card (desktop) -->
     <div
@@ -164,64 +155,13 @@ async function handleRegister() {
 
 <style scoped>
 .register {
-  min-height: 100dvh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
 /* ─── Hero (Screen 1 — mobile only) ─── */
-.register__hero {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  min-height: 100dvh;
-}
-
-.register__hero-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-  padding: var(--space-10) var(--space-6);
-}
-
-.register__logo {
-  margin-bottom: var(--space-8);
-  width: 200px;
-  height: 200px;
-  flex-shrink: 0;
-}
-
-.register__wordmark {
-  height: 18px;
-  width: auto;
-  display: block;
-  margin-bottom: var(--space-8);
-}
-
-.register__tagline {
-  font-family: var(--font-title);
-  font-size: var(--title-md);
-  color: var(--color-text);
-  text-align: center;
-  line-height: var(--leading-snug);
-}
-
-/* ─── CTA area at bottom of hero ─── */
-.register__cta-area {
-  position: relative;
-  z-index: 1;
-  padding: 0 var(--space-6) var(--space-8);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
 /* ─── Sheet overlay (mobile: slides up) ─── */
 .register__overlay {
   position: fixed;
