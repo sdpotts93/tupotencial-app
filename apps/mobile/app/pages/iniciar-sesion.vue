@@ -494,6 +494,7 @@ async function handleRegister() {
   padding: var(--space-2) var(--space-6) var(--space-10);
   max-height: 85dvh;
   overflow-y: auto;
+  width: 100%;
   -webkit-overflow-scrolling: touch;
   transform: translateY(100%);
   transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
