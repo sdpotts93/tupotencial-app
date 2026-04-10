@@ -77,7 +77,7 @@ const props = withDefaults(defineProps<{
   stagePreserveAspectRatio?: string
   stageAlignY?: 'center' | 'top' | 'bottom'
 }>(), {
-  baseOpacity: 0.075,
+  baseOpacity: 0.05,
   imageSrc: '/complete-layout-mobile.webp',
   maskCenterXRatio: DEFAULT_MASK_CENTER_X_RATIO,
   maskCenterYOffsetRatio: DEFAULT_MASK_CENTER_Y_OFFSET_RATIO,
