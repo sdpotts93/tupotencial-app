@@ -191,13 +191,13 @@ const { data: events, status: eventosStatus, refresh: refreshEventos } = useAsyn
 
 const upcomingMapped = computed(() =>
   (events.value ?? [])
-    .filter(e => new Date(e.start_at) > new Date())
+    .filter(e => e.start_at && new Date(e.start_at) > new Date())
     .map(e => ({
       id: e.id,
       title: e.title,
       description: e.description,
-      dateLabel: dateFmt.format(new Date(e.start_at)),
-      timeLabel: dayTimeFmt.format(new Date(e.start_at)).toUpperCase() + ' CDMX',
+      dateLabel: dateFmt.format(new Date(e.start_at!)),
+      timeLabel: dayTimeFmt.format(new Date(e.start_at!)).toUpperCase() + ' CDMX',
       img: e.cover_url ?? undefined,
       entitlement_key: e.entitlement_key,
       plan: e.plan,

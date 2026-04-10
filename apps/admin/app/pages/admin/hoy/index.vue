@@ -556,7 +556,7 @@ const { data: savedConfig, refresh: refreshSavedConfig } = useAsyncData('hoy-con
     map[row.key] = row.value
   }
   return map
-}, { lazy: true, server: false, default: () => ({}) })
+}, { lazy: true, server: false, default: () => ({} as Record<string, any>) })
 
 function formatDuration(seconds: number | null) {
   if (!seconds) return ''
@@ -695,7 +695,8 @@ const contentSearch = ref('')
 
 const allContentItems = computed(() => adminHoyOptions.value.contentItems)
 
-const selectedContent = ref<typeof allContentItems.value>([])
+const selectedContent = ref<typeof allContentItems.value[number][]>([])
+
 
 watch(contentSearch, () => { contentDropdownOpen.value = true })
 

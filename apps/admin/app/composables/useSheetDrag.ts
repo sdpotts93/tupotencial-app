@@ -17,7 +17,7 @@ export function useSheetDrag(sheetEl: Ref<HTMLElement | null>, onClose: () => vo
     if (el && el.scrollTop > 0) return
 
     isDragging.value = true
-    startY = e.touches[0].clientY
+    startY = e.touches[0]!.clientY
     startTime = Date.now()
     currentY = 0
     translateY.value = 0
@@ -26,7 +26,7 @@ export function useSheetDrag(sheetEl: Ref<HTMLElement | null>, onClose: () => vo
   function onTouchMove(e: TouchEvent) {
     if (!isDragging.value) return
 
-    const deltaY = e.touches[0].clientY - startY
+    const deltaY = e.touches[0]!.clientY - startY
     currentY = deltaY
 
     if (deltaY > 0) {

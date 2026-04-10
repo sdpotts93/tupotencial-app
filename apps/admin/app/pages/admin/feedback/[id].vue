@@ -138,9 +138,9 @@ const answerEntries = computed(() => {
   return Object.entries(answers as Record<string, unknown>)
 })
 
-function sourceLabel(source: string) {
+function sourceLabel(source: string | null) {
   const map: Record<string, string> = { daily_action: 'Acción diaria', program: 'Programa' }
-  return map[source] ?? source ?? '—'
+  return (source && map[source]) ?? source ?? '—'
 }
 
 function avatarInitials(name: string) {
