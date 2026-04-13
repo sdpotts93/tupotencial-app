@@ -126,3 +126,4 @@ Append one line per completed task:
 2026-04-10 00:36 America/Mexico_City — Revert mobile page transitions back to route-meta selection on the target route so first account drill-down navigations use the correct stack transition without mutating from.meta
 2026-04-10 00:49 America/Mexico_City — Render mobile page transitions through NuxtPage slot with shared transition state so first account drill-down navigations can animate immediately without mutating from.meta
 2026-04-10 01:03 America/Mexico_City — Use a single dynamic mobile page transition wrapper keyed by CSS state so first account detail navigations can animate without switching transition names or mutating from.meta
+2026-04-13 10:18 America/Mexico_City — Fix mobile onboarding completion redirect so the bienvenida screen does not briefly flash back to its first step before entering Hoy

@@ -1,8 +1,8 @@
 <template>
-  <div class="onboarding">
+  <div :class="['onboarding', { 'onboarding--redirecting': isRedirecting }]">
     <!-- Header: back + progress -->
     <div class="onboarding__header">
-      <button class="onboarding__back" aria-label="Volver" @click="handleBack">
+      <button class="onboarding__back" aria-label="Volver" :disabled="isRedirecting" @click="handleBack">
         <Icon name="lucide:chevron-left" size="20" />
       </button>
       <div class="onboarding__progress">
@@ -20,6 +20,7 @@
           :key="`${step}-${opt.value}`"
           :class="['onboarding-opt', { 'onboarding-opt--selected': isSelected(opt.value) }]"
           :style="{ animationDelay: `${i * 70}ms` }"
+          :disabled="isRedirecting"
           @click="toggleOption(opt.value)"
         >
           <span class="onboarding-opt__icon">
@@ -41,7 +42,7 @@
         :key="`desk-${step}`"
         block
         variant="secondary"
-        :disabled="!hasAnswer"
+        :disabled="isRedirecting || !hasAnswer"
         class="onboarding__desktop-btn"
         @click="handleContinue"
       >
@@ -51,7 +52,7 @@
 
     <!-- Mobile: bottom-pinned button -->
     <div :key="`foot-${step}`" class="onboarding__footer">
-      <UiButton block variant="secondary" :disabled="!hasAnswer" @click="handleContinue">
+      <UiButton block variant="secondary" :disabled="isRedirecting || !hasAnswer" @click="handleContinue">
         Continuar
       </UiButton>
     </div>
@@ -74,6 +75,7 @@ const supabase = useSupabaseClient()
 const { avatarUrl } = useCharacterAvatars()
 
 const step = ref(0)
+const isRedirecting = ref(false)
 const failedAvatarOptions = ref<Record<string, boolean>>({})
 
 const steps = computed(() => [
@@ -178,47 +180,53 @@ function handleBack() {
 }
 
 async function handleContinue() {
-  if (!hasAnswer.value) return
+  if (!hasAnswer.value || isRedirecting.value) return
 
   if (step.value < steps.value.length - 1) {
     step.value++
   } else {
-    // Final step — save segment + onboarding preferences
-    const segment = answers.value.segment as 'gabriel' | 'carlotta' | 'conjunta'
-    if (segment) {
-      await setSegment(segment)
-    }
+    isRedirecting.value = true
 
-    // Save onboarding preferences for AI context
-    if (user.value) {
-      await supabase.from('profiles').update({
-        onboarding_motivation: answers.value.motivation,
-        onboarding_focus: answers.value.focus,
-        onboarding_time: answers.value.time,
-      } as any).eq('id', user.value.id)
-    }
+    try {
+      // Final step — save segment + onboarding preferences
+      const segment = answers.value.segment as 'gabriel' | 'carlotta' | 'conjunta'
+      if (segment) {
+        await setSegment(segment)
+      }
 
-    navigateTo('/cuenta/hoy')
+      // Save onboarding preferences for AI context
+      if (user.value) {
+        await supabase.from('profiles').update({
+          onboarding_motivation: answers.value.motivation,
+          onboarding_focus: answers.value.focus,
+          onboarding_time: answers.value.time,
+        } as any).eq('id', user.value.id)
+      }
+
+      await navigateTo('/cuenta/hoy', { replace: true })
+    } finally {
+      if (useRoute().path === '/cuenta/bienvenida/segmento') {
+        isRedirecting.value = false
+      }
+    }
   }
 }
 
 async function redirectIfAlreadyOnboarded() {
   if (isOnboarded.value) {
-    await navigateTo('/cuenta/hoy')
+    isRedirecting.value = true
+    await navigateTo('/cuenta/hoy', { replace: true })
     return
   }
 
   if (!user.value && supaUser.value) {
     const loaded = await refreshProfile()
     if (loaded && isOnboarded.value) {
-      await navigateTo('/cuenta/hoy')
+      isRedirecting.value = true
+      await navigateTo('/cuenta/hoy', { replace: true })
     }
   }
 }
-
-watch(() => user.value?.community_segment, (segment) => {
-  if (segment) navigateTo('/cuenta/hoy')
-})
 
 onMounted(() => {
   redirectIfAlreadyOnboarded()
@@ -231,6 +239,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background: var(--color-white);
+}
+
+.onboarding--redirecting {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ─── Header ─── */
@@ -252,6 +265,10 @@ onMounted(() => {
   color: var(--color-dark-lighter);
   cursor: pointer;
   flex-shrink: 0;
+}
+
+.onboarding__back:disabled {
+  cursor: default;
 }
 
 /* ─── Progress bar ─── */
@@ -344,6 +361,10 @@ onMounted(() => {
   text-align: left;
   transition: border-color var(--transition-fast), background var(--transition-fast);
   animation: slide-in-elastic 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.onboarding-opt:disabled {
+  cursor: default;
 }
 
 
