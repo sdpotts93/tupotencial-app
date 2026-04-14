@@ -771,7 +771,10 @@ watch(() => savedConfig.value?.hoy_defaults, (hoyDefaults) => {
 watch([savedConfig, allContentItems], ([config, contentItems]) => {
   if (hasHydratedSelectedContent.value || !config) return
 
-  const selectedIds = new Set(config.hoy_recent_content?.selected_ids ?? [])
+  // Wait for real config data before hydrating
+  if (!config.hoy_recent_content) return
+
+  const selectedIds = new Set(config.hoy_recent_content.selected_ids ?? [])
   if (selectedIds.size > 0 && contentItems.length === 0) return
 
   selectedContent.value = contentItems.filter(item => selectedIds.has(item.id))

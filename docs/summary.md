@@ -131,3 +131,5 @@ Append one line per completed task:
 2026-04-13 23:55 America/Mexico_City — Keep admin-only invited accounts out of admin usuarios by stopping admin invites from seeding customer onboarding data and only showing dual-role admins there after customer onboarding data exists
 2026-04-13 23:56 America/Mexico_City — Show a loader on mobile onboarding completion so the final save and redirect to Hoy does not appear blank
 2026-04-14 12:09 America/Mexico_City — Seed a default VIP add-on in seed-prod.sh using the admin form placeholder values and a default cover image
+2026-04-14 13:18 America/Mexico_City — Use per-field Hoy badge fallback for share capture titles and subtitles instead of reusing the featured action title
+2026-04-14 13:31 America/Mexico_City — Resolve Hoy day-plan fields independently from defaults so blank day values fall back per field, including action refs and progreso badge copy

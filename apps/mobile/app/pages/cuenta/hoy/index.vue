@@ -296,9 +296,9 @@
               <ShareBadge
                 v-model="showShareBadge"
                 eyebrow="CHECK-IN DIARIO"
-                :action-title="dailyPlan.title"
+                :action-title="badgeShareTitle"
                 :streak-count="streak"
-                :share-text="dailyPlan.badgeShareText"
+                :share-text="badgeShareText"
                 outcome="done"
               />
             </template>
@@ -382,9 +382,9 @@
               <ShareBadge
                 v-model="showShareBadge"
                 :eyebrow="dailyPlan.eyebrow"
-                :action-title="dailyPlan.title"
+                :action-title="badgeShareTitle"
                 :streak-count="streak"
-                :share-text="dailyPlan.badgeShareText"
+                :share-text="badgeShareText"
                 :outcome="accionChoice!"
               />
             </template>
@@ -579,13 +579,59 @@ const normalizeActionType = (t: string | undefined) => {
   if (t === 'formulario') return 'form'
   return t
 }
+function resolveText(value: unknown, fallback: unknown, defaultValue: string | null = null) {
+  if (typeof value === 'string' && value.trim()) return value.trim()
+  if (typeof fallback === 'string' && fallback.trim()) return fallback.trim()
+  return defaultValue
+}
+
+const dailyPlanPayload = computed(() => (dailyPlanData.value?.primary_action_payload as Record<string, any> | null) ?? {})
 const actionType = computed(() => {
   const planType = dailyPlanData.value?.primary_action_type as string | undefined
   if (planType) return planType
   return normalizeActionType(hoyDefaults.value.action_type as string | undefined)
 })
-const actionPayload = computed(() => dailyPlanData.value?.primary_action_payload as Record<string, any> | null)
-const actionRef = computed(() => hoyPage.value?.action_ref ?? null)
+const actionPayload = computed(() => ({
+  quote_text: resolveText(dailyPlanPayload.value.quote_text, hoyDefaults.value.phrase_text, null),
+  quote_author: resolveText(dailyPlanPayload.value.quote_author, hoyDefaults.value.phrase_author, null),
+  content_id: resolveText(dailyPlanPayload.value.content_id, hoyDefaults.value.content_id, null),
+  form_id: resolveText(dailyPlanPayload.value.form_id, hoyDefaults.value.form_id, null),
+}))
+
+const { data: fallbackActionRef } = useAsyncData('hoy-action-ref', async () => {
+  if (hoyPage.value?.action_ref) return null
+
+  if (actionType.value === 'content' && actionPayload.value.content_id) {
+    const { data } = await client
+      .from('content_items')
+      .select('id, type, title, thumbnail_url, duration_seconds')
+      .eq('id', actionPayload.value.content_id)
+      .maybeSingle()
+    return data ?? null
+  }
+
+  if (actionType.value === 'form' && actionPayload.value.form_id) {
+    const { data } = await client
+      .from('forms')
+      .select('id, title, description, fields')
+      .eq('id', actionPayload.value.form_id)
+      .eq('status', 'active')
+      .maybeSingle()
+    return data ?? null
+  }
+
+  return null
+}, {
+  lazy: true,
+  watch: [
+    () => hoyPage.value?.action_ref,
+    actionType,
+    () => actionPayload.value.content_id,
+    () => actionPayload.value.form_id,
+  ],
+})
+
+const actionRef = computed(() => hoyPage.value?.action_ref ?? fallbackActionRef.value ?? null)
 
 // Dynamic featured card name based on action type + resolved reference
 const featuredName = computed(() => {
@@ -600,23 +646,29 @@ const featuredName = computed(() => {
     if (contentType === 'audio') return `Escucha ${name}`
     return name
   }
-  return dailyPlanData.value?.badge_title || hoyDefaults.value.badge_title || 'Acción del día'
+  return resolveText(dailyPlanData.value?.badge_title, hoyDefaults.value.badge_title, 'Acción del día') ?? 'Acción del día'
 })
+
+const badgeShareTitle = computed(() =>
+  resolveText(dailyPlanData.value?.badge_title, hoyDefaults.value.badge_title, 'Día completado') ?? 'Día completado',
+)
+
+const badgeShareText = computed(() =>
+  resolveText(dailyPlanData.value?.badge_subtitle, hoyDefaults.value.badge_subtitle, null),
+)
 
 const dailyPlan = computed(() => ({
   eyebrow: 'Acción del día',
   title: featuredName.value,
-  badgeShareText: dailyPlanData.value?.badge_subtitle || hoyDefaults.value.badge_subtitle || null,
 }))
 
 // ─── Mensaje del día (derived from daily plan payload or fallback to defaults) ───
 const mensajeDelDia = computed(() => {
-  const payload = dailyPlanData.value?.primary_action_payload as Record<string, any> | null
   const fallbackAuthor = user.value?.community_segment === 'carlotta' ? 'carlotta' : 'gabriel'
-  const rawAuthor = payload?.quote_author || hoyDefaults.value.phrase_author || fallbackAuthor
+  const rawAuthor = actionPayload.value.quote_author || fallbackAuthor
   const author = typeof rawAuthor === 'string' ? rawAuthor.toLowerCase() : fallbackAuthor
   return {
-    text: payload?.quote_text || hoyDefaults.value.phrase_text || 'Tu guía diaria aparecerá aquí cuando esté configurada.',
+    text: actionPayload.value.quote_text || 'Tu guía diaria aparecerá aquí cuando esté configurada.',
     author: author === 'carlotta' ? 'carlotta' : 'gabriel',
   }
 })

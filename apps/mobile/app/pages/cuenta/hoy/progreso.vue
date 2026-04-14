@@ -272,8 +272,13 @@ const { data: hoyPage } = useAsyncData('progreso-hoy-page', async () => {
 }, { lazy: true })
 
 const hoyDefaults = computed(() => hoyPage.value?.settings?.hoy_defaults ?? {})
-const badgeTitle = computed(() => hoyPage.value?.daily_plan?.badge_title || hoyDefaults.value.badge_title || 'Día completado')
-const badgeSubtitle = computed(() => hoyPage.value?.daily_plan?.badge_subtitle || hoyDefaults.value.badge_subtitle || null)
+function resolveText(value: unknown, fallback: unknown, defaultValue: string | null = null) {
+  if (typeof value === 'string' && value.trim()) return value.trim()
+  if (typeof fallback === 'string' && fallback.trim()) return fallback.trim()
+  return defaultValue
+}
+const badgeTitle = computed(() => resolveText(hoyPage.value?.daily_plan?.badge_title, hoyDefaults.value.badge_title, 'Día completado') ?? 'Día completado')
+const badgeSubtitle = computed(() => resolveText(hoyPage.value?.daily_plan?.badge_subtitle, hoyDefaults.value.badge_subtitle, null))
 
 </script>
 

@@ -136,9 +136,20 @@ const form = reactive({
   badge_subtitle: '',
 })
 
+// Flag to prevent action_type watcher from clearing selections during initial load
+const isLoadingPlan = ref(true)
+
 // Seed form once data arrives
 watch(existingPlan, (plan) => {
-  if (!plan) return
+  if (!plan) {
+    // Only set to false if we're done loading (status is not pending)
+    if (planStatus.value === 'success') {
+      isLoadingPlan.value = false
+    }
+    return
+  }
+  // Set flag BEFORE changing form values to prevent action_type watcher from clearing
+  isLoadingPlan.value = true
   const payload = plan.primary_action_payload as Record<string, any> | null
   form.phrase_text = payload?.quote_text ?? ''
   form.phrase_author = payload?.quote_author ?? ''
@@ -147,6 +158,10 @@ watch(existingPlan, (plan) => {
   form.form_id = payload?.form_id ?? ''
   form.badge_title = plan.badge_title ?? ''
   form.badge_subtitle = plan.badge_subtitle ?? ''
+  // Allow clearing on subsequent action_type changes
+  nextTick(() => {
+    isLoadingPlan.value = false
+  })
 }, { immediate: true })
 
 const authorOptions = [
@@ -180,6 +195,8 @@ const formOptions = computed(() =>
 )
 
 watch(() => form.action_type, () => {
+  // Don't clear selections during initial data loading
+  if (isLoadingPlan.value) return
   form.content_id = ''
   form.form_id = ''
   errors.content_id = ''
