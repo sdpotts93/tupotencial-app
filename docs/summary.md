@@ -130,3 +130,4 @@ Append one line per completed task:
 2026-04-13 23:53 America/Mexico_City — Include dual-role admin accounts in the admin usuarios list instead of filtering out every profile that exists in admin_users
 2026-04-13 23:55 America/Mexico_City — Keep admin-only invited accounts out of admin usuarios by stopping admin invites from seeding customer onboarding data and only showing dual-role admins there after customer onboarding data exists
 2026-04-13 23:56 America/Mexico_City — Show a loader on mobile onboarding completion so the final save and redirect to Hoy does not appear blank
+2026-04-14 12:09 America/Mexico_City — Seed a default VIP add-on in seed-prod.sh using the admin form placeholder values and a default cover image

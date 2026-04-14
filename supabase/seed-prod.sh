@@ -117,12 +117,14 @@ upload "character-avatars/carlotta/avatar.png"   "${IMAGES}/carlotta.png"      "
 upload "character-avatars/gabriel/avatar.png"     "${IMAGES}/gabriel.png"       "image/png"
 upload "content-covers/hoy/featured.jpg"         "${IMAGES}/rojo-carlotta.jpg" "image/jpeg"
 upload "content-covers/content-seed/cover.jpg"   "${IMAGES}/lib-4.jpg"         "image/jpeg"
+upload "content-covers/addons/vip-cover.jpg"     "${IMAGES}/lib-8.jpg"         "image/jpeg"
 upload "content-covers/community/post-seed/logo-word-black.png" "${LOGO}"      "image/png"
 
 CARLOTTA_AVATAR="${STORAGE_PUBLIC}/character-avatars/carlotta/avatar.png"
 GABRIEL_AVATAR="${STORAGE_PUBLIC}/character-avatars/gabriel/avatar.png"
 HOY_FEATURED="${STORAGE_PUBLIC}/content-covers/hoy/featured.jpg"
 CONTENT_THUMBNAIL="${STORAGE_PUBLIC}/content-covers/content-seed/cover.jpg"
+VIP_ADDON_COVER="${STORAGE_PUBLIC}/content-covers/addons/vip-cover.jpg"
 POST_MEDIA="${STORAGE_PUBLIC}/content-covers/community/post-seed/logo-word-black.png"
 
 echo "  Done"
@@ -262,6 +264,32 @@ curl -s -X POST "${API}/app_settings" \
     "value": {"mode": "automatic", "selected_ids": []}
   }' > /dev/null
 
+# ── 12. Add-on seed ──────────────────────────────────────────────────────────
+echo "Inserting VIP add-on..."
+curl -s -X POST "${API}/addons" \
+  "${REST_HEADERS[@]}" \
+  -H "Prefer: return=minimal,resolution=ignore-duplicates" \
+  -d "{
+    \"id\": \"f6000000-0000-4000-8000-000000000002\",
+    \"title\": \"VIP\",
+    \"description\": \"Describe qué incluye este add-on...\",
+    \"cover_url\": \"${VIP_ADDON_COVER}\",
+    \"price\": 249900,
+    \"plan\": \"todos\",
+    \"grants_core_months\": 0,
+    \"revenuecat_offering_id\": \"addon_vip\",
+    \"revenuecat_package_id\": \"default\",
+    \"status\": \"active\"
+  }" > /dev/null
+
+curl -s -X POST "${API}/addon_entitlements" \
+  "${REST_HEADERS[@]}" \
+  -H "Prefer: return=minimal,resolution=ignore-duplicates" \
+  -d '{
+    "addon_id": "f6000000-0000-4000-8000-000000000002",
+    "entitlement_key": "vip"
+  }' > /dev/null
+
 # ── Done ────────────────────────────────────────────────────────────────────
 echo ""
 echo "Production seed complete!"
@@ -270,4 +298,5 @@ echo "  Avatars:   ${CARLOTTA_AVATAR}"
 echo "             ${GABRIEL_AVATAR}"
 echo "  Featured:  ${HOY_FEATURED}"
 echo "  Content:   ${CONTENT_THUMBNAIL}"
+echo "  VIP Addon: ${VIP_ADDON_COVER}"
 echo "  Post:      ${POST_MEDIA}"
