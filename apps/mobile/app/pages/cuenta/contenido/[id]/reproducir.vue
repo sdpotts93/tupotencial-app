@@ -152,6 +152,7 @@ const isBuffering = ref(false)
 const currentTime = ref(0)
 const duration = ref(0)
 const isScrubbing = ref(false)
+const isMounted = ref(false)
 
 // ── Controls visibility ──
 const controlsVisible = ref(true)
@@ -159,6 +160,8 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null
 
 // ── Vimeo SDK instance ──
 let vimeoPlayer: Player | null = null
+let initializedPlayerKey: string | null = null
+let resolvedMediaPath: string | null = null
 
 // ── Content from DB ──
 const { data: contentData, status: playerStatus, refresh: refreshPlayer } = useAsyncData(`content-player-${contentId}`, async () => {
@@ -329,34 +332,69 @@ function onProgressTouchEnd() {
   resetHideTimer()
 }
 
-// ── Lifecycle ──
-onMounted(async () => {
-  const today = new Date().toISOString().slice(0, 10)
-  localStorage.setItem(`hoy-content-done-${today}`, contentId)
-
-  // Mark program day item as completed when navigating from a program day
-  const dayItemId = route.query.dayItemId as string | undefined
-  const programIdParam = route.query.programId as string | undefined
-  const dayIndexParam = route.query.dayIndex as string | undefined
-  const runParam = route.query.run as string | undefined
-  if (dayItemId && programIdParam && dayIndexParam && runParam) {
-    const { markDayItemCompleted } = useDayItemCompletion()
-    markDayItemCompleted({ programId: programIdParam, dayIndex: Number(dayIndexParam), dayItemId, run: Number(runParam) })
+async function destroyActivePlayer() {
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
   }
 
-  // Resolve storage path to signed URL
+  if (vimeoPlayer) {
+    await vimeoPlayer.destroy()
+    vimeoPlayer = null
+  }
+
+  const video = videoRef.value
+  if (video) {
+    video.pause()
+  }
+
+  isPlaying.value = false
+  isBuffering.value = false
+  currentTime.value = 0
+  duration.value = 0
+  controlsVisible.value = true
+}
+
+async function resolveMediaUrl() {
   const path = contentBase.value.mediaPath
-  if (path && !path.startsWith('http')) {
+  if (!path) {
+    mediaUrl.value = ''
+    resolvedMediaPath = null
+    return
+  }
+
+  if (resolvedMediaPath === path && mediaUrl.value) {
+    return
+  }
+
+  if (!path.startsWith('http')) {
     const { data: signed } = await client.storage
       .from('content-media')
       .createSignedUrl(path, 3600)
-    if (signed?.signedUrl) mediaUrl.value = signed.signedUrl
-  } else if (path) {
+    mediaUrl.value = signed?.signedUrl ?? ''
+  } else {
     mediaUrl.value = path
   }
 
-  // Wait a tick for the media element to update its src
+  resolvedMediaPath = path
+}
+
+async function initializePlayer() {
+  if (!isMounted.value || playerStatus.value !== 'success' || !contentData.value) return
+
+  await resolveMediaUrl()
   await nextTick()
+
+  const nextPlayerKey = JSON.stringify({
+    type: content.value.type,
+    vimeoId: content.value.vimeoId,
+    mediaUrl: content.value.mediaUrl,
+  })
+
+  if (initializedPlayerKey === nextPlayerKey) return
+
+  await destroyActivePlayer()
+  initializedPlayerKey = nextPlayerKey
 
   if (isVimeo.value && vimeoIframe.value) {
     // ── Init Vimeo SDK ──
@@ -399,14 +437,43 @@ onMounted(async () => {
         controlsVisible.value = true
       })
   }
+}
+
+watch(
+  [
+    playerStatus,
+    () => contentBase.value.vimeoId,
+    () => contentBase.value.mediaPath,
+  ],
+  () => {
+    void initializePlayer()
+  },
+)
+
+// ── Lifecycle ──
+onMounted(async () => {
+  isMounted.value = true
+
+  const today = new Date().toISOString().slice(0, 10)
+  localStorage.setItem(`hoy-content-done-${today}`, contentId)
+
+  // Mark program day item as completed when navigating from a program day
+  const dayItemId = route.query.dayItemId as string | undefined
+  const programIdParam = route.query.programId as string | undefined
+  const dayIndexParam = route.query.dayIndex as string | undefined
+  const runParam = route.query.run as string | undefined
+  if (dayItemId && programIdParam && dayIndexParam && runParam) {
+    const { markDayItemCompleted } = useDayItemCompletion()
+    markDayItemCompleted({ programId: programIdParam, dayIndex: Number(dayIndexParam), dayItemId, run: Number(runParam) })
+  }
+
+  await initializePlayer()
 })
 
-onBeforeUnmount(() => {
-  if (hideTimer) clearTimeout(hideTimer)
-  if (vimeoPlayer) {
-    vimeoPlayer.destroy()
-    vimeoPlayer = null
-  }
+onBeforeUnmount(async () => {
+  isMounted.value = false
+  initializedPlayerKey = null
+  await destroyActivePlayer()
 })
 </script>
 

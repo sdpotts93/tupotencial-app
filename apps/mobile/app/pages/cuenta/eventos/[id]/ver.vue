@@ -142,9 +142,26 @@ const countdown = computed(() => {
 })
 
 // Once the event time arrives, poll every 30s to pick up vimeo_live_event_id
-// in case the admin sets it right before going live
-watch(() => event.value.isUpcoming, (isUpcoming) => {
-  if (!isUpcoming && !event.value.vimeoEmbedUrl && !pollTimer) {
+// in case the admin sets it right before going live or after viewers are already on the page.
+watch(
+  [
+    watchStatus,
+    () => event.value.isUpcoming,
+    () => event.value.vimeoEmbedUrl,
+  ],
+  ([status, isUpcoming, vimeoEmbedUrl]) => {
+    const shouldPoll = status === 'success' && !isUpcoming && !vimeoEmbedUrl
+
+    if (!shouldPoll) {
+      if (pollTimer) {
+        clearInterval(pollTimer)
+        pollTimer = null
+      }
+      return
+    }
+
+    if (pollTimer) return
+
     pollTimer = setInterval(() => {
       if (event.value.vimeoEmbedUrl) {
         clearInterval(pollTimer!)
@@ -153,8 +170,9 @@ watch(() => event.value.isUpcoming, (isUpcoming) => {
       }
       refreshWatch()
     }, 30_000)
-  }
-})
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
