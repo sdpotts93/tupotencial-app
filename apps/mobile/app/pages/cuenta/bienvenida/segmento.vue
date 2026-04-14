@@ -1,5 +1,10 @@
 <template>
   <div :class="['onboarding', { 'onboarding--redirecting': isRedirecting }]">
+    <div v-if="isRedirecting" class="onboarding__loading" aria-live="polite" aria-busy="true">
+      <BlobLoader />
+      <p class="onboarding__loading-text">Guardando tu experiencia...</p>
+    </div>
+
     <!-- Header: back + progress -->
     <div class="onboarding__header">
       <button class="onboarding__back" aria-label="Volver" :disabled="isRedirecting" @click="handleBack">
@@ -239,11 +244,31 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background: var(--color-white);
+  position: relative;
 }
 
 .onboarding--redirecting {
-  opacity: 0;
   pointer-events: none;
+}
+
+.onboarding__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.onboarding__loading-text {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  text-align: center;
 }
 
 /* ─── Header ─── */

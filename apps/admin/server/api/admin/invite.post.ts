@@ -62,7 +62,10 @@ export default defineEventHandler(async (event) => {
     id: newUserId,
     display_name: body.full_name.trim(),
     email: body.email.trim().toLowerCase(),
-    community_segment: 'conjunta',
+    community_segment: null,
+    onboarding_motivation: null,
+    onboarding_focus: null,
+    onboarding_time: null,
   })
 
   await serviceClient.from('admin_users').insert({

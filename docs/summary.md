@@ -127,3 +127,6 @@ Append one line per completed task:
 2026-04-10 00:49 America/Mexico_City — Render mobile page transitions through NuxtPage slot with shared transition state so first account drill-down navigations can animate immediately without mutating from.meta
 2026-04-10 01:03 America/Mexico_City — Use a single dynamic mobile page transition wrapper keyed by CSS state so first account detail navigations can animate without switching transition names or mutating from.meta
 2026-04-13 10:18 America/Mexico_City — Fix mobile onboarding completion redirect so the bienvenida screen does not briefly flash back to its first step before entering Hoy
+2026-04-13 23:53 America/Mexico_City — Include dual-role admin accounts in the admin usuarios list instead of filtering out every profile that exists in admin_users
+2026-04-13 23:55 America/Mexico_City — Keep admin-only invited accounts out of admin usuarios by stopping admin invites from seeding customer onboarding data and only showing dual-role admins there after customer onboarding data exists
+2026-04-13 23:56 America/Mexico_City — Show a loader on mobile onboarding completion so the final save and redirect to Hoy does not appear blank

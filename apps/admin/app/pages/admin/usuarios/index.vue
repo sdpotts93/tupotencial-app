@@ -111,12 +111,9 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
       .from('admin_users')
       .select('user_id')
 
-    const adminIds = (adminRows ?? []).map(row => row.user_id)
+    const adminIdSet = new Set((adminRows ?? []).map(row => row.user_id))
 
     let profilesQuery = client.from('profiles').select('*')
-    if (adminIds.length) {
-      profilesQuery = profilesQuery.not('id', 'in', `(${adminIds.join(',')})`)
-    }
     if (search.value) {
       profilesQuery = profilesQuery.or(`display_name.ilike.%${search.value}%,email.ilike.%${search.value}%`)
     }
@@ -135,7 +132,19 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
     }
 
     const { data: profiles } = await profilesQuery.range(from, to).order('created_at', { ascending: false })
-    const profileIds = (profiles ?? []).map(p => p.id)
+    const visibleProfiles = (profiles ?? []).filter((profile: any) => {
+      if (!adminIdSet.has(profile.id)) return true
+
+      // Admin-only invited accounts should be managed from /admin/roles.
+      // Show dual-role admins here only once they have actual customer onboarding data.
+      return Boolean(
+        profile.onboarding_time
+        || profile.onboarding_motivation?.length
+        || profile.onboarding_focus?.length,
+      )
+    })
+
+    const profileIds = visibleProfiles.map((p: any) => p.id)
     if (!profileIds.length) return []
 
     const [{ data: subs }, { data: entitlements }] = await Promise.all([
@@ -149,7 +158,7 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
       list.push(e.entitlement_key)
       entMap.set(e.user_id, list)
     }
-    return (profiles ?? []).map(p => {
+    return visibleProfiles.map((p: any) => {
       const subStatus = subsMap.get(p.id) ?? null
       return {
         ...p,
