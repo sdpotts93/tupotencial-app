@@ -182,7 +182,7 @@ curl -s -X POST "${API}/content_items" \
     \"description\": \"Sesión grabada de la meditación semanal guiada por Carlotta. Un espacio para pausar, respirar y reconectarte con tu centro.\",
     \"thumbnail_url\": \"${CONTENT_THUMBNAIL}\",
     \"duration_seconds\": 3600,
-    \"entitlement_key\": \"vip\",
+    \"entitlement_key\": null,
     \"plan\": \"free\",
     \"objective_id\": \"e67daea3-67cf-4a66-bd1b-4e812f817d02\",
     \"status\": \"published\",

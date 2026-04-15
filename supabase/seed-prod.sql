@@ -54,7 +54,7 @@ INSERT INTO content_items (
   'Sesión grabada de la meditación semanal guiada por Carlotta. Un espacio para pausar, respirar y reconectarte con tu centro.',
   null,
   null, null, null, -- thumbnail_url set by shell script
-  3600, 'vip', 'free', 'e67daea3-67cf-4a66-bd1b-4e812f817d02',
+  3600, null, 'free', 'e67daea3-67cf-4a66-bd1b-4e812f817d02',
   'published', '2026-04-09 08:17:59.377+00', null, null,
   null, '1178967928'
 ) ON CONFLICT (id) DO NOTHING;
