@@ -127,6 +127,22 @@
                   </div>
                 </div>
               </div>
+              <div v-else-if="latestGrant" class="user-detail__card-content">
+                <div class="user-detail__list">
+                  <div class="user-detail__row">
+                    <span class="user-detail__row-label">Estado</span>
+                    <UiTag variant="success">Activa</UiTag>
+                  </div>
+                  <div class="user-detail__row">
+                    <span class="user-detail__row-label">Origen</span>
+                    <span>{{ grantSourceLabel(latestGrant.source) }}</span>
+                  </div>
+                  <div class="user-detail__row">
+                    <span class="user-detail__row-label">Vigente hasta</span>
+                    <span>{{ formatDate(latestGrant.ends_at) }}</span>
+                  </div>
+                </div>
+              </div>
               <p v-else class="user-detail__empty">Sin suscripción activa</p>
             </UiCard>
           </div>
@@ -238,6 +254,12 @@ const hasCoreAccess = computed(() => {
   return (activeGrants.value?.length ?? 0) > 0
 })
 
+const latestGrant = computed(() => {
+  const grants = activeGrants.value ?? []
+  if (!grants.length) return null
+  return [...grants].sort((a: any, b: any) => new Date(b.ends_at).getTime() - new Date(a.ends_at).getTime())[0]
+})
+
 // ── Entitlements ──
 const { data: _entitlements } = useAsyncData(`user-ent-${userId}`, async () => {
   const { data } = await client.from('user_entitlements').select('*').eq('user_id', userId)
@@ -317,6 +339,11 @@ function subStatusVariant(s: string) {
 
 function subStatusLabel(s: string) {
   const map: Record<string, string> = { active: 'Activa', trialing: 'Prueba', past_due: 'Pago pendiente', canceled: 'Cancelada', incomplete: 'Incompleta' }
+  return map[s] ?? s
+}
+
+function grantSourceLabel(s: string) {
+  const map: Record<string, string> = { addon: 'Compra de add-on', admin: 'Otorgada por admin' }
   return map[s] ?? s
 }
 
