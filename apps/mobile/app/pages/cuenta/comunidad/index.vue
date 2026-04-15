@@ -335,13 +335,32 @@ function isVideo(url: string) {
 }
 
 async function toggleReaction(id: string) {
-  const post = allPosts.value.find((p: any) => p.id === id)
-  if (!post || !user.value?.id) return
+  if (!user.value?.id) return
+  const current = allPosts.value.find((p: any) => p.id === id)
+  if (!current) return
 
-  const previousLiked = post.liked
-  const previousReactions = post.reactions
-  post.liked = !previousLiked
-  post.reactions = Math.max(0, previousReactions + (previousLiked ? -1 : 1))
+  const previousLiked = current.liked
+  const previousReactions = current.reactions
+  const nextLiked = !previousLiked
+  const nextReactions = Math.max(0, previousReactions + (previousLiked ? -1 : 1))
+
+  const applyUpdate = (liked: boolean, reactions: number) => {
+    if (postsData.value) {
+      const idx = postsData.value.items.findIndex((p: any) => p.id === id)
+      if (idx !== -1) {
+        const items = [...postsData.value.items]
+        items[idx] = { ...items[idx], liked, reactions }
+        postsData.value = { ...postsData.value, items }
+        return
+      }
+    }
+    const idx = extraPosts.value.findIndex((p: any) => p.id === id)
+    if (idx !== -1) {
+      extraPosts.value[idx] = { ...extraPosts.value[idx], liked, reactions }
+    }
+  }
+
+  applyUpdate(nextLiked, nextReactions)
 
   try {
     if (previousLiked) {
@@ -352,8 +371,7 @@ async function toggleReaction(id: string) {
       if (error) throw error
     }
   } catch {
-    post.liked = previousLiked
-    post.reactions = previousReactions
+    applyUpdate(previousLiked, previousReactions)
     await refreshComunidad()
   }
 }
