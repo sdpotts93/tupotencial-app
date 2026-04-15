@@ -80,6 +80,11 @@
       </section>
       </div>
 
+      <!-- Actions -->
+      <div class="ai-home__actions">
+        <UiButton variant="outline" block :disabled="limitReached" @click="startChat()">Nueva conversación</UiButton>
+      </div>
+
       <!-- Session history -->
       <section v-if="sessions.length" class="ai-home__history">
         <p class="eyebrow">HISTORIAL</p>
@@ -104,11 +109,6 @@
           <UiSkeleton v-if="loadingMore" variant="rect" width="100%" height="52px" style="border-radius: var(--radius-xl);" />
         </div>
       </section>
-
-      <!-- Actions -->
-      <div class="ai-home__actions">
-        <UiButton variant="outline" block :disabled="limitReached" @click="startChat()">Nueva conversación</UiButton>
-      </div>
 
       <!-- Limit state -->
       <div v-if="limitReached" class="ai-home__limit">
@@ -492,6 +492,10 @@ function startChat() {
     background:var(--color-surface);
   }
 
+  .ai-home__actions {
+    width: calc(50% - var(--space-5) / 2);
+  }
+
   .ai-home__session {
     background: var(--color-desktop-card);
     border: 1px solid var(--color-desktop-border);
@@ -505,9 +509,9 @@ function startChat() {
     }
   }
 
-  .ai-home__actions :deep(.btn) {
+  /* .ai-home__actions :deep(.btn) {
     max-width: 280px;
-  }
+  } */
 }
 
 /* ─── Error state ─── */
