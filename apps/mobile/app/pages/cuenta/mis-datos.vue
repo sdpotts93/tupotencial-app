@@ -76,6 +76,7 @@
           <!-- Form -->
           <form class="profile__form" @submit.prevent="handleSave">
             <UiInput v-model="displayName" label="Nombre" placeholder="Tu nombre" />
+            <UiInput :model-value="user?.email || ''" label="Correo electrónico" type="email" disabled autocomplete="email" />
             <UiSelect v-model="segment" label="Comunidad" :options="segmentOptions" />
             <p v-if="formError" class="form-error">{{ formError }}</p>
             <UiButton type="submit" block variant="secondary" :loading="saving">Guardar cambios</UiButton>
