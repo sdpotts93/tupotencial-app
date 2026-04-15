@@ -87,8 +87,8 @@
           <div class="user-detail__stat">
             <span class="eyebrow user-detail__stat-label">Plan</span>
             <span class="user-detail__stat-value">
-              <UiTag :variant="subscription?.status === 'active' ? 'gold' : 'default'">
-                {{ subscription?.status === 'active' ? 'Core' : 'Gratuito' }}
+              <UiTag :variant="hasCoreAccess ? 'gold' : 'default'">
+                {{ hasCoreAccess ? 'Core' : 'Gratuito' }}
               </UiTag>
             </span>
           </div>
@@ -220,6 +220,23 @@ const { data: subscription } = useAsyncData(`user-sub-${userId}`, async () => {
   const { data } = await client.from('subscriptions').select('*').eq('user_id', userId).maybeSingle()
   return data
 }, { lazy: true })
+
+// Core access can come from an active/trialing subscription OR a non-expired
+// subscription_access_grant (e.g. add-on purchases that grant core months).
+const { data: activeGrants } = useAsyncData(`user-grants-${userId}`, async () => {
+  const { data } = await client
+    .from('subscription_access_grants')
+    .select('id, source, ends_at')
+    .eq('user_id', userId)
+    .gt('ends_at', new Date().toISOString())
+  return data ?? []
+}, { lazy: true })
+
+const hasCoreAccess = computed(() => {
+  const status = subscription.value?.status
+  if (status === 'active' || status === 'trialing') return true
+  return (activeGrants.value?.length ?? 0) > 0
+})
 
 // ── Entitlements ──
 const { data: _entitlements } = useAsyncData(`user-ent-${userId}`, async () => {

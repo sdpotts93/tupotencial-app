@@ -113,22 +113,24 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
 
     const adminIdSet = new Set((adminRows ?? []).map(row => row.user_id))
 
+    // Fetch the full subscriber set up-front so it drives both the plan/status
+    // filters and the per-row plan/status display. This set includes add-on
+    // grants (subscription_access_grants), so users with core-via-add-on are
+    // counted as subscribers even without a row in `subscriptions`.
+    const { data: subscriberIdsData } = await client.rpc('get_subscriber_user_ids')
+    const subscriberIds = new Set<string>(subscriberIdsData ?? [])
+
     let profilesQuery = client.from('profiles').select('*')
     if (search.value) {
       profilesQuery = profilesQuery.or(`display_name.ilike.%${search.value}%,email.ilike.%${search.value}%`)
     }
     if (filterSegment.value) profilesQuery = profilesQuery.eq('community_segment', filterSegment.value)
 
-    // For plan/status filter, pre-filter by subscription status
-    if (filterPlan.value === 'core' || filterStatus.value === 'active' || filterPlan.value === 'free' || filterStatus.value === 'inactive') {
-      const { data: activeIds } = await client.rpc('get_subscriber_user_ids')
-      const ids = activeIds ?? []
-      if (filterPlan.value === 'core' || filterStatus.value === 'active') {
-        if (!ids.length) return []
-        profilesQuery = profilesQuery.in('id', ids)
-      } else {
-        if (ids.length) profilesQuery = profilesQuery.not('id', 'in', `(${ids.join(',')})`)
-      }
+    if (filterPlan.value === 'core' || filterStatus.value === 'active') {
+      if (!subscriberIds.size) return []
+      profilesQuery = profilesQuery.in('id', [...subscriberIds])
+    } else if (filterPlan.value === 'free' || filterStatus.value === 'inactive') {
+      if (subscriberIds.size) profilesQuery = profilesQuery.not('id', 'in', `(${[...subscriberIds].join(',')})`)
     }
 
     const { data: profiles } = await profilesQuery.range(from, to).order('created_at', { ascending: false })
@@ -160,14 +162,15 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
     }
     return visibleProfiles.map((p: any) => {
       const subStatus = subsMap.get(p.id) ?? null
+      const hasAccess = subscriberIds.has(p.id)
       return {
         ...p,
         full_name: p.display_name ?? 'Sin nombre',
         email: p.email ?? '\u2014',
         segment: p.community_segment ?? '',
-        plan: subStatus === 'active' ? 'core' : 'free',
+        plan: hasAccess ? 'core' : 'free',
         subscription_status: subStatus,
-        status: subStatus === 'active' ? 'active' : 'inactive',
+        status: hasAccess ? 'active' : 'inactive',
         entitlements: entMap.get(p.id) ?? [],
       }
     })
