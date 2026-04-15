@@ -275,13 +275,13 @@ const { data: streak } = useAsyncData(`user-streak-${userId}`, async () => {
 
 // ── Check-ins (count + recent) ──
 const { data: _checkins } = useAsyncData(`user-checkins-${userId}`, async () => {
-  const { data } = await client.from('daily_checkins').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(10)
+  const { data } = await client.from('daily_checkins').select('*').eq('user_id', userId).eq('type', 'checkin').order('date', { ascending: false }).limit(10)
   return data ?? []
 }, { lazy: true })
 const recentCheckins = computed(() => _checkins.value ?? [])
 
 const { data: _checkinCount } = useAsyncData(`user-checkin-count-${userId}`, async () => {
-  const { count } = await client.from('daily_checkins').select('*', { count: 'exact', head: true }).eq('user_id', userId)
+  const { count } = await client.from('daily_checkins').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('type', 'checkin')
   return count ?? 0
 }, { lazy: true })
 const checkinCount = computed(() => _checkinCount.value ?? 0)
