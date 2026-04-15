@@ -453,6 +453,12 @@ function formatDate(iso: string) {
   gap: var(--space-4);
 }
 
+.user-detail__grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 /* ─── List rows ─── */
 .user-detail__list {
   display: flex;
