@@ -297,7 +297,7 @@ curl -s -X POST "${API}/addons" \
     \"title\": \"VIP\",
     \"description\": \"Describe qué incluye este add-on...\",
     \"cover_url\": \"${VIP_ADDON_COVER}\",
-    \"price\": 249900,
+    \"price\": 29900,
     \"plan\": \"todos\",
     \"grants_core_months\": 0,
     \"revenuecat_offering_id\": \"addon_vip\",
