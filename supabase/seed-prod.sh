@@ -156,6 +156,19 @@ curl -s -X POST "${API}/content_categories" \
     "sort_order": 1
   }' > /dev/null
 
+curl -s -X POST "${API}/content_categories" \
+  "${REST_HEADERS[@]}" \
+  -H "Prefer: return=minimal,resolution=ignore-duplicates" \
+  -d '{
+    "id": "98f09c22-cf94-4f15-8587-cb5eead43afd",
+    "title": "Eventos Grabados",
+    "slug": "eventos-grabados",
+    "description": "Grabaciones de eventos y lives pasados.",
+    "is_active": true,
+    "status": "active",
+    "sort_order": 2
+  }' > /dev/null
+
 # ── 6. Content items ────────────────────────────────────────────────────────
 echo "Inserting content items..."
 curl -s -X POST "${API}/content_items" \
@@ -186,6 +199,16 @@ curl -s -X POST "${API}/content_item_categories" \
     "id": "0ab4ae09-72e5-4412-b8f0-29a3d6dd5d9e",
     "content_item_id": "f7951a78-e942-4f89-badf-237f86944707",
     "category_id": "98f09c22-cf94-4f15-8587-cb5eead43afc",
+    "position": 0
+  }' > /dev/null
+
+curl -s -X POST "${API}/content_item_categories" \
+  "${REST_HEADERS[@]}" \
+  -H "Prefer: return=minimal,resolution=ignore-duplicates" \
+  -d '{
+    "id": "0ab4ae09-72e5-4412-b8f0-29a3d6dd5d9f",
+    "content_item_id": "f7951a78-e942-4f89-badf-237f86944707",
+    "category_id": "98f09c22-cf94-4f15-8587-cb5eead43afd",
     "position": 0
   }' > /dev/null
 

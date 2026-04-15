@@ -20,14 +20,14 @@
           <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
-      <span v-if="event.isLive && event.isTransmitting" class="watch__badge watch__badge--live">EN VIVO</span>
+      <span v-if="event.showPlayer" class="watch__badge watch__badge--live">EN VIVO</span>
     </div>
 
     <!-- Fullscreen player -->
     <div class="watch__player">
       <!-- Live & Transmitting: Vimeo embed -->
       <iframe
-        v-if="event.isLive && event.isTransmitting && event.vimeoEmbedUrl"
+        v-if="event.showPlayer && event.vimeoEmbedUrl"
         :src="event.vimeoEmbedUrl"
         class="watch__iframe"
         frameborder="0"
@@ -133,20 +133,39 @@ const dayTimeFmt = new Intl.DateTimeFormat('es-MX', {
 
 const event = computed(() => {
   const e = eventData.value
-  if (!e) return { title: '', subtitle: '', isLive: false, isUpcoming: false, isTransmitting: false, vimeoEmbedUrl: null as string | null, dateLabel: '', startAt: null as Date | null, vimeoId: null as string | null }
+  if (!e) {
+    return {
+      title: '',
+      subtitle: '',
+      isLive: false,
+      isUpcoming: false,
+      isEnded: false,
+      isTransmitting: false,
+      showPlayer: false,
+      shouldProbe: false,
+      vimeoEmbedUrl: null as string | null,
+      dateLabel: '',
+      startAt: null as Date | null,
+      vimeoId: null as string | null,
+    }
+  }
   const startDate = new Date(e.start_at)
   const endDate = e.end_at ? new Date(e.end_at) : new Date(startDate.getTime() + (parseInt(e.duration) || 60) * 60 * 1000)
   const liveId = e.vimeo_live_event_id as string | null
-  // isUpcoming: scheduled time hasn't arrived
   const isUpcoming = startDate > now.value
-  // isLive: within the event time window and published (but may not be transmitting yet)
-  const isLive = e.status === 'published' && now.value < endDate && !isUpcoming
+  const isEnded = now.value >= endDate
+  const isScheduledLive = e.status === 'published' && !isUpcoming && !isEnded
+  const showPlayer = Boolean(liveId && isTransmitting.value)
+  const shouldProbe = e.status === 'published' && !isEnded && !showPlayer
   return {
     title: e.title,
     subtitle: e.description ?? '',
-    isLive,
+    isLive: isScheduledLive || showPlayer,
     isUpcoming,
+    isEnded,
     isTransmitting: isTransmitting.value,
+    showPlayer,
+    shouldProbe,
     vimeoEmbedUrl: liveId ? `https://player.vimeo.com/video/${liveId}` : null,
     dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
     startAt: startDate,
@@ -165,17 +184,16 @@ const countdown = computed(() => {
   return { days, hours, minutes, seconds }
 })
 
-// Poll Vimeo status when event is live but not yet transmitting
+// Probe before and during the scheduled start so early Vimeo transmissions appear immediately.
 watch(
   [
     watchStatus,
-    () => event.value.isLive,
+    () => event.value.shouldProbe,
     () => event.value.vimeoId,
-    () => event.value.isTransmitting,
   ],
-  ([status, isLive, vimeoId, transmitting]) => {
+  ([status, shouldProbe, vimeoId]) => {
     // If no vimeo ID yet, poll for event data to get it
-    if (status === 'success' && isLive && !vimeoId) {
+    if (status === 'success' && shouldProbe && !vimeoId) {
       if (!pollTimer) {
         pollTimer = setInterval(refreshWatch, 10_000)
       }
@@ -188,12 +206,10 @@ watch(
       pollTimer = null
     }
 
-    // If live with vimeo ID but not transmitting, poll Vimeo status
-    const shouldPollVimeo = status === 'success' && isLive && vimeoId && !transmitting
+    // If published and not ended, keep probing Vimeo until it reports the live feed is transmitting.
+    const shouldPollVimeo = status === 'success' && shouldProbe && vimeoId
     if (shouldPollVimeo) {
-      // Check immediately
       checkVimeoStatus()
-      // Then poll every 10 seconds
       if (!vimeoStatusTimer) {
         vimeoStatusTimer = setInterval(checkVimeoStatus, 10_000)
       }
@@ -206,17 +222,6 @@ watch(
     }
   },
   { immediate: true },
-)
-
-// Also check when event is upcoming but countdown reaches zero
-watch(
-  () => event.value.isUpcoming,
-  (isUpcoming, wasUpcoming) => {
-    if (wasUpcoming && !isUpcoming) {
-      // Event just became "live" by time, check vimeo status
-      checkVimeoStatus()
-    }
-  },
 )
 </script>
 

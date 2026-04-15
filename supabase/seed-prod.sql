@@ -34,7 +34,9 @@ ON CONFLICT (id) DO NOTHING;
 
 -- ── 3. Content categories ───────────────────────────────────────────────────
 INSERT INTO content_categories (id, title, slug, description, icon_url, is_active, status, sort_order)
-VALUES ('98f09c22-cf94-4f15-8587-cb5eead43afc', 'Meditaciones', 'meditaciones', null, null, true, 'active', 1)
+VALUES
+('98f09c22-cf94-4f15-8587-cb5eead43afc', 'Meditaciones', 'meditaciones', null, null, true, 'active', 1),
+('98f09c22-cf94-4f15-8587-cb5eead43afd', 'Eventos Grabados', 'eventos-grabados', 'Grabaciones de eventos y lives pasados.', null, true, 'active', 2)
 ON CONFLICT (id) DO NOTHING;
 
 -- ── 4. Content items ────────────────────────────────────────────────────────
@@ -60,6 +62,10 @@ INSERT INTO content_items (
 -- ── 5. Content item → category ──────────────────────────────────────────────
 INSERT INTO content_item_categories (id, content_item_id, category_id, position)
 VALUES ('0ab4ae09-72e5-4412-b8f0-29a3d6dd5d9e', 'f7951a78-e942-4f89-badf-237f86944707', '98f09c22-cf94-4f15-8587-cb5eead43afc', 0)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO content_item_categories (id, content_item_id, category_id, position)
+VALUES ('0ab4ae09-72e5-4412-b8f0-29a3d6dd5d9f', 'f7951a78-e942-4f89-badf-237f86944707', '98f09c22-cf94-4f15-8587-cb5eead43afd', 0)
 ON CONFLICT (id) DO NOTHING;
 
 -- ── 6. Content item → objective ─────────────────────────────────────────────

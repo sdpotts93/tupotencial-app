@@ -138,3 +138,4 @@ Append one line per completed task:
 2026-04-14 19:15 America/Mexico_City — Add Eventos to the Cuenta section of the mobile Más screen
 2026-04-14 19:16 America/Mexico_City — Rename the mobile Más screen Configuración entry to Ayuda and describe its terms, privacy, and support links
 2026-04-14 19:17 America/Mexico_City — Change the mobile Más screen Ayuda item icon from settings to help
+2026-04-14 19:49 America/Mexico_City — Probe mobile live events before their scheduled start and seed the eventos-grabados recorded-events category in production seeds
