@@ -27,6 +27,23 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+async function waitForRegisterBootstrap(
+  uid: string,
+  getCurrentUserId: () => string | undefined,
+  timeoutMs = 2000,
+) {
+  const start = Date.now()
+
+  while (
+    authMutationMode.value === 'register'
+    && pendingProfileBootstrapUserId.value === uid
+    && getCurrentUserId() !== uid
+    && Date.now() - start < timeoutMs
+  ) {
+    await sleep(50)
+  }
+}
+
 async function hydrateProfileWithRetry(
   fetchProfile: (uid: string) => Promise<boolean>,
   uid: string,
@@ -226,6 +243,10 @@ export function useAuth() {
       const uid = u.id ?? (u as any).sub as string | undefined
       if (!uid) return // guard against incomplete user object
       if (user.value?.id === uid) return // already loaded
+      if (authMutationMode.value === 'register' && pendingProfileBootstrapUserId.value === uid) {
+        await waitForRegisterBootstrap(uid, () => user.value?.id)
+        if (user.value?.id === uid) return
+      }
       const ok = await loadProfile(uid, { retryOnBootstrap: true })
       if (!ok) {
         // No profile row for this user — stale session after DB reset
@@ -272,11 +293,23 @@ export function useAuth() {
       })
       if (profileError) throw profileError
 
-      // Load profile into state so middleware sees the user as logged in.
-      // Retry briefly because auth state change and profile insert can race.
-      const hydrated = await hydrateProfileWithRetry(fetchProfile, data.user.id, 5, 200)
-      if (!hydrated) {
-        throw new Error('No se pudo cargar el perfil del nuevo usuario.')
+      user.value = {
+        id: data.user.id,
+        email: data.user.email?.trim().toLowerCase() ?? '',
+        display_name: '',
+        avatar_url: null,
+        community_segment: null,
+        is_subscriber: false,
+        subscription_status: null,
+        entitlements: [],
+        is_admin: false,
+      }
+
+      try {
+        const { login: rcLogin } = useRevenueCat()
+        await rcLogin(data.user.id, data.user.email ?? null)
+      } catch {
+        // RevenueCat identity can safely lag behind initial signup state.
       }
     } finally {
       authMutationMode.value = 'idle'

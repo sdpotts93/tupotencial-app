@@ -145,4 +145,5 @@ Append one line per completed task:
 2026-04-14 20:51 America/Mexico_City — Deduplicate mobile auth profile hydration so watcher, middleware, login, and onboarding share one in-flight load instead of repeated parallel Supabase reads
 2026-04-14 20:53 America/Mexico_City — Remove redundant account-page refreshProfile loops from mobile Más and Beneficios, keeping only auth bootstrap and purchase-sync refreshes
 2026-04-14 20:55 America/Mexico_City — Reduce mobile subscription page auth churn by separating normal subscription refreshes from purchase-triggered profile sync
+2026-04-14 21:01 America/Mexico_City — Deduplicate signup hydration by routing new-user profile bootstrap through the shared auth load pipeline instead of a second direct fetchProfile retry
 2026-04-14 20:32 America/Mexico_City — Show live event times in the user's local timezone and keep admin event scheduling explicit in CDMX while storing UTC
