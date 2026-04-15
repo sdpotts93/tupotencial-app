@@ -32,12 +32,12 @@
     </template>
     <div v-else class="benefit">
       <!-- Media (cover image or icon fallback) -->
-      <div class="benefit__media" :style="{ background: benefit.bgGradient }">
+      <div ref="heroEl" class="benefit__media" :style="{ background: benefit.bgGradient }">
         <img v-if="benefit.cover_url" :src="benefit.cover_url" :alt="benefit.title" class="benefit__cover" />
         <div v-else class="benefit__icon" :style="{ color: benefit.color }">
           <Icon :name="benefit.icon" size="64" />
         </div>
-        <div class="benefit__nav safe-top">
+        <div :class="['benefit__nav safe-top', { 'benefit__nav--scrolled': heroScrolled }]">
           <button class="benefit__back" aria-label="Volver" @click="$router.back()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"/>
@@ -81,6 +81,9 @@ definePageMeta({
 const route = useRoute()
 const id = route.params.id as string
 const client = useSupabaseClient()
+
+const heroEl = ref<HTMLElement | null>(null)
+const heroScrolled = useHeroScrolled(heroEl)
 
 const { data: benefitData, status: benefitStatus, refresh: refreshBenefit } = useAsyncData(`benefit-${id}`, async () => {
   const { data } = await client.from('benefits').select('*').eq('id', id).single()
@@ -146,12 +149,19 @@ function handleOpen() {
 
 /* ─── Nav (mobile back) ─── */
 .benefit__nav {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: var(--z-sticky);
   padding: var(--space-3) var(--space-4);
+  transition: background var(--transition-fast), backdrop-filter var(--transition-fast);
+}
+
+.benefit__nav--scrolled {
+  background: rgba(var(--tint-inverse-rgb), 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .benefit__back {

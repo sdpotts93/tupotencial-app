@@ -100,6 +100,29 @@ img, video {
   background: var(--color-white);
 }
 
+/* Sticky page header for detail/sub-pages with a back button (mobile only).
+   Mirrors the chat__header spacing (space-3 / space-5) with a translucent
+   blurred background. Negative horizontal margins break out of .screen__content
+   padding so the blur covers edge-to-edge. !important overrides scoped page
+   styles like position: relative. */
+@media (max-width: 1023px) {
+  .page-header-sticky {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: var(--z-sticky);
+    background: rgba(var(--tint-inverse-rgb), 0.1) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    margin-top: calc(var(--space-4) * -1) !important;
+    margin-left: calc(var(--space-4) * -1) !important;
+    margin-right: calc(var(--space-4) * -1) !important;
+    padding-top: calc(var(--space-3) + var(--safe-area-top)) !important;
+    padding-right: var(--space-5) !important;
+    padding-bottom: var(--space-3) !important;
+    padding-left: var(--space-5) !important;
+  }
+}
+
 .screen__content {
   flex: 1;
   padding: var(--space-4);

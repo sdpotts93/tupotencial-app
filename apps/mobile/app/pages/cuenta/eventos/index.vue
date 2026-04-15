@@ -1,7 +1,7 @@
 <template>
   <div class="screen">
     <div class="screen__content">
-      <header class="events__header">
+      <header class="events__header page-header-sticky">
         <button class="events__back" aria-label="Volver" @click="$router.back()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>

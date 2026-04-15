@@ -2,7 +2,7 @@
   <div class="screen">
     <div class="screen__content">
       <!-- Standard header -->
-      <header class="profile__header">
+      <header class="profile__header page-header-sticky">
         <button class="profile__back" aria-label="Volver" @click="$router.back()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>

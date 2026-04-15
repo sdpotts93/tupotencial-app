@@ -33,10 +33,10 @@
     <template v-else>
     <div class="detail">
       <!-- Media hero (video/audio show play button, article/link show static image) -->
-      <div class="detail__media">
+      <div ref="heroEl" class="detail__media">
         <img v-if="content.thumbnail" :src="content.thumbnail" alt="" class="detail__img" />
         <div class="detail__overlay" />
-        <div class="detail__nav safe-top">
+        <div :class="['detail__nav safe-top', { 'detail__nav--scrolled': heroScrolled }]">
           <button class="detail__back" aria-label="Volver" @click="$router.back()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"/>
@@ -99,6 +99,9 @@ definePageMeta({
 const route = useRoute()
 const id = route.params.id as string
 const client = useSupabaseClient()
+
+const heroEl = ref<HTMLElement | null>(null)
+const heroScrolled = useHeroScrolled(heroEl)
 
 function formatDuration(seconds: number | null) {
   if (!seconds) return null
@@ -208,12 +211,19 @@ onMounted(() => {
 
 /* ─── Nav (mobile back) ─── */
 .detail__nav {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: var(--z-sticky);
   padding: var(--space-3) var(--space-4);
+  transition: background var(--transition-fast), backdrop-filter var(--transition-fast);
+}
+
+.detail__nav--scrolled {
+  background: rgba(var(--tint-inverse-rgb), 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .detail__back {

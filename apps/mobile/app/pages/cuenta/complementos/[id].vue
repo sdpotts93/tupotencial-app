@@ -32,10 +32,10 @@
     </template>
     <div v-else class="addon">
       <!-- Media -->
-      <div class="addon__media">
+      <div ref="heroEl" class="addon__media">
         <img :src="addon.img" alt="" class="addon__img" />
         <div class="addon__overlay" />
-        <div class="addon__nav safe-top">
+        <div :class="['addon__nav safe-top', { 'addon__nav--scrolled': heroScrolled }]">
           <button class="addon__back" aria-label="Volver" @click="$router.back()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"/>
@@ -113,6 +113,9 @@ const { user, refreshProfile, hasEntitlement } = useAuth()
 const { isNative } = useNativePlatform()
 const { purchaseAddon } = useRevenueCat()
 const purchasing = ref(false)
+
+const heroEl = ref<HTMLElement | null>(null)
+const heroScrolled = useHeroScrolled(heroEl)
 
 function formatPrice(cents: number) {
   return cents > 0 ? `$${(cents / 100).toLocaleString('es-MX')} MXN` : 'Gratis'
@@ -225,12 +228,19 @@ async function handlePurchase() {
 
 /* ─── Nav (mobile back) ─── */
 .addon__nav {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: var(--z-sticky);
   padding: var(--space-3) var(--space-4);
+  transition: background var(--transition-fast), backdrop-filter var(--transition-fast);
+}
+
+.addon__nav--scrolled {
+  background: rgba(var(--tint-inverse-rgb), 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .addon__back {
