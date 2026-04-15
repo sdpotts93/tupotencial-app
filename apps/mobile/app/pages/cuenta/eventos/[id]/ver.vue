@@ -20,14 +20,14 @@
           <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
-      <span v-if="event.isLive" class="watch__badge watch__badge--live">EN VIVO</span>
+      <span v-if="event.isLive && event.isTransmitting" class="watch__badge watch__badge--live">EN VIVO</span>
     </div>
 
     <!-- Fullscreen player -->
     <div class="watch__player">
-      <!-- Live: Vimeo embed -->
+      <!-- Live & Transmitting: Vimeo embed -->
       <iframe
-        v-if="event.isLive && event.vimeoEmbedUrl"
+        v-if="event.isLive && event.isTransmitting && event.vimeoEmbedUrl"
         :src="event.vimeoEmbedUrl"
         class="watch__iframe"
         frameborder="0"
@@ -62,13 +62,17 @@
         </div>
         <p class="watch__countdown-date">{{ event.dateLabel }}</p>
       </div>
-      <!-- Waiting for stream / no video -->
-      <div v-else class="watch__placeholder">
-        <svg v-if="event.isLive" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="watch__spinner">
+      <!-- Live but waiting for transmission -->
+      <div v-else-if="event.isLive && !event.isTransmitting" class="watch__placeholder">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="watch__spinner">
           <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
         </svg>
-        <svg v-else width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-        <p>{{ event.isLive ? 'Esperando transmisión...' : 'Video no disponible' }}</p>
+        <p>Esperando transmisión...</p>
+      </div>
+      <!-- No video available -->
+      <div v-else class="watch__placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        <p>Video no disponible</p>
       </div>
     </div>
   </div>
@@ -91,8 +95,23 @@ const { data: eventData, status: watchStatus, refresh: refreshWatch } = useAsync
 }, { lazy: true })
 
 const now = ref(new Date())
+const isTransmitting = ref(false)
 let ticker: ReturnType<typeof setInterval> | null = null
 let pollTimer: ReturnType<typeof setInterval> | null = null
+let vimeoStatusTimer: ReturnType<typeof setInterval> | null = null
+
+async function checkVimeoStatus() {
+  const vimeoId = eventData.value?.vimeo_live_event_id
+  if (!vimeoId) return
+
+  try {
+    const res = await $fetch<{ is_transmitting: boolean }>(`/api/vimeo/live-status?id=${vimeoId}`)
+    isTransmitting.value = res.is_transmitting
+  }
+  catch {
+    // Ignore errors, keep previous state
+  }
+}
 
 onMounted(() => {
   ticker = setInterval(() => { now.value = new Date() }, 1000)
@@ -100,6 +119,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (ticker) clearInterval(ticker)
   if (pollTimer) clearInterval(pollTimer)
+  if (vimeoStatusTimer) clearInterval(vimeoStatusTimer)
 })
 
 const dayTimeFmt = new Intl.DateTimeFormat('es-MX', {
@@ -113,20 +133,24 @@ const dayTimeFmt = new Intl.DateTimeFormat('es-MX', {
 
 const event = computed(() => {
   const e = eventData.value
-  if (!e) return { title: '', subtitle: '', isLive: false, isUpcoming: false, vimeoEmbedUrl: null as string | null, dateLabel: '', startAt: null as Date | null }
+  if (!e) return { title: '', subtitle: '', isLive: false, isUpcoming: false, isTransmitting: false, vimeoEmbedUrl: null as string | null, dateLabel: '', startAt: null as Date | null, vimeoId: null as string | null }
   const startDate = new Date(e.start_at)
   const endDate = e.end_at ? new Date(e.end_at) : new Date(startDate.getTime() + (parseInt(e.duration) || 60) * 60 * 1000)
   const liveId = e.vimeo_live_event_id as string | null
+  // isUpcoming: scheduled time hasn't arrived
   const isUpcoming = startDate > now.value
-  const isLive = !isUpcoming && now.value < endDate && e.status === 'published'
+  // isLive: within the event time window and published (but may not be transmitting yet)
+  const isLive = e.status === 'published' && now.value < endDate && !isUpcoming
   return {
     title: e.title,
     subtitle: e.description ?? '',
     isLive,
     isUpcoming,
+    isTransmitting: isTransmitting.value,
     vimeoEmbedUrl: liveId ? `https://vimeo.com/event/${liveId}/embed/interaction` : null,
     dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
     startAt: startDate,
+    vimeoId: liveId,
   }
 })
 
@@ -141,37 +165,58 @@ const countdown = computed(() => {
   return { days, hours, minutes, seconds }
 })
 
-// Once the event time arrives, poll every 30s to pick up vimeo_live_event_id
-// in case the admin sets it right before going live or after viewers are already on the page.
+// Poll Vimeo status when event is live but not yet transmitting
 watch(
   [
     watchStatus,
-    () => event.value.isUpcoming,
-    () => event.value.vimeoEmbedUrl,
+    () => event.value.isLive,
+    () => event.value.vimeoId,
+    () => event.value.isTransmitting,
   ],
-  ([status, isUpcoming, vimeoEmbedUrl]) => {
-    const shouldPoll = status === 'success' && !isUpcoming && !vimeoEmbedUrl
-
-    if (!shouldPoll) {
-      if (pollTimer) {
-        clearInterval(pollTimer)
-        pollTimer = null
+  ([status, isLive, vimeoId, transmitting]) => {
+    // If no vimeo ID yet, poll for event data to get it
+    if (status === 'success' && isLive && !vimeoId) {
+      if (!pollTimer) {
+        pollTimer = setInterval(refreshWatch, 10_000)
       }
       return
     }
 
-    if (pollTimer) return
+    // Clear event data poll if we have vimeo ID
+    if (pollTimer) {
+      clearInterval(pollTimer)
+      pollTimer = null
+    }
 
-    pollTimer = setInterval(() => {
-      if (event.value.vimeoEmbedUrl) {
-        clearInterval(pollTimer!)
-        pollTimer = null
-        return
+    // If live with vimeo ID but not transmitting, poll Vimeo status
+    const shouldPollVimeo = status === 'success' && isLive && vimeoId && !transmitting
+    if (shouldPollVimeo) {
+      // Check immediately
+      checkVimeoStatus()
+      // Then poll every 10 seconds
+      if (!vimeoStatusTimer) {
+        vimeoStatusTimer = setInterval(checkVimeoStatus, 10_000)
       }
-      refreshWatch()
-    }, 30_000)
+    }
+    else {
+      if (vimeoStatusTimer) {
+        clearInterval(vimeoStatusTimer)
+        vimeoStatusTimer = null
+      }
+    }
   },
   { immediate: true },
+)
+
+// Also check when event is upcoming but countdown reaches zero
+watch(
+  () => event.value.isUpcoming,
+  (isUpcoming, wasUpcoming) => {
+    if (wasUpcoming && !isUpcoming) {
+      // Event just became "live" by time, check vimeo status
+      checkVimeoStatus()
+    }
+  },
 )
 </script>
 
@@ -291,19 +336,19 @@ watch(
 .watch__countdown-timer {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .watch__countdown-unit {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 52px;
+  min-width: 44px;
 }
 
 .watch__countdown-value {
   font-family: var(--font-eyebrow);
-  font-size: 40px;
+  font-size: clamp(24px, 8vw, 40px);
   font-weight: var(--weight-bold);
   color: var(--color-white);
   line-height: 1;
@@ -319,11 +364,20 @@ watch(
 }
 
 .watch__countdown-sep {
-  font-size: 32px;
+  font-size: clamp(20px, 6vw, 32px);
   font-weight: var(--weight-bold);
   color: rgba(var(--tint-inverse-rgb), 0.3);
   line-height: 1;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 360px) {
+  .watch__countdown-timer {
+    gap: var(--space-1);
+  }
+  .watch__countdown-unit {
+    min-width: 36px;
+  }
 }
 
 .watch__countdown-date {

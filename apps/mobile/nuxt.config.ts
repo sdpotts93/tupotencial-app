@@ -70,6 +70,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     openaiApiKey: process.env.OPENAI_API_KEY,
+    vimeoToken: process.env.NUXT_VIMEO_TOKEN,
     public: {
       isNative: isCapacitor,
       revenueCatApiKey: process.env.REVENUECAT_API_KEY || '',
