@@ -335,6 +335,7 @@ interface VimeoVideo {
   description: string | null
   duration_seconds: number
   thumbnail: string | null
+  is_past_event_recording: boolean
 }
 
 const showVimeoModal = ref(false)
@@ -343,6 +344,7 @@ const vimeoError = ref('')
 const vimeoImporting = ref(false)
 const vimeoVideos = ref<VimeoVideo[]>([])
 const selectedVimeoIds = reactive(new Set<string>())
+const EVENT_RECORDINGS_SLUG = 'eventos-grabados'
 
 const newVimeoVideos = computed(() => vimeoVideos.value)
 
@@ -393,8 +395,31 @@ async function importSelectedVideos(status: 'draft' | 'published') {
       status,
       published_at: status === 'published' ? now : null,
     }))
-    const { error } = await client.from('content_items').insert(payloads)
+    const { data: insertedRows, error } = await client.from('content_items').insert(payloads).select('id')
     if (error) throw error
+
+    const recordedEventSelections = selected
+      .map((video, index) => ({ video, row: insertedRows?.[index] }))
+      .filter((entry): entry is { video: VimeoVideo; row: { id: string } } => Boolean(entry.video.is_past_event_recording && entry.row?.id))
+
+    if (recordedEventSelections.length) {
+      const { data: recordingCategory } = await client
+        .from('content_categories')
+        .select('id')
+        .eq('slug', EVENT_RECORDINGS_SLUG)
+        .maybeSingle()
+
+      if (recordingCategory?.id) {
+        const { error: categoryError } = await client.from('content_item_categories').insert(
+          recordedEventSelections.map(({ row }) => ({
+            content_item_id: row.id,
+            category_id: recordingCategory.id,
+          })),
+        )
+        if (categoryError) throw categoryError
+      }
+    }
+
     const label = status === 'published' ? 'publicados' : 'importados como borrador'
     toast.show(`${selected.length} video(s) ${label}`, 'success')
     showVimeoModal.value = false

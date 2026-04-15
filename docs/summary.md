@@ -133,3 +133,4 @@ Append one line per completed task:
 2026-04-14 12:09 America/Mexico_City — Seed a default VIP add-on in seed-prod.sh using the admin form placeholder values and a default cover image
 2026-04-14 13:18 America/Mexico_City — Use per-field Hoy badge fallback for share capture titles and subtitles instead of reusing the featured action title
 2026-04-14 13:31 America/Mexico_City — Resolve Hoy day-plan fields independently from defaults so blank day values fall back per field, including action refs and progreso badge copy
+2026-04-14 19:04 America/Mexico_City — Restrict admin event imports to non-finished Vimeo lives and auto-assign imported past live recordings to the eventos-grabados category in admin content

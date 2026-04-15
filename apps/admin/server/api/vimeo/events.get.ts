@@ -7,6 +7,7 @@ interface VimeoVideo {
   description: string | null
   duration: number
   type: string
+  status: string
   pictures: { sizes: { link: string; width: number }[] }
   created_time: string
   link: string
@@ -54,12 +55,14 @@ export default defineEventHandler(async (event) => {
 
   while (!done) {
     const res = await $fetch<VimeoResponse>(
-      `https://api.vimeo.com/me/videos?fields=uri,name,description,duration,type,pictures.sizes,created_time,link&filter=live&per_page=${perPage}&page=${page}&sort=date&direction=desc`,
+      `https://api.vimeo.com/me/videos?fields=uri,name,description,duration,type,status,pictures.sizes,created_time,link&filter=live&per_page=${perPage}&page=${page}&sort=date&direction=desc`,
       { headers: { Authorization: `Bearer ${token}` } },
     )
 
     for (const v of res.data) {
       if (v.type !== 'live') continue
+      // Ended live streams with an exported recording belong in /admin/contenido.
+      if (v.status === 'available' && v.duration > 0) continue
       const vimeoId = v.uri.replace('/videos/', '')
       if (existingIds.has(vimeoId)) {
         done = true

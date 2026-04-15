@@ -20,6 +20,15 @@ interface VimeoResponse {
   data: VimeoVideo[]
 }
 
+interface ImportableVideo {
+  vimeo_id: string
+  title: string
+  description: string | null
+  duration_seconds: number
+  thumbnail: string | null
+  is_past_event_recording: boolean
+}
+
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event)
   const uid = user?.sub
@@ -47,9 +56,19 @@ export default defineEventHandler(async (event) => {
     .not('vimeo_id', 'is', null)
 
   const existingIds = new Set((existing ?? []).map((r: any) => r.vimeo_id))
+  const nowIso = new Date().toISOString()
+
+  const { data: pastEventRows } = await serviceClient
+    .from('events')
+    .select('vimeo_live_event_id')
+    .not('vimeo_live_event_id', 'is', null)
+    .not('start_at', 'is', null)
+    .lte('start_at', nowIso)
+
+  const pastEventIds = new Set((pastEventRows ?? []).map((row: any) => row.vimeo_live_event_id))
 
   // Fetch from Vimeo sorted by date desc — stop as soon as we hit a known video
-  const newVideos: { vimeo_id: string; title: string; description: string | null; duration_seconds: number; thumbnail: string | null }[] = []
+  const newVideos: ImportableVideo[] = []
   let page = 1
   const perPage = 100
   let done = false
@@ -78,6 +97,7 @@ export default defineEventHandler(async (event) => {
         description: v.description,
         duration_seconds: v.duration,
         thumbnail: thumb?.link ?? null,
+        is_past_event_recording: pastEventIds.has(vimeoId),
       })
     }
 

@@ -66,7 +66,7 @@
       </div>
       <template v-else>
         <p v-if="vimeoEvents.length === 0" class="vimeo-import__empty">
-          Todos los eventos en vivo de Vimeo ya han sido importados.
+          No hay lives próximos por importar. Los lives terminados se importan desde Contenido.
         </p>
         <div v-else class="vimeo-import__list">
           <label
