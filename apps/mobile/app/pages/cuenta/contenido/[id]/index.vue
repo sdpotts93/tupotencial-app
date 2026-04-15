@@ -160,7 +160,10 @@ function openLink() {
 // Flag article as viewed for Hoy acción auto-complete (video/audio flagged on reproducir page)
 onMounted(() => {
   if (content.value.type === 'article') {
-    const today = new Date().toISOString().slice(0, 10)
+    // Use local date — Hoy reads with the user's local day, so UTC would
+    // mismatch for evening hours west of UTC.
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
     localStorage.setItem(`hoy-content-done-${today}`, id)
   }
 
