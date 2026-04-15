@@ -250,13 +250,21 @@ async function saveObjective() {
 
 const confirm = useConfirm()
 
+function getDeleteErrorMessage(error: { code?: string; message?: string; details?: string | null } | null) {
+  if (!error) return 'No se pudo eliminar el objetivo. Intenta de nuevo.'
+  if (error.code === '23503') return 'No se puede eliminar el objetivo porque está asociado a contenido existente.'
+  return error.details || error.message || 'No se pudo eliminar el objetivo. Intenta de nuevo.'
+}
+
 async function handleDelete(row: Record<string, any>) {
   if (await confirm({ message: `¿Seguro que deseas eliminar "${row.name}"?` })) {
     try {
-      await client.from('content_objectives').delete().eq('id', row.id)
+      const { error } = await client.from('content_objectives').delete().eq('id', row.id)
+      if (error) throw error
       await refresh()
-    } catch {
-      toast.show('Error al eliminar', 'error')
+      toast.show('Objetivo eliminado', 'success')
+    } catch (error: any) {
+      toast.show(getDeleteErrorMessage(error), 'error')
     }
   }
 }
