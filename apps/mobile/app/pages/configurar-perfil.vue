@@ -144,9 +144,12 @@ async function handleSave() {
   if (!displayName.value.trim()) { error.value = 'Ingresa tu nombre'; return }
 
   loading.value = true
-  await updateProfile({ display_name: displayName.value.trim() })
-  loading.value = false
-  navigateTo('/cuenta/bienvenida/segmento')
+  try {
+    await updateProfile({ display_name: displayName.value.trim() })
+  } finally {
+    loading.value = false
+  }
+  await navigateTo('/cuenta/bienvenida/segmento')
 }
 </script>
 

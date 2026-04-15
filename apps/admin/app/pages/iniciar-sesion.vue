@@ -87,7 +87,7 @@ const errors = reactive({ email: '', password: '' })
 
 // Redirect if already authenticated
 if (isAuthenticated.value) {
-  navigateTo('/admin')
+  await navigateTo('/admin')
 }
 
 async function handleLogin() {
@@ -104,17 +104,20 @@ async function handleLogin() {
     return
   }
 
-  const success = await login(email.value, password.value)
-  if (success) {
-    // Wait for auth cookies to propagate before navigating.
-    // The supabase.client.js page:start hook calls getClaims() on navigation —
-    // if cookies aren't written yet, it nulls out supaUser and triggers logout.
-    await new Promise(r => setTimeout(r, 300))
-    navigateTo('/admin')
-  } else {
-    loginError.value = 'Credenciales incorrectas'
-    toast.show('Credenciales incorrectas', 'error')
+  const result = await login(email.value, password.value)
+  if (result.ok) {
+    // login() already waited for supaUser to hydrate, so navigating now is safe.
+    await navigateTo('/admin')
+    return
   }
+
+  const msg = result.reason === 'not_admin'
+    ? 'Tu cuenta no tiene acceso al panel de administración. Contacta al administrador.'
+    : result.reason === 'invalid_credentials'
+      ? 'Credenciales incorrectas'
+      : 'No pudimos iniciar sesión. Intenta de nuevo.'
+  loginError.value = msg
+  toast.show(msg, 'error')
 }
 </script>
 

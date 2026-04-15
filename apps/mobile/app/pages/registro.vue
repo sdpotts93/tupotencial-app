@@ -142,9 +142,16 @@ async function handleRegister() {
   loading.value = true
   try {
     await register(email.value, password.value)
-    navigateTo('/configurar-perfil')
+    await navigateTo('/configurar-perfil')
   } catch (err: any) {
-    const msg = err?.code === 'user_already_exists' ? 'Tu usuario ya está registrado' : 'Error al crear la cuenta'
+    let msg: string
+    if (err?.code === 'user_already_exists') {
+      msg = 'Tu usuario ya está registrado'
+    } else if (err?.code === 'email_confirmation_required') {
+      msg = err.message
+    } else {
+      msg = 'Error al crear la cuenta'
+    }
     errors.email = msg
     toast.show(msg, 'error')
   } finally {

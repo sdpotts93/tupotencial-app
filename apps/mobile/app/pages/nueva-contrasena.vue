@@ -72,13 +72,23 @@ const loading = ref(false)
 const done = ref(false)
 const errors = reactive<{ password?: string; confirm?: string }>({})
 
-// Listen for the PASSWORD_RECOVERY event from the email link token exchange
+// Listen for the PASSWORD_RECOVERY event from the email link token exchange.
+// Hold onto the subscription so we can unsubscribe on unmount — otherwise
+// every mount of this page stacks another listener on the shared client.
+let authSubscription: { unsubscribe: () => void } | null = null
+
 onMounted(() => {
-  client.auth.onAuthStateChange((event) => {
+  const { data } = client.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') {
       // Session is set — the form is ready to use
     }
   })
+  authSubscription = data.subscription
+})
+
+onBeforeUnmount(() => {
+  authSubscription?.unsubscribe()
+  authSubscription = null
 })
 
 async function handleSubmit() {

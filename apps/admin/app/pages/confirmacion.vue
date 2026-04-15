@@ -39,8 +39,8 @@ const client = useSupabaseClient()
 const status = ref<'loading' | 'error'>('loading')
 const errorMessage = ref('El enlace no es válido o ya expiró.')
 
-function goToPasswordReset() {
-  navigateTo('/nueva-contrasena', { replace: true })
+async function goToPasswordReset() {
+  await navigateTo('/nueva-contrasena', { replace: true })
 }
 
 async function establishSessionFromLink() {
@@ -92,7 +92,7 @@ async function establishSessionFromLink() {
 onMounted(async () => {
   try {
     await establishSessionFromLink()
-    goToPasswordReset()
+    await goToPasswordReset()
   } catch (error: any) {
     status.value = 'error'
     errorMessage.value = error?.message || 'El enlace no es válido o ya expiró.'

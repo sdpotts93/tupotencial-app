@@ -21,7 +21,14 @@ const watcherRegistered = ref(false)
 const authMutationMode = ref<'idle' | 'register' | 'logout'>('idle')
 const pendingProfileBootstrapUserId = ref<string | null>(null)
 const activeProfileLoadUid = ref<string | null>(null)
-let activeProfileLoadPromise: Promise<boolean> | null = null
+
+// Result of a profile load attempt:
+//  - 'loaded'  → profile is in state
+//  - 'missing' → DB confirmed there is no profile row for this uid
+//  - 'error'   → transient failure (network/RLS/etc.). Retry later; do NOT sign out.
+type ProfileLoadResult = 'loaded' | 'missing' | 'error'
+
+let activeProfileLoadPromise: Promise<ProfileLoadResult> | null = null
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -45,21 +52,23 @@ async function waitForRegisterBootstrap(
 }
 
 async function hydrateProfileWithRetry(
-  fetchProfile: (uid: string) => Promise<boolean>,
+  fetchProfile: (uid: string) => Promise<ProfileLoadResult>,
   uid: string,
   attempts = 4,
   delayMs = 150,
-) {
+): Promise<ProfileLoadResult> {
+  let last: ProfileLoadResult = 'error'
   for (let attempt = 0; attempt < attempts; attempt++) {
-    const ok = await fetchProfile(uid)
-    if (ok) return true
-
+    last = await fetchProfile(uid)
+    if (last === 'loaded') return last
+    // On 'missing' during bootstrap the trigger may not have fired yet —
+    // keep retrying. On 'error' we also retry (transient).
     if (attempt < attempts - 1) {
       await sleep(delayMs)
     }
   }
 
-  return false
+  return last
 }
 
 function clearClientSessionArtifacts() {
@@ -108,14 +117,14 @@ export function useAuth() {
   const user = useState<AuthUser | null>('auth-user', () => null)
   const loading = useState('auth-loading', () => false)
 
-  async function fetchProfile(uid: string): Promise<boolean> {
+  async function fetchProfile(uid: string): Promise<ProfileLoadResult> {
     // Ensure the client has a fresh access token before querying.
     // On SSR, the server plugin refreshes the token in a separate client
     // instance, but useSupabaseClient() may still hold an expired JWT.
     const { data: { session } } = await client.auth.getSession()
     const sessionUid = session?.user?.id
-    if (authMutationMode.value === 'logout') return false
-    if (sessionUid && sessionUid !== uid) return false
+    if (authMutationMode.value === 'logout') return 'error'
+    if (sessionUid && sessionUid !== uid) return 'error'
 
     const normalizedEmail = supaUser.value?.email?.trim().toLowerCase() ?? null
     const [profileRes, subRes, entRes, adminRes, effectiveSubscriberRes] = await Promise.all([
@@ -125,7 +134,10 @@ export function useAuth() {
       client.from('admin_users').select('role').eq('user_id', uid).maybeSingle(),
       client.rpc('user_is_subscriber'),
     ])
-    if (profileRes.error || !profileRes.data) return false
+    // Distinguish transient failures from a genuinely absent profile.
+    // Only 'missing' (confirmed no row) justifies signing the user out.
+    if (profileRes.error) return 'error'
+    if (!profileRes.data) return 'missing'
     const hasActiveSubscription = subRes.data?.status === 'active' || subRes.data?.status === 'trialing'
     let isSubscriber = effectiveSubscriberRes.error
       ? hasActiveSubscription
@@ -168,39 +180,39 @@ export function useAuth() {
       entitlements,
       is_admin: !!adminRes.data,
     }
-    return true
+    return 'loaded'
   }
 
-  async function loadProfile(uid: string, options?: { retryOnBootstrap?: boolean }): Promise<boolean> {
+  async function loadProfile(uid: string, options?: { retryOnBootstrap?: boolean }): Promise<ProfileLoadResult> {
     if (activeProfileLoadPromise) {
       if (activeProfileLoadUid.value === uid) {
         return await activeProfileLoadPromise
       }
 
-      await activeProfileLoadPromise.catch(() => false)
+      await activeProfileLoadPromise.catch(() => 'error' as ProfileLoadResult)
 
       if (user.value?.id === uid) {
-        return true
+        return 'loaded'
       }
     }
 
     loading.value = true
     activeProfileLoadUid.value = uid
 
-    const task = (async () => {
-      let ok = await fetchProfile(uid)
+    const task = (async (): Promise<ProfileLoadResult> => {
+      let result = await fetchProfile(uid)
 
-      if (!ok && options?.retryOnBootstrap) {
+      if (result !== 'loaded' && options?.retryOnBootstrap) {
         const registerBootstrapPending =
           authMutationMode.value === 'register'
           || pendingProfileBootstrapUserId.value === uid
 
         if (registerBootstrapPending) {
-          ok = await hydrateProfileWithRetry(fetchProfile, uid, 6, 200)
+          result = await hydrateProfileWithRetry(fetchProfile, uid, 6, 200)
         }
       }
 
-      return ok
+      return result
     })()
 
     activeProfileLoadPromise = task.finally(() => {
@@ -221,7 +233,8 @@ export function useAuth() {
       return false
     }
 
-    return await loadProfile(uid, { retryOnBootstrap: true })
+    const result = await loadProfile(uid, { retryOnBootstrap: true })
+    return result === 'loaded'
   }
 
   // Register the supaUser watcher ONCE across all useAuth() calls.
@@ -247,14 +260,16 @@ export function useAuth() {
         await waitForRegisterBootstrap(uid, () => user.value?.id)
         if (user.value?.id === uid) return
       }
-      const ok = await loadProfile(uid, { retryOnBootstrap: true })
-      if (!ok) {
-        // No profile row for this user — stale session after DB reset
-        // or deleted account. Sign out to force a clean login.
+      const result = await loadProfile(uid, { retryOnBootstrap: true })
+      if (result === 'missing') {
+        // DB confirmed there is no profile row for this user — stale session
+        // after DB reset or deleted account. Sign out to force a clean login.
         await client.auth.signOut()
         user.value = null
-        navigateTo('/iniciar-sesion')
+        await navigateTo('/iniciar-sesion')
       }
+      // result === 'error' → transient; leave user state as-is, the next
+      // middleware pass or refreshProfile() call will retry.
     }, { immediate: true })
   }
 
@@ -266,9 +281,30 @@ export function useAuth() {
     return user.value?.entitlements.includes(key) ?? false
   }
 
+  // After signInWithPassword, @nuxtjs/supabase's plugin hydrates supaUser
+  // asynchronously via getClaims(). Navigating before that completes makes
+  // the next page:start hook see empty claims and bounce to /iniciar-sesion.
+  // Wait for supaUser to match the authenticated uid before continuing.
+  async function waitForSupaUser(targetUid: string, timeoutMs = 3000): Promise<boolean> {
+    const currentUid = () => supaUser.value?.id ?? (supaUser.value as any)?.sub as string | undefined
+    if (currentUid() === targetUid) return true
+
+    const start = Date.now()
+    while (Date.now() - start < timeoutMs) {
+      await sleep(50)
+      if (currentUid() === targetUid) return true
+    }
+    return false
+  }
+
   async function login(email: string, password: string) {
-    const { error } = await client.auth.signInWithPassword({ email, password })
+    const { data, error } = await client.auth.signInWithPassword({ email, password })
     if (error) throw error
+    if (data.user) {
+      // Block until the @nuxtjs/supabase plugin finishes hydrating supaUser
+      // so the caller can safely navigate without racing middleware.
+      await waitForSupaUser(data.user.id)
+    }
   }
 
   async function register(email: string, password: string) {
@@ -282,16 +318,24 @@ export function useAuth() {
         throw new Error('Supabase no devolvió el usuario recién creado.')
       }
 
+      // If the Supabase project requires email confirmation, signUp returns
+      // no session. We can't proceed with the signed-in flow and the user
+      // needs to confirm before logging in. Surface a typed error so the
+      // caller can show the right message.
+      if (!data.session) {
+        throw Object.assign(
+          new Error('Te enviamos un correo para confirmar tu cuenta. Ábrelo antes de iniciar sesión.'),
+          { code: 'email_confirmation_required' },
+        )
+      }
+
       pendingProfileBootstrapUserId.value = data.user.id
 
-      const { error: profileError } = await client.from('profiles').upsert({
-        id: data.user.id,
-        display_name: '',
-        email: data.user.email?.trim().toLowerCase() ?? null,
-      }, {
-        onConflict: 'id',
-      })
-      if (profileError) throw profileError
+      // The profile row is created by the `on_auth_user_created` trigger on
+      // auth.users (see migration 20260414000000). We no longer upsert from
+      // the client here because that call races with the trigger and is
+      // blocked by RLS when signUp returns no session (e.g. email
+      // confirmation flows). Hydration happens via fetchProfile below.
 
       user.value = {
         id: data.user.id,

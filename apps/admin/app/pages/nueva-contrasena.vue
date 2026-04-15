@@ -69,12 +69,21 @@ const loading = ref(false)
 const done = ref(false)
 const errors = reactive<{ password?: string; confirm?: string }>({})
 
+// Hold onto the subscription so we can unsubscribe on unmount.
+let authSubscription: { unsubscribe: () => void } | null = null
+
 onMounted(() => {
-  client.auth.onAuthStateChange((event) => {
+  const { data } = client.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') {
       // Session is set — the form is ready to use
     }
   })
+  authSubscription = data.subscription
+})
+
+onBeforeUnmount(() => {
+  authSubscription?.unsubscribe()
+  authSubscription = null
 })
 
 async function handleSubmit() {

@@ -314,19 +314,25 @@ async function handleLogin() {
 
   loginLoading.value = true
   try {
+    // login() internally waits for supaUser to hydrate, so refreshProfile()
+    // can run immediately and deterministically.
     await login(loginEmail.value, loginPassword.value)
-    // Load the profile before routing so existing members don't get sent back
-    // through onboarding when auth cookies/session state are still settling.
-    await new Promise(r => setTimeout(r, 150))
     let profileLoaded = await refreshProfile()
     if (!profileLoaded) {
-      await new Promise(r => setTimeout(r, 300))
+      // Short backoff for the rare case where the JWT is valid but the
+      // profile row isn't readable yet (replication lag, RLS warm-up).
+      await new Promise(r => setTimeout(r, 200))
       profileLoaded = await refreshProfile()
     }
+    if (!profileLoaded) {
+      loginErrors.value.email = 'No pudimos cargar tu perfil. Intenta de nuevo.'
+      toast.show('No pudimos cargar tu perfil. Intenta de nuevo.', 'error')
+      return
+    }
     if (!user.value?.community_segment) {
-      navigateTo('/cuenta/bienvenida/segmento')
+      await navigateTo('/cuenta/bienvenida/segmento')
     } else {
-      navigateTo('/cuenta/hoy')
+      await navigateTo('/cuenta/hoy')
     }
   } catch {
     loginErrors.value.email = 'Correo o contraseña incorrectos'
@@ -348,11 +354,17 @@ async function handleRegister() {
   regLoading.value = true
   try {
     await register(regEmail.value, regPassword.value)
-    console.log('Register success, navigating to /configurar-perfil')
-    navigateTo('/configurar-perfil')
+    await navigateTo('/configurar-perfil')
   } catch (err: any) {
     console.error('Register error:', err)
-    const msg = err?.code === 'user_already_exists' ? 'Tu usuario ya está registrado' : 'Error al crear la cuenta'
+    let msg: string
+    if (err?.code === 'user_already_exists') {
+      msg = 'Tu usuario ya está registrado'
+    } else if (err?.code === 'email_confirmation_required') {
+      msg = err.message
+    } else {
+      msg = 'Error al crear la cuenta'
+    }
     regErrors.email = msg
     toast.show(msg, 'error')
   } finally {

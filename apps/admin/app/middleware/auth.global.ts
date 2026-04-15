@@ -8,24 +8,30 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const user = useSupabaseUser()
 
-  // Root redirect: logged in → dashboard, not logged in → login
-  if (to.path === '/') {
-    return navigateTo(user.value ? '/admin/hoy' : '/iniciar-sesion')
-  }
-
-  // No supabase session → redirect to login
+  // No supabase session → always redirect to login.
   if (!user.value) {
     return navigateTo('/iniciar-sesion')
   }
 
-  // Has session → ensure admin role is loaded
-  const { isAuthenticated, restore } = useAdminAuth()
-  if (!isAuthenticated.value) {
+  // Has a session. Ensure admin role AND profile are loaded before routing.
+  // On SSR restore() fast-paths without the profiles query; on client we
+  // run it again to hydrate display_name/avatar_url. The guards inside
+  // restore() make repeat calls cheap.
+  const { isAuthenticated, isProfileHydrated, restore } = useAdminAuth()
+  if (!isAuthenticated.value || (import.meta.client && !isProfileHydrated.value)) {
     await restore()
   }
 
+  // Session but no admin role → send to login rather than deeper admin
+  // routes. Applies to the root redirect too, so a non-admin supabase user
+  // hitting `/` doesn't bounce through /admin/hoy first.
   if (!isAuthenticated.value) {
     return navigateTo('/iniciar-sesion')
+  }
+
+  // Root redirect: authed admin → dashboard.
+  if (to.path === '/') {
+    return navigateTo('/admin/hoy')
   }
 
   // ── Role-based route guards ──
