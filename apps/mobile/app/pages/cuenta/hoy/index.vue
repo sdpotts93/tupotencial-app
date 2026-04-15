@@ -728,15 +728,20 @@ const retosProgressWidth = computed(() => {
 
 // Animate progress bar on mount
 const animatedProgressWidth = ref('0%')
-onMounted(async () => {
+onMounted(() => {
   requestAnimationFrame(() => {
     setTimeout(() => {
       animatedProgressWidth.value = retosProgressWidth.value
     }, 300)
   })
-
-  await checkAutoCompleteAccion()
 })
+
+// Auto-complete check must wait for lazy async data (hoyPage, todayAccion) to
+// resolve — running it only in onMounted races with the fetch on SPA navigation
+// back, leaving actionType undefined and the check silently no-opping.
+watch([actionType, todayAccion], () => {
+  if (import.meta.client && actionType.value) void checkAutoCompleteAccion()
+}, { immediate: true })
 
 // Auto-complete acción based on action type when user has performed the action
 async function checkAutoCompleteAccion() {
