@@ -106,7 +106,7 @@
             {{ program.allComplete ? 'Completado' : (program.enrolled ? 'Inscrito' : (program.free ? 'Gratis' : 'Core')) }}
           </span>
           <span v-if="program.previouslyCompleted && !program.allComplete" class="detail__tag detail__tag--completed-before">Completado anteriormente</span>
-          <UiTag>{{ program.totalDays }} días</UiTag>
+          <UiTag>{{ program.totalDays }} {{ program.totalDays === 1 ? 'día' : 'días' }}</UiTag>
         </div>
       </div>
     </div>
@@ -218,7 +218,7 @@ const program = computed(() => {
   return {
     title: p?.title ?? '',
     typeLabel: (p?.type ?? 'program').toUpperCase(),
-    duration: `${totalDays.value} días`,
+    duration: `${totalDays.value} ${totalDays.value === 1 ? 'día' : 'días'}`,
     totalDays: totalDays.value,
     enrolled: !!enrollment.value,
     enrollmentStatus: enrollment.value?.status ?? null,

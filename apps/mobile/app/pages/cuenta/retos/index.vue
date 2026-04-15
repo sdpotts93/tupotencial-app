@@ -154,7 +154,7 @@ async function fetchPage(tab: string, from: number, to: number) {
       ...p,
       typeLabel: p.type.toUpperCase(),
       img: p.cover_url ?? undefined,
-      duration: `${totalDays} días`,
+      duration: `${totalDays} ${totalDays === 1 ? 'día' : 'días'}`,
       enrolled: !!enrollment,
       allComplete,
       free: p.plan === 'free',
