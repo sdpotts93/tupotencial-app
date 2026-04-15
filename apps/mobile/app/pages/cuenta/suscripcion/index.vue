@@ -221,8 +221,8 @@ const accessTimeline = computed(() => {
 
 const paywallLoading = ref(false)
 
-async function refreshSubscriptionState() {
-  const profilePromise = refreshProfile()
+async function refreshSubscriptionState(options?: { syncProfile?: boolean }) {
+  const profilePromise = options?.syncProfile ? refreshProfile() : Promise.resolve(false)
   const plansPromise = refreshSub()
   const accessPromise = refreshAccess()
   const rcActive = await readRevenueCatSubscriptionState()
@@ -264,7 +264,7 @@ async function waitForSubscriptionSync() {
   const maxAttempts = 10
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    await refreshSubscriptionState()
+    await refreshSubscriptionState({ syncProfile: true })
 
     if (effectiveIsSubscriber.value) {
       return true
@@ -282,7 +282,7 @@ async function openPaywall() {
     const result = await purchaseCurrentOffering()
     if (result === 'purchased' || result === 'restored') {
       await waitForSubscriptionSync()
-      await refreshSubscriptionState()
+      await refreshSubscriptionState({ syncProfile: true })
     }
   } finally {
     paywallLoading.value = false

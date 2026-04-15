@@ -1,6 +1,6 @@
 // Auth composable — powered by @nuxtjs/supabase
 // Integrates with RevenueCat for subscription entitlements (native IAP + web)
-import { useState, navigateTo, watch, computed, clearNuxtData } from '#imports'
+import { useState, navigateTo, watch, computed, clearNuxtData, clearNuxtState, useRuntimeConfig } from '#imports'
 
 export interface AuthUser {
   id: string
@@ -20,6 +20,8 @@ export interface AuthUser {
 const watcherRegistered = ref(false)
 const authMutationMode = ref<'idle' | 'register' | 'logout'>('idle')
 const pendingProfileBootstrapUserId = ref<string | null>(null)
+const activeProfileLoadUid = ref<string | null>(null)
+let activeProfileLoadPromise: Promise<boolean> | null = null
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -45,16 +47,38 @@ async function hydrateProfileWithRetry(
 
 function clearClientSessionArtifacts() {
   clearNuxtData()
+  clearNuxtState(['auth-user', 'auth-loading', 'library-tab'])
 
   if (!import.meta.client) return
 
   try {
-    const keysToRemove = Object.keys(window.localStorage).filter(key =>
-      key.startsWith('hoy-ai-done-') || key.startsWith('hoy-content-done-'),
-    )
+    const runtimeConfig = useRuntimeConfig()
+    const supabaseCookiePrefix = runtimeConfig.public.supabase.cookiePrefix
+    const shouldRemoveStorageKey = (key: string) =>
+      key.startsWith('hoy-ai-done-')
+      || key.startsWith('hoy-content-done-')
+      || key.startsWith(supabaseCookiePrefix)
 
-    for (const key of keysToRemove) {
+    const localStorageKeys = Object.keys(window.localStorage).filter(shouldRemoveStorageKey)
+    const sessionStorageKeys = Object.keys(window.sessionStorage).filter(shouldRemoveStorageKey)
+
+    for (const key of localStorageKeys) {
       window.localStorage.removeItem(key)
+    }
+
+    for (const key of sessionStorageKeys) {
+      window.sessionStorage.removeItem(key)
+    }
+
+    const cookieNames = document.cookie
+      .split(';')
+      .map(part => part.trim().split('=')[0] ?? '')
+      .filter(Boolean)
+      .filter(name => name.startsWith(supabaseCookiePrefix))
+
+    for (const name of cookieNames) {
+      document.cookie = `${name}=; Max-Age=0; path=/`
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
     }
   } catch {
     // Ignore storage cleanup errors; sign-out should still succeed.
@@ -67,26 +91,18 @@ export function useAuth() {
   const user = useState<AuthUser | null>('auth-user', () => null)
   const loading = useState('auth-loading', () => false)
 
-  async function waitForProfileLoad(uid?: string, timeoutMs = 2000): Promise<boolean> {
-    const start = Date.now()
-
-    while (loading.value && Date.now() - start < timeoutMs) {
-      await sleep(50)
-    }
-
-    if (!uid) return !!user.value
-    return user.value?.id === uid
-  }
-
   async function fetchProfile(uid: string): Promise<boolean> {
     // Ensure the client has a fresh access token before querying.
     // On SSR, the server plugin refreshes the token in a separate client
     // instance, but useSupabaseClient() may still hold an expired JWT.
-    await client.auth.getSession()
+    const { data: { session } } = await client.auth.getSession()
+    const sessionUid = session?.user?.id
+    if (authMutationMode.value === 'logout') return false
+    if (sessionUid && sessionUid !== uid) return false
 
     const normalizedEmail = supaUser.value?.email?.trim().toLowerCase() ?? null
     const [profileRes, subRes, entRes, adminRes, effectiveSubscriberRes] = await Promise.all([
-      client.from('profiles').select('display_name, avatar_url, community_segment, email').eq('id', uid).single(),
+      client.from('profiles').select('display_name, avatar_url, community_segment, email').eq('id', uid).maybeSingle(),
       client.from('subscriptions').select('status').eq('user_id', uid).maybeSingle(),
       client.from('user_entitlements').select('entitlement_key').eq('user_id', uid),
       client.from('admin_users').select('role').eq('user_id', uid).maybeSingle(),
@@ -138,6 +154,49 @@ export function useAuth() {
     return true
   }
 
+  async function loadProfile(uid: string, options?: { retryOnBootstrap?: boolean }): Promise<boolean> {
+    if (activeProfileLoadPromise) {
+      if (activeProfileLoadUid.value === uid) {
+        return await activeProfileLoadPromise
+      }
+
+      await activeProfileLoadPromise.catch(() => false)
+
+      if (user.value?.id === uid) {
+        return true
+      }
+    }
+
+    loading.value = true
+    activeProfileLoadUid.value = uid
+
+    const task = (async () => {
+      let ok = await fetchProfile(uid)
+
+      if (!ok && options?.retryOnBootstrap) {
+        const registerBootstrapPending =
+          authMutationMode.value === 'register'
+          || pendingProfileBootstrapUserId.value === uid
+
+        if (registerBootstrapPending) {
+          ok = await hydrateProfileWithRetry(fetchProfile, uid, 6, 200)
+        }
+      }
+
+      return ok
+    })()
+
+    activeProfileLoadPromise = task.finally(() => {
+      if (activeProfileLoadUid.value === uid) {
+        activeProfileLoadUid.value = null
+        activeProfileLoadPromise = null
+        loading.value = false
+      }
+    })
+
+    return await task
+  }
+
   async function refreshProfile(): Promise<boolean> {
     const uid = supaUser.value?.id ?? (supaUser.value as any)?.sub as string | undefined
     if (!uid) {
@@ -145,17 +204,7 @@ export function useAuth() {
       return false
     }
 
-    if (loading.value) {
-      const hydrated = await waitForProfileLoad(uid)
-      if (hydrated) return true
-    }
-
-    loading.value = true
-    try {
-      return await fetchProfile(uid)
-    } finally {
-      loading.value = false
-    }
+    return await loadProfile(uid, { retryOnBootstrap: true })
   }
 
   // Register the supaUser watcher ONCE across all useAuth() calls.
@@ -177,31 +226,13 @@ export function useAuth() {
       const uid = u.id ?? (u as any).sub as string | undefined
       if (!uid) return // guard against incomplete user object
       if (user.value?.id === uid) return // already loaded
-      if (loading.value) {
-        const hydrated = await waitForProfileLoad(uid)
-        if (hydrated) return
-      }
-      loading.value = true
-      try {
-        const ok = await fetchProfile(uid)
-        if (!ok) {
-          const registerBootstrapPending =
-            authMutationMode.value === 'register'
-            || pendingProfileBootstrapUserId.value === uid
-
-          if (registerBootstrapPending) {
-            const hydrated = await hydrateProfileWithRetry(fetchProfile, uid, 6, 200)
-            if (hydrated) return
-          }
-
-          // No profile row for this user — stale session after DB reset
-          // or deleted account. Sign out to force a clean login.
-          await client.auth.signOut()
-          user.value = null
-          navigateTo('/iniciar-sesion')
-        }
-      } finally {
-        loading.value = false
+      const ok = await loadProfile(uid, { retryOnBootstrap: true })
+      if (!ok) {
+        // No profile row for this user — stale session after DB reset
+        // or deleted account. Sign out to force a clean login.
+        await client.auth.signOut()
+        user.value = null
+        navigateTo('/iniciar-sesion')
       }
     }, { immediate: true })
   }
@@ -287,6 +318,8 @@ export function useAuth() {
       loading.value = false
       clearClientSessionArtifacts()
       authMutationMode.value = 'idle'
+      activeProfileLoadUid.value = null
+      activeProfileLoadPromise = null
     }
 
     await navigateTo('/iniciar-sesion', { replace: true })

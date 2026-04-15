@@ -74,7 +74,7 @@ type OnboardingOption = {
   avatar?: string
 }
 
-const { setSegment, user, refreshProfile, isOnboarded } = useAuth()
+const { setSegment, user, isOnboarded } = useAuth()
 const supaUser = useSupabaseUser()
 const supabase = useSupabaseClient()
 const { avatarUrl } = useCharacterAvatars()
@@ -218,18 +218,12 @@ async function handleContinue() {
 }
 
 async function redirectIfAlreadyOnboarded() {
-  if (isOnboarded.value) {
+  const sessionUserId = supaUser.value?.id ?? (supaUser.value as any)?.sub as string | undefined
+  const hasHydratedCurrentUser = !!sessionUserId && user.value?.id === sessionUserId
+
+  if (hasHydratedCurrentUser && isOnboarded.value) {
     isRedirecting.value = true
     await navigateTo('/cuenta/hoy', { replace: true })
-    return
-  }
-
-  if (!user.value && supaUser.value) {
-    const loaded = await refreshProfile()
-    if (loaded && isOnboarded.value) {
-      isRedirecting.value = true
-      await navigateTo('/cuenta/hoy', { replace: true })
-    }
   }
 }
 

@@ -3,11 +3,13 @@
 // Per AGENTS.md section 9.6
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const { isLoggedIn, isOnboarded, isSubscriber, hasEntitlement, refreshProfile } = useAuth()
+  const { user, isLoggedIn, isOnboarded, isSubscriber, hasEntitlement, refreshProfile } = useAuth()
   const supaUser = useSupabaseUser()
   const client = useSupabaseClient()
 
   const path = to.path
+  const sessionUserId = supaUser.value?.id ?? (supaUser.value as any)?.sub as string | undefined
+  const hasHydratedCurrentUser = !!sessionUserId && user.value?.id === sessionUserId
 
   // ---- Public routes (no auth required) ----
   const publicRoutes = ['/iniciar-sesion', '/registro', '/precios', '/restablecer-contrasena', '/nueva-contrasena', '/terminos', '/privacidad']
@@ -15,12 +17,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // If Supabase already has a session but app state hasn't hydrated yet,
   // load the profile before deciding whether onboarding is required.
-  if (supaUser.value && !isLoggedIn.value) {
+  if (sessionUserId && !hasHydratedCurrentUser) {
     await refreshProfile()
   }
 
   // Use both app state and verified supabase session to determine auth.
-  const hasSession = !!supaUser.value
+  const hasSession = !!sessionUserId
   const isAuthed = isLoggedIn.value || hasSession
 
   // ---- Root redirect ----
@@ -41,14 +43,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // ---- Onboarding redirect ----
   if (path === '/cuenta/bienvenida/segmento') {
-    if (isOnboarded.value) return navigateTo('/cuenta/hoy')
+    if (hasHydratedCurrentUser && isOnboarded.value) return navigateTo('/cuenta/hoy')
     return
   }
 
   // ---- Onboarded routes ----
   // If we have a supabase session but profile hasn't loaded yet, don't redirect —
   // the profile watcher will hydrate state shortly after mount.
-  if (!isOnboarded.value && isLoggedIn.value) {
+  if (hasHydratedCurrentUser && !isOnboarded.value) {
     return navigateTo('/cuenta/bienvenida/segmento')
   }
 

@@ -125,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-const { user, isSubscriber, refreshProfile, logout } = useAuth()
+const { user, isSubscriber, logout } = useAuth()
 const client = useSupabaseClient()
 const { presentCustomerCenter } = useRevenueCat()
 
@@ -148,24 +148,6 @@ const currentPlanName = computed(() => currentPlan.value?.title ?? (isSubscriber
 
 function handleLogout() {
   logout()
-}
-
-onMounted(() => {
-  void refreshProfile()
-})
-
-onActivated(() => {
-  void refreshProfile()
-})
-
-if (import.meta.client) {
-  const onVisChange = () => {
-    if (document.visibilityState === 'visible') {
-      void refreshProfile()
-    }
-  }
-  onMounted(() => document.addEventListener('visibilitychange', onVisChange))
-  onUnmounted(() => document.removeEventListener('visibilitychange', onVisChange))
 }
 </script>
 
