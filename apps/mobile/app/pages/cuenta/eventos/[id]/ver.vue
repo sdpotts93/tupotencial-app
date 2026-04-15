@@ -147,7 +147,7 @@ const event = computed(() => {
     isLive,
     isUpcoming,
     isTransmitting: isTransmitting.value,
-    vimeoEmbedUrl: liveId ? `https://vimeo.com/event/${liveId}/embed/interaction` : null,
+    vimeoEmbedUrl: liveId ? `https://player.vimeo.com/video/${liveId}` : null,
     dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
     startAt: startDate,
     vimeoId: liveId,

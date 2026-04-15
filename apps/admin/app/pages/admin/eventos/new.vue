@@ -89,7 +89,7 @@
               v-model="form.vimeo_live_event_id"
               label="Vimeo Live Event ID"
               placeholder="1234567"
-              hint="ID del evento en vivo. Ir a Vimeo > Crear > Evento en vivo. Copiar ID de la URL (ej: vimeo.com/event/1234567). Requiere Vimeo Premium."
+              hint="ID del video en vivo. Copiar el número de la URL del video (ej: vimeo.com/1234567)."
             />
           </div>
         </UiCard>
@@ -127,7 +127,7 @@
             </p>
             <p v-if="form.vimeo_live_event_id" class="meta-text">
               URL de embed en vivo:<br>
-              <code class="embed-url">https://vimeo.com/event/{{ form.vimeo_live_event_id }}/embed</code>
+              <code class="embed-url">https://player.vimeo.com/video/{{ form.vimeo_live_event_id }}</code>
             </p>
           </div>
         </UiCard>
