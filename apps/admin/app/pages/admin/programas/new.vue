@@ -406,7 +406,7 @@ async function handleSave() {
         .from('program_days')
         .insert({
           program_id: inserted.id,
-          day_index: i,
+          day_index: i + 1,
           title: day.title || null,
           description: day.description || null,
         })
