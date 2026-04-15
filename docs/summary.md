@@ -134,3 +134,7 @@ Append one line per completed task:
 2026-04-14 13:18 America/Mexico_City — Use per-field Hoy badge fallback for share capture titles and subtitles instead of reusing the featured action title
 2026-04-14 13:31 America/Mexico_City — Resolve Hoy day-plan fields independently from defaults so blank day values fall back per field, including action refs and progreso badge copy
 2026-04-14 19:04 America/Mexico_City — Restrict admin event imports to non-finished Vimeo lives and auto-assign imported past live recordings to the eventos-grabados category in admin content
+2026-04-14 19:14 America/Mexico_City — Remove the admin event form rule that required events to start at least 10 minutes in the future
+2026-04-14 19:15 America/Mexico_City — Add Eventos to the Cuenta section of the mobile Más screen
+2026-04-14 19:16 America/Mexico_City — Rename the mobile Más screen Configuración entry to Ayuda and describe its terms, privacy, and support links
+2026-04-14 19:17 America/Mexico_City — Change the mobile Más screen Ayuda item icon from settings to help
