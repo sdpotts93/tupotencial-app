@@ -283,7 +283,7 @@
     </section>
 
     <!-- Explora otras secciones Configuration -->
-    <section class="hoy-config-section">
+    <section class="hoy-config-section mb">
       <h2 class="section-title">Explora otras secciones</h2>
       <p class="section-description">Administra las secciones que aparecen en "Explora otras secciones" en la pantalla Hoy. Agrega, quita y elige cuál es la destacada.</p>
 
@@ -771,10 +771,7 @@ watch(() => savedConfig.value?.hoy_defaults, (hoyDefaults) => {
 watch([savedConfig, allContentItems], ([config, contentItems]) => {
   if (hasHydratedSelectedContent.value || !config) return
 
-  // Wait for real config data before hydrating
-  if (!config.hoy_recent_content) return
-
-  const selectedIds = new Set(config.hoy_recent_content.selected_ids ?? [])
+  const selectedIds = new Set(config.hoy_recent_content?.selected_ids ?? [])
   if (selectedIds.size > 0 && contentItems.length === 0) return
 
   selectedContent.value = contentItems.filter(item => selectedIds.has(item.id))
@@ -1188,9 +1185,11 @@ function goToDateFromRow(row: Record<string, any>) {
 
 .explore-add__row {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: var(--space-3);
   margin-top: var(--space-3);
+  flex-direction: column;
+
 }
 
 .explore-add__row > :first-child {
@@ -1312,4 +1311,19 @@ function goToDateFromRow(row: Record<string, any>) {
     justify-content: space-between;
   }
 }
+
+  
+.hoy-config-section.mb {
+  margin-bottom: 80px;
+}
+
+@media (min-width: 1024px) {
+  .hoy-config-section.mb {
+    margin-bottom: 100px;
+  }
+  .explore-add__row {
+    flex-direction: row;
+  }
+}
+
 </style>
