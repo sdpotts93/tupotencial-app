@@ -1,8 +1,12 @@
 <template>
-  <div class="list">
+  <div class="list" :class="{ 'list--gutter': gutter }">
     <slot />
   </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{ gutter?: boolean }>()
+</script>
 
 <style scoped>
 .list {
@@ -13,6 +17,8 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
 }
+
+.list--gutter { margin-bottom: 2rem; }
 
 .list > :deep(.list-item + .list-item) {
   border-top: 1px solid rgba(var(--tint-rgb), 0.08);

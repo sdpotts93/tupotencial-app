@@ -34,7 +34,7 @@
       v-else-if="content.vimeoId"
       ref="vimeoIframe"
       class="player__video"
-      :src="`https://player.vimeo.com/video/${content.vimeoId}?controls=0&autoplay=1&title=0&byline=0&portrait=0&transparent=1`"
+      :src="`https://player.vimeo.com/video/${content.vimeoId}?controls=0&title=0&byline=0&portrait=0&transparent=1`"
       frameborder="0"
       allow="autoplay; fullscreen; picture-in-picture"
       allowfullscreen

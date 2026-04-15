@@ -266,85 +266,71 @@
     </template>
 
     <!-- Check-in slideover -->
-    <Transition name="hoy-sheet">
-    <div
-      v-if="activeSheet === 'checkin'"
-      class="hoy__overlay"
-      @click.self="activeSheet = 'none'"
+    <UiModal
+      :model-value="activeSheet === 'checkin'"
+      @update:model-value="v => { if (!v) activeSheet = 'none' }"
     >
-      <div ref="checkinSheetRef" class="hoy__sheet" :style="checkinSheetStyle" v-on="checkinDragListeners">
-        <div class="hoy__sheet-header">
-          <div class="hoy__sheet-handle" />
-          <button class="hoy__sheet-close" aria-label="Cerrar" @click="activeSheet = 'none'">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </button>
+      <Transition name="fade" mode="out-in">
+        <!-- Success state -->
+        <div v-if="checkinSuccess" key="success" class="hoy__checkin-success">
+          <template v-if="allRetosComplete">
+            <div class="hoy__checkin-success-badge"><ClientOnly><DotLottieVue src="/lottie/trophy-confetti.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" /></ClientOnly></div>
+            <p class="hoy__checkin-success-streak">Racha de {{ streak }} {{ streak === 1 ? 'día' : 'días' }}</p>
+            <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
+            <UiButton block variant="outline" style="margin-bottom: var(--space-3);" @click="showShareBadge = true">
+              <template #icon><Icon name="lucide:share-2" size="18" /></template>
+              Compartir logro
+            </UiButton>
+            <ShareBadge
+              v-model="showShareBadge"
+              eyebrow="CHECK-IN DIARIO"
+              :action-title="badgeShareTitle"
+              :streak-count="streak"
+              :share-text="badgeShareText"
+              outcome="done"
+            />
+          </template>
+          <template v-else>
+            <div class="hoy__checkin-success-badge"><ClientOnly><DotLottieVue src="/lottie/success.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" /></ClientOnly></div>
+            <p class="hoy__checkin-success-streak">Check-in completado</p>
+            <p class="hoy__checkin-success-msg">Ahora completa tu acción del día para sumar a tu racha.</p>
+          </template>
+          <UiButton block variant="secondary" @click="closeCheckinSheet">Listo</UiButton>
         </div>
 
-        <Transition name="fade" mode="out-in">
-          <!-- Success state -->
-          <div v-if="checkinSuccess" key="success" class="hoy__checkin-success">
-            <template v-if="allRetosComplete">
-              <div class="hoy__checkin-success-badge"><ClientOnly><DotLottieVue src="/lottie/trophy-confetti.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" /></ClientOnly></div>
-              <p class="hoy__checkin-success-streak">Racha de {{ streak }} {{ streak === 1 ? 'día' : 'días' }}</p>
-              <p class="hoy__checkin-success-msg">{{ streakMessage }}</p>
-              <UiButton block variant="outline" style="margin-bottom: var(--space-3);" @click="showShareBadge = true">
-                <template #icon><Icon name="lucide:share-2" size="18" /></template>
-                Compartir logro
-              </UiButton>
-              <ShareBadge
-                v-model="showShareBadge"
-                eyebrow="CHECK-IN DIARIO"
-                :action-title="badgeShareTitle"
-                :streak-count="streak"
-                :share-text="badgeShareText"
-                outcome="done"
-              />
-            </template>
-            <template v-else>
-              <div class="hoy__checkin-success-badge"><ClientOnly><DotLottieVue src="/lottie/success.lottie" autoplay loop width="120" height="120" :render-config="{ devicePixelRatio: 3 }" /></ClientOnly></div>
-              <p class="hoy__checkin-success-streak">Check-in completado</p>
-              <p class="hoy__checkin-success-msg">Ahora completa tu acción del día para sumar a tu racha.</p>
-            </template>
-            <UiButton block variant="secondary" @click="closeCheckinSheet">Listo</UiButton>
+        <!-- Form state -->
+        <div v-else key="form">
+          <h1 class="hoy__sheet-title">¿Cómo te sientes hoy?</h1>
+          <p class="hoy__sheet-subtitle">Tómate un momento para reflexionar sobre tu estado actual.</p>
+
+          <!-- Mood selector -->
+          <div class="hoy__checkin-moods">
+            <button
+              v-for="mood in moods"
+              :key="mood.value"
+              :class="['hoy__checkin-mood', { 'hoy__checkin-mood--selected': selectedMood === mood.value }]"
+              :style="selectedMood === mood.value ? { background: mood.color, borderColor: mood.color } : {}"
+              @click="selectedMood = mood.value"
+            >
+              <span class="hoy__checkin-mood-emoji"><Icon :name="mood.emoji" size="24" /></span>
+              <span class="hoy__checkin-mood-label">{{ mood.label }}</span>
+            </button>
           </div>
 
-          <!-- Form state -->
-          <div v-else key="form">
-            <h1 class="hoy__sheet-title">¿Cómo te sientes hoy?</h1>
-            <p class="hoy__sheet-subtitle">Tómate un momento para reflexionar sobre tu estado actual.</p>
+          <!-- Reflection -->
+          <UiTextarea
+            v-model="checkinReflection"
+            label="Reflexión (opcional)"
+            placeholder="¿Qué quieres lograr hoy?"
+            :rows="3"
+          />
 
-            <!-- Mood selector -->
-            <div class="hoy__checkin-moods">
-              <button
-                v-for="mood in moods"
-                :key="mood.value"
-                :class="['hoy__checkin-mood', { 'hoy__checkin-mood--selected': selectedMood === mood.value }]"
-                :style="selectedMood === mood.value ? { background: mood.color, borderColor: mood.color } : {}"
-                @click="selectedMood = mood.value"
-              >
-                <span class="hoy__checkin-mood-emoji"><Icon :name="mood.emoji" size="24" /></span>
-                <span class="hoy__checkin-mood-label">{{ mood.label }}</span>
-              </button>
-            </div>
-
-            <!-- Reflection -->
-            <UiTextarea
-              v-model="checkinReflection"
-              label="Reflexión (opcional)"
-              placeholder="¿Qué quieres lograr hoy?"
-              :rows="3"
-            />
-
-            <UiButton block variant="secondary" :loading="checkinLoading" :disabled="!selectedMood" class="hoy__checkin-submit" @click="handleCheckin">
-              Completar check-in
-            </UiButton>
-          </div>
-        </Transition>
-      </div>
-    </div>
-    </Transition>
+          <UiButton block variant="secondary" :loading="checkinLoading" :disabled="!selectedMood" class="hoy__checkin-submit" @click="handleCheckin">
+            Completar check-in
+          </UiButton>
+        </div>
+      </Transition>
+    </UiModal>
 
     <!-- Acción del día slideover -->
     <Transition name="hoy-sheet">
@@ -941,14 +927,7 @@ const activities = computed(() => {
 
 // ─── Sheet state ───
 const activeSheet = ref<'none' | 'checkin' | 'accion'>('none')
-const checkinSheetRef = ref<HTMLElement | null>(null)
 const accionSheetRef = ref<HTMLElement | null>(null)
-
-const { translateY: checkinTranslateY, isDragging: checkinDragging, dragListeners: checkinDragListeners } = useSheetDrag(checkinSheetRef, () => { activeSheet.value = 'none' })
-const checkinSheetStyle = computed(() => {
-  if (checkinTranslateY.value === 0) return {}
-  return { transform: `translateY(${checkinTranslateY.value}px)`, transition: checkinDragging.value ? 'none' : 'transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)' }
-})
 
 const { translateY: accionTranslateY, isDragging: accionDragging, dragListeners: accionDragListeners } = useSheetDrag(accionSheetRef, closeAccionSheet)
 const accionSheetStyle = computed(() => {
