@@ -528,6 +528,15 @@ const streakMessage = computed(() => {
 // Update streak only when BOTH check-in and acción are completed for today
 async function maybeUpdateStreak() {
   const uid = user.value!.id
+
+  // Idempotency: if streak was already bumped for today, do nothing.
+  const { data: existingStreak } = await client
+    .from('user_streaks')
+    .select('current_streak, best_streak, last_checkin_date')
+    .eq('user_id', uid)
+    .maybeSingle()
+  if (existingStreak?.last_checkin_date === today) return
+
   // Check both retos exist for today
   const [checkinRow, accionRow] = await Promise.all([
     client.from('daily_checkins').select('id').eq('user_id', uid).eq('date', today).eq('type', 'checkin').maybeSingle(),
@@ -535,15 +544,20 @@ async function maybeUpdateStreak() {
   ])
   if (!checkinRow.data || !accionRow.data) return // not both done yet
 
-  // Check if yesterday both retos were also completed (consecutive)
-  const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
+  // Check if yesterday both retos were also completed (consecutive).
+  // Compute yesterday in local time to match `today` — using UTC here caused
+  // `yesterday === today` for users west of UTC after ~6pm local, which made
+  // the streak self-increment on every trigger.
+  const yDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+  const yesterday = `${yDate.getFullYear()}-${String(yDate.getMonth() + 1).padStart(2, '0')}-${String(yDate.getDate()).padStart(2, '0')}`
   const [yCheckin, yAccion] = await Promise.all([
     client.from('daily_checkins').select('id').eq('user_id', uid).eq('date', yesterday).eq('type', 'checkin').maybeSingle(),
     client.from('daily_checkins').select('id').eq('user_id', uid).eq('date', yesterday).eq('type', 'accion').maybeSingle(),
   ])
-  const isConsecutive = streak.value > 0 && !!yCheckin.data && !!yAccion.data
-  const newStreak = isConsecutive ? streak.value + 1 : 1
-  const newBest = Math.max(newStreak, streak.value)
+  const prev = existingStreak?.current_streak ?? 0
+  const isConsecutive = prev > 0 && !!yCheckin.data && !!yAccion.data
+  const newStreak = isConsecutive ? prev + 1 : 1
+  const newBest = Math.max(newStreak, existingStreak?.best_streak ?? 0)
 
   await client.from('user_streaks').upsert({
     current_streak: newStreak,
