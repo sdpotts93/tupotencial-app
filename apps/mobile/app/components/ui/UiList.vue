@@ -18,7 +18,7 @@ defineProps<{ gutter?: boolean }>()
   overflow: hidden;
 }
 
-.list--gutter { margin-bottom: 2rem; }
+.list--gutter { margin-bottom: 0rem; }
 
 .list > :deep(.list-item + .list-item) {
   border-top: 1px solid rgba(var(--tint-rgb), 0.08);
