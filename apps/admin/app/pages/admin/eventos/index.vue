@@ -159,6 +159,7 @@ const { rows, hasMore, loading, loadingMore, loadMore, refresh, status } = await
 )
 
 const { entitlementLabels } = await useAdminEntitlements()
+const { formatAdminEventDateTime } = useAdminEventTime()
 
 function statusVariant(status: string) {
   const map: Record<string, string> = { published: 'success', draft: 'warning', cancelled: 'danger' }
@@ -171,7 +172,7 @@ function statusLabel(status: string) {
 }
 
 function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return formatAdminEventDateTime(iso)
 }
 
 function handleRowClick(row: Record<string, any>) {

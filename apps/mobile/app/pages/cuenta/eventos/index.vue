@@ -173,7 +173,7 @@ const { isLocked, getAddonForEntitlement } = useEntitlementGating()
 const showPurchaseModal = ref(false)
 const selectedAddon = ref<{ id: string; title: string; description: string | null } | null>(null)
 const dateFmt = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' })
-const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' })
+const dayTimeFmt = new Intl.DateTimeFormat('es-MX', { weekday: 'long', hour: '2-digit', minute: '2-digit' })
 
 // Fetch user's registered event IDs (RLS scopes to current user automatically)
 const { data: registeredEventIds } = useAsyncData('mobile-my-event-ids', async () => {
@@ -197,7 +197,7 @@ const upcomingMapped = computed(() =>
       title: e.title,
       description: e.description,
       dateLabel: dateFmt.format(new Date(e.start_at!)),
-      timeLabel: dayTimeFmt.format(new Date(e.start_at!)).toUpperCase() + ' CDMX',
+      timeLabel: dayTimeFmt.format(new Date(e.start_at!)).toUpperCase(),
       img: e.cover_url ?? undefined,
       entitlement_key: e.entitlement_key,
       plan: e.plan,

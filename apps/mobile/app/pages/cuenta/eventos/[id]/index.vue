@@ -129,7 +129,6 @@ const dayTimeFmt = new Intl.DateTimeFormat('es-MX', {
   month: 'short',
   hour: '2-digit',
   minute: '2-digit',
-  timeZone: 'America/Mexico_City',
 })
 
 const statusLabels: Record<string, string> = {
@@ -196,7 +195,7 @@ const event = computed(() => {
   return {
     title: e.title,
     description: e.description ?? '',
-    dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
+    dateLabel: dayTimeFmt.format(startDate).toUpperCase(),
     img: e.cover_url ?? null,
     plan: e.plan ?? 'free',
     status: statusLabels[e.status] ?? e.status,

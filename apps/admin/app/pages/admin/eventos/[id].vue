@@ -102,6 +102,7 @@
                   label="Fecha y hora"
                   :enable-time="true"
                   placeholder="Selecciona fecha y hora"
+                  :hint="`Se agenda en hora ${adminEventTimeZoneLabel} y se guarda en UTC.`"
                   required
                   :error="errors.starts_at"
                 />
@@ -185,6 +186,7 @@ const saving = ref(false)
 const deleting = ref(false)
 const formError = ref('')
 const errors = reactive({ title: '', description: '', starts_at: '', duration: '' })
+const { adminEventTimeZoneLabel, toAdminEventFormDate, fromAdminEventFormDate } = useAdminEventTime()
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -253,7 +255,7 @@ watch(event, (val) => {
     form.title = val.title ?? ''
     form.description = val.description ?? ''
     form.cover_url = val.cover_url ?? ''
-    form.starts_at = val.start_at ? new Date(val.start_at) : null
+    form.starts_at = toAdminEventFormDate(val.start_at)
     form.duration = val.duration ?? ''
     form.vimeo_live_event_id = val.vimeo_live_event_id ?? ''
     form.plan = val.plan ?? 'free'
@@ -305,7 +307,8 @@ async function handleSave() {
 
   saving.value = true
   try {
-    const startAt = form.starts_at!.toISOString()
+    const startAt = fromAdminEventFormDate(form.starts_at)
+    if (!startAt) throw new Error('Invalid event date')
     let coverUrl = form.cover_url || null
     if (coverFile.value) {
       coverUrl = await uploadCover(coverFile.value, id)

@@ -128,7 +128,6 @@ const dayTimeFmt = new Intl.DateTimeFormat('es-MX', {
   month: 'short',
   hour: '2-digit',
   minute: '2-digit',
-  timeZone: 'America/Mexico_City',
 })
 
 const event = computed(() => {
@@ -167,7 +166,7 @@ const event = computed(() => {
     showPlayer,
     shouldProbe,
     vimeoEmbedUrl: liveId ? `https://player.vimeo.com/video/${liveId}` : null,
-    dateLabel: dayTimeFmt.format(startDate).toUpperCase() + ' CDMX',
+    dateLabel: dayTimeFmt.format(startDate).toUpperCase(),
     startAt: startDate,
     vimeoId: liveId,
   }

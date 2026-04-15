@@ -68,6 +68,7 @@
                 label="Fecha y hora"
                 :enable-time="true"
                 placeholder="Selecciona fecha y hora"
+                :hint="`Se agenda en hora ${adminEventTimeZoneLabel} y se guarda en UTC.`"
                 required
                 :error="errors.starts_at"
               />
@@ -150,6 +151,7 @@ const toast = useToast()
 const saving = ref(false)
 const formError = ref('')
 const errors = reactive({ title: '', description: '', starts_at: '', duration: '' })
+const { adminEventTimeZoneLabel, fromAdminEventFormDate } = useAdminEventTime()
 
 // ── Image upload ──
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -253,7 +255,8 @@ async function handleSave() {
   saving.value = true
   try {
     const targetId = crypto.randomUUID()
-    const startAt = form.starts_at!.toISOString()
+    const startAt = fromAdminEventFormDate(form.starts_at)
+    if (!startAt) throw new Error('Invalid event date')
     let coverUrl: string | null = null
     if (coverFile.value) {
       coverUrl = await uploadCover(coverFile.value, targetId)

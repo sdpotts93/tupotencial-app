@@ -18,9 +18,47 @@ export interface AuthUser {
 // Each call to useAuth() in middleware/pages/layouts would otherwise
 // register a new watcher, causing racing fetchProfile calls.
 const watcherRegistered = ref(false)
+const authMutationMode = ref<'idle' | 'register' | 'logout'>('idle')
+const pendingProfileBootstrapUserId = ref<string | null>(null)
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function hydrateProfileWithRetry(
+  fetchProfile: (uid: string) => Promise<boolean>,
+  uid: string,
+  attempts = 4,
+  delayMs = 150,
+) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const ok = await fetchProfile(uid)
+    if (ok) return true
+
+    if (attempt < attempts - 1) {
+      await sleep(delayMs)
+    }
+  }
+
+  return false
+}
+
+function clearClientSessionArtifacts() {
+  clearNuxtData()
+
+  if (!import.meta.client) return
+
+  try {
+    const keysToRemove = Object.keys(window.localStorage).filter(key =>
+      key.startsWith('hoy-ai-done-') || key.startsWith('hoy-content-done-'),
+    )
+
+    for (const key of keysToRemove) {
+      window.localStorage.removeItem(key)
+    }
+  } catch {
+    // Ignore storage cleanup errors; sign-out should still succeed.
+  }
 }
 
 export function useAuth() {
@@ -147,6 +185,15 @@ export function useAuth() {
       try {
         const ok = await fetchProfile(uid)
         if (!ok) {
+          const registerBootstrapPending =
+            authMutationMode.value === 'register'
+            || pendingProfileBootstrapUserId.value === uid
+
+          if (registerBootstrapPending) {
+            const hydrated = await hydrateProfileWithRetry(fetchProfile, uid, 6, 200)
+            if (hydrated) return
+          }
+
           // No profile row for this user — stale session after DB reset
           // or deleted account. Sign out to force a clean login.
           await client.auth.signOut()
@@ -173,20 +220,36 @@ export function useAuth() {
   }
 
   async function register(email: string, password: string) {
-    const { data, error } = await client.auth.signUp({ email, password })
-    if (error) throw error
+    authMutationMode.value = 'register'
+    pendingProfileBootstrapUserId.value = null
 
-    // Create the profiles row for the new user
-    if (data.user) {
-      const { error: profileError } = await client.from('profiles').insert({
+    try {
+      const { data, error } = await client.auth.signUp({ email, password })
+      if (error) throw error
+      if (!data.user) {
+        throw new Error('Supabase no devolvió el usuario recién creado.')
+      }
+
+      pendingProfileBootstrapUserId.value = data.user.id
+
+      const { error: profileError } = await client.from('profiles').upsert({
         id: data.user.id,
         display_name: '',
         email: data.user.email?.trim().toLowerCase() ?? null,
+      }, {
+        onConflict: 'id',
       })
-      if (profileError) console.error('Profile insert error:', profileError)
+      if (profileError) throw profileError
 
-      // Load profile into state so middleware sees the user as logged in
-      await fetchProfile(data.user.id)
+      // Load profile into state so middleware sees the user as logged in.
+      // Retry briefly because auth state change and profile insert can race.
+      const hydrated = await hydrateProfileWithRetry(fetchProfile, data.user.id, 5, 200)
+      if (!hydrated) {
+        throw new Error('No se pudo cargar el perfil del nuevo usuario.')
+      }
+    } finally {
+      authMutationMode.value = 'idle'
+      pendingProfileBootstrapUserId.value = null
     }
   }
 
@@ -202,6 +265,9 @@ export function useAuth() {
   }
 
   async function logout() {
+    authMutationMode.value = 'logout'
+    pendingProfileBootstrapUserId.value = null
+
     // Clean up push tokens before signing out (native only)
     try {
       const { unregister } = usePushNotifications()
@@ -214,14 +280,16 @@ export function useAuth() {
       await rcLogout()
     } catch { /* non-critical */ }
 
-    await client.auth.signOut()
-    user.value = null
-    clearNuxtData('hoy-page')
-    clearNuxtData('hoy-checkin')
-    clearNuxtData('hoy-accion')
-    clearNuxtData('hoy-programs')
-    clearNuxtData('current-plan')
-    navigateTo('/iniciar-sesion')
+    try {
+      await client.auth.signOut()
+    } finally {
+      user.value = null
+      loading.value = false
+      clearClientSessionArtifacts()
+      authMutationMode.value = 'idle'
+    }
+
+    await navigateTo('/iniciar-sesion', { replace: true })
   }
 
   async function setSegment(segment: 'gabriel' | 'carlotta' | 'conjunta') {

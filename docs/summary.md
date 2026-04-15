@@ -139,3 +139,5 @@ Append one line per completed task:
 2026-04-14 19:16 America/Mexico_City — Rename the mobile Más screen Configuración entry to Ayuda and describe its terms, privacy, and support links
 2026-04-14 19:17 America/Mexico_City — Change the mobile Más screen Ayuda item icon from settings to help
 2026-04-14 19:49 America/Mexico_City — Probe mobile live events before their scheduled start and seed the eventos-grabados recorded-events category in production seeds
+2026-04-14 20:21 America/Mexico_City — Fix mobile auth logout/register race by retrying new-user profile hydration and clearing client async/local session cache on sign-out
+2026-04-14 20:32 America/Mexico_City — Show live event times in the user's local timezone and keep admin event scheduling explicit in CDMX while storing UTC
