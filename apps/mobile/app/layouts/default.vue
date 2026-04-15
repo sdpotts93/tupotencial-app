@@ -135,7 +135,7 @@ const desktopBottomItems = [
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 0;
   background: var(--color-white);
 }
 
