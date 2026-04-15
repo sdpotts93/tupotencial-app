@@ -29,12 +29,12 @@
         @pause="isPlaying = false"
       />
     </template>
-    <!-- Vimeo embed (chromeless — our controls handle UI) -->
+    <!-- Vimeo embed — native controls (iOS requires in-iframe taps for audio) -->
     <iframe
       v-else-if="content.vimeoId"
       ref="vimeoIframe"
       class="player__video"
-      :src="`https://player.vimeo.com/video/${content.vimeoId}?controls=0&title=0&byline=0&portrait=0&transparent=1`"
+      :src="`https://player.vimeo.com/video/${content.vimeoId}?title=0&byline=0&portrait=0&transparent=1`"
       frameborder="0"
       allow="autoplay; fullscreen; picture-in-picture"
       allowfullscreen
@@ -57,14 +57,14 @@
     />
 
     <!-- Gradient scrims -->
-    <div class="player__scrims" :class="{ 'player__scrims--visible': controlsVisible }">
+    <div v-if="!isVimeo" class="player__scrims" :class="{ 'player__scrims--visible': controlsVisible }">
       <div class="player__scrim-top" />
       <div class="player__scrim-bottom" />
     </div>
 
     <!-- Top bar: back + time -->
     <Transition name="fade">
-      <div v-show="controlsVisible" class="player__top safe-top" @click.stop>
+      <div v-show="isVimeo || controlsVisible" class="player__top safe-top" @click.stop>
         <button class="player__back-btn" aria-label="Volver" @click="$router.back()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
@@ -75,7 +75,7 @@
 
     <!-- Center: buffering spinner -->
     <Transition name="fade">
-      <div v-show="isBuffering" class="player__center-spinner">
+      <div v-show="!isVimeo && isBuffering" class="player__center-spinner">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="player__spinner">
           <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
         </svg>
@@ -84,7 +84,7 @@
 
     <!-- Bottom controls -->
     <Transition name="fade">
-      <div v-show="controlsVisible" class="player__bottom" @click.stop>
+      <div v-show="!isVimeo && controlsVisible" class="player__bottom" @click.stop>
         <h2 class="player__title">{{ content.title }}</h2>
         <p class="player__subtitle">{{ content.subtitle }}</p>
 
@@ -224,8 +224,11 @@ function formatTime(seconds: number): string {
 // ── Play / Pause (works for all modes) ──
 async function togglePlayPause() {
   if (isVimeo.value && vimeoPlayer) {
-    const paused = await vimeoPlayer.getPaused()
-    paused ? vimeoPlayer.play() : vimeoPlayer.pause()
+    if (isPlaying.value) {
+      vimeoPlayer.pause()
+    } else {
+      vimeoPlayer.play()
+    }
   } else {
     const video = videoRef.value
     if (!video) return
@@ -502,8 +505,6 @@ onBeforeUnmount(async () => {
   object-fit: contain;
 }
 
-/* ─── Vimeo: iframe is display-only, controls overlay handles interaction ─── */
-.player--vimeo iframe { pointer-events: none; }
 
 /* ─── Audio mode: cover image ─── */
 .player__cover {

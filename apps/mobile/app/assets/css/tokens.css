@@ -192,9 +192,9 @@
   --z-dropdown: 10;
   --z-sticky: 20;
   --z-fixed: 30;
-  --z-modal-backdrop: 40;
-  --z-modal: 50;
-  --z-toast: 60;
+  --z-modal-backdrop: 1000;
+  --z-modal: 1010;
+  --z-toast: 1100;
 
   /* ---- Transitions ---- */
   --transition-fast: 150ms ease;

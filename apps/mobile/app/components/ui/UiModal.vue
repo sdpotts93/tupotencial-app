@@ -10,15 +10,15 @@
           :style="sheetStyle"
           v-on="dragListeners"
         >
-          <div class="modal__handle" />
-          <div v-if="title || showClose" class="modal__header">
-            <h2 v-if="title" class="modal__title">{{ title }}</h2>
+          <div class="modal__header">
+            <div class="modal__handle" />
             <button v-if="showClose" class="modal__close" aria-label="Cerrar" @click="close">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
             </button>
           </div>
+          <h2 v-if="title" class="modal__title">{{ title }}</h2>
           <div class="modal__body">
             <slot />
           </div>
@@ -77,14 +77,14 @@ const sheetStyle = computed(() => {
 
 /* ─── Sheet (mobile-first) ─── */
 .modal {
-  background: var(--color-surface);
+  background: var(--color-accent);
   color: var(--color-text);
   width: 100%;
-  max-height: 90dvh;
+  max-height: 85dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-  padding-bottom: var(--safe-area-bottom);
+  padding: var(--space-2) var(--space-6) var(--space-10);
 }
 
 /* ─── Mobile slide-up transition ─── */
@@ -109,40 +109,37 @@ const sheetStyle = computed(() => {
   transform: translateY(100%);
 }
 
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+  margin-bottom: var(--space-8);
+}
+
 .modal__handle {
   width: 36px;
   height: 4px;
   background: var(--color-border);
   border-radius: var(--radius-full);
-  margin: var(--space-3) auto var(--space-4);
-}
-
-.modal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-4) var(--space-5);
-  gap: var(--space-3);
-}
-
-.modal__title {
-  font-family: var(--font-body);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
+  margin-top: var(--space-2);
 }
 
 .modal__close {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  border-radius: var(--radius-full);
   border: none;
   background: var(--color-surface-alt);
-  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
   cursor: pointer;
-  color: var(--color-text);
-  flex-shrink: 0;
+  transition: background var(--transition-fast);
 }
 
 @media (hover: hover) {
@@ -151,8 +148,25 @@ const sheetStyle = computed(() => {
   }
 }
 
-.modal__body { padding: 0 var(--space-5) var(--space-5); }
-.modal__footer { padding: 0 var(--space-5) var(--space-5); }
+.modal__title {
+  font-family: var(--font-title);
+  font-size: var(--title-xl);
+  color: var(--color-text);
+  line-height: var(--leading-tight);
+  margin: var(--space-10) 0 var(--space-2);
+  font-weight: 100;
+}
+
+.modal__body { padding: 0; }
+.modal__footer { padding: 0; margin-top: var(--space-4); }
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .modal {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
 
 /* ─── Desktop: centered modal instead of bottom sheet ─── */
 @media (min-width: 1024px) {
@@ -162,10 +176,10 @@ const sheetStyle = computed(() => {
   }
 
   .modal {
-    border-radius: var(--radius-2xl);
-    max-width: 400px;
+    border-radius: var(--radius-xl);
+    max-width: 480px;
     width: 100%;
-    padding-bottom: 0;
+    max-height: 80dvh;
   }
 
   .sheet-enter-active .modal {

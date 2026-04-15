@@ -119,23 +119,11 @@
     </div>
 
     <!-- Celebration sheet -->
-    <Transition name="day-sheet">
-    <div
-      v-if="showFormSheet"
-      class="day__overlay"
-      @click.self="closeFormSheet"
+    <UiModal
+      :model-value="showFormSheet"
+      @update:model-value="v => { if (!v) closeFormSheet() }"
     >
-      <div class="day__sheet">
-        <div class="day__sheet-header">
-          <div class="day__sheet-handle" />
-          <button class="day__sheet-close" aria-label="Cerrar" @click="closeFormSheet">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-
-        <Transition name="fade" mode="out-in">
+      <Transition name="fade" mode="out-in">
           <div v-if="formSuccess" key="success" class="day__checkin-success">
             <div class="day__checkin-success-badge">
               <ClientOnly>
@@ -213,10 +201,8 @@
               Enviar
             </UiButton>
           </div>
-        </Transition>
-      </div>
-    </div>
-    </Transition>
+      </Transition>
+    </UiModal>
   </div>
 </template>
 
@@ -717,59 +703,7 @@ function closeFormSheet() {
   display: flex;
 }
 
-/* ─── Celebration sheet (matches hoy pattern) ─── */
-.day__overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(var(--tint-rgb), 0.4);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.day__sheet {
-  background: var(--color-accent);
-  color: var(--color-text);
-  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-  padding: var(--space-2) var(--space-6) var(--space-10);
-  max-height: 85dvh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.day__sheet-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  position: relative;
-  margin-bottom: var(--space-8);
-}
-
-.day__sheet-handle {
-  width: 36px;
-  height: 4px;
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-  margin-top: var(--space-2);
-}
-
-.day__sheet-close {
-  position: absolute;
-  right: 0;
-  top: 10px;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-full);
-  border: none;
-  background: var(--color-surface-alt);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
+/* ─── Celebration sheet content ─── */
 .day__sheet-title {
   font-family: var(--font-title);
   font-size: var(--title-sm);
@@ -852,28 +786,6 @@ function closeFormSheet() {
 .fade-enter-from { opacity: 0; transform: translateY(8px); }
 .fade-leave-to { opacity: 0; }
 
-/* ─── Sheet transition ─── */
-.day-sheet-enter-active {
-  transition: background 0.3s ease;
-}
-.day-sheet-enter-active .day__sheet {
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-}
-.day-sheet-leave-active {
-  transition: background 0.2s ease;
-}
-.day-sheet-leave-active .day__sheet {
-  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
-}
-.day-sheet-enter-from,
-.day-sheet-leave-to {
-  background: rgba(var(--tint-rgb), 0);
-}
-.day-sheet-enter-from .day__sheet,
-.day-sheet-leave-to .day__sheet {
-  transform: translateY(100%);
-}
-
 /* ─── Success state ─── */
 .day__checkin-success {
   text-align: center;
@@ -917,8 +829,6 @@ function closeFormSheet() {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .day__overlay,
-  .day__sheet,
   .fade-enter-active,
   .fade-leave-active,
   .day__checkin-success-badge {
@@ -952,34 +862,6 @@ function closeFormSheet() {
     background: var(--color-desktop-card);
   }
 
-  /* Sheet becomes centered modal on desktop */
-  .day__overlay {
-    justify-content: center;
-    align-items: center;
-  }
-
-  .day__sheet {
-    border-radius: var(--radius-xl);
-    max-width: 480px;
-    width: 100%;
-    max-height: 80dvh;
-  }
-
-  .day-sheet-enter-active .day__sheet {
-    transition: transform 0.25s ease, opacity 0.25s ease;
-  }
-  .day-sheet-leave-active .day__sheet {
-    transition: transform 0.2s ease, opacity 0.2s ease;
-  }
-  .day-sheet-enter-from .day__sheet,
-  .day-sheet-leave-to .day__sheet {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-
-  .day__sheet-handle {
-    display: none;
-  }
 }
 
 /* ─── Error state ─── */
