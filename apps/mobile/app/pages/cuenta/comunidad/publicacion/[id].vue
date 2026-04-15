@@ -502,7 +502,7 @@ async function submitComment() {
   border: none;
   border-radius: 0;
   padding: var(--space-3) 0;
-  font-size: var(--text-base);
+  font-size: var(--text-md);
   font-family: var(--font-body);
   color: var(--color-text);
   outline: none;

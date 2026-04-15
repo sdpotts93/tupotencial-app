@@ -571,12 +571,16 @@ onBeforeUnmount(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
+  background: rgba(var(--tint-rgb), 0.4);
+  backdrop-filter: blur(8px);
   border: none;
   color: var(--color-white);
   cursor: pointer;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  .player__back-btn:hover { background: rgba(var(--tint-rgb), 0.6); }
 }
 
 /* ─── Center spinner (buffering) ─── */

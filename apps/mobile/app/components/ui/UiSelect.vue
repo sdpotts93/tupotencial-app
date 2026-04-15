@@ -286,7 +286,7 @@ onBeforeUnmount(() => {
   outline: none;
   background: transparent;
   font-family: var(--font-body);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   color: var(--color-text);
   padding: var(--space-1) 0;
 }
